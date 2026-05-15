@@ -91,11 +91,15 @@ dart run build_runner build --delete-conflicting-outputs
 - El provider real de repositorio esta en `data/repositories/book_repository_provider.dart`.
 - La app puede listar, crear, filtrar, abrir detalle, cambiar estado y eliminar libros durante la sesion.
 - La persistencia es temporal en memoria; al cerrar la app se pierden los libros.
-- El SDK Flutter/Dart no esta disponible en el PATH de esta sesion, asi que no se pudo ejecutar `flutter analyze` ni `flutter test`.
+- **Flutter 3.44.0 (master) instalado en `c:\src\flutter` y añadido al PATH del sistema.**
+- **Dart SDK está disponible con Flutter.**
+- Las dependencias del proyecto están actualizadas en `pubspec.lock`.
 
 ## Siguientes pasos recomendados
 
-- Instalar o exponer Flutter en el PATH y ejecutar `flutter analyze` y `flutter test`.
+- ✓ **Flutter instalado**: Reinicia el terminal o VS Code para que los cambios de PATH tomen efecto.
+- Ejecutar `flutter analyze` y `flutter test` para validar el código.
 - Decidir si la siguiente fase mantiene DAO en memoria temporalmente o reconecta Drift con codigo generado.
 - Completar stats cuando el flujo de libros este estable.
+- Instalar Android SDK y/o Visual Studio si necesitas compilar para Android o Windows respectivamente.
 - Reemplazar el README generado por defecto.
