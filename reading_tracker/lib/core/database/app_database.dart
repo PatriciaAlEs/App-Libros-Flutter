@@ -1,56 +1,20 @@
-import 'dart:async';
+import 'package:drift/drift.dart';
 
-import '../../features/books/domain/entities/book.dart';
+import 'connection/database_connection.dart';
+import 'daos/book_dao.dart';
+import 'tables/books_table.dart';
 
-class AppDatabase {
-  AppDatabase() : bookDao = BookDao();
+part 'app_database.g.dart';
 
-  final BookDao bookDao;
+@DriftDatabase(tables: [BooksTable], daos: [BookDao])
+class AppDatabase extends _$AppDatabase {
+  AppDatabase() : super(openDatabaseConnection());
 
-  Future<void> close() => bookDao.close();
-}
+  @override
+  int get schemaVersion => 1;
 
-class BookDao {
-  final List<Book> _books = [];
-  final StreamController<List<Book>> _controller =
-      StreamController<List<Book>>.broadcast();
-
-  Future<void> insertBook(Book book) async {
-    _books.add(book);
-    _emit();
-  }
-
-  Future<List<Book>> getAllBooks() async => List.unmodifiable(_books);
-
-  Stream<List<Book>> watchAllBooks() async* {
-    yield List.unmodifiable(_books);
-    yield* _controller.stream;
-  }
-
-  Future<Book?> getBookById(String id) async {
-    for (final book in _books) {
-      if (book.id == id) return book;
-    }
-    return null;
-  }
-
-  Future<void> updateBook(Book updatedBook) async {
-    final index = _books.indexWhere((book) => book.id == updatedBook.id);
-    if (index == -1) return;
-    _books[index] = updatedBook;
-    _emit();
-  }
-
-  Future<void> deleteBook(String id) async {
-    _books.removeWhere((book) => book.id == id);
-    _emit();
-  }
-
-  Future<void> close() => _controller.close();
-
-  void _emit() {
-    if (!_controller.isClosed) {
-      _controller.add(List.unmodifiable(_books));
-    }
-  }
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (migrator) => migrator.createAll(),
+      );
 }

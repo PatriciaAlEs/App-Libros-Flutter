@@ -16,7 +16,7 @@ La app usa una arquitectura por capas y features:
 - Flutter / Dart.
 - Riverpod (`flutter_riverpod`) para estado e inyeccion de dependencias.
 - `http` para consultar Open Library desde la pantalla de alta de libros.
-- Drift y SQLite estan declarados en `pubspec.yaml`, pero la app esta conectada ahora con un DAO en memoria para poder continuar sin codigo generado.
+- Drift y SQLite se usan como persistencia real.
 - `uuid` para generar identificadores.
 - `intl` esta declarado para formato de fechas.
 
@@ -36,10 +36,11 @@ La entrada actual esta en `reading_tracker/lib/main.dart`.
 
 ### Core
 
-- `reading_tracker/lib/core/database/app_database.dart`: contiene `AppDatabase` y `BookDao` en memoria.
+- `reading_tracker/lib/core/database/app_database.dart`: declara `AppDatabase` con Drift.
+- `reading_tracker/lib/core/database/connection`: conexion SQLite por plataforma.
 - `reading_tracker/lib/core/database/database_provider.dart`: expone `databaseProvider` y `bookDaoProvider`.
-- `reading_tracker/lib/core/database/tables/books_table.dart`: tabla Drift declarada, actualmente no conectada.
-- `reading_tracker/lib/core/database/daos/book_dao.dart`: export de compatibilidad para `BookDao`.
+- `reading_tracker/lib/core/database/tables/books_table.dart`: tabla Drift de libros.
+- `reading_tracker/lib/core/database/daos/book_dao.dart`: DAO Drift real para CRUD de libros.
 - `reading_tracker/lib/core/theme/app_theme.dart`: tema compartido.
 - `reading_tracker/lib/core/utils/id_generator.dart`: reservado para generacion de IDs.
 - `reading_tracker/lib/core/utils/date_formatter.dart`: reservado para formato de fechas.
@@ -51,6 +52,7 @@ La entrada actual esta en `reading_tracker/lib/main.dart`.
 - `reading_tracker/lib/features/books/domain/enums/book_status.dart`: estados `pending`, `reading`, `completed`.
 - `reading_tracker/lib/features/books/domain/repositories/book_repository.dart`: contrato del repositorio.
 - `reading_tracker/lib/features/books/data/datasources/book_api_datasource.dart`: busqueda en Open Library.
+- `reading_tracker/lib/features/books/data/mappers/book_mapper.dart`: conversion entre `Book` de dominio y modelos Drift.
 - `reading_tracker/lib/features/books/data/repositories/book_repository_impl.dart`: implementacion del repositorio usando `BookDao`.
 - `reading_tracker/lib/features/books/data/repositories/book_repository_provider.dart`: providers del repositorio.
 - `reading_tracker/lib/features/books/presentation/providers/books_provider.dart`: `AsyncNotifier` para cargar y mutar libros.
@@ -95,7 +97,7 @@ dart run build_runner build --delete-conflicting-outputs
 - La app puede buscar libros por titulo, autor o ISBN usando Open Library, seleccionar un resultado con portada/editorial y guardarlo.
 - `Book` separa metadatos externos (`publisher`, `coverUrl`, `isbn`, `firstPublishYear`) de datos del lector (`totalPages`, `currentPage`, `rating`, `notes`, `startDate`, `completedDate`).
 - La app puede listar, filtrar, abrir detalle, cambiar estado y eliminar libros durante la sesion.
-- La persistencia es temporal en memoria; al cerrar la app se pierden los libros.
+- La persistencia ya usa Drift. En IO usa archivo SQLite `reading_tracker.sqlite`; en web usa Drift WebDatabase sobre almacenamiento IndexedDB.
 - Flutter 3.44.0 (master) esta instalado en `c:\src\flutter` y agregado al PATH del sistema, pero esta sesion de Codex todavia no lo detecta.
 - Dart SDK esta disponible con Flutter cuando el PATH este activo.
 - Hay que ejecutar `flutter pub get` para actualizar `pubspec.lock` despues de agregar `http`.
@@ -103,9 +105,10 @@ dart run build_runner build --delete-conflicting-outputs
 ## Siguientes pasos recomendados
 
 - Reiniciar el terminal o VS Code para que los cambios de PATH tomen efecto.
-- Ejecutar `flutter pub get`, `flutter analyze` y `flutter test`.
+- Ejecutar `flutter analyze`, `flutter test` y `flutter build web` despues de cambios de persistencia.
 - Probar en navegador la busqueda de libros y la carga de portadas.
-- Decidir si la siguiente fase mantiene DAO en memoria temporalmente o reconecta Drift con codigo generado.
+- Probar persistencia cerrando y reabriendo la app tras guardar un libro.
+- Considerar migrar la conexion web de `WebDatabase` a `WasmDatabase` con worker dedicado en una fase posterior.
 - Completar stats cuando el flujo de libros este estable.
 - Instalar Android SDK y/o Visual Studio si necesitas compilar para Android o Windows respectivamente.
 - Reemplazar el README generado por defecto.

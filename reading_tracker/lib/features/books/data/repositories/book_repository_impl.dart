@@ -1,6 +1,7 @@
-import '../../../../core/database/app_database.dart';
+import '../../../../core/database/daos/book_dao.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/repositories/book_repository.dart';
+import '../mappers/book_mapper.dart';
 
 class BookRepositoryImpl implements BookRepository {
   const BookRepositoryImpl(this._dao);
@@ -8,20 +9,36 @@ class BookRepositoryImpl implements BookRepository {
   final BookDao _dao;
 
   @override
-  Future<void> addBook(Book book) => _dao.insertBook(book);
+  Future<void> addBook(Book book) {
+    return _dao.insertBook(book.toCompanion());
+  }
 
   @override
-  Future<List<Book>> getAllBooks() => _dao.getAllBooks();
+  Future<List<Book>> getAllBooks() async {
+    final rows = await _dao.getAllBooks();
+    return rows.map((row) => row.toDomain()).toList();
+  }
 
   @override
-  Stream<List<Book>> watchBooks() => _dao.watchAllBooks();
+  Stream<List<Book>> watchBooks() {
+    return _dao.watchAllBooks().map(
+          (rows) => rows.map((row) => row.toDomain()).toList(),
+        );
+  }
 
   @override
-  Future<Book?> getBookById(String id) => _dao.getBookById(id);
+  Future<Book?> getBookById(String id) async {
+    final row = await _dao.getBookById(id);
+    return row?.toDomain();
+  }
 
   @override
-  Future<void> updateBook(Book book) => _dao.updateBook(book);
+  Future<void> updateBook(Book book) async {
+    await _dao.updateBook(book.toCompanion());
+  }
 
   @override
-  Future<void> deleteBook(String id) => _dao.deleteBook(id);
+  Future<void> deleteBook(String id) async {
+    await _dao.deleteBook(id);
+  }
 }
