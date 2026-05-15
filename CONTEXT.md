@@ -13,60 +13,58 @@ La app usa una arquitectura por capas y features:
 
 ## Stack principal
 
-- Flutter / Dart
+- Flutter / Dart.
 - Riverpod (`flutter_riverpod`) para estado e inyeccion de dependencias.
-- Drift + SQLite para persistencia local.
-- `path_provider` y `path` para ubicar el archivo de base de datos.
+- Drift y SQLite estan declarados en `pubspec.yaml`, pero la app esta conectada ahora con un DAO en memoria para poder continuar sin codigo generado.
 - `uuid` para generar identificadores.
-- `intl` para formato de fechas.
+- `intl` esta declarado para formato de fechas.
 
 ## Entrada de la app
 
 La entrada actual esta en `reading_tracker/lib/main.dart`.
 
-`main.dart` crea un `ProviderScope` y monta `MyApp`, que configura un `MaterialApp` con:
+`main.dart` crea un `ProviderScope` y monta `App`, definida en `reading_tracker/lib/app.dart`.
+
+`App` configura un `MaterialApp` con:
 
 - titulo `Reading Tracker`
-- tema basado en `Colors.deepPurple`
-- pantalla inicial `BooksListScreen`
-
-Tambien existe `reading_tracker/lib/app.dart`, con rutas nombradas:
-
-- `/`
-- `/book/add`
-- `/book/detail`
-
-De momento `main.dart` no esta usando `App`, sino `MyApp`.
+- tema centralizado en `lib/core/theme/app_theme.dart`
+- rutas nombradas `/`, `/book/add` y `/book/detail`
 
 ## Estructura relevante
 
 ### Core
 
-- `reading_tracker/lib/core/database/app_database.dart`: configura Drift, SQLite y `BookDao`.
-- `reading_tracker/lib/core/database/tables/books_table.dart`: tabla de libros.
-- `reading_tracker/lib/core/database/daos/book_dao.dart`: operaciones de base de datos.
-- `reading_tracker/lib/core/database/database_provider.dart`: provider de base de datos.
+- `reading_tracker/lib/core/database/app_database.dart`: contiene `AppDatabase` y `BookDao` en memoria.
+- `reading_tracker/lib/core/database/database_provider.dart`: expone `databaseProvider` y `bookDaoProvider`.
+- `reading_tracker/lib/core/database/tables/books_table.dart`: tabla Drift declarada, actualmente no conectada.
+- `reading_tracker/lib/core/database/daos/book_dao.dart`: export de compatibilidad para `BookDao`.
 - `reading_tracker/lib/core/theme/app_theme.dart`: tema compartido.
-- `reading_tracker/lib/core/utils/id_generator.dart`: generacion de IDs.
-- `reading_tracker/lib/core/utils/date_formatter.dart`: formato de fechas.
+- `reading_tracker/lib/core/utils/id_generator.dart`: reservado para generacion de IDs.
+- `reading_tracker/lib/core/utils/date_formatter.dart`: reservado para formato de fechas.
 
 ### Books
 
+- `reading_tracker/lib/features/books/domain/entities/book.dart`: entidad `Book`.
+- `reading_tracker/lib/features/books/domain/enums/book_status.dart`: estados `pending`, `reading`, `completed`.
+- `reading_tracker/lib/features/books/domain/repositories/book_repository.dart`: contrato del repositorio.
+- `reading_tracker/lib/features/books/data/repositories/book_repository_impl.dart`: implementacion del repositorio usando `BookDao`.
+- `reading_tracker/lib/features/books/data/repositories/book_repository_provider.dart`: providers del repositorio.
+- `reading_tracker/lib/features/books/presentation/providers/books_provider.dart`: `AsyncNotifier` para cargar y mutar libros.
 - `reading_tracker/lib/features/books/presentation/screens/books_list_screen.dart`: listado principal.
 - `reading_tracker/lib/features/books/presentation/screens/book_form_screen.dart`: formulario de libro.
 - `reading_tracker/lib/features/books/presentation/screens/book_detail_screen.dart`: detalle de libro.
-- `reading_tracker/lib/features/books/presentation/providers/books_provider.dart`: `AsyncNotifier` para cargar y mutar libros.
-- `reading_tracker/lib/features/books/data/repositories/book_repository_impl.dart`: implementacion del repositorio con Drift.
-- `reading_tracker/lib/features/books/domain/repositories/book_repository.dart`: contrato del repositorio.
-- `reading_tracker/lib/features/books/domain/enums/book_status.dart`: estados `pending`, `reading`, `completed`.
-- `reading_tracker/lib/features/books/domain/entities/book.dart`: entidad `Book`.
+- `reading_tracker/lib/features/books/presentation/widgets/book_card.dart`: tarjeta de libro.
+- `reading_tracker/lib/features/books/presentation/widgets/status_filter_bar.dart`: filtro por estado.
 
 ### Stats
 
-- `reading_tracker/lib/features/stats/domain/stats_calculator.dart`: logica de estadisticas.
-- `reading_tracker/lib/features/stats/presentation/providers/stats_provider.dart`: provider de estadisticas.
-- `reading_tracker/lib/features/stats/presentation/screens/stats_screen.dart`: pantalla de estadisticas.
-- `reading_tracker/lib/features/stats/presentation/widgets/stat_card.dart`: tarjeta de estadistica.
+Los archivos de stats existen, pero estan vacios todavia:
+
+- `reading_tracker/lib/features/stats/domain/stats_calculator.dart`
+- `reading_tracker/lib/features/stats/presentation/providers/stats_provider.dart`
+- `reading_tracker/lib/features/stats/presentation/screens/stats_screen.dart`
+- `reading_tracker/lib/features/stats/presentation/widgets/stat_card.dart`
 
 ## Comandos utiles
 
@@ -79,24 +77,25 @@ flutter test
 flutter run
 ```
 
-Para regenerar codigo de Drift:
+Si se vuelve a conectar Drift como persistencia real:
 
 ```powershell
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-## Notas para futuras tareas
+## Estado actual
 
-- El README actual es el generado por defecto de Flutter; convendria reemplazarlo cuando la app este mas estable.
-- Hay comentarios en algunos archivos que parecen tener problemas de codificacion, por ejemplo caracteres tipo `Ã` y `â`.
-- Revisar consistencia de imports: algunos archivos leidos apuntan a `domain/models/...`, mientras la estructura actual listada usa `domain/entities/...` y `domain/enums/...`.
-- `lib/app.dart` y `lib/main.dart` definen configuraciones de `MaterialApp` distintas. Conviene decidir una entrada unica para evitar divergencias.
-- Drift usa `schemaVersion => 1`; cualquier cambio futuro en tablas deberia ir acompanado de migracion.
+- La navegacion principal esta centralizada en `App`.
+- `main.dart` ya no define otro `MaterialApp` paralelo.
+- Los imports principales apuntan a `domain/entities` y `domain/enums`.
+- El provider real de repositorio esta en `data/repositories/book_repository_provider.dart`.
+- La app puede listar, crear, filtrar, abrir detalle, cambiar estado y eliminar libros durante la sesion.
+- La persistencia es temporal en memoria; al cerrar la app se pierden los libros.
+- El SDK Flutter/Dart no esta disponible en el PATH de esta sesion, asi que no se pudo ejecutar `flutter analyze` ni `flutter test`.
 
-## Convenciones sugeridas
+## Siguientes pasos recomendados
 
-- Mantener la separacion `domain`, `data` y `presentation` dentro de cada feature.
-- Evitar logica de base de datos directamente en widgets.
-- Usar providers para exponer repositorios, notifiers y datos derivados.
-- Mantener las entidades de dominio independientes de Drift.
-- Antes de tocar persistencia, revisar tabla, DAO, repositorio y providers juntos.
+- Instalar o exponer Flutter en el PATH y ejecutar `flutter analyze` y `flutter test`.
+- Decidir si la siguiente fase mantiene DAO en memoria temporalmente o reconecta Drift con codigo generado.
+- Completar stats cuando el flujo de libros este estable.
+- Reemplazar el README generado por defecto.

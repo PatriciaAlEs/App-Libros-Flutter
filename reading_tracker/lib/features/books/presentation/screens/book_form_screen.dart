@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../domain/models/book.dart';
-import '../../domain/models/book_status.dart';
+import '../../domain/entities/book.dart';
+import '../../domain/enums/book_status.dart';
 import '../providers/books_provider.dart';
 
 class BookFormScreen extends ConsumerStatefulWidget {

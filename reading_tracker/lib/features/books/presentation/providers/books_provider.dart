@@ -1,14 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/repositories/book_repository_provider.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/repositories/book_repository.dart';
 
-// ── Provider del repositorio ─────────────────────────────
-final bookRepositoryProvider = Provider<BookRepository>((ref) {
-  throw UnimplementedError('bookRepositoryProvider not overridden');
-});
-
-// ── Notifier ─────────────────────────────────────────────
 class BooksNotifier extends AsyncNotifier<List<Book>> {
   BookRepository get _repo => ref.read(bookRepositoryProvider);
 
@@ -36,6 +31,5 @@ class BooksNotifier extends AsyncNotifier<List<Book>> {
   }
 }
 
-// ── Provider expuesto a la UI ────────────────────────────
 final booksProvider =
     AsyncNotifierProvider<BooksNotifier, List<Book>>(BooksNotifier.new);

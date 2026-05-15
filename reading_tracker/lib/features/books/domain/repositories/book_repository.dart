@@ -1,4 +1,4 @@
-import '../models/book.dart';
+import '../entities/book.dart';
 
 abstract interface class BookRepository {
   Future<void> addBook(Book book);

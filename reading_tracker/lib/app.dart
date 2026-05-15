@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'core/theme/app_theme.dart';
 import 'features/books/presentation/screens/book_detail_screen.dart';
 import 'features/books/presentation/screens/book_form_screen.dart';
 import 'features/books/presentation/screens/books_list_screen.dart';
@@ -12,6 +13,7 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'Reading Tracker',
       debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,
       initialRoute: '/',
       onGenerateRoute: _onGenerateRoute,
     );

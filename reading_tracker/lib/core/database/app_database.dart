@@ -1,40 +1,56 @@
-import 'dart:io';
+import 'dart:async';
 
-import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import '../../features/books/domain/entities/book.dart';
 
-import 'book_dao.dart';
-import 'books_table.dart';
+class AppDatabase {
+  AppDatabase() : bookDao = BookDao();
 
-part 'app_database.g.dart';
+  final BookDao bookDao;
 
-@DriftDatabase(tables: [BooksTable], daos: [BookDao])
-class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
-
-  @override
-  int get schemaVersion => 1;
-
-  @override
-  MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) async {
-          await m.createAll();
-        },
-        onUpgrade: (m, from, to) async {
-          // Migraciones futuras aquí
-        },
-      );
-
-  late final BookDao bookDao = BookDao(this);
+  Future<void> close() => bookDao.close();
 }
 
-// ── Conexión SQLite ──────────────────────────────────────
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dir.path, 'reading_tracker.sqlite'));
-    return NativeDatabase.createInBackground(file);
-  });
+class BookDao {
+  final List<Book> _books = [];
+  final StreamController<List<Book>> _controller =
+      StreamController<List<Book>>.broadcast();
+
+  Future<void> insertBook(Book book) async {
+    _books.add(book);
+    _emit();
+  }
+
+  Future<List<Book>> getAllBooks() async => List.unmodifiable(_books);
+
+  Stream<List<Book>> watchAllBooks() async* {
+    yield List.unmodifiable(_books);
+    yield* _controller.stream;
+  }
+
+  Future<Book?> getBookById(String id) async {
+    for (final book in _books) {
+      if (book.id == id) return book;
+    }
+    return null;
+  }
+
+  Future<void> updateBook(Book updatedBook) async {
+    final index = _books.indexWhere((book) => book.id == updatedBook.id);
+    if (index == -1) return;
+    _books[index] = updatedBook;
+    _emit();
+  }
+
+  Future<void> deleteBook(String id) async {
+    _books.removeWhere((book) => book.id == id);
+    _emit();
+  }
+
+  Future<void> close() => _controller.close();
+
+  void _emit() {
+    if (!_controller.isClosed) {
+      _controller.add(List.unmodifiable(_books));
+    }
+  }
 }

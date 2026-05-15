@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/models/book.dart';
-import '../../domain/models/book_status.dart';
+import '../../domain/entities/book.dart';
+import '../../domain/enums/book_status.dart';
 import '../providers/books_provider.dart';
 
 class BookDetailScreen extends ConsumerWidget {
@@ -22,7 +22,13 @@ class BookDetailScreen extends ConsumerWidget {
         body: Center(child: Text('Error: $e')),
       ),
       data: (books) {
-        final book = books.where((b) => b.id == bookId).firstOrNull;
+        Book? book;
+        for (final candidate in books) {
+          if (candidate.id == bookId) {
+            book = candidate;
+            break;
+          }
+        }
 
         if (book == null) {
           return const Scaffold(
