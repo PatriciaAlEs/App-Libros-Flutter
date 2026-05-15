@@ -74,7 +74,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
       firstPublishYear: selectedBook.firstPublishYear,
       status: BookStatus.pending,
       startDate: null,
-      endDate: null,
+      completedDate: null,
       createdAt: DateTime.now(),
     );
 

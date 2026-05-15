@@ -46,7 +46,7 @@ La entrada actual esta en `reading_tracker/lib/main.dart`.
 
 ### Books
 
-- `reading_tracker/lib/features/books/domain/entities/book.dart`: entidad `Book`.
+- `reading_tracker/lib/features/books/domain/entities/book.dart`: entidad `Book`, con metadatos del libro y datos personales de lectura.
 - `reading_tracker/lib/features/books/domain/entities/book_search_result.dart`: resultado de busqueda externo.
 - `reading_tracker/lib/features/books/domain/enums/book_status.dart`: estados `pending`, `reading`, `completed`.
 - `reading_tracker/lib/features/books/domain/repositories/book_repository.dart`: contrato del repositorio.
@@ -93,6 +93,7 @@ dart run build_runner build --delete-conflicting-outputs
 - Los imports principales apuntan a `domain/entities` y `domain/enums`.
 - El provider real de repositorio esta en `data/repositories/book_repository_provider.dart`.
 - La app puede buscar libros por titulo, autor o ISBN usando Open Library, seleccionar un resultado con portada/editorial y guardarlo.
+- `Book` separa metadatos externos (`publisher`, `coverUrl`, `isbn`, `firstPublishYear`) de datos del lector (`totalPages`, `currentPage`, `rating`, `notes`, `startDate`, `completedDate`).
 - La app puede listar, filtrar, abrir detalle, cambiar estado y eliminar libros durante la sesion.
 - La persistencia es temporal en memoria; al cerrar la app se pierden los libros.
 - Flutter 3.44.0 (master) esta instalado en `c:\src\flutter` y agregado al PATH del sistema, pero esta sesion de Codex todavia no lo detecta.

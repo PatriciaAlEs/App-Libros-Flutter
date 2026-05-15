@@ -6,55 +6,67 @@ class Book {
     required this.title,
     required this.createdAt,
     this.author,
-    this.pages,
+    this.totalPages,
+    this.currentPage,
+    this.rating,
+    this.notes,
     this.publisher,
     this.coverUrl,
     this.isbn,
     this.firstPublishYear,
     this.status = BookStatus.pending,
     this.startDate,
-    this.endDate,
+    this.completedDate,
   });
 
   final String id;
   final String title;
   final String? author;
-  final int? pages;
+  final int? totalPages;
+  final int? currentPage;
+  final double? rating;
+  final String? notes;
   final String? publisher;
   final String? coverUrl;
   final String? isbn;
   final int? firstPublishYear;
   final BookStatus status;
   final DateTime? startDate;
-  final DateTime? endDate;
+  final DateTime? completedDate;
   final DateTime createdAt;
 
   Book copyWith({
     String? id,
     String? title,
     String? author,
-    int? pages,
+    int? totalPages,
+    int? currentPage,
+    double? rating,
+    String? notes,
     String? publisher,
     String? coverUrl,
     String? isbn,
     int? firstPublishYear,
     BookStatus? status,
     DateTime? startDate,
-    DateTime? endDate,
+    DateTime? completedDate,
     DateTime? createdAt,
   }) {
     return Book(
       id: id ?? this.id,
       title: title ?? this.title,
       author: author ?? this.author,
-      pages: pages ?? this.pages,
+      totalPages: totalPages ?? this.totalPages,
+      currentPage: currentPage ?? this.currentPage,
+      rating: rating ?? this.rating,
+      notes: notes ?? this.notes,
       publisher: publisher ?? this.publisher,
       coverUrl: coverUrl ?? this.coverUrl,
       isbn: isbn ?? this.isbn,
       firstPublishYear: firstPublishYear ?? this.firstPublishYear,
       status: status ?? this.status,
       startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
+      completedDate: completedDate ?? this.completedDate,
       createdAt: createdAt ?? this.createdAt,
     );
   }

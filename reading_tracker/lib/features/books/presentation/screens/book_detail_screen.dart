@@ -56,9 +56,9 @@ class _BookDetailView extends ConsumerWidget {
       startDate: newStatus == BookStatus.reading
           ? DateTime.now()
           : book.startDate,
-      endDate: newStatus == BookStatus.completed
+      completedDate: newStatus == BookStatus.completed
           ? DateTime.now()
-          : book.endDate,
+          : book.completedDate,
     );
 
     await ref.read(booksProvider.notifier).updateBook(updated);
@@ -97,6 +97,8 @@ class _BookDetailView extends ConsumerWidget {
             book: book,
             onStatusChanged: (status) => _onStatusChanged(status, ref),
           ),
+          const SizedBox(height: 24),
+          _ReaderDataSection(book: book),
           const SizedBox(height: 24),
           _DatesSection(book: book),
         ],
@@ -186,6 +188,40 @@ class _StatusSection extends StatelessWidget {
   }
 }
 
+class _ReaderDataSection extends StatelessWidget {
+  const _ReaderDataSection({required this.book});
+
+  final Book book;
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = [
+      if (book.currentPage != null) '${book.currentPage}',
+      if (book.totalPages != null) 'of ${book.totalPages}',
+    ].join(' ');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Reader data', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        _DateRow(
+          label: 'Progress',
+          value: progress.isEmpty ? '-' : progress,
+        ),
+        _DateRow(
+          label: 'Rating',
+          value: book.rating == null ? '-' : '${book.rating}/5',
+        ),
+        if (book.notes != null && book.notes!.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(book.notes!, style: Theme.of(context).textTheme.bodyMedium),
+        ],
+      ],
+    );
+  }
+}
+
 class _DatesSection extends StatelessWidget {
   const _DatesSection({required this.book});
 
@@ -205,7 +241,7 @@ class _DatesSection extends StatelessWidget {
         const SizedBox(height: 8),
         _DateRow(label: 'Added', value: _format(book.createdAt)),
         _DateRow(label: 'Started', value: _format(book.startDate)),
-        _DateRow(label: 'Finished', value: _format(book.endDate)),
+        _DateRow(label: 'Finished', value: _format(book.completedDate)),
       ],
     );
   }
