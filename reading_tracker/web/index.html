@@ -32,6 +32,15 @@
   <title>reading_tracker</title>
   <link rel="manifest" href="manifest.json">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+  <script>
+    const originalInitSqlJs = window.initSqlJs;
+    window.initSqlJs = function(config) {
+      return originalInitSqlJs({
+        locateFile: (file) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}`,
+        ...config,
+      });
+    };
+  </script>
 </head>
 <body>
   <!--
