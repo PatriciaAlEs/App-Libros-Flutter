@@ -18,8 +18,8 @@ class BookDetailScreen extends ConsumerWidget {
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       ),
-      error: (e, _) => Scaffold(
-        body: Center(child: Text('Error: $e')),
+      error: (error, _) => Scaffold(
+        body: Center(child: Text('Error: $error')),
       ),
       data: (books) {
         Book? book;
@@ -42,7 +42,6 @@ class BookDetailScreen extends ConsumerWidget {
   }
 }
 
-// ── Vista principal ──────────────────────────────────────
 class _BookDetailView extends ConsumerWidget {
   const _BookDetailView({required this.book});
 
@@ -51,7 +50,6 @@ class _BookDetailView extends ConsumerWidget {
   Future<void> _onStatusChanged(
     BookStatus newStatus,
     WidgetRef ref,
-    BuildContext context,
   ) async {
     final updated = book.copyWith(
       status: newStatus,
@@ -97,8 +95,7 @@ class _BookDetailView extends ConsumerWidget {
           const SizedBox(height: 24),
           _StatusSection(
             book: book,
-            onStatusChanged: (status) =>
-                _onStatusChanged(status, ref, context),
+            onStatusChanged: (status) => _onStatusChanged(status, ref),
           ),
           const SizedBox(height: 24),
           _DatesSection(book: book),
@@ -108,7 +105,6 @@ class _BookDetailView extends ConsumerWidget {
   }
 }
 
-// ── Sección: Info ────────────────────────────────────────
 class _InfoSection extends StatelessWidget {
   const _InfoSection({required this.book});
 
@@ -118,24 +114,40 @@ class _InfoSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(book.title, style: textTheme.headlineSmall),
-        if (book.author != null) ...[
-          const SizedBox(height: 4),
-          Text(book.author!, style: textTheme.bodyLarge),
-        ],
-        if (book.pages != null) ...[
-          const SizedBox(height: 4),
-          Text('${book.pages} pages', style: textTheme.bodyMedium),
-        ],
+        _Cover(url: book.coverUrl),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(book.title, style: textTheme.headlineSmall),
+              if (book.author != null) ...[
+                const SizedBox(height: 4),
+                Text(book.author!, style: textTheme.bodyLarge),
+              ],
+              if (book.publisher != null) ...[
+                const SizedBox(height: 4),
+                Text(book.publisher!, style: textTheme.bodyMedium),
+              ],
+              if (book.firstPublishYear != null) ...[
+                const SizedBox(height: 4),
+                Text('${book.firstPublishYear}', style: textTheme.bodyMedium),
+              ],
+              if (book.isbn != null) ...[
+                const SizedBox(height: 4),
+                Text('ISBN ${book.isbn}', style: textTheme.bodySmall),
+              ],
+            ],
+          ),
+        ),
       ],
     );
   }
 }
 
-// ── Sección: Estado ──────────────────────────────────────
 class _StatusSection extends StatelessWidget {
   const _StatusSection({
     required this.book,
@@ -153,13 +165,13 @@ class _StatusSection extends StatelessWidget {
         Text('Status', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         DropdownButtonFormField<BookStatus>(
-          value: book.status,
+          initialValue: book.status,
           decoration: const InputDecoration(border: OutlineInputBorder()),
           items: BookStatus.values
               .map(
-                (s) => DropdownMenuItem(
-                  value: s,
-                  child: Text(s.toValue()),
+                (status) => DropdownMenuItem(
+                  value: status,
+                  child: Text(status.toValue()),
                 ),
               )
               .toList(),
@@ -174,14 +186,13 @@ class _StatusSection extends StatelessWidget {
   }
 }
 
-// ── Sección: Fechas ──────────────────────────────────────
 class _DatesSection extends StatelessWidget {
   const _DatesSection({required this.book});
 
   final Book book;
 
   String _format(DateTime? date) {
-    if (date == null) return '—';
+    if (date == null) return '-';
     return '${date.day}/${date.month}/${date.year}';
   }
 
@@ -221,7 +232,40 @@ class _DateRow extends StatelessWidget {
   }
 }
 
-// ── Diálogo eliminar ─────────────────────────────────────
+class _Cover extends StatelessWidget {
+  const _Cover({required this.url});
+
+  final String? url;
+
+  @override
+  Widget build(BuildContext context) {
+    if (url == null) {
+      return Container(
+        width: 88,
+        height: 132,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: const Icon(Icons.menu_book),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(4),
+      child: Image.network(
+        url!,
+        width: 88,
+        height: 132,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: 88,
+          height: 132,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: const Icon(Icons.menu_book),
+        ),
+      ),
+    );
+  }
+}
+
 class _DeleteDialog extends StatelessWidget {
   const _DeleteDialog();
 
