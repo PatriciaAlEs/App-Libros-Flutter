@@ -19,6 +19,21 @@ class BookDao extends DatabaseAccessor<AppDatabase> with _$BookDaoMixin {
     });
   }
 
+  Future<void> seedIfEmpty(List<BooksTableCompanion> books) async {
+    final existing = await getAllBooks();
+    if (existing.isEmpty) {
+      await batch((b) => b.insertAll(booksTable, books));
+    }
+  }
+
+  Future<void> upsertBooks(List<BooksTableCompanion> books) async {
+    await batch((b) {
+      for (final book in books) {
+        b.insert(booksTable, book, mode: InsertMode.insertOrReplace);
+      }
+    });
+  }
+
   Future<List<BooksTableData>> getAllBooks() {
     return (select(
       booksTable,
