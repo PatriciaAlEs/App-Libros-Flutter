@@ -1,0 +1,163 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../books/domain/entities/book.dart';
+import '../../../books/presentation/providers/books_provider.dart';
+import '../../domain/entities/reading_session.dart';
+import '../providers/reading_sessions_provider.dart';
+
+class DayDetailScreen extends ConsumerWidget {
+  const DayDetailScreen({super.key, required this.day});
+
+  final DateTime day;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sessionsAsync = ref.watch(readingSessionsForDayProvider(day));
+    final booksAsync = ref.watch(booksProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_formatDate(day)),
+        actions: [
+          IconButton(
+            tooltip: 'Nueva sesion',
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.pushNamed(context, '/session/add', arguments: day);
+            },
+          ),
+        ],
+      ),
+      body: sessionsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(child: Text('Error: $error')),
+        data: (sessions) {
+          final booksById = booksAsync.maybeWhen(
+            data: (books) => {for (final book in books) book.id: book},
+            orElse: () => <String, Book>{},
+          );
+          final total = sessions.fold<int>(
+            0,
+            (sum, session) => sum + session.minutes,
+          );
+
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _TotalCard(totalMinutes: total, sessionCount: sessions.length),
+              const SizedBox(height: 12),
+              if (sessions.isEmpty)
+                const Center(child: Text('No hay sesiones este dia.'))
+              else
+                for (final session in sessions)
+                  _SessionTile(
+                    session: session,
+                    book: booksById[session.bookId],
+                  ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+}
+
+class _TotalCard extends StatelessWidget {
+  const _TotalCard({required this.totalMinutes, required this.sessionCount});
+
+  final int totalMinutes;
+  final int sessionCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('$sessionCount sesiones'),
+            Text(
+              '$totalMinutes min',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SessionTile extends StatelessWidget {
+  const _SessionTile({required this.session, required this.book});
+
+  final ReadingSession session;
+  final Book? book;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: _Cover(url: book?.coverUrl),
+        title: Text(book?.title ?? 'Libro no encontrado'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (book?.author != null) Text(book!.author!),
+            if (session.note != null && session.note!.isNotEmpty)
+              Text(session.note!),
+          ],
+        ),
+        trailing: Text('${session.minutes} min'),
+        onTap: book == null
+            ? null
+            : () {
+                Navigator.pushNamed(
+                  context,
+                  '/book/detail',
+                  arguments: book!.id,
+                );
+              },
+      ),
+    );
+  }
+}
+
+class _Cover extends StatelessWidget {
+  const _Cover({required this.url});
+
+  final String? url;
+
+  @override
+  Widget build(BuildContext context) {
+    if (url == null) {
+      return Container(
+        width: 42,
+        height: 56,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: const Icon(Icons.menu_book),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(4),
+      child: Image.network(
+        url!,
+        width: 42,
+        height: 56,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: 42,
+          height: 56,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: const Icon(Icons.menu_book),
+        ),
+      ),
+    );
+  }
+}

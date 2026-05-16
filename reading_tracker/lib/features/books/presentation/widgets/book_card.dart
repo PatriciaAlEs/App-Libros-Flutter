@@ -3,11 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/book.dart';
 
 class BookCard extends StatelessWidget {
-  const BookCard({
-    super.key,
-    required this.book,
-    required this.onTap,
-  });
+  const BookCard({super.key, required this.book, required this.onTap});
 
   final Book book;
   final VoidCallback onTap;
@@ -16,8 +12,7 @@ class BookCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final subtitle = [
       if (book.author != null && book.author!.isNotEmpty) book.author!,
-      if (book.publisher != null && book.publisher!.isNotEmpty)
-        book.publisher!,
+      if (book.publisher != null && book.publisher!.isNotEmpty) book.publisher!,
       if (book.firstPublishYear != null) '${book.firstPublishYear}',
     ].join(' - ');
 

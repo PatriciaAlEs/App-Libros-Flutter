@@ -5,13 +5,11 @@ import 'package:http/http.dart' as http;
 
 import '../../domain/entities/book_search_result.dart';
 
-final bookApiDatasourceProvider = Provider<BookApiDatasource>(
-  (ref) {
-    final client = http.Client();
-    ref.onDispose(client.close);
-    return BookApiDatasource(client);
-  },
-);
+final bookApiDatasourceProvider = Provider<BookApiDatasource>((ref) {
+  final client = http.Client();
+  ref.onDispose(client.close);
+  return BookApiDatasource(client);
+});
 
 class BookApiDatasource {
   const BookApiDatasource(this._client);
@@ -22,22 +20,18 @@ class BookApiDatasource {
     final trimmedQuery = query.trim();
     if (trimmedQuery.isEmpty) return const [];
 
-    final uri = Uri.https(
-      'openlibrary.org',
-      '/search.json',
-      {
-        'q': trimmedQuery,
-        'limit': '12',
-        'fields': [
-          'title',
-          'author_name',
-          'publisher',
-          'cover_i',
-          'isbn',
-          'first_publish_year',
-        ].join(','),
-      },
-    );
+    final uri = Uri.https('openlibrary.org', '/search.json', {
+      'q': trimmedQuery,
+      'limit': '12',
+      'fields': [
+        'title',
+        'author_name',
+        'publisher',
+        'cover_i',
+        'isbn',
+        'first_publish_year',
+      ].join(','),
+    });
 
     final response = await _client.get(uri);
     if (response.statusCode != 200) {
@@ -77,7 +71,10 @@ class BookApiDatasource {
 
   List<String> _stringList(Object? value) {
     if (value is List) {
-      return value.whereType<String>().where((item) => item.isNotEmpty).toList();
+      return value
+          .whereType<String>()
+          .where((item) => item.isNotEmpty)
+          .toList();
     }
     return const [];
   }

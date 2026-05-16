@@ -97,7 +97,10 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
           ),
           const SizedBox(height: 16),
           if (_error != null) ...[
-            Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            Text(
+              _error!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
             const SizedBox(height: 16),
           ],
           if (_selectedBook != null) ...[
@@ -229,7 +232,10 @@ class _SelectedBookCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(book.title, style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  book.title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 if (book.author != null) Text(book.author!),
                 if (book.publisher != null) Text(book.publisher!),
               ],

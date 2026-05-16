@@ -5,7 +5,7 @@ import '../../domain/repositories/book_repository.dart';
 import 'book_repository_impl.dart';
 
 final bookRepositoryImplProvider = Provider<BookRepositoryImpl>(
-  (ref) => BookRepositoryImpl(ref.watch(bookDaoProvider)),
+  (ref) => BookRepositoryImpl(ref.watch(databaseProvider)),
 );
 
 final bookRepositoryProvider = Provider<BookRepository>(

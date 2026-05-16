@@ -15,7 +15,9 @@ class BookDao extends DatabaseAccessor<AppDatabase> with _$BookDaoMixin {
 
   Future<void> insertBooks(List<BooksTableCompanion> books) {
     return batch((batch) {
-      batch.insertAll(booksTable, books);
+      for (final book in books) {
+        batch.insert(booksTable, book, mode: InsertMode.insertOrIgnore);
+      }
     });
   }
 

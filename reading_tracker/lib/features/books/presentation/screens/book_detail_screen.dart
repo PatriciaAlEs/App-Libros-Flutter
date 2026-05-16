@@ -15,12 +15,9 @@ class BookDetailScreen extends ConsumerWidget {
     final booksAsync = ref.watch(booksProvider);
 
     return booksAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, _) => Scaffold(
-        body: Center(child: Text('Error: $error')),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (error, _) => Scaffold(body: Center(child: Text('Error: $error'))),
       data: (books) {
         Book? book;
         for (final candidate in books) {
@@ -31,9 +28,7 @@ class BookDetailScreen extends ConsumerWidget {
         }
 
         if (book == null) {
-          return const Scaffold(
-            body: Center(child: Text('Book not found.')),
-          );
+          return const Scaffold(body: Center(child: Text('Book not found.')));
         }
 
         return _BookDetailView(book: book);
@@ -47,10 +42,7 @@ class _BookDetailView extends ConsumerWidget {
 
   final Book book;
 
-  Future<void> _onStatusChanged(
-    BookStatus newStatus,
-    WidgetRef ref,
-  ) async {
+  Future<void> _onStatusChanged(BookStatus newStatus, WidgetRef ref) async {
     final updated = book.copyWith(
       status: newStatus,
       startDate: newStatus == BookStatus.reading
@@ -151,10 +143,7 @@ class _InfoSection extends StatelessWidget {
 }
 
 class _StatusSection extends StatelessWidget {
-  const _StatusSection({
-    required this.book,
-    required this.onStatusChanged,
-  });
+  const _StatusSection({required this.book, required this.onStatusChanged});
 
   final Book book;
   final ValueChanged<BookStatus> onStatusChanged;
@@ -205,10 +194,7 @@ class _ReaderDataSection extends StatelessWidget {
       children: [
         Text('Reader data', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        _DateRow(
-          label: 'Progress',
-          value: progress.isEmpty ? '-' : progress,
-        ),
+        _DateRow(label: 'Progress', value: progress.isEmpty ? '-' : progress),
         _DateRow(
           label: 'Rating',
           value: book.rating == null ? '-' : '${book.rating}/5',

@@ -2,12 +2,11 @@ import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 
 import 'app_database.dart';
-import 'daos/book_dao.dart';
 
 class DatabaseSeeder {
-  DatabaseSeeder(this._bookDao);
+  DatabaseSeeder(this._database);
 
-  final BookDao _bookDao;
+  final AppDatabase _database;
   bool _hasRun = false;
 
   Future<void> seedIfNeeded() async {
@@ -15,10 +14,11 @@ class DatabaseSeeder {
 
     _hasRun = true;
 
-    final existingBooks = await _bookDao.getAllBooks();
+    final existingBooks = await _database.bookDao.getAllBooks();
     if (existingBooks.isNotEmpty) return;
 
-    await _bookDao.insertBooks(_seedBooks());
+    await _database.bookDao.insertBooks(_seedBooks());
+    await _database.readingSessionDao.insertSessions(_seedSessions());
   }
 
   List<BooksTableCompanion> _seedBooks() {
@@ -27,60 +27,118 @@ class DatabaseSeeder {
     final oneMonthAgo = now.subtract(const Duration(days: 32));
     final fiveDaysAgo = now.subtract(const Duration(days: 5));
 
-    // 5 pending, 5 reading, 5 completed
     return [
-      // Pending
-      for (var i = 1; i <= 5; i++)
-        BooksTableCompanion.insert(
-          id: 'seed-pending-$i',
-          title: 'Pending Book $i',
-          author: Value('Author P$i'),
-          publisher: Value('Publisher P$i'),
-          coverUrl: Value('https://picsum.photos/seed/pending$i/200/300'),
-          isbn: Value('PENDING-ISBN-$i'),
-          firstPublishYear: Value(2000 + i),
-          totalPages: Value(150 + i * 10),
-          status: const Value('pending'),
-          createdAt: Value(now.subtract(Duration(days: i))),
+      BooksTableCompanion.insert(
+        id: 'seed-dune',
+        title: 'Dune',
+        author: const Value('Frank Herbert'),
+        publisher: const Value('Ace'),
+        coverUrl: const Value(
+          'https://covers.openlibrary.org/b/id/14824735-M.jpg',
         ),
-
-      // Reading
-      for (var i = 1; i <= 5; i++)
-        BooksTableCompanion.insert(
-          id: 'seed-reading-$i',
-          title: 'Reading Book $i',
-          author: Value('Author R$i'),
-          publisher: Value('Publisher R$i'),
-          coverUrl: Value('https://picsum.photos/seed/reading$i/200/300'),
-          isbn: Value('READING-ISBN-$i'),
-          firstPublishYear: Value(1990 + i),
-          totalPages: Value(200 + i * 20),
-          currentPage: Value((50 * i) % (200 + i * 20)),
-          notes: Value(i == 3 ? 'Buen ritmo para leer por las tardes.' : ''),
-          status: const Value('reading'),
-          startDate: Value(twoWeeksAgo.subtract(Duration(days: i))),
-          createdAt: Value(twoWeeksAgo.subtract(Duration(days: i))),
+        isbn: const Value('9780441172719'),
+        firstPublishYear: const Value(1965),
+        genre: const Value('Science fiction'),
+        language: const Value('English'),
+        totalPages: const Value(688),
+        status: const Value('pending'),
+        createdAt: Value(now.subtract(const Duration(days: 2))),
+      ),
+      BooksTableCompanion.insert(
+        id: 'seed-earthsea',
+        title: 'A Wizard of Earthsea',
+        author: const Value('Ursula K. Le Guin'),
+        publisher: const Value('Parnassus Press'),
+        coverUrl: const Value(
+          'https://covers.openlibrary.org/b/id/8231856-M.jpg',
         ),
-
-      // Completed
-      for (var i = 1; i <= 5; i++)
-        BooksTableCompanion.insert(
-          id: 'seed-completed-$i',
-          title: 'Completed Book $i',
-          author: Value('Author C$i'),
-          publisher: Value('Publisher C$i'),
-          coverUrl: Value('https://picsum.photos/seed/completed$i/200/300'),
-          isbn: Value('COMPLETED-ISBN-$i'),
-          firstPublishYear: Value(1980 + i),
-          totalPages: Value(120 + i * 15),
-          currentPage: Value(0),
-          rating: Value(3.5 + (i % 3)),
-          notes: Value(i == 2 ? 'Lectura intensa, muy recomendable.' : ''),
-          status: const Value('completed'),
-          startDate: Value(oneMonthAgo.subtract(Duration(days: i * 2))),
-          completedDate: Value(fiveDaysAgo.subtract(Duration(days: i))),
-          createdAt: Value(oneMonthAgo.subtract(Duration(days: i * 2))),
+        isbn: const Value('9780547773742'),
+        firstPublishYear: const Value(1968),
+        genre: const Value('Fantasy'),
+        language: const Value('English'),
+        totalPages: const Value(205),
+        currentPage: const Value(86),
+        notes: const Value('Buen ritmo para leer por las tardes.'),
+        status: const Value('reading'),
+        startDate: Value(twoWeeksAgo),
+        createdAt: Value(twoWeeksAgo),
+      ),
+      BooksTableCompanion.insert(
+        id: 'seed-left-hand-darkness',
+        title: 'The Left Hand of Darkness',
+        author: const Value('Ursula K. Le Guin'),
+        publisher: const Value('Ace Books'),
+        coverUrl: const Value(
+          'https://covers.openlibrary.org/b/id/9255566-M.jpg',
         ),
+        isbn: const Value('9780441478125'),
+        firstPublishYear: const Value(1969),
+        genre: const Value('Science fiction'),
+        language: const Value('English'),
+        totalPages: const Value(304),
+        currentPage: const Value(304),
+        rating: const Value(4.5),
+        notes: const Value('Lectura intensa, muy recomendable.'),
+        status: const Value('completed'),
+        startDate: Value(oneMonthAgo),
+        completedDate: Value(fiveDaysAgo),
+        createdAt: Value(oneMonthAgo),
+      ),
     ];
+  }
+
+  List<ReadingSessionsTableCompanion> _seedSessions() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    return [
+      _session('seed-session-1', 'seed-earthsea', today, 35),
+      _session(
+        'seed-session-2',
+        'seed-earthsea',
+        today.subtract(const Duration(days: 1)),
+        45,
+      ),
+      _session(
+        'seed-session-3',
+        'seed-left-hand-darkness',
+        today.subtract(const Duration(days: 2)),
+        60,
+      ),
+      _session(
+        'seed-session-4',
+        'seed-dune',
+        today.subtract(const Duration(days: 3)),
+        25,
+      ),
+      _session(
+        'seed-session-5',
+        'seed-earthsea',
+        today.subtract(const Duration(days: 3)),
+        30,
+      ),
+      _session(
+        'seed-session-6',
+        'seed-left-hand-darkness',
+        today.subtract(const Duration(days: 5)),
+        50,
+      ),
+    ];
+  }
+
+  ReadingSessionsTableCompanion _session(
+    String id,
+    String bookId,
+    DateTime date,
+    int minutes,
+  ) {
+    return ReadingSessionsTableCompanion.insert(
+      id: id,
+      bookId: bookId,
+      date: date,
+      minutes: minutes,
+      note: const Value('Sesion de prueba'),
+      createdAt: Value(date),
+    );
   }
 }

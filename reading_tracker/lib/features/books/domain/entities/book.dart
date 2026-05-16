@@ -14,9 +14,12 @@ class Book {
     this.coverUrl,
     this.isbn,
     this.firstPublishYear,
+    this.genre,
+    this.language,
     this.status = BookStatus.pending,
     this.startDate,
     this.completedDate,
+    this.updatedAt,
   });
 
   final String id;
@@ -30,10 +33,13 @@ class Book {
   final String? coverUrl;
   final String? isbn;
   final int? firstPublishYear;
+  final String? genre;
+  final String? language;
   final BookStatus status;
   final DateTime? startDate;
   final DateTime? completedDate;
   final DateTime createdAt;
+  final DateTime? updatedAt;
 
   Book copyWith({
     String? id,
@@ -47,10 +53,13 @@ class Book {
     String? coverUrl,
     String? isbn,
     int? firstPublishYear,
+    String? genre,
+    String? language,
     BookStatus? status,
     DateTime? startDate,
     DateTime? completedDate,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return Book(
       id: id ?? this.id,
@@ -64,10 +73,13 @@ class Book {
       coverUrl: coverUrl ?? this.coverUrl,
       isbn: isbn ?? this.isbn,
       firstPublishYear: firstPublishYear ?? this.firstPublishYear,
+      genre: genre ?? this.genre,
+      language: language ?? this.language,
       status: status ?? this.status,
       startDate: startDate ?? this.startDate,
       completedDate: completedDate ?? this.completedDate,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

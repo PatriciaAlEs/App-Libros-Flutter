@@ -11,6 +11,8 @@ class BooksTable extends Table {
   TextColumn get coverUrl => text().nullable()();
   TextColumn get isbn => text().nullable()();
   IntColumn get firstPublishYear => integer().nullable()();
+  TextColumn get genre => text().nullable()();
+  TextColumn get language => text().nullable()();
   IntColumn get totalPages => integer().nullable()();
   IntColumn get currentPage => integer().nullable()();
   RealColumn get rating => real().nullable()();
@@ -19,6 +21,7 @@ class BooksTable extends Table {
   DateTimeColumn get startDate => dateTime().nullable()();
   DateTimeColumn get completedDate => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

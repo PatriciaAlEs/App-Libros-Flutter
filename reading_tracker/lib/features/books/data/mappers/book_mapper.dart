@@ -14,6 +14,8 @@ extension BookDriftMapper on Book {
       coverUrl: Value(coverUrl),
       isbn: Value(isbn),
       firstPublishYear: Value(firstPublishYear),
+      genre: Value(genre),
+      language: Value(language),
       totalPages: Value(totalPages),
       currentPage: Value(currentPage),
       rating: Value(rating),
@@ -22,6 +24,7 @@ extension BookDriftMapper on Book {
       startDate: Value(startDate),
       completedDate: Value(completedDate),
       createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
     );
   }
 }
@@ -36,6 +39,8 @@ extension BooksTableDataMapper on BooksTableData {
       coverUrl: coverUrl,
       isbn: isbn,
       firstPublishYear: firstPublishYear,
+      genre: genre,
+      language: language,
       totalPages: totalPages,
       currentPage: currentPage,
       rating: rating,
@@ -44,6 +49,7 @@ extension BooksTableDataMapper on BooksTableData {
       startDate: startDate,
       completedDate: completedDate,
       createdAt: createdAt,
+      updatedAt: updatedAt,
     );
   }
 }

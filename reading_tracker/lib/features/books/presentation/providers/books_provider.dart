@@ -31,5 +31,6 @@ class BooksNotifier extends AsyncNotifier<List<Book>> {
   }
 }
 
-final booksProvider =
-    AsyncNotifierProvider<BooksNotifier, List<Book>>(BooksNotifier.new);
+final booksProvider = AsyncNotifierProvider<BooksNotifier, List<Book>>(
+  BooksNotifier.new,
+);
