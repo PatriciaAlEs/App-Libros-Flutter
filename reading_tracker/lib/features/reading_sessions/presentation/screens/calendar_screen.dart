@@ -251,20 +251,19 @@ class _WeekCalendar extends StatelessWidget {
   Widget build(BuildContext context) {
     final start = _startOfWeek(focusedDate);
     final days = List.generate(7, (index) => start.add(Duration(days: index)));
+    final hasSessions = days.any(
+      (day) => (sessionsByDay[_dateOnly(day)] ?? const []).isNotEmpty,
+    );
 
     return ListView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
       children: [
+        if (!hasSessions) const _WeekEmptyState(),
         for (final day in days)
-          SizedBox(
-            width: 150,
-            child: _CalendarDayCell(
-              day: day,
-              sessions: sessionsByDay[_dateOnly(day)] ?? const [],
-              booksById: booksById,
-              large: true,
-            ),
+          _WeekDaySection(
+            day: day,
+            sessions: sessionsByDay[_dateOnly(day)] ?? const [],
+            booksById: booksById,
           ),
       ],
     );
@@ -277,6 +276,133 @@ class _WeekCalendar extends StatelessWidget {
 
   DateTime _dateOnly(DateTime date) =>
       DateTime(date.year, date.month, date.day);
+}
+
+class _WeekEmptyState extends StatelessWidget {
+  const _WeekEmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Center(
+        child: Text(
+          'No hay sesiones esta semana.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ),
+    );
+  }
+}
+
+class _WeekDaySection extends StatelessWidget {
+  const _WeekDaySection({
+    required this.day,
+    required this.sessions,
+    required this.booksById,
+  });
+
+  final DateTime day;
+  final List<ReadingSession> sessions;
+  final Map<String, Book> booksById;
+
+  @override
+  Widget build(BuildContext context) {
+    final totalMinutes = sessions.fold<int>(
+      0,
+      (total, session) => total + session.minutes,
+    );
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: () =>
+            Navigator.pushNamed(context, '/calendar/day', arguments: day),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _dayTitle(day),
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                  if (totalMinutes > 0)
+                    Text(
+                      '$totalMinutes min',
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              if (sessions.isEmpty)
+                Text(
+                  'Sin sesiones',
+                  style: Theme.of(context).textTheme.bodySmall,
+                )
+              else
+                for (final session in sessions)
+                  _WeekSessionRow(
+                    session: session,
+                    book: booksById[session.bookId],
+                  ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _dayTitle(DateTime date) {
+    const weekdays = [
+      'Lunes',
+      'Martes',
+      'Miercoles',
+      'Jueves',
+      'Viernes',
+      'Sabado',
+      'Domingo',
+    ];
+    return '${weekdays[date.weekday - 1]} ${date.day}/${date.month}';
+  }
+}
+
+class _WeekSessionRow extends StatelessWidget {
+  const _WeekSessionRow({required this.session, required this.book});
+
+  final ReadingSession session;
+  final Book? book;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          _MiniCover(url: book?.coverUrl, width: 34, height: 48),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              book?.title ?? 'Libro no encontrado',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '${session.minutes} min',
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _WeekdayHeader extends StatelessWidget {
@@ -309,7 +435,6 @@ class _CalendarDayCell extends StatelessWidget {
     required this.sessions,
     required this.booksById,
     this.isMuted = false,
-    this.large = false,
     this.compact = false,
   });
 
@@ -317,17 +442,16 @@ class _CalendarDayCell extends StatelessWidget {
   final List<ReadingSession> sessions;
   final Map<String, Book> booksById;
   final bool isMuted;
-  final bool large;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final books = _uniqueBooks();
-    final maxCovers = compact ? 2 : (large ? 4 : 3);
+    final maxCovers = compact ? 2 : 3;
     final visibleBooks = books.take(maxCovers).toList();
     final extraCount = books.length - visibleBooks.length;
-    final coverWidth = compact ? 22.0 : (large ? 42.0 : 28.0);
-    final coverHeight = compact ? 32.0 : (large ? 58.0 : 40.0);
+    final coverWidth = compact ? 22.0 : 28.0;
+    final coverHeight = compact ? 32.0 : 40.0;
 
     return InkWell(
       borderRadius: BorderRadius.circular(8),
