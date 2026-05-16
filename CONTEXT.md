@@ -2,113 +2,199 @@
 
 ## Resumen
 
-Este repositorio contiene una app Flutter llamada `reading_tracker`, pensada para registrar libros y seguir su estado de lectura.
+`reading_tracker` es una app Flutter para registrar libros, seguir el estado de lectura y visualizar sesiones de lectura en calendario.
 
-La app usa una arquitectura por capas y features:
+Arquitectura actual:
 
-- `lib/core`: infraestructura compartida, tema, base de datos y utilidades.
-- `lib/features/books`: dominio, datos y presentacion de libros.
-- `lib/features/stats`: calculo y UI de estadisticas.
-- `test`: tests de Flutter.
+- `lib/core`: infraestructura compartida, tema, Drift, providers de base de datos y utilidades.
+- `lib/features/books`: busqueda/alta de libros, listado, detalle y estado de lectura.
+- `lib/features/reading_sessions`: sesiones de lectura, calendario mes/semana, detalle de dia y formulario de sesion.
+- `lib/features/stats`: reservado; archivos creados pero todavia vacios.
 
-## Stack principal
+## Stack
 
 - Flutter / Dart.
-- Riverpod (`flutter_riverpod`) para estado e inyeccion de dependencias.
-- `http` para consultar Open Library desde la pantalla de alta de libros.
-- Drift y SQLite se usan como persistencia real.
-- `uuid` para generar identificadores.
-- `intl` esta declarado para formato de fechas.
+- Riverpod (`flutter_riverpod`) para estado e inyeccion.
+- Drift + SQLite para persistencia real.
+- Drift web con `WebDatabase` sobre IndexedDB.
+- `http` para Open Library.
+- `uuid` para IDs.
+- `intl` declarado, poco usado todavia.
 
-## Entrada de la app
+## Entrada y rutas
 
-La entrada actual esta en `reading_tracker/lib/main.dart`.
+Entrada:
 
-`main.dart` crea un `ProviderScope` y monta `App`, definida en `reading_tracker/lib/app.dart`.
+- `reading_tracker/lib/main.dart`
+- `reading_tracker/lib/app.dart`
 
-`App` configura un `MaterialApp` con:
+Rutas principales:
 
-- titulo `Reading Tracker`
-- tema centralizado en `lib/core/theme/app_theme.dart`
-- rutas nombradas `/`, `/book/add` y `/book/detail`
+- `/`: listado de libros.
+- `/book/add`: busqueda y alta desde Open Library.
+- `/book/detail`: detalle de libro.
+- `/calendar`: calendario de lectura.
+- `/calendar/day`: detalle de un dia.
+- `/session/add`: registrar sesion de lectura.
 
-## Estructura relevante
+## Drift
 
-### Core
+Archivos importantes:
 
-- `reading_tracker/lib/core/database/app_database.dart`: declara `AppDatabase` con Drift.
-- `reading_tracker/lib/core/database/connection`: conexion SQLite por plataforma.
-- `reading_tracker/lib/core/database/database_provider.dart`: expone `databaseProvider` y `bookDaoProvider`.
-- `reading_tracker/lib/core/database/tables/books_table.dart`: tabla Drift de libros.
-- `reading_tracker/lib/core/database/daos/book_dao.dart`: DAO Drift real para CRUD de libros.
-- `reading_tracker/lib/core/theme/app_theme.dart`: tema compartido.
-- `reading_tracker/lib/core/utils/id_generator.dart`: reservado para generacion de IDs.
-- `reading_tracker/lib/core/utils/date_formatter.dart`: reservado para formato de fechas.
+- `core/database/app_database.dart`: `AppDatabase`, `schemaVersion = 2`, tablas y DAOs.
+- `core/database/app_database.g.dart`: generado por Drift.
+- `core/database/connection/`: conexion por plataforma.
+  - IO: `NativeDatabase` con archivo `reading_tracker.sqlite`.
+  - Web: `WebDatabase` con IndexedDB.
+- `core/database/tables/books_table.dart`: tabla `books`.
+- `core/database/tables/reading_sessions_table.dart`: tabla `reading_sessions`.
+- `core/database/daos/book_dao.dart`: CRUD de libros.
+- `core/database/daos/reading_session_dao.dart`: CRUD y queries por rango/dia.
 
-### Books
+Notas:
 
-- `reading_tracker/lib/features/books/domain/entities/book.dart`: entidad `Book`, con metadatos del libro y datos personales de lectura.
-- `reading_tracker/lib/features/books/domain/entities/book_search_result.dart`: resultado de busqueda externo.
-- `reading_tracker/lib/features/books/domain/enums/book_status.dart`: estados `pending`, `reading`, `completed`.
-- `reading_tracker/lib/features/books/domain/repositories/book_repository.dart`: contrato del repositorio.
-- `reading_tracker/lib/features/books/data/datasources/book_api_datasource.dart`: busqueda en Open Library.
-- `reading_tracker/lib/features/books/data/mappers/book_mapper.dart`: conversion entre `Book` de dominio y modelos Drift.
-- `reading_tracker/lib/features/books/data/repositories/book_repository_impl.dart`: implementacion del repositorio usando `BookDao`.
-- `reading_tracker/lib/features/books/data/repositories/book_repository_provider.dart`: providers del repositorio.
-- `reading_tracker/lib/features/books/presentation/providers/books_provider.dart`: `AsyncNotifier` para cargar y mutar libros.
-- `reading_tracker/lib/features/books/presentation/screens/books_list_screen.dart`: listado principal.
-- `reading_tracker/lib/features/books/presentation/screens/book_form_screen.dart`: formulario de busqueda y seleccion de libro.
-- `reading_tracker/lib/features/books/presentation/screens/book_detail_screen.dart`: detalle de libro.
-- `reading_tracker/lib/features/books/presentation/widgets/book_card.dart`: tarjeta de libro.
-- `reading_tracker/lib/features/books/presentation/widgets/status_filter_bar.dart`: filtro por estado.
+- `Book` de dominio no depende de Drift.
+- `ReadingSession` de dominio no depende de Drift.
+- Los mappers estan en capa `data`.
+- Si se cambian tablas/DAOs, ejecutar build_runner.
 
-### Stats
+## Books
 
-Los archivos de stats existen, pero estan vacios todavia:
+Entidad:
 
-- `reading_tracker/lib/features/stats/domain/stats_calculator.dart`
-- `reading_tracker/lib/features/stats/presentation/providers/stats_provider.dart`
-- `reading_tracker/lib/features/stats/presentation/screens/stats_screen.dart`
-- `reading_tracker/lib/features/stats/presentation/widgets/stat_card.dart`
+- `features/books/domain/entities/book.dart`
+
+Campos relevantes:
+
+- Metadatos externos: `title`, `author`, `publisher`, `coverUrl`, `isbn`, `firstPublishYear`, `genre`, `language`.
+- Datos del lector: `status`, `totalPages`, `currentPage`, `rating`, `notes`, `startDate`, `completedDate`, `createdAt`, `updatedAt`.
+
+Flujo actual:
+
+- Buscar libro por titulo/autor/ISBN en Open Library.
+- Seleccionar resultado y guardar metadatos.
+- Listar, filtrar por estado, abrir detalle, cambiar estado y eliminar.
+
+Archivos clave:
+
+- `features/books/data/datasources/book_api_datasource.dart`
+- `features/books/data/mappers/book_mapper.dart`
+- `features/books/data/repositories/book_repository_impl.dart`
+- `features/books/presentation/providers/books_provider.dart`
+- `features/books/presentation/screens/books_list_screen.dart`
+- `features/books/presentation/screens/book_form_screen.dart`
+- `features/books/presentation/screens/book_detail_screen.dart`
+
+## Reading Sessions
+
+Entidad:
+
+- `features/reading_sessions/domain/entities/reading_session.dart`
+
+Campos:
+
+- `id`
+- `bookId`
+- `date`
+- `minutes`
+- `note`
+- `createdAt`
+
+Funcionalidad:
+
+- Registrar minutos leidos por dia.
+- Asociar sesiones a libros.
+- Varias sesiones por libro y por dia.
+- Consultar sesiones por dia o rango.
+
+Archivos clave:
+
+- `features/reading_sessions/data/mappers/reading_session_mapper.dart`
+- `features/reading_sessions/data/repositories/reading_session_repository_impl.dart`
+- `features/reading_sessions/presentation/providers/reading_sessions_provider.dart`
+- `features/reading_sessions/presentation/screens/calendar_screen.dart`
+- `features/reading_sessions/presentation/screens/day_detail_screen.dart`
+- `features/reading_sessions/presentation/screens/session_form_screen.dart`
+
+## Calendario
+
+Estado actual:
+
+- Vista mensual y semanal en `/calendar`.
+- Navegacion por mes/semana.
+- Cada dia muestra mini portadas de libros con sesiones.
+- Vista mensual optimizada para mobile:
+  - maximo 2 mini portadas por dia.
+  - contador `+N` si hay mas libros.
+  - celdas estables para evitar overflow.
+- Detalle de dia muestra sesiones, total de minutos y permite navegar al libro.
+- Formulario `/session/add` permite seleccionar libro, fecha, minutos y nota.
+
+Pendientes UX:
+
+- Mejorar jerarquia visual del calendario semanal.
+- Pulir responsive en pantallas muy estrechas.
+- Permitir editar/eliminar sesiones desde el detalle del dia.
+- Mejorar textos/labels a un idioma consistente.
+- Considerar bottom navigation si crecen las secciones.
+
+## Seed Data
+
+Archivo:
+
+- `core/database/database_seed.dart`
+
+Estado:
+
+- Seed solo en debug usando `kDebugMode`.
+- Inserta datos solo si la base esta vacia.
+- Crea libros y sesiones de prueba.
+- Usa IDs fijos y `insertOrIgnore` para evitar duplicados.
+- Se dispara desde repositorios antes de lecturas/escrituras para evitar mezclar seed con UI.
+
+## Decisiones tecnicas tomadas
+
+- Mantener `domain` libre de Drift.
+- Ubicar conversiones Drift en `data/mappers`.
+- Mantener consultas SQL simples; combinar libros/sesiones en providers/UI por ahora.
+- Usar `WebDatabase` para web por simplicidad; posible migracion futura a `WasmDatabase` con worker dedicado.
+- Seed en infraestructura/repositorios, no en pantallas.
+- No implementar backend, login ni JWT todavia.
 
 ## Comandos utiles
 
 Ejecutar desde `reading_tracker`:
 
 ```powershell
-flutter pub get
-flutter analyze
-flutter test
-flutter run
+C:\src\flutter\bin\flutter.bat pub get
+C:\src\flutter\bin\flutter.bat analyze
+C:\src\flutter\bin\flutter.bat test
+C:\src\flutter\bin\flutter.bat build web
+C:\src\flutter\bin\flutter.bat run -d chrome
 ```
 
-Si se vuelve a conectar Drift como persistencia real:
+Generar Drift:
 
 ```powershell
-dart run build_runner build --delete-conflicting-outputs
+C:\src\flutter\bin\cache\dart-sdk\bin\dart.exe run build_runner build --delete-conflicting-outputs
 ```
 
-## Estado actual
+Nota: `--delete-conflicting-outputs` puede aparecer como ignorado segun la version de build_runner actual.
 
-- La navegacion principal esta centralizada en `App`.
-- `main.dart` ya no define otro `MaterialApp` paralelo.
-- Los imports principales apuntan a `domain/entities` y `domain/enums`.
-- El provider real de repositorio esta en `data/repositories/book_repository_provider.dart`.
-- La app puede buscar libros por titulo, autor o ISBN usando Open Library, seleccionar un resultado con portada/editorial y guardarlo.
-- `Book` separa metadatos externos (`publisher`, `coverUrl`, `isbn`, `firstPublishYear`) de datos del lector (`totalPages`, `currentPage`, `rating`, `notes`, `startDate`, `completedDate`).
-- La app puede listar, filtrar, abrir detalle, cambiar estado y eliminar libros durante la sesion.
-- La persistencia ya usa Drift. En IO usa archivo SQLite `reading_tracker.sqlite`; en web usa Drift WebDatabase sobre almacenamiento IndexedDB.
-- Flutter 3.44.0 (master) esta instalado en `c:\src\flutter` y agregado al PATH del sistema, pero esta sesion de Codex todavia no lo detecta.
-- Dart SDK esta disponible con Flutter cuando el PATH este activo.
-- Hay que ejecutar `flutter pub get` para actualizar `pubspec.lock` despues de agregar `http`.
+## Verificacion reciente
+
+Ultimas validaciones ejecutadas correctamente:
+
+- `flutter analyze`: sin issues.
+- `flutter test`: tests pasando.
+- `flutter build web`: OK.
 
 ## Siguientes pasos recomendados
 
-- Reiniciar el terminal o VS Code para que los cambios de PATH tomen efecto.
-- Ejecutar `flutter analyze`, `flutter test` y `flutter build web` despues de cambios de persistencia.
-- Probar en navegador la busqueda de libros y la carga de portadas.
-- Probar persistencia cerrando y reabriendo la app tras guardar un libro.
-- Considerar migrar la conexion web de `WebDatabase` a `WasmDatabase` con worker dedicado en una fase posterior.
-- Completar stats cuando el flujo de libros este estable.
-- Instalar Android SDK y/o Visual Studio si necesitas compilar para Android o Windows respectivamente.
-- Reemplazar el README generado por defecto.
+- Probar manualmente el calendario mensual en mobile y desktop.
+- Registrar sesiones en varios dias y verificar persistencia tras refrescar.
+- Implementar editar/eliminar sesiones.
+- Mejorar vista semanal con una distribucion mas parecida a agenda.
+- Anadir tests de repositorio/DAO para `ReadingSession`.
+- Completar `stats` usando sesiones reales.
+- Revisar migracion web futura a `WasmDatabase` si se quiere evitar `sql.js` legacy.
