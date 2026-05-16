@@ -202,10 +202,12 @@ class _MonthCalendar extends StatelessWidget {
         const _WeekdayHeader(),
         Expanded(
           child: GridView.builder(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 7,
-              childAspectRatio: 0.82,
+              childAspectRatio: 0.72,
+              mainAxisSpacing: 4,
+              crossAxisSpacing: 4,
             ),
             itemCount: days.length,
             itemBuilder: (context, index) {
@@ -215,6 +217,7 @@ class _MonthCalendar extends StatelessWidget {
                 isMuted: day.month != focusedDate.month,
                 sessions: sessionsByDay[_dateOnly(day)] ?? const [],
                 booksById: booksById,
+                compact: true,
               );
             },
           ),
@@ -307,6 +310,7 @@ class _CalendarDayCell extends StatelessWidget {
     required this.booksById,
     this.isMuted = false,
     this.large = false,
+    this.compact = false,
   });
 
   final DateTime day;
@@ -314,20 +318,23 @@ class _CalendarDayCell extends StatelessWidget {
   final Map<String, Book> booksById;
   final bool isMuted;
   final bool large;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final books = _uniqueBooks();
-    final visibleBooks = books.take(large ? 4 : 3).toList();
+    final maxCovers = compact ? 2 : (large ? 4 : 3);
+    final visibleBooks = books.take(maxCovers).toList();
     final extraCount = books.length - visibleBooks.length;
+    final coverWidth = compact ? 22.0 : (large ? 42.0 : 28.0);
+    final coverHeight = compact ? 32.0 : (large ? 58.0 : 40.0);
 
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: () =>
           Navigator.pushNamed(context, '/calendar/day', arguments: day),
       child: Container(
-        margin: const EdgeInsets.all(3),
-        padding: const EdgeInsets.all(6),
+        padding: EdgeInsets.all(compact ? 4 : 6),
         decoration: BoxDecoration(
           color: _isToday(day)
               ? Theme.of(context).colorScheme.primaryContainer
@@ -338,28 +345,31 @@ class _CalendarDayCell extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '${day.day}',
-              style: TextStyle(
-                color: isMuted ? Theme.of(context).disabledColor : null,
-                fontWeight: FontWeight.w700,
+            SizedBox(
+              height: compact ? 18 : 22,
+              child: Text(
+                '${day.day}',
+                maxLines: 1,
+                style: TextStyle(
+                  color: isMuted ? Theme.of(context).disabledColor : null,
+                  fontSize: compact ? 12 : null,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 4,
-              runSpacing: 4,
-              children: [
-                for (final book in visibleBooks)
-                  _MiniCover(url: book.coverUrl, large: large),
-              ],
-            ),
-            const Spacer(),
-            if (extraCount > 0)
-              Text(
-                '+$extraCount mas',
-                style: Theme.of(context).textTheme.labelSmall,
+            const SizedBox(height: 2),
+            Expanded(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: _MiniCoverRow(
+                  books: visibleBooks,
+                  extraCount: extraCount,
+                  coverWidth: coverWidth,
+                  coverHeight: coverHeight,
+                  compact: compact,
+                ),
               ),
+            ),
           ],
         ),
       ),
@@ -385,16 +395,89 @@ class _CalendarDayCell extends StatelessWidget {
   }
 }
 
-class _MiniCover extends StatelessWidget {
-  const _MiniCover({required this.url, required this.large});
+class _MiniCoverRow extends StatelessWidget {
+  const _MiniCoverRow({
+    required this.books,
+    required this.extraCount,
+    required this.coverWidth,
+    required this.coverHeight,
+    required this.compact,
+  });
 
-  final String? url;
-  final bool large;
+  final List<Book> books;
+  final int extraCount;
+  final double coverWidth;
+  final double coverHeight;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    final width = large ? 42.0 : 28.0;
-    final height = large ? 58.0 : 40.0;
+    if (books.isEmpty && extraCount <= 0) {
+      return const SizedBox.shrink();
+    }
+
+    return FittedBox(
+      alignment: Alignment.topLeft,
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final book in books) ...[
+            _MiniCover(
+              url: book.coverUrl,
+              width: coverWidth,
+              height: coverHeight,
+            ),
+            SizedBox(width: compact ? 2 : 4),
+          ],
+          if (extraCount > 0)
+            _ExtraCountBadge(count: extraCount, compact: compact),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExtraCountBadge extends StatelessWidget {
+  const _ExtraCountBadge({required this.count, required this.compact});
+
+  final int count;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: compact ? 20 : 24,
+      padding: EdgeInsets.symmetric(horizontal: compact ? 5 : 7),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        '+$count',
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          fontSize: compact ? 10 : null,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniCover extends StatelessWidget {
+  const _MiniCover({
+    required this.url,
+    required this.width,
+    required this.height,
+  });
+
+  final String? url;
+  final double width;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
     if (url == null) {
       return Container(
         width: width,
