@@ -7,6 +7,7 @@ import 'features/books/presentation/screens/books_list_screen.dart';
 import 'features/reading_sessions/presentation/screens/calendar_screen.dart';
 import 'features/reading_sessions/presentation/screens/day_detail_screen.dart';
 import 'features/reading_sessions/presentation/screens/session_form_screen.dart';
+import 'features/stats/presentation/screens/stats_screen.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -50,6 +51,9 @@ class App extends StatelessWidget {
         return MaterialPageRoute(
           builder: (_) => SessionFormScreen(initialDate: initialDate),
         );
+
+      case '/stats':
+        return MaterialPageRoute(builder: (_) => const StatsScreen());
 
       default:
         return _notFoundRoute();

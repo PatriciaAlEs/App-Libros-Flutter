@@ -25,6 +25,11 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
         title: const Text('My Books'),
         actions: [
           IconButton(
+            tooltip: 'Estadísticas',
+            icon: const Icon(Icons.bar_chart),
+            onPressed: () => Navigator.pushNamed(context, '/stats'),
+          ),
+          IconButton(
             tooltip: 'Calendario',
             icon: const Icon(Icons.calendar_month),
             onPressed: () => Navigator.pushNamed(context, '/calendar'),
