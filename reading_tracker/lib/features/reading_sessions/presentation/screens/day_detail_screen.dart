@@ -23,9 +23,7 @@ class DayDetailScreen extends ConsumerWidget {
           IconButton(
             tooltip: 'Nueva sesion',
             icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.pushNamed(context, '/session/add', arguments: day);
-            },
+            onPressed: () => _openSessionForm(context, ref),
           ),
         ],
       ),
@@ -47,8 +45,12 @@ class DayDetailScreen extends ConsumerWidget {
             children: [
               _TotalCard(totalMinutes: total, sessionCount: sessions.length),
               const SizedBox(height: 12),
+              _AddSessionButton(
+                onPressed: () => _openSessionForm(context, ref),
+              ),
+              const SizedBox(height: 12),
               if (sessions.isEmpty)
-                const Center(child: Text('No hay sesiones este dia.'))
+                const _EmptyState()
               else
                 for (final session in sessions)
                   _SessionTile(
@@ -62,8 +64,46 @@ class DayDetailScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _openSessionForm(BuildContext context, WidgetRef ref) async {
+    await Navigator.pushNamed(context, '/session/add', arguments: day);
+    if (!context.mounted) return;
+    ref.invalidate(readingSessionsForDayProvider(day));
+  }
+
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
+  }
+}
+
+class _AddSessionButton extends StatelessWidget {
+  const _AddSessionButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton.icon(
+      onPressed: onPressed,
+      icon: const Icon(Icons.add),
+      label: const Text('Anadir sesion'),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 32),
+      child: Center(
+        child: Text(
+          'No hay sesiones este dia.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ),
+    );
   }
 }
 
