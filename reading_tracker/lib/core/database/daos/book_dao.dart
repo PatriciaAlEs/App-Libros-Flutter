@@ -13,19 +13,28 @@ class BookDao extends DatabaseAccessor<AppDatabase> with _$BookDaoMixin {
     return into(booksTable).insert(book);
   }
 
+  Future<void> insertBooks(List<BooksTableCompanion> books) {
+    return batch((batch) {
+      batch.insertAll(booksTable, books);
+    });
+  }
+
   Future<List<BooksTableData>> getAllBooks() {
-    return (select(booksTable)..orderBy([(table) => OrderingTerm.desc(table.createdAt)]))
-        .get();
+    return (select(
+      booksTable,
+    )..orderBy([(table) => OrderingTerm.desc(table.createdAt)])).get();
   }
 
   Stream<List<BooksTableData>> watchAllBooks() {
-    return (select(booksTable)..orderBy([(table) => OrderingTerm.desc(table.createdAt)]))
-        .watch();
+    return (select(
+      booksTable,
+    )..orderBy([(table) => OrderingTerm.desc(table.createdAt)])).watch();
   }
 
   Future<BooksTableData?> getBookById(String id) {
-    return (select(booksTable)..where((table) => table.id.equals(id)))
-        .getSingleOrNull();
+    return (select(
+      booksTable,
+    )..where((table) => table.id.equals(id))).getSingleOrNull();
   }
 
   Future<bool> updateBook(BooksTableCompanion book) {
