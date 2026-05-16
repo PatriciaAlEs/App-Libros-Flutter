@@ -65,9 +65,13 @@ class DayDetailScreen extends ConsumerWidget {
   }
 
   Future<void> _openSessionForm(BuildContext context, WidgetRef ref) async {
-    await Navigator.pushNamed(context, '/session/add', arguments: day);
+    final saved = await Navigator.pushNamed(
+      context,
+      '/session/add',
+      arguments: day,
+    );
     if (!context.mounted) return;
-    ref.invalidate(readingSessionsForDayProvider(day));
+    if (saved == true) ref.invalidate(readingSessionsForDayProvider(day));
   }
 
   String _formatDate(DateTime date) {
