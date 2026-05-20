@@ -14,9 +14,9 @@ Antes de actuar:
 
 Durante cambios:
 
-- Hacer cambios pequenos y coherentes con la arquitectura.
+- Hacer el cambio minimo que satisface la tarea.
 - No modificar archivos existentes si el usuario pidio solo archivos nuevos.
-- No refactorizar mas de lo necesario.
+- No refactorizar fuera del area tocada sin aprobacion.
 - No revertir cambios ajenos.
 - Explicar cualquier bloqueo tecnico.
 
@@ -26,3 +26,10 @@ Al cerrar:
 - Listar archivos creados/modificados.
 - Incluir pruebas ejecutadas o explicar por que no se pudieron ejecutar.
 - Indicar informacion incierta como "pendiente de confirmar".
+
+Ejemplos:
+
+- ✅ Antes de tocar calendario, leer screens/providers de `reading_sessions`.
+- ✅ Si `flutter analyze` se cuelga por permisos, decirlo y aportar `dart analyze` si corre.
+- ❌ Crear una arquitectura nueva para una pantalla pequena.
+- ❌ Cambiar Stats mientras se trabaja en Books si el usuario no lo pidio.

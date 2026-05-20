@@ -10,9 +10,9 @@ alwaysApply: false
 
 Prioridad de tests:
 
-- Logica de dominio y calculos.
-- Mappers y repositorios cuando haya riesgo de persistencia.
-- Flujos UI cuando el cambio tenga comportamiento visible no trivial.
+- Anadir o actualizar tests si cambia logica de dominio, calculos de stats, mappers, repositorios o reglas de validacion.
+- Para cambios puramente visuales, ejecutar analisis y probar manualmente el flujo afectado.
+- Para cambios de Drift, cubrir al menos la consulta/mutacion critica cuando sea viable.
 
 Verificacion esperada:
 
@@ -24,3 +24,10 @@ Mantener tests focalizados:
 
 - No crear suites grandes para cambios pequenos.
 - Cubrir casos borde cuando existan: listas vacias, minutos invalidos, fechas sin sesiones, libros sin estado `reading`.
+
+Ejemplos:
+
+- ✅ Testear que stats suma minutos correctamente para varias sesiones.
+- ✅ Testear que un formulario rechaza `0` minutos si la validacion se extrae o se cubre con widget test.
+- ❌ Anadir snapshots grandes para un cambio de copy.
+- ❌ Omitir pruebas/logica manual si se cambia una consulta de sesiones.

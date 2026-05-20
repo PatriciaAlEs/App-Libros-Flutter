@@ -1,7 +1,7 @@
 ---
 description: Reglas para estado e inyeccion con Riverpod.
 globs:
-  - "reading_tracker/lib/**/*provider*.dart"
+  - "reading_tracker/lib/**/providers/**/*.dart"
   - "reading_tracker/lib/features/**/presentation/**/*.dart"
 alwaysApply: false
 ---

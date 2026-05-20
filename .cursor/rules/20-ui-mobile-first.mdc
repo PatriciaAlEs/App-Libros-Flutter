@@ -26,3 +26,10 @@ Formularios:
 - Validaciones claras.
 - Botones deshabilitados durante guardado.
 - Evitar campos innecesarios para el MVP.
+
+Ejemplos:
+
+- ✅ En calendario mensual, mostrar indicadores compactos y abrir detalle al tocar el dia.
+- ✅ En calendario semanal, mostrar filas legibles con portada, titulo y minutos.
+- ❌ Meter listas largas de sesiones dentro de una celda mensual.
+- ❌ Crear una pantalla de bienvenida si el usuario pidio una herramienta funcional.

@@ -13,8 +13,8 @@ Reglas:
 - Tablas y DAOs viven en `core/database`.
 - Entidades de dominio no deben importar Drift.
 - Convertir con mappers en `features/<feature>/data/mappers`.
-- Si cambia el schema, actualizar `schemaVersion` y migracion.
-- Si cambian tablas o DAOs, ejecutar build_runner.
+- Si cambia una tabla, actualizar `schemaVersion`, migracion y archivos generados.
+- Si cambian tablas o DAOs, ejecutar build_runner antes de cerrar.
 - Mantener consultas simples mientras el volumen y el MVP lo permitan.
 - Seed data solo para debug y fuera de pantallas.
 
@@ -23,3 +23,10 @@ Comando de generacion:
 ```powershell
 C:\src\flutter\bin\cache\dart-sdk\bin\dart.exe run build_runner build --delete-conflicting-outputs
 ```
+
+Ejemplos:
+
+- ✅ Crear un metodo DAO para una consulta reutilizada por repositorios.
+- ✅ Normalizar fechas de sesiones antes de consultar por dia.
+- ❌ Leer tablas Drift directamente desde una pantalla.
+- ❌ Cambiar columnas sin migracion cuando `schemaVersion` ya existe.

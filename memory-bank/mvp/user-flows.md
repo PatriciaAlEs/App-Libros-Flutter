@@ -32,5 +32,7 @@
 ## Consultar estadisticas
 
 1. Usuario abre Stats.
-2. La app calcula resumen desde libros y sesiones.
+2. La app muestra un resumen calculado desde libros y sesiones.
 3. Usuario ve metricas utiles para entender progreso y habitos.
+
+Estado: parcialmente implementado; pendiente cerrar funcionalmente antes de considerar Stats completo.

@@ -19,6 +19,13 @@ Reglas:
 - El dominio no debe depender de Drift, Flutter UI ni implementaciones concretas.
 - Los mappers entre Drift y dominio viven en `data/mappers`.
 - Las pantallas no deben contener SQL ni detalles de tablas.
-- Preferir cambios locales antes que abstracciones globales.
+- Si un cambio afecta a una sola feature, mantenlo dentro de esa feature.
 - Seguir patrones existentes de `books`, `reading_sessions` y `stats`.
 - No mover archivos ni hacer refactors amplios sin motivo claro y aprobacion.
+
+Ejemplos:
+
+- ✅ Crear `features/<feature>/data/mappers/*_mapper.dart` para convertir entre Drift y dominio.
+- ✅ Anadir un provider dentro de `features/<feature>/presentation/providers`.
+- ❌ Importar `package:drift/drift.dart` desde una entidad en `domain`.
+- ❌ Mover varias features para "ordenar" si la tarea solo pide un cambio puntual.

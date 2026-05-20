@@ -11,12 +11,7 @@ Antes de editar:
 
 - Lee `memory-bank/active-context.md` y `memory-bank/current-state.md`.
 - Si la tarea toca arquitectura o persistencia, lee tambien `memory-bank/architecture.md` y `memory-bank/decisions.md`.
-- Mantener el proyecto simple y mantenible; no sobredimensionar.
 - No implementar backend, login ni sincronizacion salvo peticion explicita.
-- No tocar `Stats` en tareas de libros/calendario/sesiones salvo que el usuario lo pida.
+- Trata `Stats` como parcialmente implementado hasta que el usuario confirme que esta cerrado.
 
-Al terminar una tarea de codigo:
-
-- Lista archivos modificados.
-- Explica como probar.
-- Ejecuta `flutter analyze` y `flutter test` cuando aplique. Si el entorno bloquea Flutter, explica el bloqueo y usa una verificacion razonable como `dart analyze`.
+Para arquitectura, UI, estado, base de datos, testing y workflow, aplica la regla `.mdc` especifica correspondiente.
