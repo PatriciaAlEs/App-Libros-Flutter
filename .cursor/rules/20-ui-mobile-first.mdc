@@ -1,0 +1,28 @@
+---
+description: Reglas UI mobile-first para pantallas, calendario y formularios.
+globs:
+  - "reading_tracker/lib/features/**/presentation/**/*.dart"
+alwaysApply: false
+---
+
+# UI Mobile-First Rules
+
+Principios:
+
+- Disenar primero para pantallas pequenas.
+- Evitar overflows con textos largos, portadas y botones.
+- Mantener pantallas simples y accionables.
+- Usar estados de carga, error y empty state claros.
+- Usar componentes Material existentes antes de crear UI custom compleja.
+
+Calendario:
+
+- Vista mensual: compacta, estable y con poca informacion por celda.
+- Vista semanal: mas espacio por dia, sesiones legibles con portada, titulo y minutos.
+- Detalle de dia: lista de sesiones, total diario y accion para anadir sesion.
+
+Formularios:
+
+- Validaciones claras.
+- Botones deshabilitados durante guardado.
+- Evitar campos innecesarios para el MVP.

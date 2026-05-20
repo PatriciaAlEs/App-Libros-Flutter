@@ -1,0 +1,26 @@
+---
+description: Reglas de testing y verificacion para cambios Flutter/Dart.
+globs:
+  - "reading_tracker/lib/**/*.dart"
+  - "reading_tracker/test/**/*.dart"
+alwaysApply: false
+---
+
+# Testing Rules
+
+Prioridad de tests:
+
+- Logica de dominio y calculos.
+- Mappers y repositorios cuando haya riesgo de persistencia.
+- Flujos UI cuando el cambio tenga comportamiento visible no trivial.
+
+Verificacion esperada:
+
+- Ejecutar `flutter analyze`.
+- Ejecutar `flutter test` si el cambio toca logica, providers, repositorios o comportamiento cubierto por tests.
+- Si `flutter analyze` se bloquea por permisos del entorno, documentar el bloqueo y usar `dart analyze` como comprobacion alternativa.
+
+Mantener tests focalizados:
+
+- No crear suites grandes para cambios pequenos.
+- Cubrir casos borde cuando existan: listas vacias, minutos invalidos, fechas sin sesiones, libros sin estado `reading`.

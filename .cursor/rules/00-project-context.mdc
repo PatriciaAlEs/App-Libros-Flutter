@@ -1,0 +1,22 @@
+---
+description: Contexto base del producto reading_tracker y reglas globales para asistentes IA.
+alwaysApply: true
+---
+
+# Project Context
+
+`reading_tracker` es una app Flutter mobile-first para seguimiento de lectura: libros, sesiones, progreso, calendario y estadisticas.
+
+Antes de editar:
+
+- Lee `memory-bank/active-context.md` y `memory-bank/current-state.md`.
+- Si la tarea toca arquitectura o persistencia, lee tambien `memory-bank/architecture.md` y `memory-bank/decisions.md`.
+- Mantener el proyecto simple y mantenible; no sobredimensionar.
+- No implementar backend, login ni sincronizacion salvo peticion explicita.
+- No tocar `Stats` en tareas de libros/calendario/sesiones salvo que el usuario lo pida.
+
+Al terminar una tarea de codigo:
+
+- Lista archivos modificados.
+- Explica como probar.
+- Ejecuta `flutter analyze` y `flutter test` cuando aplique. Si el entorno bloquea Flutter, explica el bloqueo y usa una verificacion razonable como `dart analyze`.

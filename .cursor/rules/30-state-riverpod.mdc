@@ -1,0 +1,24 @@
+---
+description: Reglas para estado e inyeccion con Riverpod.
+globs:
+  - "reading_tracker/lib/**/*provider*.dart"
+  - "reading_tracker/lib/features/**/presentation/**/*.dart"
+alwaysApply: false
+---
+
+# Riverpod State Rules
+
+Reglas:
+
+- Usar Riverpod existente; no introducir otro gestor de estado.
+- Mantener providers cerca de la feature que representan.
+- Usar repositorios como frontera entre presentation y data.
+- Preferir `FutureProvider`, `StreamProvider`, `Provider` o `AsyncNotifier` segun el patron ya existente.
+- Invalidar providers solo cuando sea necesario para refrescar una vista tras una mutacion.
+- Evitar estado global si el estado puede vivir en una pantalla.
+
+Patrones actuales:
+
+- `booksProvider` usa `AsyncNotifier`.
+- Sesiones por rango usan `StreamProvider.family`.
+- Sesiones por dia usan `FutureProvider.family`.

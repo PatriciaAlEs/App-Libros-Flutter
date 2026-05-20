@@ -1,0 +1,28 @@
+---
+description: Flujo de trabajo para asistentes IA en este repositorio.
+alwaysApply: true
+---
+
+# AI Workflow Rules
+
+Antes de actuar:
+
+- Leer el contexto relevante.
+- Confirmar restricciones del usuario.
+- Inspeccionar archivos antes de editarlos.
+- No asumir que el estado del repo esta limpio.
+
+Durante cambios:
+
+- Hacer cambios pequenos y coherentes con la arquitectura.
+- No modificar archivos existentes si el usuario pidio solo archivos nuevos.
+- No refactorizar mas de lo necesario.
+- No revertir cambios ajenos.
+- Explicar cualquier bloqueo tecnico.
+
+Al cerrar:
+
+- Resumir que cambio.
+- Listar archivos creados/modificados.
+- Incluir pruebas ejecutadas o explicar por que no se pudieron ejecutar.
+- Indicar informacion incierta como "pendiente de confirmar".

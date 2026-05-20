@@ -1,0 +1,25 @@
+---
+description: Reglas de persistencia con Drift y SQLite.
+globs:
+  - "reading_tracker/lib/core/database/**/*.dart"
+  - "reading_tracker/lib/features/**/data/**/*.dart"
+alwaysApply: false
+---
+
+# Drift Database Rules
+
+Reglas:
+
+- Tablas y DAOs viven en `core/database`.
+- Entidades de dominio no deben importar Drift.
+- Convertir con mappers en `features/<feature>/data/mappers`.
+- Si cambia el schema, actualizar `schemaVersion` y migracion.
+- Si cambian tablas o DAOs, ejecutar build_runner.
+- Mantener consultas simples mientras el volumen y el MVP lo permitan.
+- Seed data solo para debug y fuera de pantallas.
+
+Comando de generacion:
+
+```powershell
+C:\src\flutter\bin\cache\dart-sdk\bin\dart.exe run build_runner build --delete-conflicting-outputs
+```
