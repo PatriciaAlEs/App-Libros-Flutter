@@ -44,7 +44,7 @@ void main() {
     await tester.tap(find.text('Open form'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Editar sesion'), findsOneWidget);
+    expect(find.text('Editar sesión'), findsOneWidget);
     expect(find.text('Current Book'), findsOneWidget);
     expect(find.text('Original note'), findsOneWidget);
 
@@ -105,7 +105,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byTooltip('Editar sesion'));
+    await tester.tap(find.byTooltip('Editar sesión'));
     await tester.pumpAndSettle();
 
     expect(editArguments, same(session));

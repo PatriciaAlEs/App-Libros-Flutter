@@ -22,7 +22,7 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Books'),
+        title: const Text('Mis libros'),
         actions: [
           IconButton(
             tooltip: 'Estadísticas',
@@ -38,7 +38,8 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
       ),
       body: booksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) =>
+            const Center(child: Text('No se pudieron cargar los libros.')),
         data: (books) {
           final filteredBooks = _selectedStatus == null
               ? books
@@ -54,19 +55,27 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
               ),
               Expanded(
                 child: filteredBooks.isEmpty
-                    ? const Center(child: Text('No books yet.'))
+                    ? _BooksEmptyState(hasBooks: books.isNotEmpty)
                     : ListView.builder(
                         itemCount: filteredBooks.length,
                         itemBuilder: (context, index) {
                           final book = filteredBooks[index];
                           return BookCard(
                             book: book,
-                            onTap: () {
-                              Navigator.pushNamed(
+                            onTap: () async {
+                              final deleted = await Navigator.pushNamed(
                                 context,
                                 '/book/detail',
                                 arguments: book.id,
                               );
+                              if (!context.mounted) return;
+                              if (deleted == true) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Libro eliminado'),
+                                  ),
+                                );
+                              }
                             },
                           );
                         },
@@ -77,8 +86,37 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, '/book/add'),
+        onPressed: () async {
+          final saved = await Navigator.pushNamed(context, '/book/add');
+          if (!context.mounted) return;
+          if (saved == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Libro añadido')),
+            );
+          }
+        },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class _BooksEmptyState extends StatelessWidget {
+  const _BooksEmptyState({required this.hasBooks});
+
+  final bool hasBooks;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          hasBooks
+              ? 'No hay libros en este estado.'
+              : 'Todavía no tienes libros. Añade tu primer libro con el botón +.',
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }

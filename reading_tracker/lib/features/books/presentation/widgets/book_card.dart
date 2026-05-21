@@ -22,7 +22,7 @@ class BookCard extends StatelessWidget {
         leading: _BookCover(url: book.coverUrl),
         title: Text(book.title),
         subtitle: subtitle.isEmpty ? null : Text(subtitle),
-        trailing: Text(book.status.toValue()),
+        trailing: Text(book.status.label),
         onTap: onTap,
       ),
     );

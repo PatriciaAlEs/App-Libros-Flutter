@@ -22,6 +22,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   BookSearchResult? _selectedBook;
   bool _isSearching = false;
   bool _isSaving = false;
+  bool _hasSearched = false;
   String? _error;
 
   @override
@@ -37,6 +38,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
 
     setState(() {
       _isSearching = true;
+      _hasSearched = true;
       _error = null;
       _selectedBook = null;
     });
@@ -49,7 +51,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = 'No se pudo buscar el libro. Intentalo de nuevo.';
+        _error = 'No se pudo buscar el libro. Inténtalo de nuevo.';
         _results = const [];
       });
     } finally {
@@ -82,13 +84,13 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     await ref.read(booksProvider.notifier).addBook(book);
     ref.invalidate(statsProvider);
 
-    if (mounted) Navigator.pop(context);
+    if (mounted) Navigator.pop(context, true);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Book')),
+      appBar: AppBar(title: const Text('Añadir libro')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -111,6 +113,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
           ],
           _ResultsList(
             results: _results,
+            hasSearched: _hasSearched,
             selectedBook: _selectedBook,
             onSelected: (book) => setState(() => _selectedBook = book),
           ),
@@ -147,7 +150,7 @@ class _SearchField extends StatelessWidget {
             controller: controller,
             textInputAction: TextInputAction.search,
             decoration: const InputDecoration(
-              labelText: 'Titulo, autor o ISBN',
+              labelText: 'Título, autor o ISBN',
               border: OutlineInputBorder(),
             ),
             onSubmitted: (_) => onSubmitted(),
@@ -173,18 +176,27 @@ class _SearchField extends StatelessWidget {
 class _ResultsList extends StatelessWidget {
   const _ResultsList({
     required this.results,
+    required this.hasSearched,
     required this.selectedBook,
     required this.onSelected,
   });
 
   final List<BookSearchResult> results;
+  final bool hasSearched;
   final BookSearchResult? selectedBook;
   final ValueChanged<BookSearchResult> onSelected;
 
   @override
   Widget build(BuildContext context) {
     if (results.isEmpty) {
-      return const SizedBox.shrink();
+      if (!hasSearched) return const SizedBox.shrink();
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Text(
+          'No encontramos resultados. Prueba con otro título, autor o ISBN.',
+          textAlign: TextAlign.center,
+        ),
+      );
     }
 
     return Column(

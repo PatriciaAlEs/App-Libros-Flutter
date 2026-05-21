@@ -4,9 +4,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:reading_tracker/app.dart';
 import 'package:reading_tracker/features/books/data/repositories/book_repository_provider.dart';
 import 'package:reading_tracker/features/books/domain/entities/book.dart';
+import 'package:reading_tracker/features/books/domain/enums/book_status.dart';
 import 'package:reading_tracker/features/books/domain/repositories/book_repository.dart';
 
 void main() {
+  test('book status keeps persisted value and exposes Spanish label', () {
+    expect(BookStatus.pending.toValue(), 'pending');
+    expect(BookStatus.pending.label, 'Pendiente');
+    expect(BookStatus.reading.label, 'Leyendo');
+    expect(BookStatus.completed.label, 'Completado');
+  });
+
   testWidgets('shows the books screen', (WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -18,8 +26,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('My Books'), findsOneWidget);
-    expect(find.text('No books yet.'), findsOneWidget);
+    expect(find.text('Mis libros'), findsOneWidget);
+    expect(
+      find.text('Todavía no tienes libros. Añade tu primer libro con el botón +.'),
+      findsOneWidget,
+    );
   });
 }
 

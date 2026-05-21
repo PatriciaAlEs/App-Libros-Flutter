@@ -29,7 +29,9 @@ class BookDetailScreen extends ConsumerWidget {
         }
 
         if (book == null) {
-          return const Scaffold(body: Center(child: Text('Book not found.')));
+          return const Scaffold(
+            body: Center(child: Text('Libro no encontrado.')),
+          );
         }
 
         return _BookDetailView(book: book);
@@ -43,7 +45,11 @@ class _BookDetailView extends ConsumerWidget {
 
   final Book book;
 
-  Future<void> _onStatusChanged(BookStatus newStatus, WidgetRef ref) async {
+  Future<void> _onStatusChanged(
+    BuildContext context,
+    BookStatus newStatus,
+    WidgetRef ref,
+  ) async {
     final updated = book.copyWith(
       status: newStatus,
       startDate: newStatus == BookStatus.reading
@@ -56,6 +62,10 @@ class _BookDetailView extends ConsumerWidget {
 
     await ref.read(booksProvider.notifier).updateBook(updated);
     ref.invalidate(statsProvider);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Estado actualizado')),
+    );
   }
 
   Future<void> _onDelete(WidgetRef ref, BuildContext context) async {
@@ -67,7 +77,7 @@ class _BookDetailView extends ConsumerWidget {
     if (confirm == true) {
       await ref.read(booksProvider.notifier).deleteBook(book.id);
       ref.invalidate(statsProvider);
-      if (context.mounted) Navigator.pop(context);
+      if (context.mounted) Navigator.pop(context, true);
     }
   }
 
@@ -75,7 +85,7 @@ class _BookDetailView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Book Detail'),
+        title: const Text('Detalle del libro'),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline),
@@ -90,7 +100,11 @@ class _BookDetailView extends ConsumerWidget {
           const SizedBox(height: 24),
           _StatusSection(
             book: book,
-            onStatusChanged: (status) => _onStatusChanged(status, ref),
+            onStatusChanged: (status) => _onStatusChanged(
+              context,
+              status,
+              ref,
+            ),
           ),
           const SizedBox(height: 24),
           _ReaderDataSection(book: book),
@@ -156,7 +170,7 @@ class _StatusSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Status', style: Theme.of(context).textTheme.titleMedium),
+        Text('Estado', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         DropdownButtonFormField<BookStatus>(
           initialValue: book.status,
@@ -165,7 +179,7 @@ class _StatusSection extends StatelessWidget {
               .map(
                 (status) => DropdownMenuItem(
                   value: status,
-                  child: Text(status.toValue()),
+                  child: Text(status.label),
                 ),
               )
               .toList(),
@@ -189,17 +203,20 @@ class _ReaderDataSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final progress = [
       if (book.currentPage != null) '${book.currentPage}',
-      if (book.totalPages != null) 'of ${book.totalPages}',
+      if (book.totalPages != null) 'de ${book.totalPages}',
     ].join(' ');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Reader data', style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          'Datos de lectura',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 8),
-        _DateRow(label: 'Progress', value: progress.isEmpty ? '-' : progress),
+        _DateRow(label: 'Progreso', value: progress.isEmpty ? '-' : progress),
         _DateRow(
-          label: 'Rating',
+          label: 'Valoración',
           value: book.rating == null ? '-' : '${book.rating}/5',
         ),
         if (book.notes != null && book.notes!.isNotEmpty) ...[
@@ -226,11 +243,11 @@ class _DatesSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Dates', style: Theme.of(context).textTheme.titleMedium),
+        Text('Fechas', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        _DateRow(label: 'Added', value: _format(book.createdAt)),
-        _DateRow(label: 'Started', value: _format(book.startDate)),
-        _DateRow(label: 'Finished', value: _format(book.completedDate)),
+        _DateRow(label: 'Añadido', value: _format(book.createdAt)),
+        _DateRow(label: 'Empezado', value: _format(book.startDate)),
+        _DateRow(label: 'Terminado', value: _format(book.completedDate)),
       ],
     );
   }
@@ -297,16 +314,16 @@ class _DeleteDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Delete book'),
-      content: const Text('This action cannot be undone. Continue?'),
+      title: const Text('Eliminar libro'),
+      content: const Text('Esta acción no se puede deshacer.'),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
+          child: const Text('Cancelar'),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context, true),
-          child: const Text('Delete'),
+          child: const Text('Eliminar'),
         ),
       ],
     );

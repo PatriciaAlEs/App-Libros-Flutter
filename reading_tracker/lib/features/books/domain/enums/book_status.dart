@@ -11,4 +11,15 @@ enum BookStatus {
   }
 
   String toValue() => name;
+
+  String get label {
+    switch (this) {
+      case BookStatus.pending:
+        return 'Pendiente';
+      case BookStatus.reading:
+        return 'Leyendo';
+      case BookStatus.completed:
+        return 'Completado';
+    }
+  }
 }

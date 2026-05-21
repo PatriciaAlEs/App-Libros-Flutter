@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../books/domain/entities/book.dart';
 import '../../../books/presentation/providers/books_provider.dart';
+import '../../../stats/presentation/providers/stats_provider.dart';
+import '../../data/repositories/reading_session_repository_provider.dart';
 import '../../domain/entities/reading_session.dart';
 import '../providers/reading_sessions_provider.dart';
 
@@ -21,7 +23,7 @@ class DayDetailScreen extends ConsumerWidget {
         title: Text(_formatDate(day)),
         actions: [
           IconButton(
-            tooltip: 'Nueva sesion',
+            tooltip: 'Nueva sesión',
             icon: const Icon(Icons.add),
             onPressed: () => _openSessionForm(context, ref),
           ),
@@ -57,6 +59,11 @@ class DayDetailScreen extends ConsumerWidget {
                     session: session,
                     book: booksById[session.bookId],
                     onEdit: () => _openEditSessionForm(context, ref, session),
+                    onDelete: () => _confirmDeleteSession(
+                      context,
+                      ref,
+                      session,
+                    ),
                   ),
             ],
           );
@@ -72,7 +79,12 @@ class DayDetailScreen extends ConsumerWidget {
       arguments: day,
     );
     if (!context.mounted) return;
-    if (saved == true) ref.invalidate(readingSessionsForDayProvider(day));
+    if (saved == true) {
+      ref.invalidate(readingSessionsForDayProvider(day));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sesión guardada')),
+      );
+    }
   }
 
   Future<void> _openEditSessionForm(
@@ -86,7 +98,32 @@ class DayDetailScreen extends ConsumerWidget {
       arguments: session,
     );
     if (!context.mounted) return;
-    if (saved == true) ref.invalidate(readingSessionsForDayProvider(day));
+    if (saved == true) {
+      ref.invalidate(readingSessionsForDayProvider(day));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sesión actualizada')),
+      );
+    }
+  }
+
+  Future<void> _confirmDeleteSession(
+    BuildContext context,
+    WidgetRef ref,
+    ReadingSession session,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => const _DeleteSessionDialog(),
+    );
+    if (confirmed != true) return;
+
+    await ref.read(readingSessionRepositoryProvider).deleteSession(session.id);
+    ref.invalidate(statsProvider);
+    ref.invalidate(readingSessionsForDayProvider(day));
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sesión eliminada')),
+    );
   }
 
   String _formatDate(DateTime date) {
@@ -104,7 +141,7 @@ class _AddSessionButton extends StatelessWidget {
     return FilledButton.icon(
       onPressed: onPressed,
       icon: const Icon(Icons.add),
-      label: const Text('Anadir sesion'),
+      label: const Text('Añadir sesión'),
     );
   }
 }
@@ -118,8 +155,9 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 32),
       child: Center(
         child: Text(
-          'No hay sesiones este dia.',
+          'No hay sesiones este día. Añade una sesión para registrar actividad.',
           style: Theme.of(context).textTheme.bodyMedium,
+          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -140,7 +178,7 @@ class _TotalCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('$sessionCount sesiones'),
+            Text(sessionCount == 1 ? '1 sesión' : '$sessionCount sesiones'),
             Text(
               '$totalMinutes min',
               style: Theme.of(context).textTheme.titleLarge,
@@ -157,11 +195,13 @@ class _SessionTile extends StatelessWidget {
     required this.session,
     required this.book,
     required this.onEdit,
+    required this.onDelete,
   });
 
   final ReadingSession session;
   final Book? book;
   final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -182,9 +222,14 @@ class _SessionTile extends StatelessWidget {
           children: [
             Text('${session.minutes} min'),
             IconButton(
-              tooltip: 'Editar sesion',
+              tooltip: 'Editar sesión',
               icon: const Icon(Icons.edit_outlined),
               onPressed: onEdit,
+            ),
+            IconButton(
+              tooltip: 'Eliminar sesión',
+              icon: const Icon(Icons.delete_outline),
+              onPressed: onDelete,
             ),
           ],
         ),
@@ -198,6 +243,28 @@ class _SessionTile extends StatelessWidget {
                 );
               },
       ),
+    );
+  }
+}
+
+class _DeleteSessionDialog extends StatelessWidget {
+  const _DeleteSessionDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Eliminar sesión'),
+      content: const Text('Esta acción no se puede deshacer.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Eliminar'),
+        ),
+      ],
     );
   }
 }

@@ -20,14 +20,14 @@ class StatusFilterBar extends StatelessWidget {
       child: Row(
         children: [
           ChoiceChip(
-            label: const Text('All'),
+            label: const Text('Todos'),
             selected: selectedStatus == null,
             onSelected: (_) => onChanged(null),
           ),
           const SizedBox(width: 8),
           for (final status in BookStatus.values) ...[
             ChoiceChip(
-              label: Text(status.toValue()),
+              label: Text(status.label),
               selected: selectedStatus == status,
               onSelected: (_) => onChanged(status),
             ),

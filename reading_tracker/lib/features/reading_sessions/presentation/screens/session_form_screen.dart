@@ -84,7 +84,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Editar sesion' : 'Nueva sesion'),
+        title: Text(_isEditing ? 'Editar sesión' : 'Nueva sesión'),
         actions: [
           IconButton(
             tooltip: 'Guardar',
@@ -141,14 +141,14 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
                   controller: _minutesController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    labelText: 'Minutos leidos',
+                    labelText: 'Minutos leídos',
                     suffixText: 'min',
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     final minutes = int.tryParse(value?.trim() ?? '');
                     if (minutes == null || minutes <= 0) {
-                      return 'Indica minutos validos';
+                      return 'Indica minutos válidos';
                     }
                     return null;
                   },
@@ -167,7 +167,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
                 FilledButton(
                   onPressed: _isSaving ? null : _save,
                   child: Text(
-                    _isEditing ? 'Guardar cambios' : 'Guardar sesion',
+                    _isEditing ? 'Guardar cambios' : 'Guardar sesión',
                   ),
                 ),
               ],
@@ -227,7 +227,7 @@ class _NoReadingBooksMessage extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.all(24),
         child: Text(
-          'No hay libros en lectura. Marca un libro como reading antes de anadir una sesion.',
+          'No hay libros en lectura. Marca un libro como "leyendo" antes de añadir una sesión.',
           textAlign: TextAlign.center,
         ),
       ),
