@@ -90,6 +90,88 @@ void main() {
     expect(repository.addedBook!.startDate, isNotNull);
     expect(repository.addedBook!.completedDate, isNull);
   });
+
+  testWidgets('book form auto-searches after debounce with 3 characters', (
+    tester,
+  ) async {
+    var requestCount = 0;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookRepositoryProvider.overrideWithValue(_CapturingBookRepository()),
+          bookApiDatasourceProvider.overrideWithValue(
+            BookApiDatasource(
+              MockClient((request) async {
+                requestCount++;
+                return _searchResponse('Libro automático');
+              }),
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: BookFormScreen()),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), 'Li');
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(requestCount, 0);
+
+    await tester.enterText(find.byType(TextField), 'Lib');
+    await tester.pump(const Duration(milliseconds: 499));
+    expect(requestCount, 0);
+
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pumpAndSettle();
+
+    expect(requestCount, 1);
+    expect(find.text('Libro automático'), findsOneWidget);
+  });
+
+  testWidgets('book form keeps manual search button as fallback', (
+    tester,
+  ) async {
+    var requestCount = 0;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookRepositoryProvider.overrideWithValue(_CapturingBookRepository()),
+          bookApiDatasourceProvider.overrideWithValue(
+            BookApiDatasource(
+              MockClient((request) async {
+                requestCount++;
+                return _searchResponse('Libro manual');
+              }),
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: BookFormScreen()),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), 'Li');
+    await tester.tap(find.text('Buscar'));
+    await tester.pumpAndSettle();
+
+    expect(requestCount, 1);
+    expect(find.text('Libro manual'), findsOneWidget);
+  });
+}
+
+http.Response _searchResponse(String title) {
+  return http.Response(
+    jsonEncode({
+      'docs': [
+        {
+          'title': title,
+          'author_name': ['Autora'],
+          'first_publish_year': 2024,
+        },
+      ],
+    }),
+    200,
+  );
 }
 
 class _EmptyBookRepository implements BookRepository {

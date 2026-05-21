@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -17,9 +19,14 @@ class BookFormScreen extends ConsumerStatefulWidget {
 }
 
 class _BookFormScreenState extends ConsumerState<BookFormScreen> {
+  static const _autoSearchMinLength = 3;
+  static const _autoSearchDebounce = Duration(milliseconds: 500);
+
   final _searchController = TextEditingController();
   List<BookSearchResult> _results = const [];
   BookSearchResult? _selectedBook;
+  Timer? _searchDebounce;
+  String _activeSearchQuery = '';
   BookStatus _selectedStatus = BookStatus.pending;
   bool _isSearching = false;
   bool _isSaving = false;
@@ -28,14 +35,41 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
-  Future<void> _search() async {
-    FocusScope.of(context).unfocus();
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    final query = value.trim();
+
+    if (query.length < _autoSearchMinLength) {
+      _activeSearchQuery = '';
+      setState(() {
+        _isSearching = false;
+        _hasSearched = false;
+        _error = null;
+        _results = const [];
+        _selectedBook = null;
+      });
+      return;
+    }
+
+    _searchDebounce = Timer(_autoSearchDebounce, () {
+      _search(unfocus: false);
+    });
+  }
+
+  Future<void> _search({bool unfocus = true}) async {
+    _searchDebounce?.cancel();
+    if (unfocus) {
+      FocusScope.of(context).unfocus();
+    }
     final query = _searchController.text.trim();
     if (query.isEmpty) return;
+    final requestQuery = query;
+    _activeSearchQuery = requestQuery;
 
     setState(() {
       _isSearching = true;
@@ -46,20 +80,26 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
 
     try {
       final datasource = ref.read(bookApiDatasourceProvider);
-      final results = await datasource.searchBooks(query);
-      if (!mounted) return;
+      final results = await datasource.searchBooks(requestQuery);
+      if (!_isCurrentSearch(requestQuery)) return;
       setState(() => _results = results);
     } catch (error) {
-      if (!mounted) return;
+      if (!_isCurrentSearch(requestQuery)) return;
       setState(() {
         _error = 'No se pudo buscar el libro. Inténtalo de nuevo.';
         _results = const [];
       });
     } finally {
-      if (mounted) {
+      if (_isCurrentSearch(requestQuery)) {
         setState(() => _isSearching = false);
       }
     }
+  }
+
+  bool _isCurrentSearch(String query) {
+    return mounted &&
+        _activeSearchQuery == query &&
+        _searchController.text.trim() == query;
   }
 
   Future<void> _save() async {
@@ -100,6 +140,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
           _SearchField(
             controller: _searchController,
             isSearching: _isSearching,
+            onChanged: _onSearchChanged,
             onSubmitted: _search,
           ),
           const SizedBox(height: 16),
@@ -141,11 +182,13 @@ class _SearchField extends StatelessWidget {
   const _SearchField({
     required this.controller,
     required this.isSearching,
+    required this.onChanged,
     required this.onSubmitted,
   });
 
   final TextEditingController controller;
   final bool isSearching;
+  final ValueChanged<String> onChanged;
   final VoidCallback onSubmitted;
 
   @override
@@ -161,6 +204,7 @@ class _SearchField extends StatelessWidget {
               labelText: 'Título, autor o ISBN',
               border: OutlineInputBorder(),
             ),
+            onChanged: onChanged,
             onSubmitted: (_) => onSubmitted(),
           ),
         ),
