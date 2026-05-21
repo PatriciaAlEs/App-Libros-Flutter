@@ -9,6 +9,7 @@
 - Conexion IO con SQLite en archivo local.
 - Conexion web con IndexedDB usando Drift `WebDatabase`.
 - Busqueda de libros contra Open Library.
+- Alta de libros con selector de estado inicial y SnackBar contextual segun estado.
 - Listado, detalle, cambio de estado y eliminacion de libros.
 - Registro de sesiones de lectura.
 - Edicion de sesiones desde el detalle de dia.
@@ -18,13 +19,15 @@
 - Tests de Stats ampliados con casos borde principales.
 - Tests de edicion de sesiones anadidos.
 - Validacion de edicion de sesiones: `flutter test` paso con `00:03 +10: All tests passed!` y `flutter analyze` paso con `No issues found! (ran in 6.5s)`.
+- Quick Wins UX en libros/sesiones: idioma unificado a espanol, estados visuales con `BookStatus.label`, empty states mejorados, SnackBars tras acciones exitosas y tests actualizados.
+- Mejora UX de alta de libros y lectura: copy de Open Library, terminologia de usuario "tiempo/rato de lectura" en lugar de "sesion" y tests afectados actualizados.
 - Seed data de debug si la base esta vacia.
 - Tests existentes para calculos de Stats y pantalla inicial de libros.
 - Memory bank y reglas Cursor iniciales.
 
 ## Parcial
 
-- Textos de UI: hay mezcla de ingles/espanol y mojibake visible en algunas pantallas.
+- Textos de UI: libros y sesiones ya fueron alineados en espanol; pueden quedar textos legacy fuera de ese alcance.
 
 ## Pendiente
 

@@ -3,14 +3,13 @@
 ## Alta prioridad
 
 - Eliminar sesiones desde el detalle de dia.
-- Revisar textos y acentos para una experiencia consistente en espanol.
 
 ## Media prioridad
 
-- Verificar manualmente persistencia completa: libro en lectura -> sesion -> calendario -> refresh.
+- Verificar manualmente persistencia completa: libro en lectura -> tiempo de lectura -> calendario -> refresh.
 - Tests de repositorio/DAO para sesiones.
 - Mejorar responsive en pantallas muy estrechas.
-- Mejorar empty states con acciones contextuales.
+- Revisar textos legacy fuera de libros/sesiones si aparecen mojibake o mezcla de idioma.
 
 ## Baja prioridad
 
