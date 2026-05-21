@@ -1,3 +1,5 @@
+> ENTREGABLE ACADEMICO: Este documento se conserva como entrega del proyecto de requisitos MVP. El PRD vivo del proyecto esta en memory-bank/product-requirements.md.
+
 # Requisitos de Producto: reading_tracker
 
 ## 1. Nombre del producto

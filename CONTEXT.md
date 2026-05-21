@@ -1,3 +1,5 @@
+> LEGACY: Este archivo se conserva como historico. No usar como fuente principal para agentes IA. La fuente viva esta en memory-bank/.
+
 # Contexto del proyecto
 
 ## Resumen

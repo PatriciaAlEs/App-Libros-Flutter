@@ -1,3 +1,5 @@
+> LEGACY: Este archivo puede contener informacion de setup/dependencias desactualizada. Para dependencias reales usar pubspec.yaml. Para contexto del proyecto usar memory-bank/.
+
 # Requisitos de la Aplicación
 
 ## Requisitos del Sistema
