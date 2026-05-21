@@ -89,13 +89,21 @@ StatsData calculateStats(
   DateTime? today,
 }) {
   final referenceDate = today ?? DateTime.now();
-  final now = DateTime(referenceDate.year, referenceDate.month, referenceDate.day);
+  final now = DateTime(
+    referenceDate.year,
+    referenceDate.month,
+    referenceDate.day,
+  );
 
   final totalBooks = books.length;
   final pendingBooks = books.where((b) => b.status.name == 'pending').length;
   final readingBooks = books.where((b) => b.status.name == 'reading').length;
-  final completedBooks = books.where((b) => b.status.name == 'completed').length;
-  final completedRate = totalBooks > 0 ? (completedBooks / totalBooks * 100).toDouble() : 0.0;
+  final completedBooks = books
+      .where((b) => b.status.name == 'completed')
+      .length;
+  final completedRate = totalBooks > 0
+      ? (completedBooks / totalBooks * 100).toDouble()
+      : 0.0;
 
   final booksCompletedThisMonth = books.where((book) {
     final completedDate = book.completedDate;
@@ -109,12 +117,12 @@ StatsData calculateStats(
   }).length;
 
   final pagesRead = books.fold<int>(0, (sum, book) {
-    if (book.currentPage != null) {
-      return sum + book.currentPage!;
-    }
-
     if (book.status.name == 'completed' && book.totalPages != null) {
       return sum + book.totalPages!;
+    }
+
+    if (book.currentPage != null) {
+      return sum + book.currentPage!;
     }
 
     return sum;
@@ -130,32 +138,43 @@ StatsData calculateStats(
   final averageReadingProgress = readingBooksWithProgress.isEmpty
       ? 0.0
       : readingBooksWithProgress
-              .map((book) => book.currentPage! / book.totalPages!)
-              .reduce((a, b) => a + b) /
-          readingBooksWithProgress.length *
-          100;
+                .map((book) => book.currentPage! / book.totalPages!)
+                .reduce((a, b) => a + b) /
+            readingBooksWithProgress.length *
+            100;
 
   final sessionMinutesByDay = <DateTime, int>{};
   for (final session in sessions) {
-    final sessionDay = DateTime(session.date.year, session.date.month, session.date.day);
-    sessionMinutesByDay[sessionDay] = (sessionMinutesByDay[sessionDay] ?? 0) + session.minutes;
+    final sessionDay = DateTime(
+      session.date.year,
+      session.date.month,
+      session.date.day,
+    );
+    sessionMinutesByDay[sessionDay] =
+        (sessionMinutesByDay[sessionDay] ?? 0) + session.minutes;
   }
 
-  final totalMinutesRead = sessions.fold<int>(0, (sum, item) => sum + item.minutes);
-  final daysWithActivity = sessionMinutesByDay.length;
-  final averageDailyMinutes = daysWithActivity > 0 ? totalMinutesRead / daysWithActivity : 0.0;
-
-  final bestDayEntry = sessionMinutesByDay.entries.fold<MapEntry<DateTime, int>?>(
-    null,
-    (best, entry) {
-      if (best == null) return entry;
-      return entry.value > best.value ? entry : best;
-    },
+  final totalMinutesRead = sessions.fold<int>(
+    0,
+    (sum, item) => sum + item.minutes,
   );
+  final daysWithActivity = sessionMinutesByDay.length;
+  final averageDailyMinutes = daysWithActivity > 0
+      ? totalMinutesRead / daysWithActivity
+      : 0.0;
+
+  final bestDayEntry = sessionMinutesByDay.entries
+      .fold<MapEntry<DateTime, int>?>(null, (best, entry) {
+        if (best == null) return entry;
+        return entry.value > best.value ? entry : best;
+      });
 
   final bestDay = bestDayEntry?.key;
   final bestDayMinutes = bestDayEntry?.value ?? 0;
-  final currentStreakDays = _calculateCurrentStreak(sessionMinutesByDay.keys.toSet(), now);
+  final currentStreakDays = _calculateCurrentStreak(
+    sessionMinutesByDay.keys.toSet(),
+    now,
+  );
 
   final topRatedBooks = books.where((book) => book.rating != null).toList();
   topRatedBooks.sort((a, b) => a.rating!.compareTo(b.rating!));
@@ -200,10 +219,14 @@ StatsData calculateStats(
 int _calculateCurrentStreak(Set<DateTime> activeDays, DateTime today) {
   if (activeDays.isEmpty) return 0;
 
-  final days = activeDays.map((day) => DateTime(day.year, day.month, day.day)).toSet();
-  final lastDay = days.reduce((value, element) => value.isAfter(element) ? value : element);
+  final days = activeDays
+      .map((day) => DateTime(day.year, day.month, day.day))
+      .toSet();
+  final currentDay = DateTime(today.year, today.month, today.day);
+  if (!days.contains(currentDay)) return 0;
+
   var streak = 0;
-  var cursor = lastDay;
+  var cursor = currentDay;
 
   while (days.contains(cursor)) {
     streak += 1;
@@ -218,32 +241,25 @@ List<StatAuthorSummary> _calculateTopAuthors(
   List<ReadingSession> sessions,
 ) {
   final authorMinutes = <String, int>{};
-  final authorBookCount = <String, int>{};
+  final authorBookIds = <String, Set<String>>{};
   final booksById = {for (final book in books) book.id: book};
 
-  if (sessions.isNotEmpty) {
-    for (final session in sessions) {
-      final book = booksById[session.bookId];
-      final author = book?.author?.trim();
-      if (author == null || author.isEmpty) continue;
-      authorMinutes[author] = (authorMinutes[author] ?? 0) + session.minutes;
-      authorBookCount[author] = (authorBookCount[author] ?? 0) + 1;
-    }
-  } else {
-    for (final book in books) {
-      final author = book.author?.trim();
-      if (author == null || author.isEmpty) continue;
-      authorMinutes[author] = (authorMinutes[author] ?? 0) + (book.totalPages ?? 0);
-      authorBookCount[author] = (authorBookCount[author] ?? 0) + 1;
-    }
+  for (final session in sessions) {
+    final book = booksById[session.bookId];
+    final author = book?.author?.trim();
+    if (author == null || author.isEmpty) continue;
+    authorMinutes[author] = (authorMinutes[author] ?? 0) + session.minutes;
+    authorBookIds.putIfAbsent(author, () => <String>{}).add(session.bookId);
   }
 
   return authorMinutes.entries
-      .map((entry) => StatAuthorSummary(
-            author: entry.key,
-            minutes: entry.value,
-            bookCount: authorBookCount[entry.key] ?? 0,
-          ))
+      .map(
+        (entry) => StatAuthorSummary(
+          author: entry.key,
+          minutes: entry.value,
+          bookCount: authorBookIds[entry.key]?.length ?? 0,
+        ),
+      )
       .toList()
     ..sort((a, b) => b.minutes.compareTo(a.minutes));
 }
@@ -256,18 +272,16 @@ List<StatBookTime> _calculateTopBooksByTime(
   final booksById = {for (final book in books) book.id: book};
 
   for (final session in sessions) {
-    minutesByBook[session.bookId] = (minutesByBook[session.bookId] ?? 0) + session.minutes;
+    minutesByBook[session.bookId] =
+        (minutesByBook[session.bookId] ?? 0) + session.minutes;
   }
 
-  return minutesByBook.entries
-      .map((entry) {
-        final book = booksById[entry.key];
-        return StatBookTime(
-          title: book?.title ?? 'Unknown',
-          author: book?.author,
-          minutes: entry.value,
-        );
-      })
-      .toList()
-    ..sort((a, b) => b.minutes.compareTo(a.minutes));
+  return minutesByBook.entries.map((entry) {
+    final book = booksById[entry.key];
+    return StatBookTime(
+      title: book?.title ?? 'Unknown',
+      author: book?.author,
+      minutes: entry.value,
+    );
+  }).toList()..sort((a, b) => b.minutes.compareTo(a.minutes));
 }

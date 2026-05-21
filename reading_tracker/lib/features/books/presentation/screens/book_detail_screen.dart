@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/book.dart';
 import '../../domain/enums/book_status.dart';
+import '../../../stats/presentation/providers/stats_provider.dart';
 import '../providers/books_provider.dart';
 
 class BookDetailScreen extends ConsumerWidget {
@@ -54,6 +55,7 @@ class _BookDetailView extends ConsumerWidget {
     );
 
     await ref.read(booksProvider.notifier).updateBook(updated);
+    ref.invalidate(statsProvider);
   }
 
   Future<void> _onDelete(WidgetRef ref, BuildContext context) async {
@@ -64,6 +66,7 @@ class _BookDetailView extends ConsumerWidget {
 
     if (confirm == true) {
       await ref.read(booksProvider.notifier).deleteBook(book.id);
+      ref.invalidate(statsProvider);
       if (context.mounted) Navigator.pop(context);
     }
   }

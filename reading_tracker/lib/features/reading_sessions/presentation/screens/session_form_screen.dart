@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
+import '../../../stats/presentation/providers/stats_provider.dart';
 import '../../data/repositories/reading_session_repository_provider.dart';
 import '../../domain/entities/reading_session.dart';
 
@@ -58,6 +59,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
       );
 
       await repository.addSession(session);
+      ref.invalidate(statsProvider);
       if (mounted) Navigator.pop(context, true);
     } finally {
       if (mounted) setState(() => _isSaving = false);
