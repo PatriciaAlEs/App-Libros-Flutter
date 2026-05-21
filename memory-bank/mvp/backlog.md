@@ -2,7 +2,7 @@
 
 ## Alta prioridad
 
-- Editar y eliminar sesiones desde el detalle de dia.
+- Eliminar sesiones desde el detalle de dia.
 - Revisar textos y acentos para una experiencia consistente en espanol.
 
 ## Media prioridad
