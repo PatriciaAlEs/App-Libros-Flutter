@@ -63,9 +63,9 @@ class _BookDetailView extends ConsumerWidget {
     await ref.read(booksProvider.notifier).updateBook(updated);
     ref.invalidate(statsProvider);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Estado actualizado')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Estado actualizado')));
   }
 
   Future<void> _onDelete(WidgetRef ref, BuildContext context) async {
@@ -100,11 +100,7 @@ class _BookDetailView extends ConsumerWidget {
           const SizedBox(height: 24),
           _StatusSection(
             book: book,
-            onStatusChanged: (status) => _onStatusChanged(
-              context,
-              status,
-              ref,
-            ),
+            onStatusChanged: (status) => _onStatusChanged(context, status, ref),
           ),
           const SizedBox(height: 24),
           _ReaderDataSection(book: book),
@@ -177,10 +173,8 @@ class _StatusSection extends StatelessWidget {
           decoration: const InputDecoration(border: OutlineInputBorder()),
           items: BookStatus.values
               .map(
-                (status) => DropdownMenuItem(
-                  value: status,
-                  child: Text(status.label),
-                ),
+                (status) =>
+                    DropdownMenuItem(value: status, child: Text(status.label)),
               )
               .toList(),
           onChanged: (value) {

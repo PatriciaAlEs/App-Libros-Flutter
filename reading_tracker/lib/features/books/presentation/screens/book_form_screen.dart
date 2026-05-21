@@ -20,6 +20,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   final _searchController = TextEditingController();
   List<BookSearchResult> _results = const [];
   BookSearchResult? _selectedBook;
+  BookStatus _selectedStatus = BookStatus.pending;
   bool _isSearching = false;
   bool _isSaving = false;
   bool _hasSearched = false;
@@ -75,16 +76,18 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
       coverUrl: selectedBook.coverUrl,
       isbn: selectedBook.isbn,
       firstPublishYear: selectedBook.firstPublishYear,
-      status: BookStatus.pending,
-      startDate: null,
-      completedDate: null,
+      status: _selectedStatus,
+      startDate: _selectedStatus == BookStatus.reading ? DateTime.now() : null,
+      completedDate: _selectedStatus == BookStatus.completed
+          ? DateTime.now()
+          : null,
       createdAt: DateTime.now(),
     );
 
     await ref.read(booksProvider.notifier).addBook(book);
     ref.invalidate(statsProvider);
 
-    if (mounted) Navigator.pop(context, true);
+    if (mounted) Navigator.pop(context, _selectedStatus);
   }
 
   @override
@@ -111,6 +114,11 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
             _SelectedBookCard(book: _selectedBook!),
             const SizedBox(height: 16),
           ],
+          _InitialStatusSelector(
+            selectedStatus: _selectedStatus,
+            onChanged: (status) => setState(() => _selectedStatus = status),
+          ),
+          const SizedBox(height: 16),
           _ResultsList(
             results: _results,
             hasSearched: _hasSearched,
@@ -200,19 +208,32 @@ class _ResultsList extends StatelessWidget {
     }
 
     return Column(
-      children: results.map((book) {
-        final selected = identical(book, selectedBook);
-        return Card(
-          child: ListTile(
-            leading: _Cover(url: book.coverUrl),
-            title: Text(book.title),
-            subtitle: Text(_subtitleFor(book)),
-            trailing: selected ? const Icon(Icons.check_circle) : null,
-            selected: selected,
-            onTap: () => onSelected(book),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Resultados de Open Library',
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Algunos resultados pueden aparecer en otros idiomas.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        for (final book in results)
+          Card(
+            child: ListTile(
+              leading: _Cover(url: book.coverUrl),
+              title: Text(book.title),
+              subtitle: Text(_subtitleFor(book)),
+              trailing: identical(book, selectedBook)
+                  ? const Icon(Icons.check_circle)
+                  : null,
+              selected: identical(book, selectedBook),
+              onTap: () => onSelected(book),
+            ),
           ),
-        );
-      }).toList(),
+      ],
     );
   }
 
@@ -222,6 +243,34 @@ class _ResultsList extends StatelessWidget {
       if (book.publisher != null) book.publisher,
       if (book.firstPublishYear != null) '${book.firstPublishYear}',
     ].whereType<String>().join(' - ');
+  }
+}
+
+class _InitialStatusSelector extends StatelessWidget {
+  const _InitialStatusSelector({
+    required this.selectedStatus,
+    required this.onChanged,
+  });
+
+  final BookStatus selectedStatus;
+  final ValueChanged<BookStatus> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<BookStatus>(
+      initialValue: selectedStatus,
+      decoration: const InputDecoration(
+        labelText: 'Estado inicial',
+        border: OutlineInputBorder(),
+      ),
+      items: [
+        for (final status in BookStatus.values)
+          DropdownMenuItem(value: status, child: Text(status.label)),
+      ],
+      onChanged: (status) {
+        if (status != null) onChanged(status);
+      },
+    );
   }
 }
 

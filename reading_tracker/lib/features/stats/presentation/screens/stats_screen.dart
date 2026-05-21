@@ -55,7 +55,8 @@ class StatsScreen extends ConsumerWidget {
                       icon: Icons.check_circle_outline,
                       title: 'Completados',
                       value: '${stats.completedBooks}',
-                      subtitle: '${stats.completedRate.toStringAsFixed(0)}% completado',
+                      subtitle:
+                          '${stats.completedRate.toStringAsFixed(0)}% completado',
                     ),
                   ],
                 ),
@@ -74,7 +75,8 @@ class StatsScreen extends ConsumerWidget {
                     StatCard(
                       icon: Icons.percent,
                       title: 'Progreso medio',
-                      value: '${stats.averageReadingProgress.toStringAsFixed(0)}%',
+                      value:
+                          '${stats.averageReadingProgress.toStringAsFixed(0)}%',
                     ),
                     StatCard(
                       icon: Icons.calendar_month,
@@ -145,7 +147,8 @@ class StatsScreen extends ConsumerWidget {
                 _rankingCard(
                   title: 'Mejor valorados',
                   items: stats.topRatedBooks,
-                  itemBuilder: (book) => '${book.title} ${book.rating.toStringAsFixed(1)}',
+                  itemBuilder: (book) =>
+                      '${book.title} ${book.rating.toStringAsFixed(1)}',
                   emptyMessage: 'No hay libros valorados aún.',
                 ),
                 const SizedBox(height: 12),
@@ -160,8 +163,7 @@ class StatsScreen extends ConsumerWidget {
                 _rankingCard(
                   title: 'Más tiempo dedicado',
                   items: stats.topBooksByTime,
-                  itemBuilder: (book) =>
-                      '${book.title} · ${book.minutes} min',
+                  itemBuilder: (book) => '${book.title} · ${book.minutes} min',
                   emptyMessage: stats.hasSessionData
                       ? 'No hay suficiente información para este ranking.'
                       : 'Añade sesiones de lectura para ver el ranking.',
@@ -177,9 +179,9 @@ class StatsScreen extends ConsumerWidget {
   Widget _sectionTitle(BuildContext context, String title) {
     return Text(
       title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
     );
   }
 
@@ -197,10 +199,7 @@ class StatsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             if (items.isEmpty)
               Text(emptyMessage)
@@ -208,16 +207,18 @@ class StatsScreen extends ConsumerWidget {
               Column(
                 children: items
                     .take(5)
-                    .map((item) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('• ', style: TextStyle(fontSize: 16)),
-                              Expanded(child: Text(itemBuilder(item))),
-                            ],
-                          ),
-                        ))
+                    .map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('• ', style: TextStyle(fontSize: 16)),
+                            Expanded(child: Text(itemBuilder(item))),
+                          ],
+                        ),
+                      ),
+                    )
                     .toList(),
               ),
           ],

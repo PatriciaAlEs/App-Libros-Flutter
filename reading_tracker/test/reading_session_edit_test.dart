@@ -35,16 +35,14 @@ void main() {
           ),
           readingSessionRepositoryProvider.overrideWithValue(sessionRepository),
         ],
-        child: MaterialApp(
-          home: _OpenFormHost(session: session),
-        ),
+        child: MaterialApp(home: _OpenFormHost(session: session)),
       ),
     );
 
     await tester.tap(find.text('Open form'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Editar sesión'), findsOneWidget);
+    expect(find.text('Editar rato de lectura'), findsOneWidget);
     expect(find.text('Current Book'), findsOneWidget);
     expect(find.text('Original note'), findsOneWidget);
 
@@ -105,7 +103,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byTooltip('Editar sesión'));
+    await tester.tap(find.byTooltip('Editar rato de lectura'));
     await tester.pumpAndSettle();
 
     expect(editArguments, same(session));

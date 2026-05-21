@@ -87,11 +87,11 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final saved = await Navigator.pushNamed(context, '/book/add');
+          final status = await Navigator.pushNamed(context, '/book/add');
           if (!context.mounted) return;
-          if (saved == true) {
+          if (status is BookStatus) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Libro añadido')),
+              SnackBar(content: Text('Libro añadido como ${status.label}')),
             );
           }
         },

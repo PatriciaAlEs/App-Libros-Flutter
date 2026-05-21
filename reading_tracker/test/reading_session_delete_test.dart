@@ -18,7 +18,7 @@ void main() {
 
     await _pumpDayDetail(tester, repository);
 
-    await tester.tap(find.byTooltip('Eliminar sesión'));
+    await tester.tap(find.byTooltip('Eliminar rato de lectura'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Cancelar'));
     await tester.pumpAndSettle();
@@ -34,7 +34,7 @@ void main() {
 
     await _pumpDayDetail(tester, repository);
 
-    await tester.tap(find.byTooltip('Eliminar sesión'));
+    await tester.tap(find.byTooltip('Eliminar rato de lectura'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Eliminar'));
     await tester.pumpAndSettle();

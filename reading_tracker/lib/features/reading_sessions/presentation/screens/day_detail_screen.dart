@@ -23,7 +23,7 @@ class DayDetailScreen extends ConsumerWidget {
         title: Text(_formatDate(day)),
         actions: [
           IconButton(
-            tooltip: 'Nueva sesión',
+            tooltip: 'Añadir tiempo de lectura',
             icon: const Icon(Icons.add),
             onPressed: () => _openSessionForm(context, ref),
           ),
@@ -59,11 +59,8 @@ class DayDetailScreen extends ConsumerWidget {
                     session: session,
                     book: booksById[session.bookId],
                     onEdit: () => _openEditSessionForm(context, ref, session),
-                    onDelete: () => _confirmDeleteSession(
-                      context,
-                      ref,
-                      session,
-                    ),
+                    onDelete: () =>
+                        _confirmDeleteSession(context, ref, session),
                   ),
             ],
           );
@@ -82,7 +79,7 @@ class DayDetailScreen extends ConsumerWidget {
     if (saved == true) {
       ref.invalidate(readingSessionsForDayProvider(day));
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sesión guardada')),
+        const SnackBar(content: Text('Tiempo de lectura guardado')),
       );
     }
   }
@@ -101,7 +98,7 @@ class DayDetailScreen extends ConsumerWidget {
     if (saved == true) {
       ref.invalidate(readingSessionsForDayProvider(day));
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sesión actualizada')),
+        const SnackBar(content: Text('Tiempo de lectura actualizado')),
       );
     }
   }
@@ -122,7 +119,7 @@ class DayDetailScreen extends ConsumerWidget {
     ref.invalidate(readingSessionsForDayProvider(day));
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Sesión eliminada')),
+      const SnackBar(content: Text('Tiempo de lectura eliminado')),
     );
   }
 
@@ -141,7 +138,7 @@ class _AddSessionButton extends StatelessWidget {
     return FilledButton.icon(
       onPressed: onPressed,
       icon: const Icon(Icons.add),
-      label: const Text('Añadir sesión'),
+      label: const Text('Añadir tiempo de lectura'),
     );
   }
 }
@@ -155,7 +152,7 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 32),
       child: Center(
         child: Text(
-          'No hay sesiones este día. Añade una sesión para registrar actividad.',
+          'No hay ratos de lectura este día. Añade tiempo de lectura para registrar actividad.',
           style: Theme.of(context).textTheme.bodyMedium,
           textAlign: TextAlign.center,
         ),
@@ -178,7 +175,11 @@ class _TotalCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(sessionCount == 1 ? '1 sesión' : '$sessionCount sesiones'),
+            Text(
+              sessionCount == 1
+                  ? '1 rato de lectura'
+                  : '$sessionCount ratos de lectura',
+            ),
             Text(
               '$totalMinutes min',
               style: Theme.of(context).textTheme.titleLarge,
@@ -222,12 +223,12 @@ class _SessionTile extends StatelessWidget {
           children: [
             Text('${session.minutes} min'),
             IconButton(
-              tooltip: 'Editar sesión',
+              tooltip: 'Editar rato de lectura',
               icon: const Icon(Icons.edit_outlined),
               onPressed: onEdit,
             ),
             IconButton(
-              tooltip: 'Eliminar sesión',
+              tooltip: 'Eliminar rato de lectura',
               icon: const Icon(Icons.delete_outline),
               onPressed: onDelete,
             ),
@@ -253,7 +254,7 @@ class _DeleteSessionDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Eliminar sesión'),
+      title: const Text('Eliminar rato de lectura'),
       content: const Text('Esta acción no se puede deshacer.'),
       actions: [
         TextButton(

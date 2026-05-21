@@ -29,26 +29,19 @@ class StatCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (icon != null)
-              Icon(icon, color: color, size: 24),
+            if (icon != null) Icon(icon, color: color, size: 24),
             if (icon != null) const SizedBox(height: 12),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
+            Text(title, style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 8),
             Text(
               value,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             if (subtitle != null) ...[
               const SizedBox(height: 8),
-              Text(
-                subtitle!,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text(subtitle!, style: Theme.of(context).textTheme.bodySmall),
             ],
           ],
         ),
