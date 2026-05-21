@@ -7,6 +7,7 @@ import 'features/books/presentation/screens/books_list_screen.dart';
 import 'features/reading_sessions/presentation/screens/calendar_screen.dart';
 import 'features/reading_sessions/presentation/screens/day_detail_screen.dart';
 import 'features/reading_sessions/presentation/screens/session_form_screen.dart';
+import 'features/reading_sessions/domain/entities/reading_session.dart';
 import 'features/stats/presentation/screens/stats_screen.dart';
 
 class App extends StatelessWidget {
@@ -50,6 +51,13 @@ class App extends StatelessWidget {
         final initialDate = settings.arguments as DateTime?;
         return MaterialPageRoute(
           builder: (_) => SessionFormScreen(initialDate: initialDate),
+        );
+
+      case '/session/edit':
+        final session = settings.arguments as ReadingSession?;
+        if (session == null) return _notFoundRoute();
+        return MaterialPageRoute(
+          builder: (_) => SessionFormScreen(session: session),
         );
 
       case '/stats':

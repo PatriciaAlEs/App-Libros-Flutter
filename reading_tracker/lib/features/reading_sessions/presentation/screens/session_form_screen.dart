@@ -10,9 +10,10 @@ import '../../data/repositories/reading_session_repository_provider.dart';
 import '../../domain/entities/reading_session.dart';
 
 class SessionFormScreen extends ConsumerStatefulWidget {
-  const SessionFormScreen({super.key, this.initialDate});
+  const SessionFormScreen({super.key, this.initialDate, this.session});
 
   final DateTime? initialDate;
+  final ReadingSession? session;
 
   @override
   ConsumerState<SessionFormScreen> createState() => _SessionFormScreenState();
@@ -25,13 +26,19 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
   String? _bookId;
   late DateTime _date;
   bool _isSaving = false;
+  bool get _isEditing => widget.session != null;
 
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
-    final initial = widget.initialDate ?? now;
+    final initial = widget.session?.date ?? widget.initialDate ?? now;
     _date = DateTime(initial.year, initial.month, initial.day);
+    if (widget.session case final session?) {
+      _bookId = session.bookId;
+      _minutesController.text = session.minutes.toString();
+      _noteController.text = session.note ?? '';
+    }
   }
 
   @override
@@ -47,18 +54,23 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
     setState(() => _isSaving = true);
     try {
       final repository = ref.read(readingSessionRepositoryProvider);
+      final existingSession = widget.session;
       final session = ReadingSession(
-        id: const Uuid().v4(),
+        id: existingSession?.id ?? const Uuid().v4(),
         bookId: _bookId!,
         date: _date,
         minutes: int.parse(_minutesController.text.trim()),
         note: _noteController.text.trim().isEmpty
             ? null
             : _noteController.text.trim(),
-        createdAt: DateTime.now(),
+        createdAt: existingSession?.createdAt ?? DateTime.now(),
       );
 
-      await repository.addSession(session);
+      if (_isEditing) {
+        await repository.updateSession(session);
+      } else {
+        await repository.addSession(session);
+      }
       ref.invalidate(statsProvider);
       if (mounted) Navigator.pop(context, true);
     } finally {
@@ -72,7 +84,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nueva sesion'),
+        title: Text(_isEditing ? 'Editar sesion' : 'Nueva sesion'),
         actions: [
           IconButton(
             tooltip: 'Guardar',
@@ -85,17 +97,15 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error: $error')),
         data: (books) {
-          final readingBooks = books
-              .where((book) => book.status == BookStatus.reading)
-              .toList();
+          final selectableBooks = _selectableBooks(books);
 
-          if (readingBooks.isEmpty) {
+          if (selectableBooks.isEmpty) {
             return const _NoReadingBooksMessage();
           }
 
           if (_bookId == null ||
-              !readingBooks.any((book) => book.id == _bookId)) {
-            _bookId = readingBooks.first.id;
+              !selectableBooks.any((book) => book.id == _bookId)) {
+            _bookId = selectableBooks.first.id;
           }
 
           return Form(
@@ -110,7 +120,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
                     border: OutlineInputBorder(),
                   ),
                   items: [
-                    for (final book in readingBooks)
+                    for (final book in selectableBooks)
                       DropdownMenuItem(
                         value: book.id,
                         child: Text(_bookLabel(book)),
@@ -156,7 +166,9 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: _isSaving ? null : _save,
-                  child: const Text('Guardar sesion'),
+                  child: Text(
+                    _isEditing ? 'Guardar cambios' : 'Guardar sesion',
+                  ),
                 ),
               ],
             ),
@@ -182,6 +194,27 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
   String _bookLabel(Book book) {
     if (book.author == null || book.author!.isEmpty) return book.title;
     return '${book.title} - ${book.author}';
+  }
+
+  List<Book> _selectableBooks(List<Book> books) {
+    final readingBooks = books
+        .where((book) => book.status == BookStatus.reading)
+        .toList();
+    Book? currentBook;
+    for (final book in books) {
+      if (book.id == _bookId) {
+        currentBook = book;
+        break;
+      }
+    }
+    if (currentBook == null) {
+      return readingBooks;
+    }
+    final selectedBook = currentBook;
+    if (readingBooks.any((book) => book.id == selectedBook.id)) {
+      return readingBooks;
+    }
+    return [selectedBook, ...readingBooks];
   }
 }
 

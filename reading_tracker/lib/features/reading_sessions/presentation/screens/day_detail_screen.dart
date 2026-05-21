@@ -56,6 +56,7 @@ class DayDetailScreen extends ConsumerWidget {
                   _SessionTile(
                     session: session,
                     book: booksById[session.bookId],
+                    onEdit: () => _openEditSessionForm(context, ref, session),
                   ),
             ],
           );
@@ -69,6 +70,20 @@ class DayDetailScreen extends ConsumerWidget {
       context,
       '/session/add',
       arguments: day,
+    );
+    if (!context.mounted) return;
+    if (saved == true) ref.invalidate(readingSessionsForDayProvider(day));
+  }
+
+  Future<void> _openEditSessionForm(
+    BuildContext context,
+    WidgetRef ref,
+    ReadingSession session,
+  ) async {
+    final saved = await Navigator.pushNamed(
+      context,
+      '/session/edit',
+      arguments: session,
     );
     if (!context.mounted) return;
     if (saved == true) ref.invalidate(readingSessionsForDayProvider(day));
@@ -138,10 +153,15 @@ class _TotalCard extends StatelessWidget {
 }
 
 class _SessionTile extends StatelessWidget {
-  const _SessionTile({required this.session, required this.book});
+  const _SessionTile({
+    required this.session,
+    required this.book,
+    required this.onEdit,
+  });
 
   final ReadingSession session;
   final Book? book;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +177,17 @@ class _SessionTile extends StatelessWidget {
               Text(session.note!),
           ],
         ),
-        trailing: Text('${session.minutes} min'),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('${session.minutes} min'),
+            IconButton(
+              tooltip: 'Editar sesion',
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: onEdit,
+            ),
+          ],
+        ),
         onTap: book == null
             ? null
             : () {

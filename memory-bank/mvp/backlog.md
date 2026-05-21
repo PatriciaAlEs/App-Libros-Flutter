@@ -3,14 +3,12 @@
 ## Alta prioridad
 
 - Editar y eliminar sesiones desde el detalle de dia.
-- Cerrar `stats` con datos reales, copy final y comportamiento validado.
 - Revisar textos y acentos para una experiencia consistente en espanol.
 
 ## Media prioridad
 
 - Verificar manualmente persistencia completa: libro en lectura -> sesion -> calendario -> refresh.
 - Tests de repositorio/DAO para sesiones.
-- Tests de calculos de stats con casos reales.
 - Mejorar responsive en pantallas muy estrechas.
 - Mejorar empty states con acciones contextuales.
 

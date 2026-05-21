@@ -2,15 +2,15 @@
 
 ## Foco actual
 
-Profesionalizar la memoria del proyecto para uso con agentes IA, documentando solo el estado real encontrado en el repositorio.
+Cerrar el MVP alrededor de sesiones y documentacion, con Stats ya considerada funcionalmente cerrada para MVP.
 
 ## Riesgos actuales
 
 - Duplicar informacion entre documentos antiguos (`CONTEXT.md`, `memory-bank/mvp/*`) y la memoria nueva.
-- Describir como terminadas features que estan parciales, especialmente `stats`.
 - Arrastrar suposiciones sobre backend, login, Firebase, Stripe o usuarios que no existen en el codigo.
 - Mantener textos con mojibake en UI/documentacion sin distinguir entre problema documentado y feature nueva.
+- Olvidar invalidar Stats si se implementan editar/eliminar sesiones en el futuro.
 
 ## Siguiente paso recomendado
 
-Decidir si `memory-bank/projectbrief.md` y `memory-bank/product-requirements.md` sustituyen como fuente principal a `CONTEXT.md` y al PRD anterior en `memory-bank/mvp/product-requirements.md`.
+Priorizar editar/eliminar sesiones desde el detalle de dia o validar persistencia completa del flujo libro en lectura -> sesion -> calendario -> refresh.

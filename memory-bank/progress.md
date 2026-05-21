@@ -12,13 +12,15 @@
 - Listado, detalle, cambio de estado y eliminacion de libros.
 - Registro de sesiones de lectura.
 - Calendario mensual, calendario semanal y detalle de dia.
+- Stats funcionalmente cerrada para MVP.
+- Correcciones MVP de Stats: racha actual, paginas leidas, ranking de autores e invalidacion tras mutaciones.
+- Tests de Stats ampliados con casos borde principales.
 - Seed data de debug si la base esta vacia.
 - Tests existentes para calculos de Stats y pantalla inicial de libros.
 - Memory bank y reglas Cursor iniciales.
 
 ## Parcial
 
-- `stats`: hay calculadora, provider, pantalla, widgets y test de calculo; falta cerrar UX/textos y validar que la seccion cumple el MVP.
 - Textos de UI: hay mezcla de ingles/espanol y mojibake visible en algunas pantallas.
 
 ## Pendiente
