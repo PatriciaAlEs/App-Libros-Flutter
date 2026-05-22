@@ -72,7 +72,7 @@ void main() {
       ),
     );
 
-    await tester.enterText(find.byType(TextField), 'Libro');
+    await tester.enterText(_searchField(), 'Libro');
     await tester.tap(find.text('Buscar'));
     await tester.pumpAndSettle();
 
@@ -113,11 +113,11 @@ void main() {
       ),
     );
 
-    await tester.enterText(find.byType(TextField), 'Li');
+    await tester.enterText(_searchField(), 'Li');
     await tester.pump(const Duration(milliseconds: 600));
     expect(requestCount, 0);
 
-    await tester.enterText(find.byType(TextField), 'Lib');
+    await tester.enterText(_searchField(), 'Lib');
     await tester.pump(const Duration(milliseconds: 499));
     expect(requestCount, 0);
 
@@ -150,7 +150,7 @@ void main() {
       ),
     );
 
-    await tester.enterText(find.byType(TextField), 'Li');
+    await tester.enterText(_searchField(), 'Li');
     await tester.tap(find.text('Buscar'));
     await tester.pumpAndSettle();
 
@@ -158,6 +158,8 @@ void main() {
     expect(find.text('Libro manual'), findsOneWidget);
   });
 }
+
+Finder _searchField() => find.byType(TextField).first;
 
 http.Response _searchResponse(String title) {
   return http.Response(

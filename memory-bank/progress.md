@@ -2,37 +2,65 @@
 
 ## Completado
 
-- App Flutter ubicada en `reading_tracker/`.
-- Rutas principales definidas en `lib/app.dart`.
-- Arquitectura por features: `books`, `reading_sessions`, `stats`.
-- Persistencia local con Drift para `books` y `reading_sessions`.
-- Conexion IO con SQLite en archivo local.
-- Conexion web con IndexedDB usando Drift `WebDatabase`.
-- Busqueda de libros contra Open Library con busqueda automatica por debounce de 500 ms, minimo 3 caracteres, fallback manual con boton Buscar y proteccion contra resultados obsoletos.
-- Alta de libros con selector de estado inicial y SnackBar contextual segun estado.
-- Listado, detalle, cambio de estado y eliminacion de libros.
+- Base Flutter creada para `reading_tracker`.
+- Arquitectura por features con dominio, data y presentation.
+- Riverpod configurado para estado e inyeccion.
+- Persistencia Drift + SQLite.
+- Modelos principales de libros y sesiones.
+- Pantalla de libros / Biblioteca.
+- Detalle de libro.
+- Formulario de alta/edicion de libro.
 - Registro de sesiones de lectura.
-- Edicion de sesiones desde el detalle de dia.
-- Calendario mensual, calendario semanal y detalle de dia.
-- Stats funcionalmente cerrada para MVP.
-- Correcciones MVP de Stats: racha actual, paginas leidas, ranking de autores e invalidacion tras mutaciones.
-- Tests de Stats ampliados con casos borde principales.
-- Tests de edicion de sesiones anadidos.
-- Validacion de edicion de sesiones: `flutter test` paso con `00:03 +10: All tests passed!` y `flutter analyze` paso con `No issues found! (ran in 6.5s)`.
-- Quick Wins UX en libros/sesiones: idioma unificado a espanol, estados visuales con `BookStatus.label`, empty states mejorados, SnackBars tras acciones exitosas y tests actualizados.
-- Mejora UX de alta de libros y lectura: copy de Open Library, terminologia de usuario "tiempo/rato de lectura" en lugar de "sesion" y tests afectados actualizados.
-- Tests de busqueda de libros actualizados para cubrir debounce, minimo de caracteres y fallback manual.
-- Seed data de debug si la base esta vacia.
-- Tests existentes para calculos de Stats y pantalla inicial de libros.
-- Memory bank y reglas Cursor iniciales.
+- Calendario de lectura.
+- Estadisticas basicas iniciales.
+- Busqueda con Open Library.
+- Home convertida en dashboard principal.
+- CTA/card "Anadir nuevo libro" en Home.
+- Eliminado FAB/boton redundante de anadir libro.
+- Lectura actual muestra multiples libros en estado `Leyendo`.
+- Registro rapido desde Home en dialogo centrado.
+- Registro rapido crea sesiones cuando hay paginas o minutos.
+- Actividad reciente muestra acciones registradas desde Home.
+- Actividad reciente de Home limitada al dia actual.
+- Actividad reciente ordenada por `createdAt` descendente.
+- Actividad reciente contenida con scroll interno.
+- Soporte para introducir `totalPages` al crear libro.
+- Edicion de paginas desde detalle.
+- Accion "Anadir total de paginas" desde Home cuando falta `totalPages`.
+- Progreso visible como porcentaje y "Pagina X de Y" cuando hay datos suficientes.
+- Valoracion final con decimales en pasos de `0.25`.
+- Biblioteca con icono de libros.
+- Biblioteca ordena primero libros en estado `Leyendo` en la vista general.
+- Tests ajustados para el formulario con multiples campos de texto.
 
-## Parcial
+## Parcial / en seguimiento
 
-- Textos de UI: libros y sesiones ya fueron alineados en espanol; pueden quedar textos legacy fuera de ese alcance.
+- Validacion final del Sprint UX Home pendiente en terminal del usuario.
+- Revisión de textos y consistencia visual fina pendiente para el sprint visual/UI.
+- Stats MVP queda como siguiente bloque funcional despues de cerrar Home.
+- Open Library puede mejorar resultados en espanol, pero queda para una fase posterior.
 
-## Pendiente
+## Pendiente inmediato
 
-- Eliminar sesiones desde detalle de dia.
-- Validar persistencia manual tras refresh.
-- Ampliar tests de sesiones/repositorios/DAO si se estabiliza la feature.
-- Decidir fuente principal de contexto: `CONTEXT.md` legacy vs `memory-bank/*`.
+El usuario debe ejecutar:
+
+```bash
+dart format lib/features/books/presentation/screens/book_form_screen.dart lib/features/books/presentation/screens/book_detail_screen.dart lib/features/books/presentation/screens/books_list_screen.dart lib/features/home/presentation/screens/home_screen.dart test/widget_test.dart
+flutter analyze
+flutter test
+```
+
+Luego revisar:
+
+```bash
+git status
+git diff
+```
+
+## Pendiente futuro
+
+- Cerrar Sprint UX Home tras validacion.
+- Continuar con Stats MVP.
+- Investigar Open Library para mejorar resultados en espanol.
+- Hacer sprint visual/UI: paleta, estilo, referencias y design system.
+- Ampliar tests de flujos criticos si el alcance del siguiente sprint lo requiere.

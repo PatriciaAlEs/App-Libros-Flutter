@@ -1,37 +1,79 @@
 # Current State
 
-## Estado actual
+## Producto
 
-`reading_tracker` ya tiene una base funcional con Flutter, Riverpod y Drift. La app vive dentro de `reading_tracker/`; la raiz del repo contiene contexto y documentacion operativa.
+`reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario y estadisticas basicas.
 
-## Implementado
+La Home ya funciona como dashboard principal. Actualmente ofrece:
 
-- Entrada en `reading_tracker/lib/main.dart` y rutas en `reading_tracker/lib/app.dart`.
-- Feature `books` con busqueda/alta desde Open Library, busqueda automatica con debounce, selector de estado inicial, listado, detalle, cambio de estado y eliminacion.
-- Feature `reading_sessions` con entidad, repositorio, DAO, calendario, detalle de dia, formulario de sesion y edicion de sesiones desde el detalle de dia.
-- Feature `stats` cerrada funcionalmente para MVP: calcula metricas desde libros/sesiones reales, corrige racha actual, paginas leidas, ranking de autores e invalidacion tras mutaciones relevantes.
-- Drift con tablas `books` y `reading_sessions`, `schemaVersion = 2`.
-- Seed data de debug en `core/database/database_seed.dart`.
+- Card/CTA "Anadir nuevo libro".
+- Seccion "Lectura actual" con todos los libros en estado `Leyendo`.
+- Registro rapido de avance desde cada lectura actual.
+- Resumen rapido de lectura.
+- Actividad reciente del dia actual.
+- Sugerencias de pendientes cuando no hay lecturas activas.
 
-## Trabajo reciente
+## UX Home
 
-- Vista mensual del calendario optimizada para mobile.
-- Vista semanal convertida en agenda vertical por dia.
-- Detalle de dia conectado desde celdas del calendario.
-- Formulario de sesion conectado a Drift y filtrado hacia libros en lectura.
-- Edicion de sesiones implementada desde el detalle de dia, reutilizando el formulario existente e invalidando Stats tras guardar.
-- Fase Quick Wins UX completada en libros/sesiones: idioma unificado a espanol, `BookStatus.label` para etiquetas visuales, empty states mejorados, SnackBars tras acciones exitosas y tests actualizados.
-- Mejora UX del alta de libros: selector de estado inicial, SnackBar contextual segun estado, copy de Open Library, cambio de "sesion" a "tiempo/rato de lectura" en UI de usuario y tests actualizados.
-- Mejora UX de busqueda de libros: busqueda automatica con debounce de 500 ms, minimo 3 caracteres para busqueda automatica, boton Buscar como fallback manual, proteccion contra resultados obsoletos y tests actualizados.
-- Stats corregida para MVP con tests de casos borde principales en `stats_calculator_test.dart`.
-- Validacion manual del usuario: `flutter test` paso con `00:03 +10: All tests passed!` y `flutter analyze` paso con `No issues found! (ran in 6.5s)`.
+Estado actual implementado:
 
-## Pendientes visibles
+- Si existen varios libros en estado `Leyendo`, Home muestra una card por libro.
+- Si no hay libros en estado `Leyendo`, Home muestra sugerencias de libros pendientes.
+- Las sugerencias de pendientes priorizan libros mas antiguos usando la fecha disponible de alta/creacion.
+- La card de lectura actual muestra progreso cuando hay `currentPage` y `totalPages`.
+- Si falta `totalPages`, se muestra una accion clara: "Anadir total de paginas".
+- El registro rapido desde Home usa un dialogo centrado, no bottom sheet.
+- El dialogo mantiene campos de pagina actual, paginas leidas y minutos.
+- El dialogo permite guardar cambios o ir al detalle completo del libro.
+- El contenido del dialogo es scrollable para evitar overflow en movil.
+- La card "Anadir nuevo libro" es la entrada principal para anadir libros desde Home.
+- El FAB/boton redundante de anadir libro fue eliminado.
 
-- Eliminar sesiones desde el detalle del dia.
-- Ampliar tests de sesiones, repositorios/DAO y calendario si aplica.
-- Revisar experiencia responsive en pantallas muy estrechas.
+## Actividad reciente
 
-## Nota de entorno
+Estado actual implementado:
 
-En el sandbox, `flutter analyze` puede quedarse bloqueado por permisos de AppData. Como alternativa comprobada, redirigir `APPDATA`/`LOCALAPPDATA` al workspace y ejecutar `dart analyze` desde `reading_tracker`.
+- El registro rapido desde Home crea una `ReadingSession` cuando `pagesRead > 0` o `minutes > 0`.
+- Se reutiliza el repositorio/provider existente de sesiones.
+- Tras guardar, se refresca el provider usado por la actividad reciente.
+- Home muestra solo actividad del dia actual.
+- Las sesiones se ordenan por `createdAt` descendente.
+- Si hay varias sesiones hoy, aparecen dentro de un contenedor con altura maxima y scroll interno.
+- Empty state actual: "Aun no hay actividad hoy. Registra una sesion para ver tu ritmo de lectura."
+
+## Libros y progreso
+
+Estado actual implementado:
+
+- Al crear libro se puede introducir `totalPages`.
+- En detalle se pueden editar paginas.
+- Desde Home se puede anadir `totalPages` cuando falta.
+- `Book` ya tenia campos compatibles para `totalPages`, `currentPage` y `rating`; no fue necesario cambiar el modelo.
+- La valoracion final al completar lectura permite decimales con pasos de `0.25`.
+
+## Biblioteca y navegacion
+
+Estado actual implementado:
+
+- Biblioteca usa un icono de libros.
+- La vista general de Biblioteca muestra primero libros en estado `Leyendo`.
+- Despues se muestran el resto de estados.
+- Se mantienen filtros/tabs existentes y la opcion de ver todos.
+
+## Validacion
+
+Validaciones pendientes de ejecutar por el usuario:
+
+```bash
+dart format lib/features/books/presentation/screens/book_form_screen.dart lib/features/books/presentation/screens/book_detail_screen.dart lib/features/books/presentation/screens/books_list_screen.dart lib/features/home/presentation/screens/home_screen.dart test/widget_test.dart
+flutter analyze
+flutter test
+```
+
+## Siguiente paso recomendado
+
+1. Usuario ejecuta formato, analisis y tests.
+2. Revisar cualquier fallo que aparezca.
+3. Revisar `git status` y `git diff`.
+4. Si todo esta correcto, cerrar Sprint UX Home.
+5. Continuar con Stats MVP o el siguiente bloque que priorice el usuario.
