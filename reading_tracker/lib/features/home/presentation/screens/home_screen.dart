@@ -17,9 +17,14 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final booksAsync = ref.watch(booksProvider);
     final statsAsync = ref.watch(statsProvider);
+    final today = DateTime.now();
     final recentActivityRange = DateRange(
       start: DateTime.fromMillisecondsSinceEpoch(0),
-      end: DateTime.now().add(const Duration(days: 1)),
+      end: DateTime(
+        today.year,
+        today.month,
+        today.day,
+      ).add(const Duration(days: 1)),
     );
     final recentSessionsAsync = ref.watch(
       readingSessionsForRangeProvider(recentActivityRange),
