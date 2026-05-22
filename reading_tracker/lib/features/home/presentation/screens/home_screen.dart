@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
+import '../../../reading_sessions/data/repositories/reading_session_repository_provider.dart';
 import '../../../reading_sessions/domain/entities/reading_session.dart';
 import '../../../reading_sessions/presentation/providers/reading_sessions_provider.dart';
 import '../../../stats/domain/stats_calculator.dart';
@@ -50,6 +51,7 @@ class HomeScreen extends ConsumerWidget {
           final recentSessions = recentSessionsAsync.valueOrNull ?? const [];
           final booksById = {for (final book in books) book.id: book};
           final currentBook = _currentReadingBook(books);
+          final pendingBooks = _pendingBooks(books);
           final dashboard = _DashboardData.fromBooksAndStats(books, stats);
 
           return RefreshIndicator(
@@ -81,7 +83,16 @@ class HomeScreen extends ConsumerWidget {
                         },
                       ),
                       const SizedBox(height: 8),
-                      _CurrentReadingCard(book: currentBook),
+                      _CurrentReadingCard(
+                        book: currentBook,
+                        pendingBooks: pendingBooks,
+                        onOpenProgress: currentBook == null
+                            ? null
+                            : () =>
+                                  _openQuickProgress(context, ref, currentBook),
+                        onStartReading: (book) =>
+                            _startReading(context, ref, book),
+                      ),
                       const SizedBox(height: 12),
                       _AddBookCtaCard(onPressed: () => _openAddBook(context)),
                       const SizedBox(height: 24),
@@ -124,6 +135,77 @@ class HomeScreen extends ConsumerWidget {
     Navigator.pushNamed(context, '/book/add');
   }
 
+  Future<void> _startReading(
+    BuildContext context,
+    WidgetRef ref,
+    Book book,
+  ) async {
+    final now = DateTime.now();
+    await ref
+        .read(booksProvider.notifier)
+        .updateBook(
+          book.copyWith(
+            status: BookStatus.reading,
+            startDate: book.startDate ?? now,
+            updatedAt: now,
+          ),
+        );
+    ref.invalidate(statsProvider);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Has empezado "${book.title}"')));
+  }
+
+  Future<void> _openQuickProgress(
+    BuildContext context,
+    WidgetRef ref,
+    Book book,
+  ) async {
+    final update = await showModalBottomSheet<_QuickReadingUpdate>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => _QuickReadingSheet(book: book),
+    );
+    if (update == null) return;
+    if (update.openDetail) {
+      if (!context.mounted) return;
+      Navigator.pushNamed(context, '/book/detail', arguments: book.id);
+      return;
+    }
+
+    final now = DateTime.now();
+    await ref
+        .read(booksProvider.notifier)
+        .updateBook(
+          book.copyWith(
+            currentPage: update.currentPage ?? book.currentPage,
+            updatedAt: now,
+          ),
+        );
+
+    if (update.minutes > 0) {
+      await ref
+          .read(readingSessionRepositoryProvider)
+          .addSession(
+            ReadingSession(
+              id: 'session-${now.microsecondsSinceEpoch}',
+              bookId: book.id,
+              date: now,
+              minutes: update.minutes,
+              createdAt: now,
+            ),
+          );
+    }
+
+    ref.invalidate(statsProvider);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Progreso actualizado')));
+  }
+
   Book? _currentReadingBook(List<Book> books) {
     final readingBooks = books
         .where((book) => book.status == BookStatus.reading)
@@ -136,6 +218,14 @@ class HomeScreen extends ConsumerWidget {
       return bDate.compareTo(aDate);
     });
     return readingBooks.first;
+  }
+
+  List<Book> _pendingBooks(List<Book> books) {
+    final pendingBooks = books
+        .where((book) => book.status == BookStatus.pending)
+        .toList();
+    pendingBooks.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    return pendingBooks;
   }
 }
 
@@ -263,9 +353,17 @@ class _AddBookCtaCard extends StatelessWidget {
 }
 
 class _CurrentReadingCard extends StatelessWidget {
-  const _CurrentReadingCard({required this.book});
+  const _CurrentReadingCard({
+    required this.book,
+    required this.pendingBooks,
+    required this.onStartReading,
+    this.onOpenProgress,
+  });
 
   final Book? book;
+  final List<Book> pendingBooks;
+  final ValueChanged<Book> onStartReading;
+  final VoidCallback? onOpenProgress;
 
   @override
   Widget build(BuildContext context) {
@@ -274,24 +372,9 @@ class _CurrentReadingCard extends StatelessWidget {
     final currentBook = book;
 
     if (currentBook == null) {
-      return Card(
-        elevation: 0,
-        color: colorScheme.surfaceContainerHighest,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Icon(Icons.auto_stories_outlined, color: colorScheme.primary),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text(
-                  'No tienes ningun libro marcado como leyendo ahora.',
-                ),
-              ),
-            ],
-          ),
-        ),
+      return _PendingReadingSuggestions(
+        books: pendingBooks,
+        onStartReading: onStartReading,
       );
     }
 
@@ -299,56 +382,78 @@ class _CurrentReadingCard extends StatelessWidget {
     final progressLabel = '${(progress * 100).round()}%';
 
     return Semantics(
+      button: true,
       label:
-          'Libro actual ${currentBook.title}. Progreso de lectura $progressLabel.',
+          'Libro actual ${currentBook.title}. Progreso de lectura $progressLabel. Toca para registrar avance.',
       child: Card(
         elevation: 0,
         color: colorScheme.primaryContainer,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _BookCover(url: currentBook.coverUrl, width: 72, height: 104),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      currentBook.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                    if (currentBook.author?.isNotEmpty == true) ...[
-                      const SizedBox(height: 4),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onOpenProgress,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _BookCover(url: currentBook.coverUrl, width: 72, height: 104),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        currentBook.author!,
-                        maxLines: 1,
+                        currentBook.title,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
                           color: colorScheme.onPrimaryContainer,
                         ),
                       ),
-                    ],
-                    const SizedBox(height: 16),
-                    LinearProgressIndicator(value: progress),
-                    const SizedBox(height: 8),
-                    Text(
-                      _progressText(currentBook, progressLabel),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onPrimaryContainer,
+                      if (currentBook.author?.isNotEmpty == true) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          currentBook.author!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      if (currentBook.totalPages == null)
+                        Text(
+                          'Añade el total de páginas para calcular el progreso.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                        )
+                      else ...[
+                        LinearProgressIndicator(value: progress),
+                        const SizedBox(height: 8),
+                        Text(
+                          _progressText(currentBook, progressLabel),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 12),
+                      Text(
+                        'Registrar avance',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -365,10 +470,215 @@ class _CurrentReadingCard extends StatelessWidget {
   }
 
   String _progressText(Book book, String progressLabel) {
-    if (book.currentPage == null || book.totalPages == null) {
-      return 'Progreso pendiente de actualizar';
+    if (book.currentPage == null) {
+      return 'Actualiza la página actual para ver tu avance.';
     }
     return '$progressLabel · Pagina ${book.currentPage} de ${book.totalPages}';
+  }
+}
+
+class _PendingReadingSuggestions extends StatelessWidget {
+  const _PendingReadingSuggestions({
+    required this.books,
+    required this.onStartReading,
+  });
+
+  final List<Book> books;
+  final ValueChanged<Book> onStartReading;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final visibleBooks = books.take(3).toList();
+
+    return Card(
+      elevation: 0,
+      color: colorScheme.surfaceContainerHighest,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '¿Quieres empezar alguna de tus lecturas pendientes?',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (visibleBooks.isEmpty)
+              const Text('Añade libros pendientes para tener sugerencias aquí.')
+            else
+              for (final book in visibleBooks)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: _BookCover(
+                    url: book.coverUrl,
+                    width: 42,
+                    height: 56,
+                  ),
+                  title: Text(
+                    book.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Text(
+                    book.author?.isNotEmpty == true
+                        ? book.author!
+                        : 'Pendiente desde ${_formatDate(book.createdAt)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: FilledButton.tonal(
+                    onPressed: () => onStartReading(book),
+                    child: const Text('Empezar'),
+                  ),
+                  onTap: () => onStartReading(book),
+                ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+}
+
+class _QuickReadingUpdate {
+  const _QuickReadingUpdate({
+    this.currentPage,
+    this.minutes = 0,
+    this.openDetail = false,
+  });
+
+  final int? currentPage;
+  final int minutes;
+  final bool openDetail;
+}
+
+class _QuickReadingSheet extends StatefulWidget {
+  const _QuickReadingSheet({required this.book});
+
+  final Book book;
+
+  @override
+  State<_QuickReadingSheet> createState() => _QuickReadingSheetState();
+}
+
+class _QuickReadingSheetState extends State<_QuickReadingSheet> {
+  late final TextEditingController _pagesReadController;
+  late final TextEditingController _currentPageController;
+  late final TextEditingController _minutesController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pagesReadController = TextEditingController();
+    _currentPageController = TextEditingController(
+      text: widget.book.currentPage?.toString() ?? '',
+    );
+    _minutesController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _pagesReadController.dispose();
+    _currentPageController.dispose();
+    _minutesController.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final pagesRead = int.tryParse(_pagesReadController.text.trim()) ?? 0;
+    final currentPageInput = int.tryParse(_currentPageController.text.trim());
+    final currentPage =
+        currentPageInput ?? (widget.book.currentPage ?? 0) + pagesRead;
+    final minutes = int.tryParse(_minutesController.text.trim()) ?? 0;
+
+    Navigator.pop(
+      context,
+      _QuickReadingUpdate(
+        currentPage: currentPage > 0 ? currentPage : null,
+        minutes: minutes,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(24, 0, 24, bottomInset + 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Registrar avance',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              widget.book.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _pagesReadController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Páginas leídas hoy',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _currentPageController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Página actual',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _minutesController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Minutos de lectura de hoy',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: _save,
+              child: const Text('Guardar cambios'),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(
+                  context,
+                  const _QuickReadingUpdate(openDetail: true),
+                );
+              },
+              child: const Text('Ir al detalle completo del libro'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

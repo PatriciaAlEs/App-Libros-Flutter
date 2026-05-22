@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../stats/presentation/providers/stats_provider.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/enums/book_status.dart';
-import '../../../stats/presentation/providers/stats_provider.dart';
 import '../providers/books_provider.dart';
 
 class BookDetailScreen extends ConsumerWidget {
@@ -45,12 +45,53 @@ class _BookDetailView extends ConsumerWidget {
 
   final Book book;
 
-  Future<void> _onStatusChanged(
+  Future<bool> _onStatusChanged(
     BuildContext context,
     BookStatus newStatus,
     WidgetRef ref,
   ) async {
-    final updated = book.copyWith(
+    final completionReview = newStatus == BookStatus.completed
+        ? await showModalBottomSheet<_CompletionReview>(
+            context: context,
+            isScrollControlled: true,
+            showDragHandle: true,
+            builder: (_) => _CompletionReviewSheet(book: book),
+          )
+        : null;
+
+    if (newStatus == BookStatus.completed && completionReview == null) {
+      return false;
+    }
+
+    final updated = _updatedBookForStatus(newStatus, completionReview);
+    await ref.read(booksProvider.notifier).updateBook(updated);
+    ref.invalidate(statsProvider);
+
+    if (!context.mounted) return true;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Estado actualizado')));
+    return true;
+  }
+
+  Book _updatedBookForStatus(
+    BookStatus newStatus,
+    _CompletionReview? completionReview,
+  ) {
+    return Book(
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      totalPages: book.totalPages,
+      currentPage: book.currentPage,
+      rating: completionReview == null ? book.rating : completionReview.rating,
+      notes: completionReview == null ? book.notes : completionReview.note,
+      publisher: book.publisher,
+      coverUrl: book.coverUrl,
+      isbn: book.isbn,
+      firstPublishYear: book.firstPublishYear,
+      genre: book.genre,
+      language: book.language,
       status: newStatus,
       startDate: newStatus == BookStatus.reading
           ? DateTime.now()
@@ -58,14 +99,9 @@ class _BookDetailView extends ConsumerWidget {
       completedDate: newStatus == BookStatus.completed
           ? DateTime.now()
           : book.completedDate,
+      createdAt: book.createdAt,
+      updatedAt: DateTime.now(),
     );
-
-    await ref.read(booksProvider.notifier).updateBook(updated);
-    ref.invalidate(statsProvider);
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Estado actualizado')));
   }
 
   Future<void> _onDelete(WidgetRef ref, BuildContext context) async {
@@ -88,6 +124,7 @@ class _BookDetailView extends ConsumerWidget {
         title: const Text('Detalle del libro'),
         actions: [
           IconButton(
+            tooltip: 'Eliminar libro',
             icon: const Icon(Icons.delete_outline),
             onPressed: () => _onDelete(ref, context),
           ),
@@ -155,11 +192,42 @@ class _InfoSection extends StatelessWidget {
   }
 }
 
-class _StatusSection extends StatelessWidget {
+class _StatusSection extends StatefulWidget {
   const _StatusSection({required this.book, required this.onStatusChanged});
 
   final Book book;
-  final ValueChanged<BookStatus> onStatusChanged;
+  final Future<bool> Function(BookStatus status) onStatusChanged;
+
+  @override
+  State<_StatusSection> createState() => _StatusSectionState();
+}
+
+class _StatusSectionState extends State<_StatusSection> {
+  late BookStatus _selectedStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedStatus = widget.book.status;
+  }
+
+  @override
+  void didUpdateWidget(covariant _StatusSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.book.status != widget.book.status) {
+      _selectedStatus = widget.book.status;
+    }
+  }
+
+  Future<void> _handleStatusChanged(BookStatus value) async {
+    if (value == widget.book.status) return;
+
+    setState(() => _selectedStatus = value);
+    final saved = await widget.onStatusChanged(value);
+    if (!saved && mounted) {
+      setState(() => _selectedStatus = widget.book.status);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +237,8 @@ class _StatusSection extends StatelessWidget {
         Text('Estado', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         DropdownButtonFormField<BookStatus>(
-          initialValue: book.status,
+          key: ValueKey(_selectedStatus),
+          initialValue: _selectedStatus,
           decoration: const InputDecoration(border: OutlineInputBorder()),
           items: BookStatus.values
               .map(
@@ -178,13 +247,149 @@ class _StatusSection extends StatelessWidget {
               )
               .toList(),
           onChanged: (value) {
-            if (value != null && value != book.status) {
-              onStatusChanged(value);
+            if (value != null) {
+              _handleStatusChanged(value);
             }
           },
         ),
       ],
     );
+  }
+}
+
+class _CompletionReview {
+  const _CompletionReview({this.rating, this.note});
+
+  final double? rating;
+  final String? note;
+}
+
+class _CompletionReviewSheet extends StatefulWidget {
+  const _CompletionReviewSheet({required this.book});
+
+  final Book book;
+
+  @override
+  State<_CompletionReviewSheet> createState() => _CompletionReviewSheetState();
+}
+
+class _CompletionReviewSheetState extends State<_CompletionReviewSheet> {
+  late double _rating;
+  late final TextEditingController _noteController;
+
+  @override
+  void initState() {
+    super.initState();
+    _rating = widget.book.rating?.clamp(1, 5).toDouble() ?? 5;
+    _noteController = TextEditingController(text: widget.book.notes ?? '');
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final note = _noteController.text.trim();
+    Navigator.pop(
+      context,
+      _CompletionReview(rating: _rating, note: note.isEmpty ? null : note),
+    );
+  }
+
+  void _skip() {
+    Navigator.pop(context, const _CompletionReview());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(24, 0, 24, bottomInset + 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Valora tu lectura',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              widget.book.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 20),
+            Semantics(
+              label: 'Valoracion de ${_formatRating(_rating)} de 5 estrellas',
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      for (var index = 1; index <= 5; index++)
+                        Icon(
+                          _starIcon(index),
+                          color: theme.colorScheme.primary,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${_formatRating(_rating)} / 5',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  Slider(
+                    value: _rating,
+                    min: 1,
+                    max: 5,
+                    divisions: 16,
+                    label: _formatRating(_rating),
+                    onChanged: (value) => setState(() => _rating = value),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _noteController,
+              maxLines: 3,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(
+                labelText: 'Reseña u opinion corta',
+                hintText: 'Opcional',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: _save,
+              child: const Text('Guardar valoración'),
+            ),
+            const SizedBox(height: 8),
+            TextButton(onPressed: _skip, child: const Text('Omitir')),
+          ],
+        ),
+      ),
+    );
+  }
+
+  IconData _starIcon(int index) {
+    if (_rating >= index) return Icons.star;
+    if (_rating >= index - 0.5) return Icons.star_half;
+    return Icons.star_border;
+  }
+
+  String _formatRating(double rating) {
+    return rating.toStringAsFixed(rating % 1 == 0 ? 1 : 2);
   }
 }
 
