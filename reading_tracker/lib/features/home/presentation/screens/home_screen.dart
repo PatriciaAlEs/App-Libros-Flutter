@@ -87,11 +87,11 @@ class HomeScreen extends ConsumerWidget {
                         books: currentBooks,
                         pendingBooks: pendingBooks,
                         onOpenProgress: (book) => _openQuickProgress(
-                                context,
-                                ref,
-                                book,
-                                recentActivityRange,
-                              ),
+                          context,
+                          ref,
+                          book,
+                          recentActivityRange,
+                        ),
                         onStartReading: (book) =>
                             _startReading(context, ref, book),
                       ),
@@ -165,11 +165,9 @@ class HomeScreen extends ConsumerWidget {
     Book book,
     DateRange recentActivityRange,
   ) async {
-    final update = await showModalBottomSheet<_QuickReadingUpdate>(
+    final update = await showDialog<_QuickReadingUpdate>(
       context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (_) => _QuickReadingSheet(book: book),
+      builder: (_) => _QuickReadingDialog(book: book),
     );
     if (update == null) return;
     if (update.openDetail) {
@@ -184,6 +182,7 @@ class HomeScreen extends ConsumerWidget {
         .updateBook(
           book.copyWith(
             currentPage: update.currentPage ?? book.currentPage,
+            totalPages: update.totalPages ?? book.totalPages,
             updatedAt: now,
           ),
         );
@@ -393,10 +392,7 @@ class _CurrentReadingSection extends StatelessWidget {
 }
 
 class _CurrentReadingCard extends StatelessWidget {
-  const _CurrentReadingCard({
-    required this.book,
-    required this.onOpenProgress,
-  });
+  const _CurrentReadingCard({required this.book, required this.onOpenProgress});
 
   final Book book;
   final VoidCallback onOpenProgress;
@@ -453,10 +449,12 @@ class _CurrentReadingCard extends StatelessWidget {
                       ],
                       const SizedBox(height: 16),
                       if (currentBook.totalPages == null)
-                        Text(
-                          'Añade el total de páginas para calcular el progreso.',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onPrimaryContainer,
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: FilledButton.tonalIcon(
+                            onPressed: onOpenProgress,
+                            icon: const Icon(Icons.edit_outlined),
+                            label: const Text('Añadir total de páginas'),
                           ),
                         )
                       else ...[
@@ -501,7 +499,7 @@ class _CurrentReadingCard extends StatelessWidget {
     if (book.currentPage == null) {
       return 'Actualiza la página actual para ver tu avance.';
     }
-    return '$progressLabel · Pagina ${book.currentPage} de ${book.totalPages}';
+    return '$progressLabel · Página ${book.currentPage} de ${book.totalPages}';
   }
 }
 
@@ -579,12 +577,14 @@ class _PendingReadingSuggestions extends StatelessWidget {
 class _QuickReadingUpdate {
   const _QuickReadingUpdate({
     this.currentPage,
+    this.totalPages,
     this.pagesAdded = 0,
     this.minutes = 0,
     this.openDetail = false,
   });
 
   final int? currentPage;
+  final int? totalPages;
   final int pagesAdded;
   final int minutes;
   final bool openDetail;
@@ -600,18 +600,19 @@ class _QuickReadingUpdate {
   }
 }
 
-class _QuickReadingSheet extends StatefulWidget {
-  const _QuickReadingSheet({required this.book});
+class _QuickReadingDialog extends StatefulWidget {
+  const _QuickReadingDialog({required this.book});
 
   final Book book;
 
   @override
-  State<_QuickReadingSheet> createState() => _QuickReadingSheetState();
+  State<_QuickReadingDialog> createState() => _QuickReadingDialogState();
 }
 
-class _QuickReadingSheetState extends State<_QuickReadingSheet> {
+class _QuickReadingDialogState extends State<_QuickReadingDialog> {
   late final TextEditingController _pagesReadController;
   late final TextEditingController _currentPageController;
+  late final TextEditingController _totalPagesController;
   late final TextEditingController _minutesController;
 
   @override
@@ -621,6 +622,9 @@ class _QuickReadingSheetState extends State<_QuickReadingSheet> {
     _currentPageController = TextEditingController(
       text: widget.book.currentPage?.toString() ?? '',
     );
+    _totalPagesController = TextEditingController(
+      text: widget.book.totalPages?.toString() ?? '',
+    );
     _minutesController = TextEditingController();
   }
 
@@ -628,6 +632,7 @@ class _QuickReadingSheetState extends State<_QuickReadingSheet> {
   void dispose() {
     _pagesReadController.dispose();
     _currentPageController.dispose();
+    _totalPagesController.dispose();
     _minutesController.dispose();
     super.dispose();
   }
@@ -635,6 +640,7 @@ class _QuickReadingSheetState extends State<_QuickReadingSheet> {
   void _save() {
     final pagesRead = int.tryParse(_pagesReadController.text.trim()) ?? 0;
     final currentPageInput = int.tryParse(_currentPageController.text.trim());
+    final totalPagesInput = int.tryParse(_totalPagesController.text.trim());
     final previousPage = widget.book.currentPage ?? 0;
     final currentPage = currentPageInput ?? previousPage + pagesRead;
     final pagesAdded = pagesRead > 0
@@ -648,6 +654,9 @@ class _QuickReadingSheetState extends State<_QuickReadingSheet> {
       context,
       _QuickReadingUpdate(
         currentPage: currentPage > 0 ? currentPage : null,
+        totalPages: totalPagesInput != null && totalPagesInput > 0
+            ? totalPagesInput
+            : null,
         pagesAdded: pagesAdded,
         minutes: minutes,
       ),
@@ -657,71 +666,81 @@ class _QuickReadingSheetState extends State<_QuickReadingSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final screenHeight = MediaQuery.sizeOf(context).height;
 
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(24, 0, 24, bottomInset + 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Registrar avance',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
+    return AlertDialog(
+      title: Text(
+        'Registrar avance',
+        style: theme.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      content: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: screenHeight * 0.7),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                widget.book.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              widget.book.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _pagesReadController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Páginas leídas hoy',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _pagesReadController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Páginas leídas hoy',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _currentPageController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Página actual',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _currentPageController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Página actual',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _minutesController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Minutos de lectura de hoy',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _totalPagesController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Total de páginas',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: _save,
-              child: const Text('Guardar cambios'),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(
-                  context,
-                  const _QuickReadingUpdate(openDetail: true),
-                );
-              },
-              child: const Text('Ir al detalle completo del libro'),
-            ),
-          ],
+              const SizedBox(height: 12),
+              TextField(
+                controller: _minutesController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Minutos de lectura de hoy',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: _save,
+                child: const Text('Guardar cambios'),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(
+                    context,
+                    const _QuickReadingUpdate(openDetail: true),
+                  );
+                },
+                child: const Text('Ir al detalle completo del libro'),
+              ),
+            ],
+          ),
         ),
       ),
     );

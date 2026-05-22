@@ -117,6 +117,31 @@ class _BookDetailView extends ConsumerWidget {
     }
   }
 
+  Future<void> _openPagesEditor(BuildContext context, WidgetRef ref) async {
+    final pages = await showModalBottomSheet<_PagesEditResult>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => _PagesEditSheet(book: book),
+    );
+    if (pages == null) return;
+
+    await ref
+        .read(booksProvider.notifier)
+        .updateBook(
+          book.copyWith(
+            currentPage: pages.currentPage,
+            totalPages: pages.totalPages,
+            updatedAt: DateTime.now(),
+          ),
+        );
+    ref.invalidate(statsProvider);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Páginas actualizadas')));
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
@@ -140,7 +165,10 @@ class _BookDetailView extends ConsumerWidget {
             onStatusChanged: (status) => _onStatusChanged(context, status, ref),
           ),
           const SizedBox(height: 24),
-          _ReaderDataSection(book: book),
+          _ReaderDataSection(
+            book: book,
+            onEditPages: () => _openPagesEditor(context, ref),
+          ),
           const SizedBox(height: 24),
           _DatesSection(book: book),
         ],
@@ -394,9 +422,10 @@ class _CompletionReviewSheetState extends State<_CompletionReviewSheet> {
 }
 
 class _ReaderDataSection extends StatelessWidget {
-  const _ReaderDataSection({required this.book});
+  const _ReaderDataSection({required this.book, required this.onEditPages});
 
   final Book book;
+  final VoidCallback onEditPages;
 
   @override
   Widget build(BuildContext context) {
@@ -415,14 +444,128 @@ class _ReaderDataSection extends StatelessWidget {
         const SizedBox(height: 8),
         _DateRow(label: 'Progreso', value: progress.isEmpty ? '-' : progress),
         _DateRow(
+          label: 'Total de páginas',
+          value: book.totalPages == null ? '-' : '${book.totalPages}',
+        ),
+        _DateRow(
           label: 'Valoración',
           value: book.rating == null ? '-' : '${book.rating}/5',
+        ),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: OutlinedButton.icon(
+            onPressed: onEditPages,
+            icon: const Icon(Icons.edit_outlined),
+            label: const Text('Editar páginas'),
+          ),
         ),
         if (book.notes != null && book.notes!.isNotEmpty) ...[
           const SizedBox(height: 8),
           Text(book.notes!, style: Theme.of(context).textTheme.bodyMedium),
         ],
       ],
+    );
+  }
+}
+
+class _PagesEditResult {
+  const _PagesEditResult({this.currentPage, this.totalPages});
+
+  final int? currentPage;
+  final int? totalPages;
+}
+
+class _PagesEditSheet extends StatefulWidget {
+  const _PagesEditSheet({required this.book});
+
+  final Book book;
+
+  @override
+  State<_PagesEditSheet> createState() => _PagesEditSheetState();
+}
+
+class _PagesEditSheetState extends State<_PagesEditSheet> {
+  late final TextEditingController _currentPageController;
+  late final TextEditingController _totalPagesController;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPageController = TextEditingController(
+      text: widget.book.currentPage?.toString() ?? '',
+    );
+    _totalPagesController = TextEditingController(
+      text: widget.book.totalPages?.toString() ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _currentPageController.dispose();
+    _totalPagesController.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final currentPage = int.tryParse(_currentPageController.text.trim());
+    final totalPages = int.tryParse(_totalPagesController.text.trim());
+
+    Navigator.pop(
+      context,
+      _PagesEditResult(
+        currentPage: currentPage != null && currentPage > 0
+            ? currentPage
+            : null,
+        totalPages: totalPages != null && totalPages > 0 ? totalPages : null,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(24, 0, 24, bottomInset + 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Editar páginas',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _currentPageController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Página actual',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _totalPagesController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Total de páginas',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: _save,
+              child: const Text('Guardar páginas'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

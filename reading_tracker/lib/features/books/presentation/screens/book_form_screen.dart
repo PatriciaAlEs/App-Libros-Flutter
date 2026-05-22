@@ -23,6 +23,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   static const _autoSearchDebounce = Duration(milliseconds: 500);
 
   final _searchController = TextEditingController();
+  final _totalPagesController = TextEditingController();
   List<BookSearchResult> _results = const [];
   BookSearchResult? _selectedBook;
   Timer? _searchDebounce;
@@ -37,6 +38,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   void dispose() {
     _searchDebounce?.cancel();
     _searchController.dispose();
+    _totalPagesController.dispose();
     super.dispose();
   }
 
@@ -116,6 +118,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
       coverUrl: selectedBook.coverUrl,
       isbn: selectedBook.isbn,
       firstPublishYear: selectedBook.firstPublishYear,
+      totalPages: int.tryParse(_totalPagesController.text.trim()),
       status: _selectedStatus,
       startDate: _selectedStatus == BookStatus.reading ? DateTime.now() : null,
       completedDate: _selectedStatus == BookStatus.completed
@@ -159,6 +162,8 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
             selectedStatus: _selectedStatus,
             onChanged: (status) => setState(() => _selectedStatus = status),
           ),
+          const SizedBox(height: 16),
+          _TotalPagesField(controller: _totalPagesController),
           const SizedBox(height: 16),
           _ResultsList(
             results: _results,
@@ -314,6 +319,25 @@ class _InitialStatusSelector extends StatelessWidget {
       onChanged: (status) {
         if (status != null) onChanged(status);
       },
+    );
+  }
+}
+
+class _TotalPagesField extends StatelessWidget {
+  const _TotalPagesField({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      decoration: const InputDecoration(
+        labelText: 'Total de páginas',
+        hintText: 'Opcional',
+        border: OutlineInputBorder(),
+      ),
     );
   }
 }
