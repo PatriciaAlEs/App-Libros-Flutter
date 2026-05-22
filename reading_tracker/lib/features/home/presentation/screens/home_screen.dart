@@ -54,7 +54,7 @@ class HomeScreen extends ConsumerWidget {
           final stats = statsAsync.valueOrNull;
           final recentSessions = recentSessionsAsync.valueOrNull ?? const [];
           final booksById = {for (final book in books) book.id: book};
-          final currentBook = _currentReadingBook(books);
+          final currentBooks = _currentReadingBooks(books);
           final pendingBooks = _pendingBooks(books);
           final dashboard = _DashboardData.fromBooksAndStats(books, stats);
 
@@ -71,31 +71,25 @@ class HomeScreen extends ConsumerWidget {
                     children: [
                       _SectionHeader(
                         title: 'Lectura actual',
-                        actionLabel: currentBook == null
+                        actionLabel: currentBooks.isEmpty
                             ? 'Añadir libro'
-                            : 'Ver detalle',
+                            : 'Ver biblioteca',
                         onAction: () {
-                          if (currentBook == null) {
+                          if (currentBooks.isEmpty) {
                             _openAddBook(context);
                           } else {
-                            Navigator.pushNamed(
-                              context,
-                              '/book/detail',
-                              arguments: currentBook.id,
-                            );
+                            Navigator.pushNamed(context, '/books');
                           }
                         },
                       ),
                       const SizedBox(height: 8),
-                      _CurrentReadingCard(
-                        book: currentBook,
+                      _CurrentReadingSection(
+                        books: currentBooks,
                         pendingBooks: pendingBooks,
-                        onOpenProgress: currentBook == null
-                            ? null
-                            : () => _openQuickProgress(
+                        onOpenProgress: (book) => _openQuickProgress(
                                 context,
                                 ref,
-                                currentBook,
+                                book,
                                 recentActivityRange,
                               ),
                         onStartReading: (book) =>
@@ -217,18 +211,17 @@ class HomeScreen extends ConsumerWidget {
     ).showSnackBar(const SnackBar(content: Text('Progreso actualizado')));
   }
 
-  Book? _currentReadingBook(List<Book> books) {
+  List<Book> _currentReadingBooks(List<Book> books) {
     final readingBooks = books
         .where((book) => book.status == BookStatus.reading)
         .toList();
-    if (readingBooks.isEmpty) return null;
 
     readingBooks.sort((a, b) {
       final aDate = a.updatedAt ?? a.startDate ?? a.createdAt;
       final bDate = b.updatedAt ?? b.startDate ?? b.createdAt;
       return bDate.compareTo(aDate);
     });
-    return readingBooks.first;
+    return readingBooks;
   }
 
   List<Book> _pendingBooks(List<Book> books) {
@@ -363,32 +356,56 @@ class _AddBookCtaCard extends StatelessWidget {
   }
 }
 
-class _CurrentReadingCard extends StatelessWidget {
-  const _CurrentReadingCard({
-    required this.book,
+class _CurrentReadingSection extends StatelessWidget {
+  const _CurrentReadingSection({
+    required this.books,
     required this.pendingBooks,
+    required this.onOpenProgress,
     required this.onStartReading,
-    this.onOpenProgress,
   });
 
-  final Book? book;
+  final List<Book> books;
   final List<Book> pendingBooks;
+  final ValueChanged<Book> onOpenProgress;
   final ValueChanged<Book> onStartReading;
-  final VoidCallback? onOpenProgress;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final currentBook = book;
-
-    if (currentBook == null) {
+    if (books.isEmpty) {
       return _PendingReadingSuggestions(
         books: pendingBooks,
         onStartReading: onStartReading,
       );
     }
 
+    return Column(
+      children: [
+        for (var index = 0; index < books.length; index++) ...[
+          _CurrentReadingCard(
+            book: books[index],
+            onOpenProgress: () => onOpenProgress(books[index]),
+          ),
+          if (index < books.length - 1) const SizedBox(height: 12),
+        ],
+      ],
+    );
+  }
+}
+
+class _CurrentReadingCard extends StatelessWidget {
+  const _CurrentReadingCard({
+    required this.book,
+    required this.onOpenProgress,
+  });
+
+  final Book book;
+  final VoidCallback onOpenProgress;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final currentBook = book;
     final progress = _bookProgress(currentBook);
     final progressLabel = '${(progress * 100).round()}%';
 
