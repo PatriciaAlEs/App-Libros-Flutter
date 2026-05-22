@@ -17,13 +17,12 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final booksAsync = ref.watch(booksProvider);
     final statsAsync = ref.watch(statsProvider);
+    final recentActivityRange = DateRange(
+      start: DateTime.fromMillisecondsSinceEpoch(0),
+      end: DateTime.now().add(const Duration(days: 1)),
+    );
     final recentSessionsAsync = ref.watch(
-      readingSessionsForRangeProvider(
-        DateRange(
-          start: DateTime.fromMillisecondsSinceEpoch(0),
-          end: DateTime.now().add(const Duration(days: 1)),
-        ),
-      ),
+      readingSessionsForRangeProvider(recentActivityRange),
     );
 
     return Scaffold(
@@ -88,8 +87,12 @@ class HomeScreen extends ConsumerWidget {
                         pendingBooks: pendingBooks,
                         onOpenProgress: currentBook == null
                             ? null
-                            : () =>
-                                  _openQuickProgress(context, ref, currentBook),
+                            : () => _openQuickProgress(
+                                context,
+                                ref,
+                                currentBook,
+                                recentActivityRange,
+                              ),
                         onStartReading: (book) =>
                             _startReading(context, ref, book),
                       ),
@@ -161,6 +164,7 @@ class HomeScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     Book book,
+    DateRange recentActivityRange,
   ) async {
     final update = await showModalBottomSheet<_QuickReadingUpdate>(
       context: context,
@@ -185,7 +189,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         );
 
-    if (update.minutes > 0) {
+    if (update.hasReadingActivity) {
       await ref
           .read(readingSessionRepositoryProvider)
           .addSession(
@@ -194,12 +198,14 @@ class HomeScreen extends ConsumerWidget {
               bookId: book.id,
               date: now,
               minutes: update.minutes,
+              note: update.activityNote,
               createdAt: now,
             ),
           );
     }
 
     ref.invalidate(statsProvider);
+    ref.invalidate(readingSessionsForRangeProvider(recentActivityRange));
     if (!context.mounted) return;
     ScaffoldMessenger.of(
       context,
@@ -551,13 +557,25 @@ class _PendingReadingSuggestions extends StatelessWidget {
 class _QuickReadingUpdate {
   const _QuickReadingUpdate({
     this.currentPage,
+    this.pagesAdded = 0,
     this.minutes = 0,
     this.openDetail = false,
   });
 
   final int? currentPage;
+  final int pagesAdded;
   final int minutes;
   final bool openDetail;
+
+  bool get hasReadingActivity => pagesAdded > 0 || minutes > 0;
+
+  String? get activityNote {
+    final parts = <String>[
+      if (pagesAdded > 0) '$pagesAdded páginas añadidas',
+      if (currentPage != null) 'Página actual $currentPage',
+    ];
+    return parts.isEmpty ? null : parts.join(' · ');
+  }
 }
 
 class _QuickReadingSheet extends StatefulWidget {
@@ -595,14 +613,20 @@ class _QuickReadingSheetState extends State<_QuickReadingSheet> {
   void _save() {
     final pagesRead = int.tryParse(_pagesReadController.text.trim()) ?? 0;
     final currentPageInput = int.tryParse(_currentPageController.text.trim());
-    final currentPage =
-        currentPageInput ?? (widget.book.currentPage ?? 0) + pagesRead;
+    final previousPage = widget.book.currentPage ?? 0;
+    final currentPage = currentPageInput ?? previousPage + pagesRead;
+    final pagesAdded = pagesRead > 0
+        ? pagesRead
+        : currentPage > previousPage
+        ? currentPage - previousPage
+        : 0;
     final minutes = int.tryParse(_minutesController.text.trim()) ?? 0;
 
     Navigator.pop(
       context,
       _QuickReadingUpdate(
         currentPage: currentPage > 0 ? currentPage : null,
+        pagesAdded: pagesAdded,
         minutes: minutes,
       ),
     );
@@ -781,7 +805,7 @@ class _RecentActivityList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final recentSessions = [...sessions]
-      ..sort((a, b) => b.date.compareTo(a.date));
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     final visibleSessions = recentSessions.take(5).toList();
 
     if (visibleSessions.isEmpty) {
@@ -844,15 +868,17 @@ class _ActivityTile extends StatelessWidget {
 
   String _activitySubtitle(ReadingSession session, Book? book) {
     final parts = <String>[
-      _formatDate(session.date),
+      _formatDateTime(session.createdAt),
       if (book?.author?.isNotEmpty == true) book!.author!,
       if (session.note?.isNotEmpty == true) session.note!,
     ];
     return parts.join(' · ');
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+  String _formatDateTime(DateTime date) {
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return '${date.day}/${date.month}/${date.year} $hour:$minute';
   }
 }
 
