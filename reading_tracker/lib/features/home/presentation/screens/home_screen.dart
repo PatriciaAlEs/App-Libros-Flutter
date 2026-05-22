@@ -18,13 +18,10 @@ class HomeScreen extends ConsumerWidget {
     final booksAsync = ref.watch(booksProvider);
     final statsAsync = ref.watch(statsProvider);
     final today = DateTime.now();
+    final todayStart = DateTime(today.year, today.month, today.day);
     final recentActivityRange = DateRange(
-      start: DateTime.fromMillisecondsSinceEpoch(0),
-      end: DateTime(
-        today.year,
-        today.month,
-        today.day,
-      ).add(const Duration(days: 1)),
+      start: todayStart,
+      end: todayStart.add(const Duration(days: 1)),
     );
     final recentSessionsAsync = ref.watch(
       readingSessionsForRangeProvider(recentActivityRange),
@@ -36,7 +33,7 @@ class HomeScreen extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: 'Ver biblioteca',
-            icon: const Icon(Icons.library_books_outlined),
+            icon: const Icon(Icons.auto_stories_outlined),
             onPressed: () => Navigator.pushNamed(context, '/books'),
           ),
           IconButton(
@@ -123,12 +120,6 @@ class HomeScreen extends ConsumerWidget {
             ),
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        tooltip: 'Añadir libro',
-        onPressed: () => _openAddBook(context),
-        icon: const Icon(Icons.add),
-        label: const Text('Añadir libro'),
       ),
     );
   }
@@ -847,26 +838,33 @@ class _RecentActivityList extends StatelessWidget {
   Widget build(BuildContext context) {
     final recentSessions = [...sessions]
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    final visibleSessions = recentSessions.take(5).toList();
 
-    if (visibleSessions.isEmpty) {
+    if (recentSessions.isEmpty) {
       return Card(
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         child: const Padding(
           padding: EdgeInsets.all(16),
           child: Text(
-            'Aun no hay actividad. Registra una sesion para ver tu ritmo de lectura.',
+            'Aún no hay actividad hoy. Registra una sesión para ver tu ritmo de lectura.',
           ),
         ),
       );
     }
 
-    return Column(
-      children: [
-        for (final session in visibleSessions)
-          _ActivityTile(session: session, book: booksById[session.bookId]),
-      ],
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 320),
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: recentSessions.length,
+        itemBuilder: (context, index) {
+          final session = recentSessions[index];
+          return _ActivityTile(
+            session: session,
+            book: booksById[session.bookId],
+          );
+        },
+      ),
     );
   }
 }

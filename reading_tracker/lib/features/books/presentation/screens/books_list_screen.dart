@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/entities/book.dart';
 import '../../domain/enums/book_status.dart';
 import '../providers/books_provider.dart';
 import '../widgets/book_card.dart';
@@ -44,6 +45,9 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
           final filteredBooks = _selectedStatus == null
               ? books
               : books.where((book) => book.status == _selectedStatus).toList();
+          final visibleBooks = _selectedStatus == null
+              ? _readingBooksFirst(filteredBooks)
+              : filteredBooks;
 
           return Column(
             children: [
@@ -57,9 +61,9 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
                 child: filteredBooks.isEmpty
                     ? _BooksEmptyState(hasBooks: books.isNotEmpty)
                     : ListView.builder(
-                        itemCount: filteredBooks.length,
+                        itemCount: visibleBooks.length,
                         itemBuilder: (context, index) {
-                          final book = filteredBooks[index];
+                          final book = visibleBooks[index];
                           return BookCard(
                             book: book,
                             onTap: () async {
@@ -98,6 +102,16 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  List<Book> _readingBooksFirst(List<Book> books) {
+    final readingBooks = books
+        .where((book) => book.status == BookStatus.reading)
+        .toList();
+    final otherBooks = books
+        .where((book) => book.status != BookStatus.reading)
+        .toList();
+    return [...readingBooks, ...otherBooks];
   }
 }
 
