@@ -10,6 +10,7 @@
 - Tests de repositorio/DAO para sesiones.
 - Mejorar responsive en pantallas muy estrechas.
 - Revisar textos legacy fuera de libros/sesiones si aparecen mojibake o mezcla de idioma.
+- Revisar manualmente busqueda automatica de libros con Open Library en red real.
 
 ## Baja prioridad
 

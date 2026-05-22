@@ -8,7 +8,7 @@
 - Persistencia local con Drift para `books` y `reading_sessions`.
 - Conexion IO con SQLite en archivo local.
 - Conexion web con IndexedDB usando Drift `WebDatabase`.
-- Busqueda de libros contra Open Library.
+- Busqueda de libros contra Open Library con busqueda automatica por debounce de 500 ms, minimo 3 caracteres, fallback manual con boton Buscar y proteccion contra resultados obsoletos.
 - Alta de libros con selector de estado inicial y SnackBar contextual segun estado.
 - Listado, detalle, cambio de estado y eliminacion de libros.
 - Registro de sesiones de lectura.
@@ -21,6 +21,7 @@
 - Validacion de edicion de sesiones: `flutter test` paso con `00:03 +10: All tests passed!` y `flutter analyze` paso con `No issues found! (ran in 6.5s)`.
 - Quick Wins UX en libros/sesiones: idioma unificado a espanol, estados visuales con `BookStatus.label`, empty states mejorados, SnackBars tras acciones exitosas y tests actualizados.
 - Mejora UX de alta de libros y lectura: copy de Open Library, terminologia de usuario "tiempo/rato de lectura" en lugar de "sesion" y tests afectados actualizados.
+- Tests de busqueda de libros actualizados para cubrir debounce, minimo de caracteres y fallback manual.
 - Seed data de debug si la base esta vacia.
 - Tests existentes para calculos de Stats y pantalla inicial de libros.
 - Memory bank y reglas Cursor iniciales.

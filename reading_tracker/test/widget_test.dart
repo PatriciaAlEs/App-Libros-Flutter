@@ -6,13 +6,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
-import 'package:reading_tracker/app.dart';
 import 'package:reading_tracker/features/books/data/datasources/book_api_datasource.dart';
 import 'package:reading_tracker/features/books/data/repositories/book_repository_provider.dart';
 import 'package:reading_tracker/features/books/domain/entities/book.dart';
 import 'package:reading_tracker/features/books/domain/enums/book_status.dart';
 import 'package:reading_tracker/features/books/domain/repositories/book_repository.dart';
 import 'package:reading_tracker/features/books/presentation/screens/book_form_screen.dart';
+import 'package:reading_tracker/features/books/presentation/screens/books_list_screen.dart';
 
 void main() {
   test('book status keeps persisted value and exposes Spanish label', () {
@@ -28,7 +28,7 @@ void main() {
         overrides: [
           bookRepositoryProvider.overrideWithValue(_EmptyBookRepository()),
         ],
-        child: const App(),
+        child: const MaterialApp(home: BooksListScreen()),
       ),
     );
     await tester.pumpAndSettle();
