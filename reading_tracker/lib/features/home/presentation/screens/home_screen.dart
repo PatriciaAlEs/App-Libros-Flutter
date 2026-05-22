@@ -70,7 +70,7 @@ class HomeScreen extends ConsumerWidget {
                             : 'Ver detalle',
                         onAction: () {
                           if (currentBook == null) {
-                            Navigator.pushNamed(context, '/book/add');
+                            _openAddBook(context);
                           } else {
                             Navigator.pushNamed(
                               context,
@@ -82,6 +82,8 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8),
                       _CurrentReadingCard(book: currentBook),
+                      const SizedBox(height: 12),
+                      _AddBookCtaCard(onPressed: () => _openAddBook(context)),
                       const SizedBox(height: 24),
                       const _SectionHeader(title: 'Resumen rapido'),
                       const SizedBox(height: 8),
@@ -111,11 +113,15 @@ class HomeScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         tooltip: 'Añadir libro',
-        onPressed: () => Navigator.pushNamed(context, '/book/add'),
+        onPressed: () => _openAddBook(context),
         icon: const Icon(Icons.add),
-        label: const Text('Libro'),
+        label: const Text('Añadir libro'),
       ),
     );
+  }
+
+  void _openAddBook(BuildContext context) {
+    Navigator.pushNamed(context, '/book/add');
   }
 
   Book? _currentReadingBook(List<Book> books) {
@@ -144,10 +150,7 @@ class _DashboardData {
   final int pagesRead;
   final double? averageRating;
 
-  factory _DashboardData.fromBooksAndStats(
-    List<Book> books,
-    StatsData? stats,
-  ) {
+  factory _DashboardData.fromBooksAndStats(List<Book> books, StatsData? stats) {
     final currentYear = DateTime.now().year;
     final ratedBooks = books.where((book) => book.rating != null).toList();
     final averageRating = ratedBooks.isEmpty
@@ -176,11 +179,7 @@ class _DashboardData {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    this.actionLabel,
-    this.onAction,
-  });
+  const _SectionHeader({required this.title, this.actionLabel, this.onAction});
 
   final String title;
   final String? actionLabel;
@@ -201,6 +200,64 @@ class _SectionHeader extends StatelessWidget {
         if (actionLabel != null && onAction != null)
           TextButton(onPressed: onAction, child: Text(actionLabel!)),
       ],
+    );
+  }
+}
+
+class _AddBookCtaCard extends StatelessWidget {
+  const _AddBookCtaCard({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: colorScheme.secondaryContainer,
+                foregroundColor: colorScheme.onSecondaryContainer,
+                child: const Icon(Icons.add),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Añadir nuevo libro',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Busca en Open Library o crea una nueva lectura.',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -406,10 +463,7 @@ class _MetricCard extends StatelessWidget {
 }
 
 class _RecentActivityList extends StatelessWidget {
-  const _RecentActivityList({
-    required this.sessions,
-    required this.booksById,
-  });
+  const _RecentActivityList({required this.sessions, required this.booksById});
 
   final List<ReadingSession> sessions;
   final Map<String, Book> booksById;
