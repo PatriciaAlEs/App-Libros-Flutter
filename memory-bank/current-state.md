@@ -64,6 +64,8 @@ Estado actual implementado:
 - Persistencia reutiliza los campos existentes `createdAt`, `startDate` y `completedDate`.
 - En el formulario de alta aparecen fechas cuando el estado inicial lo requiere.
 - En detalle se pueden editar manualmente fecha de inicio y fecha de finalizacion.
+- Al editar fecha de finalizacion, el selector usa fecha de inicio como referencia/minimo si existe.
+- Si la fecha de inicio cambia y queda despues de la fecha de finalizacion, se limpia la finalizacion para evitar rangos invalidos.
 - Si un libro entra en estado `completed`, se ofrece valorar con estrellas y resena opcional.
 - La valoracion de completado se reutiliza en alta directa como completado y en cambio de estado desde detalle.
 - La resena usa el campo persistido existente `notes`.

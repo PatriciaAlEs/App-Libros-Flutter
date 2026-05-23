@@ -150,23 +150,36 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   Future<void> _pickStartedAt() async {
     final selected = await _pickDate(_startedAt);
     if (selected != null) {
-      setState(() => _startedAt = selected);
+      setState(() {
+        _startedAt = selected;
+        if (_finishedAt != null && _finishedAt!.isBefore(selected)) {
+          _finishedAt = null;
+        }
+      });
     }
   }
 
   Future<void> _pickFinishedAt() async {
-    final selected = await _pickDate(_finishedAt);
+    final selected = await _pickDate(
+      _finishedAt ?? _startedAt,
+      firstDate: _startedAt,
+    );
     if (selected != null) {
       setState(() => _finishedAt = selected);
     }
   }
 
-  Future<DateTime?> _pickDate(DateTime? initialDate) {
+  Future<DateTime?> _pickDate(DateTime? initialDate, {DateTime? firstDate}) {
     final now = DateTime.now();
+    final effectiveFirstDate = firstDate ?? DateTime(1900);
+    final effectiveInitialDate =
+        initialDate != null && initialDate.isBefore(effectiveFirstDate)
+        ? effectiveFirstDate
+        : initialDate ?? now;
     return showDatePicker(
       context: context,
-      initialDate: initialDate ?? now,
-      firstDate: DateTime(1900),
+      initialDate: effectiveInitialDate,
+      firstDate: effectiveFirstDate,
       lastDate: DateTime(now.year + 5),
     );
   }
@@ -261,7 +274,10 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
               showFinishedAt: _selectedStatus == BookStatus.completed,
               onStartedAtTap: _pickStartedAt,
               onFinishedAtTap: _pickFinishedAt,
-              onClearStartedAt: () => setState(() => _startedAt = null),
+              onClearStartedAt: () => setState(() {
+                _startedAt = null;
+                _finishedAt = null;
+              }),
               onClearFinishedAt: () => setState(() => _finishedAt = null),
             ),
             const SizedBox(height: 16),

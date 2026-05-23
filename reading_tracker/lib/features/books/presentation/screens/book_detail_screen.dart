@@ -556,23 +556,36 @@ class _DatesEditDialogState extends State<_DatesEditDialog> {
   Future<void> _pickStartedAt() async {
     final selected = await _pickDate(_startedAt);
     if (selected != null) {
-      setState(() => _startedAt = selected);
+      setState(() {
+        _startedAt = selected;
+        if (_finishedAt != null && _finishedAt!.isBefore(selected)) {
+          _finishedAt = null;
+        }
+      });
     }
   }
 
   Future<void> _pickFinishedAt() async {
-    final selected = await _pickDate(_finishedAt);
+    final selected = await _pickDate(
+      _finishedAt ?? _startedAt,
+      firstDate: _startedAt,
+    );
     if (selected != null) {
       setState(() => _finishedAt = selected);
     }
   }
 
-  Future<DateTime?> _pickDate(DateTime? initialDate) {
+  Future<DateTime?> _pickDate(DateTime? initialDate, {DateTime? firstDate}) {
     final now = DateTime.now();
+    final effectiveFirstDate = firstDate ?? DateTime(1900);
+    final effectiveInitialDate =
+        initialDate != null && initialDate.isBefore(effectiveFirstDate)
+        ? effectiveFirstDate
+        : initialDate ?? now;
     return showDatePicker(
       context: context,
-      initialDate: initialDate ?? now,
-      firstDate: DateTime(1900),
+      initialDate: effectiveInitialDate,
+      firstDate: effectiveFirstDate,
       lastDate: DateTime(now.year + 5),
     );
   }
@@ -611,7 +624,10 @@ class _DatesEditDialogState extends State<_DatesEditDialog> {
                 icon: const Icon(Icons.close),
                 onPressed: _startedAt == null
                     ? null
-                    : () => setState(() => _startedAt = null),
+                    : () => setState(() {
+                        _startedAt = null;
+                        _finishedAt = null;
+                      }),
               ),
               onTap: _pickStartedAt,
             ),
