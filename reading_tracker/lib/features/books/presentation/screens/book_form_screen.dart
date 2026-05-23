@@ -9,6 +9,7 @@ import '../../domain/entities/book.dart';
 import '../../domain/entities/book_search_result.dart';
 import '../../domain/enums/book_status.dart';
 import '../../../stats/presentation/providers/stats_provider.dart';
+import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 import '../providers/books_provider.dart';
 
 class BookFormScreen extends ConsumerStatefulWidget {
@@ -192,6 +193,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
 
     await ref.read(booksProvider.notifier).addBook(book);
     ref.invalidate(statsProvider);
+    ref.invalidate(statisticsSummaryProvider);
 
     if (mounted) Navigator.pop(context, _selectedStatus);
   }

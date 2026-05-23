@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/stats_provider.dart';
+
+import '../providers/statistics_summary_provider.dart';
 import '../widgets/stat_card.dart';
 
 class StatsScreen extends ConsumerWidget {
@@ -8,220 +9,149 @@ class StatsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statsAsync = ref.watch(statsProvider);
+    final summaryAsync = ref.watch(statisticsSummaryProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Estadísticas')),
-      body: statsAsync.when(
+      appBar: AppBar(title: const Text('Estadisticas')),
+      body: summaryAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
-        data: (stats) {
-          if (stats.totalBooks == 0) {
-            return const Center(
-              child: Text(
-                'No hay datos para mostrar. Añade libros o sesiones para ver estadísticas.',
-                textAlign: TextAlign.center,
-              ),
-            );
+        error: (error, _) => const _StatsErrorState(),
+        data: (summary) {
+          if (summary.totalBooks == 0) {
+            return const _StatsEmptyState();
           }
 
-          return SingleChildScrollView(
+          return ListView(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _sectionTitle(context, 'Resumen'),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    StatCard(
-                      icon: Icons.book_outlined,
-                      title: 'Libros totales',
-                      value: '${stats.totalBooks}',
-                    ),
-                    StatCard(
-                      icon: Icons.schedule,
-                      title: 'Pendientes',
-                      value: '${stats.pendingBooks}',
-                    ),
-                    StatCard(
-                      icon: Icons.auto_stories,
-                      title: 'En lectura',
-                      value: '${stats.readingBooks}',
-                    ),
-                    StatCard(
-                      icon: Icons.check_circle_outline,
-                      title: 'Completados',
-                      value: '${stats.completedBooks}',
-                      subtitle:
-                          '${stats.completedRate.toStringAsFixed(0)}% completado',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                _sectionTitle(context, 'Progreso'),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    StatCard(
-                      icon: Icons.stacked_line_chart,
-                      title: 'Páginas leídas',
-                      value: '${stats.pagesRead}',
-                    ),
-                    StatCard(
-                      icon: Icons.percent,
-                      title: 'Progreso medio',
-                      value:
-                          '${stats.averageReadingProgress.toStringAsFixed(0)}%',
-                    ),
-                    StatCard(
-                      icon: Icons.calendar_month,
-                      title: 'Terminados este mes',
-                      value: '${stats.booksCompletedThisMonth}',
-                    ),
-                    StatCard(
-                      icon: Icons.calendar_today,
-                      title: 'Añadidos este mes',
-                      value: '${stats.booksAddedThisMonth}',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                _sectionTitle(context, 'Tiempo de lectura'),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    StatCard(
-                      icon: Icons.timer,
-                      title: 'Minutos leídos',
-                      value: '${stats.totalMinutesRead}',
-                    ),
-                    StatCard(
-                      icon: Icons.access_time,
-                      title: 'Horas leídas',
-                      value: stats.totalHoursRead.toStringAsFixed(1),
-                    ),
-                    StatCard(
-                      icon: Icons.show_chart,
-                      title: 'Media diaria',
-                      value: stats.averageDailyMinutes.toStringAsFixed(0),
-                    ),
-                    StatCard(
-                      icon: Icons.calendar_view_day,
-                      title: 'Días con actividad',
-                      value: '${stats.daysWithActivity}',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    StatCard(
-                      icon: Icons.emoji_events,
-                      title: 'Mejor día',
-                      value: stats.bestDay != null
-                          ? '${stats.bestDay!.day}/${stats.bestDay!.month}/${stats.bestDay!.year}'
-                          : '-',
-                      subtitle: stats.bestDayMinutes > 0
-                          ? '${stats.bestDayMinutes} min'
-                          : null,
-                    ),
-                    StatCard(
-                      icon: Icons.whatshot,
-                      title: 'Racha actual',
-                      value: '${stats.currentStreakDays} días',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                _sectionTitle(context, 'Rankings'),
-                const SizedBox(height: 8),
-                _rankingCard(
-                  title: 'Mejor valorados',
-                  items: stats.topRatedBooks,
-                  itemBuilder: (book) =>
-                      '${book.title} ${book.rating.toStringAsFixed(1)}',
-                  emptyMessage: 'No hay libros valorados aún.',
-                ),
-                const SizedBox(height: 12),
-                _rankingCard(
-                  title: 'Autores más leídos',
-                  items: stats.topAuthors,
-                  itemBuilder: (author) =>
-                      '${author.author} · ${author.minutes} min · ${author.bookCount} libros',
-                  emptyMessage: 'Sin datos de autores todavía.',
-                ),
-                const SizedBox(height: 12),
-                _rankingCard(
-                  title: 'Más tiempo dedicado',
-                  items: stats.topBooksByTime,
-                  itemBuilder: (book) => '${book.title} · ${book.minutes} min',
-                  emptyMessage: stats.hasSessionData
-                      ? 'No hay suficiente información para este ranking.'
-                      : 'Añade sesiones de lectura para ver el ranking.',
-                ),
-              ],
-            ),
+            children: [
+              Text(
+                'Resumen de biblioteca',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 12),
+              _StatsCardGrid(
+                children: [
+                  StatCard(
+                    icon: Icons.library_books_outlined,
+                    title: 'Libros totales',
+                    value: '${summary.totalBooks}',
+                  ),
+                  StatCard(
+                    icon: Icons.check_circle_outline,
+                    title: 'Completados',
+                    value: '${summary.completedBooks}',
+                  ),
+                  StatCard(
+                    icon: Icons.auto_stories_outlined,
+                    title: 'Leyendo',
+                    value: '${summary.readingBooks}',
+                  ),
+                  StatCard(
+                    icon: Icons.pause_circle_outline,
+                    title: 'Pausados',
+                    value: '${summary.pausedBooks}',
+                  ),
+                  StatCard(
+                    icon: Icons.block_outlined,
+                    title: 'Abandonados',
+                    value: '${summary.abandonedBooks}',
+                  ),
+                  StatCard(
+                    icon: Icons.bookmark_border,
+                    title: 'Pendientes',
+                    value: '${summary.toReadBooks}',
+                  ),
+                  StatCard(
+                    icon: Icons.menu_book_outlined,
+                    title: 'Paginas leidas',
+                    value: '${summary.totalPagesRead}',
+                  ),
+                  StatCard(
+                    icon: Icons.star_border,
+                    title: 'Valoracion media',
+                    value: _formatAverageRating(summary.averageRating),
+                  ),
+                  StatCard(
+                    icon: Icons.local_library_outlined,
+                    title: 'Lecturas actuales',
+                    value: '${summary.currentlyReadingCount}',
+                  ),
+                ],
+              ),
+            ],
           );
         },
       ),
     );
   }
 
-  Widget _sectionTitle(BuildContext context, String title) {
-    return Text(
-      title,
-      style: Theme.of(
-        context,
-      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+  String _formatAverageRating(double? rating) {
+    if (rating == null) return '-';
+    return rating.toStringAsFixed(rating % 1 == 0 ? 1 : 2);
+  }
+}
+
+class _StatsCardGrid extends StatelessWidget {
+  const _StatsCardGrid({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double cardWidth;
+        if (constraints.maxWidth >= 640) {
+          cardWidth = (constraints.maxWidth - 24) / 3;
+        } else if (constraints.maxWidth >= 360) {
+          cardWidth = (constraints.maxWidth - 12) / 2;
+        } else {
+          cardWidth = constraints.maxWidth;
+        }
+
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            for (final child in children)
+              SizedBox(width: cardWidth, child: child),
+          ],
+        );
+      },
     );
   }
+}
 
-  Widget _rankingCard<T>({
-    required String title,
-    required List<T> items,
-    required String Function(T item) itemBuilder,
-    required String emptyMessage,
-  }) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+class _StatsEmptyState extends StatelessWidget {
+  const _StatsEmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
       child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            if (items.isEmpty)
-              Text(emptyMessage)
-            else
-              Column(
-                children: items
-                    .take(5)
-                    .map(
-                      (item) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('• ', style: TextStyle(fontSize: 16)),
-                            Expanded(child: Text(itemBuilder(item))),
-                          ],
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-          ],
+        padding: EdgeInsets.all(24),
+        child: Text(
+          'Todavia no hay libros para calcular estadisticas.',
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+class _StatsErrorState extends StatelessWidget {
+  const _StatsErrorState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(24),
+        child: Text(
+          'No se pudieron cargar las estadisticas.',
+          textAlign: TextAlign.center,
         ),
       ),
     );

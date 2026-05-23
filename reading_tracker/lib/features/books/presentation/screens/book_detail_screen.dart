@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../stats/presentation/providers/stats_provider.dart';
+import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/enums/book_status.dart';
 import '../providers/books_provider.dart';
@@ -66,6 +67,7 @@ class _BookDetailView extends ConsumerWidget {
     final updated = _updatedBookForStatus(newStatus, completionReview);
     await ref.read(booksProvider.notifier).updateBook(updated);
     ref.invalidate(statsProvider);
+    ref.invalidate(statisticsSummaryProvider);
 
     if (!context.mounted) return true;
     ScaffoldMessenger.of(
@@ -136,6 +138,7 @@ class _BookDetailView extends ConsumerWidget {
     if (confirm == true) {
       await ref.read(booksProvider.notifier).deleteBook(book.id);
       ref.invalidate(statsProvider);
+      ref.invalidate(statisticsSummaryProvider);
       if (context.mounted) Navigator.pop(context, true);
     }
   }
@@ -159,6 +162,7 @@ class _BookDetailView extends ConsumerWidget {
           ),
         );
     ref.invalidate(statsProvider);
+    ref.invalidate(statisticsSummaryProvider);
     if (!context.mounted) return;
     ScaffoldMessenger.of(
       context,
@@ -176,6 +180,7 @@ class _BookDetailView extends ConsumerWidget {
         .read(booksProvider.notifier)
         .updateBook(_updatedBookForDates(dates));
     ref.invalidate(statsProvider);
+    ref.invalidate(statisticsSummaryProvider);
     if (!context.mounted) return;
     ScaffoldMessenger.of(
       context,

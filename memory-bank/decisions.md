@@ -30,3 +30,8 @@
 - No confiar solo en resumen conversacional; verificar archivos modificados.
 - Mantener cambios pequenos y acotados por problema.
 - No tocar Open Library, modelos ni persistencia salvo que el requisito lo pida claramente.
+- La base nueva de Estadisticas MVP se calcula desde `Book` y no usa `ReadingSession` hasta un sprint posterior.
+- La logica de calculo de estadisticas debe vivir fuera de widgets y pantallas.
+- La UI futura debe consumir estadisticas desde un punto unico: `statisticsSummaryProvider`.
+- La pantalla `/stats` debe permanecer simple en MVP: tarjetas basicas, sin charts, objetivos, rachas ni sesiones hasta nuevos sprints.
+- Las mutaciones de libros deben invalidar `statisticsSummaryProvider` ademas de cualquier provider legacy de Stats mientras convivan ambas rutas.

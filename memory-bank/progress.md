@@ -13,6 +13,17 @@
 - Registro de sesiones de lectura.
 - Calendario de lectura.
 - Estadisticas basicas iniciales.
+- Base desacoplada para Estadisticas MVP creada sobre `Book`.
+- Modelo `StatisticsSummary` creado.
+- Calculador puro `StatisticsCalculator` creado fuera de widgets.
+- Contrato `StatisticsRepository` e implementacion `BookStatisticsRepository` creados.
+- Caso de uso `GetStatisticsSummary` creado.
+- Provider `statisticsSummaryProvider` creado como punto unico de consumo futuro.
+- Estadisticas MVP base calculan libros totales, completados, leyendo, pausados, abandonados, pendientes, paginas leidas, rating medio y lecturas actuales.
+- Pantalla `/stats` conectada a `statisticsSummaryProvider`.
+- UI basica de Estadisticas MVP creada con tarjetas simples.
+- Estados loading, error, empty y datos disponibles cubiertos en Stats.
+- Mutaciones de libros invalidan `statisticsSummaryProvider` para refrescar la UI basica de Stats.
 - Busqueda con Open Library.
 - Open Library autorrellena `totalPages` con `number_of_pages` o `number_of_pages_median` cuando estan disponibles.
 - `totalPages` permanece editable manualmente.
@@ -43,7 +54,7 @@
 ## Parcial / en seguimiento
 
 - Validacion final del Sprint UX Home pendiente en terminal del usuario.
-- Validacion final del sprint de ciclo de vida del libro pendiente en terminal del usuario.
+- Validacion final del segundo sprint de Estadisticas MVP pendiente en terminal del usuario.
 - Revisión de textos y consistencia visual fina pendiente para el sprint visual/UI.
 - Stats MVP queda como siguiente bloque funcional despues de cerrar Home.
 - Open Library puede mejorar resultados en espanol, pero queda para una fase posterior.
@@ -53,15 +64,15 @@
 El usuario debe ejecutar:
 
 ```bash
-dart format lib/features/books/data/datasources/book_api_datasource.dart lib/features/books/domain/entities/book.dart lib/features/books/domain/entities/book_search_result.dart lib/features/books/domain/enums/book_status.dart lib/features/books/presentation/screens/book_detail_screen.dart lib/features/books/presentation/screens/book_form_screen.dart lib/features/books/presentation/widgets/book_card.dart test/widget_test.dart
+dart format lib/features/stats/domain/entities/statistics_summary.dart lib/features/stats/domain/services/statistics_calculator.dart lib/features/stats/domain/repositories/statistics_repository.dart lib/features/stats/domain/usecases/get_statistics_summary.dart lib/features/stats/data/repositories/book_statistics_repository.dart lib/features/stats/data/repositories/statistics_repository_provider.dart lib/features/stats/presentation/providers/statistics_summary_provider.dart lib/features/stats/presentation/screens/stats_screen.dart lib/features/books/presentation/screens/book_form_screen.dart lib/features/books/presentation/screens/book_detail_screen.dart lib/features/home/presentation/screens/home_screen.dart
 flutter test
 flutter analyze
 ```
 
 ## Pendiente futuro
 
-- Cerrar sprint de ciclo de vida del libro tras validacion.
-- Continuar con Stats MVP.
+- Cerrar segundo sprint de Estadisticas MVP tras validacion.
+- Definir siguiente iteracion de Stats sin introducir complejidad visual prematura.
 - Investigar Open Library para mejorar resultados en espanol.
 - Hacer sprint visual/UI: paleta, estilo, referencias y design system.
 - Ampliar tests de flujos criticos si el alcance del siguiente sprint lo requiere.

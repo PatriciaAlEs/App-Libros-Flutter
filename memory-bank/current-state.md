@@ -82,14 +82,32 @@ Estado actual implementado:
 Validaciones pendientes de ejecutar por el usuario:
 
 ```bash
-dart format lib/features/books/data/datasources/book_api_datasource.dart lib/features/books/domain/entities/book.dart lib/features/books/domain/entities/book_search_result.dart lib/features/books/domain/enums/book_status.dart lib/features/books/presentation/screens/book_detail_screen.dart lib/features/books/presentation/screens/book_form_screen.dart lib/features/books/presentation/widgets/book_card.dart test/widget_test.dart
-flutter analyze
+dart format lib/features/stats/domain/entities/statistics_summary.dart lib/features/stats/domain/services/statistics_calculator.dart lib/features/stats/domain/repositories/statistics_repository.dart lib/features/stats/domain/usecases/get_statistics_summary.dart lib/features/stats/data/repositories/book_statistics_repository.dart lib/features/stats/data/repositories/statistics_repository_provider.dart lib/features/stats/presentation/providers/statistics_summary_provider.dart lib/features/stats/presentation/screens/stats_screen.dart lib/features/books/presentation/screens/book_form_screen.dart lib/features/books/presentation/screens/book_detail_screen.dart lib/features/home/presentation/screens/home_screen.dart
 flutter test
+flutter analyze
 ```
+
+## Estadisticas MVP
+
+Estado actual implementado:
+
+- Existe una capa nueva desacoplada para estadisticas basada solo en `Book`.
+- `StatisticsSummary` centraliza metricas base: total, completados, leyendo, pausados, abandonados, pendientes, paginas leidas, rating medio y lecturas actuales.
+- `StatisticsCalculator` contiene la logica pura de calculo fuera de widgets y pantallas.
+- `StatisticsRepository` define el contrato de acceso a estadisticas.
+- `BookStatisticsRepository` calcula estadisticas usando `BookRepository`.
+- `GetStatisticsSummary` encapsula el caso de uso.
+- `statisticsSummaryProvider` es el punto unico preparado para que la UI consuma estas metricas en futuros sprints.
+- La pantalla `/stats` ya consume `statisticsSummaryProvider`.
+- La UI basica muestra tarjetas para total, completados, leyendo, pausados, abandonados, pendientes, paginas leidas, rating medio y lecturas actuales.
+- La pantalla maneja loading, error, empty state y datos disponibles.
+- Los flujos de alta, detalle y Home invalidan `statisticsSummaryProvider` tras mutaciones de libros.
+- No se usan `ReadingSession` todavia en esta base nueva.
+- Quedan preparados futuros bloques de objetivos anuales, rachas, sesiones y graficas, sin implementarlos todavia.
 
 ## Siguiente paso recomendado
 
 1. Usuario ejecuta formato, tests y analisis.
 2. Revisar cualquier fallo que aparezca.
-3. Si todo esta correcto, cerrar el sprint de ciclo de vida del libro.
-4. Continuar con Stats MVP o el siguiente bloque que priorice el usuario.
+3. Si todo esta correcto, cerrar el segundo sprint de UI basica Estadisticas MVP.
+4. Continuar con el siguiente bloque que priorice el usuario.

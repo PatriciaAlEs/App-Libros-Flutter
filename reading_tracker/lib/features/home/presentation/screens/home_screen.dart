@@ -9,6 +9,7 @@ import '../../../reading_sessions/domain/entities/reading_session.dart';
 import '../../../reading_sessions/presentation/providers/reading_sessions_provider.dart';
 import '../../../stats/domain/stats_calculator.dart';
 import '../../../stats/presentation/providers/stats_provider.dart';
+import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -59,6 +60,7 @@ class HomeScreen extends ConsumerWidget {
             onRefresh: () async {
               ref.invalidate(booksProvider);
               ref.invalidate(statsProvider);
+              ref.invalidate(statisticsSummaryProvider);
             },
             child: CustomScrollView(
               slivers: [
@@ -144,6 +146,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         );
     ref.invalidate(statsProvider);
+    ref.invalidate(statisticsSummaryProvider);
     if (!context.mounted) return;
     ScaffoldMessenger.of(
       context,
@@ -194,6 +197,7 @@ class HomeScreen extends ConsumerWidget {
     }
 
     ref.invalidate(statsProvider);
+    ref.invalidate(statisticsSummaryProvider);
     ref.invalidate(readingSessionsForRangeProvider(recentActivityRange));
     if (!context.mounted) return;
     ScaffoldMessenger.of(

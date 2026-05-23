@@ -2,7 +2,9 @@
 
 ## Foco actual
 
-Cerrar el sprint de refinamiento del ciclo de vida del libro en `reading_tracker`.
+Hito 2: Estadisticas MVP.
+
+Segundo sprint: UI basica de Estadisticas MVP consumiendo `statisticsSummaryProvider`.
 
 La Home ya funciona como dashboard principal y concentra:
 
@@ -12,10 +14,23 @@ La Home ya funciona como dashboard principal y concentra:
 - Actividad reciente.
 - Acciones rapidas de progreso.
 
-Antes de avanzar a Estadisticas MVP, validar que el refinamiento de libros queda estable con formato, analisis y tests ejecutados por el usuario en su terminal.
+Graficas, objetivos, rachas y sesiones quedan fuera de este sprint.
 
 ## Estado reciente
 
+- Se creo una base nueva de estadisticas desacoplada de widgets/pantallas.
+- Se agrego `StatisticsSummary` como modelo de resumen centralizado.
+- Se agrego `StatisticsCalculator` para calcular metricas puras desde `List<Book>`.
+- Se agrego `StatisticsRepository` y una implementacion basada en `BookRepository`.
+- Se agrego el caso de uso `GetStatisticsSummary`.
+- Se agrego `statisticsSummaryProvider` como punto unico de consumo futuro para la UI.
+- La pantalla `/stats` ahora consume unicamente `statisticsSummaryProvider`.
+- La UI basica de Stats muestra tarjetas simples para las metricas de `StatisticsSummary`.
+- La pantalla maneja loading, error, empty state y datos disponibles.
+- Los flujos de mutacion de libros invalidan tambien `statisticsSummaryProvider` para evitar datos cacheados.
+- No se agregaron graficas, objetivos, rachas, `ReadingSession` ni librerias externas.
+- El calculo actual usa solo datos de `Book`: `status`, `currentPage`, `totalPages`, `rating`, `startedAt` y `finishedAt` cuando apliquen en futuras metricas.
+- No se introdujo `ReadingSession` en la nueva base MVP.
 - Se inicio un sprint de refinamiento del ciclo de vida del libro antes de Estadisticas MVP.
 - Open Library ahora puede autorrellenar `totalPages` desde `number_of_pages` o `number_of_pages_median`.
 - El campo `totalPages` sigue siendo editable manualmente por el usuario.
@@ -45,6 +60,17 @@ Antes de avanzar a Estadisticas MVP, validar que el refinamiento de libros queda
 
 ## Archivos tocados recientemente
 
+- `reading_tracker/lib/features/stats/domain/entities/statistics_summary.dart`
+- `reading_tracker/lib/features/stats/domain/services/statistics_calculator.dart`
+- `reading_tracker/lib/features/stats/domain/repositories/statistics_repository.dart`
+- `reading_tracker/lib/features/stats/domain/usecases/get_statistics_summary.dart`
+- `reading_tracker/lib/features/stats/data/repositories/book_statistics_repository.dart`
+- `reading_tracker/lib/features/stats/data/repositories/statistics_repository_provider.dart`
+- `reading_tracker/lib/features/stats/presentation/providers/statistics_summary_provider.dart`
+- `reading_tracker/lib/features/stats/presentation/screens/stats_screen.dart`
+- `reading_tracker/lib/features/books/presentation/screens/book_form_screen.dart`
+- `reading_tracker/lib/features/books/presentation/screens/book_detail_screen.dart`
+- `reading_tracker/lib/features/home/presentation/screens/home_screen.dart`
 - `reading_tracker/lib/features/books/data/datasources/book_api_datasource.dart`
 - `reading_tracker/lib/features/books/domain/entities/book.dart`
 - `reading_tracker/lib/features/books/domain/entities/book_search_result.dart`
@@ -63,17 +89,17 @@ El usuario ejecuta las validaciones en su terminal de VS Code. No ejecutarlas de
 Comandos pendientes sugeridos:
 
 ```bash
-dart format lib/features/books/data/datasources/book_api_datasource.dart lib/features/books/domain/entities/book.dart lib/features/books/domain/entities/book_search_result.dart lib/features/books/domain/enums/book_status.dart lib/features/books/presentation/screens/book_detail_screen.dart lib/features/books/presentation/screens/book_form_screen.dart lib/features/books/presentation/widgets/book_card.dart test/widget_test.dart
-flutter analyze
+dart format lib/features/stats/domain/entities/statistics_summary.dart lib/features/stats/domain/services/statistics_calculator.dart lib/features/stats/domain/repositories/statistics_repository.dart lib/features/stats/domain/usecases/get_statistics_summary.dart lib/features/stats/data/repositories/book_statistics_repository.dart lib/features/stats/data/repositories/statistics_repository_provider.dart lib/features/stats/presentation/providers/statistics_summary_provider.dart lib/features/stats/presentation/screens/stats_screen.dart lib/features/books/presentation/screens/book_form_screen.dart lib/features/books/presentation/screens/book_detail_screen.dart lib/features/home/presentation/screens/home_screen.dart
 flutter test
+flutter analyze
 ```
 
 ## Pendientes reales
 
-1. Validar el sprint de ciclo de vida del libro con `dart format`, `flutter test` y `flutter analyze`.
+1. Validar la UI basica de Estadisticas MVP con `dart format`, `flutter test` y `flutter analyze`.
 2. Corregir cualquier fallo de test/analyze que reporte el usuario.
-3. Cerrar el sprint de ciclo de vida del libro cuando las validaciones pasen.
-4. Continuar despues con Stats MVP segun prioridad del usuario.
+3. Cerrar el segundo sprint de Estadisticas MVP si las validaciones pasan.
+4. Preparar metricas visuales mas avanzadas solo despues de estabilizar esta UI basica.
 5. Mas adelante investigar Open Library para mejorar resultados en espanol.
 6. Dejar el sprint visual/UI para despues: paleta, estilo, referencias y design system.
 
