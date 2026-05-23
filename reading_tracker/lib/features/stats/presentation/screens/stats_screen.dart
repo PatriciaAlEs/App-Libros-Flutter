@@ -15,7 +15,9 @@ class StatsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Estadisticas')),
       body: summaryAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => const _StatsErrorState(),
+        error: (error, _) => _StatsErrorState(
+          onRetry: () => ref.invalidate(statisticsSummaryProvider),
+        ),
         data: (summary) {
           if (summary.totalBooks == 0) {
             return const _StatsEmptyState();
@@ -24,29 +26,39 @@ class StatsScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Text(
-                'Resumen de biblioteca',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 12),
-              _StatsCardGrid(
+              _StatsSection(
+                title: 'Biblioteca',
                 children: [
                   StatCard(
                     icon: Icons.library_books_outlined,
-                    title: 'Libros totales',
+                    title: 'Libros en biblioteca',
                     value: '${summary.totalBooks}',
+                  ),
+                  StatCard(
+                    icon: Icons.bookmark_border,
+                    title: 'Pendientes',
+                    value: '${summary.toReadBooks}',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _StatsSection(
+                title: 'Estado de lectura',
+                children: [
+                  StatCard(
+                    icon: Icons.auto_stories_outlined,
+                    title: 'Leyendo',
+                    value: '${summary.readingBooks}',
+                  ),
+                  StatCard(
+                    icon: Icons.local_library_outlined,
+                    title: 'Lecturas activas',
+                    value: '${summary.currentlyReadingCount}',
                   ),
                   StatCard(
                     icon: Icons.check_circle_outline,
                     title: 'Completados',
                     value: '${summary.completedBooks}',
-                  ),
-                  StatCard(
-                    icon: Icons.auto_stories_outlined,
-                    title: 'Leyendo',
-                    value: '${summary.readingBooks}',
                   ),
                   StatCard(
                     icon: Icons.pause_circle_outline,
@@ -58,25 +70,27 @@ class StatsScreen extends ConsumerWidget {
                     title: 'Abandonados',
                     value: '${summary.abandonedBooks}',
                   ),
-                  StatCard(
-                    icon: Icons.bookmark_border,
-                    title: 'Pendientes',
-                    value: '${summary.toReadBooks}',
-                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _StatsSection(
+                title: 'Progreso',
+                children: [
                   StatCard(
                     icon: Icons.menu_book_outlined,
                     title: 'Paginas leidas',
                     value: '${summary.totalPagesRead}',
                   ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _StatsSection(
+                title: 'Valoraciones',
+                children: [
                   StatCard(
                     icon: Icons.star_border,
                     title: 'Valoracion media',
                     value: _formatAverageRating(summary.averageRating),
-                  ),
-                  StatCard(
-                    icon: Icons.local_library_outlined,
-                    title: 'Lecturas actuales',
-                    value: '${summary.currentlyReadingCount}',
                   ),
                 ],
               ),
@@ -90,6 +104,30 @@ class StatsScreen extends ConsumerWidget {
   String _formatAverageRating(double? rating) {
     if (rating == null) return '-';
     return rating.toStringAsFixed(rating % 1 == 0 ? 1 : 2);
+  }
+}
+
+class _StatsSection extends StatelessWidget {
+  const _StatsSection({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 12),
+        _StatsCardGrid(children: children),
+      ],
+    );
   }
 }
 
@@ -129,12 +167,35 @@ class _StatsEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(24),
-        child: Text(
-          'Todavia no hay libros para calcular estadisticas.',
-          textAlign: TextAlign.center,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.insights_outlined,
+              size: 48,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Todavia no hay datos de lectura',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Anade tu primer libro para empezar a calcular tus estadisticas.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              onPressed: () => Navigator.pushNamed(context, '/book/add'),
+              icon: const Icon(Icons.add),
+              label: const Text('Anadir libro'),
+            ),
+          ],
         ),
       ),
     );
@@ -142,16 +203,41 @@ class _StatsEmptyState extends StatelessWidget {
 }
 
 class _StatsErrorState extends StatelessWidget {
-  const _StatsErrorState();
+  const _StatsErrorState({required this.onRetry});
+
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(24),
-        child: Text(
-          'No se pudieron cargar las estadisticas.',
-          textAlign: TextAlign.center,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No pudimos cargar tus estadisticas',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Intentalo de nuevo en unos segundos.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Reintentar'),
+            ),
+          ],
         ),
       ),
     );
