@@ -48,6 +48,7 @@ Estado actual implementado:
 - Al crear libro se puede introducir `totalPages`.
 - Al seleccionar un resultado de Open Library, `totalPages` se autorrellena si llega `number_of_pages` o `number_of_pages_median`.
 - El campo `totalPages` sigue siendo editable manualmente aunque venga de Open Library.
+- En alta de libros, la busqueda Open Library muestra estado de carga y limita resultados iniciales para mantener accesible el guardado.
 - En detalle se pueden editar paginas.
 - Desde Home se puede anadir `totalPages` cuando falta.
 - `Book` ya tenia campos compatibles para `totalPages`, `currentPage` y `rating`; no fue necesario cambiar el modelo.

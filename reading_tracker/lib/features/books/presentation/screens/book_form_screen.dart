@@ -23,10 +23,12 @@ class BookFormScreen extends ConsumerStatefulWidget {
 class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   static const _autoSearchMinLength = 3;
   static const _autoSearchDebounce = Duration(milliseconds: 500);
+  static const _initialVisibleResults = 5;
 
   final _searchController = TextEditingController();
   final _totalPagesController = TextEditingController();
   List<BookSearchResult> _results = const [];
+  int _visibleResultsCount = _initialVisibleResults;
   BookSearchResult? _selectedBook;
   Timer? _searchDebounce;
   String _activeSearchQuery = '';
@@ -58,6 +60,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
         _hasSearched = false;
         _error = null;
         _results = const [];
+        _visibleResultsCount = _initialVisibleResults;
         _selectedBook = null;
         if (_totalPagesAutoFilled) {
           _totalPagesController.clear();
@@ -87,13 +90,17 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
       _hasSearched = true;
       _error = null;
       _selectedBook = null;
+      _visibleResultsCount = _initialVisibleResults;
     });
 
     try {
       final datasource = ref.read(bookApiDatasourceProvider);
       final results = await datasource.searchBooks(requestQuery);
       if (!_isCurrentSearch(requestQuery)) return;
-      setState(() => _results = results);
+      setState(() {
+        _results = results;
+        _visibleResultsCount = _initialVisibleResults;
+      });
     } catch (error) {
       if (!_isCurrentSearch(requestQuery)) return;
       setState(() {
@@ -126,6 +133,14 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
         _totalPagesController.clear();
         _totalPagesAutoFilled = false;
       }
+    });
+  }
+
+  void _showMoreResults() {
+    setState(() {
+      _visibleResultsCount = (_visibleResultsCount + _initialVisibleResults)
+          .clamp(0, _results.length)
+          .toInt();
     });
   }
 
@@ -290,8 +305,11 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
           _ResultsList(
             results: _results,
             hasSearched: _hasSearched,
+            isSearching: _isSearching,
+            visibleCount: _visibleResultsCount,
             selectedBook: _selectedBook,
             onSelected: _selectBook,
+            onShowMore: _showMoreResults,
           ),
           const SizedBox(height: 24),
           _SaveButton(
@@ -356,27 +374,43 @@ class _ResultsList extends StatelessWidget {
   const _ResultsList({
     required this.results,
     required this.hasSearched,
+    required this.isSearching,
+    required this.visibleCount,
     required this.selectedBook,
     required this.onSelected,
+    required this.onShowMore,
   });
 
   final List<BookSearchResult> results;
   final bool hasSearched;
+  final bool isSearching;
+  final int visibleCount;
   final BookSearchResult? selectedBook;
   final ValueChanged<BookSearchResult> onSelected;
+  final VoidCallback onShowMore;
 
   @override
   Widget build(BuildContext context) {
+    if (isSearching) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Text('Buscando tu libro...', textAlign: TextAlign.center),
+      );
+    }
+
     if (results.isEmpty) {
       if (!hasSearched) return const SizedBox.shrink();
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 16),
         child: Text(
-          'No encontramos resultados. Prueba con otro título, autor o ISBN.',
+          'No se encontraron libros. Prueba con otro titulo, autor o ISBN.',
           textAlign: TextAlign.center,
         ),
       );
     }
+
+    final visibleResults = results.take(visibleCount).toList();
+    final hasMoreResults = visibleResults.length < results.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -391,7 +425,7 @@ class _ResultsList extends StatelessWidget {
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 8),
-        for (final book in results)
+        for (final book in visibleResults)
           Card(
             child: ListTile(
               leading: _Cover(url: book.coverUrl),
@@ -404,6 +438,19 @@ class _ResultsList extends StatelessWidget {
               onTap: () => onSelected(book),
             ),
           ),
+        if (hasMoreResults) ...[
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              onPressed: onShowMore,
+              icon: const Icon(Icons.expand_more),
+              label: Text(
+                'Ver mas resultados (${results.length - visibleResults.length})',
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

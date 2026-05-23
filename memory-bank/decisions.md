@@ -39,3 +39,4 @@
 - El progreso anual usa solo libros `completed` con `finishedAt/completedDate` dentro del ano actual.
 - Al entrar en estado `completed`, la app debe ofrecer valoracion y resena opcional; la resena se guarda en `Book.notes`.
 - Las fechas de lectura deben mantener un rango valido: `finishedAt` no puede ser anterior a `startedAt`.
+- La busqueda Open Library en alta debe mostrar pocos resultados inicialmente y permitir cargar mas para no empujar demasiado el CTA de guardado.
