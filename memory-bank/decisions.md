@@ -35,3 +35,6 @@
 - La UI futura debe consumir estadisticas desde un punto unico: `statisticsSummaryProvider`.
 - La pantalla `/stats` debe permanecer simple en MVP: tarjetas basicas, sin charts, objetivos, rachas ni sesiones hasta nuevos sprints.
 - Las mutaciones de libros deben invalidar `statisticsSummaryProvider` ademas de cualquier provider legacy de Stats mientras convivan ambas rutas.
+- El objetivo anual se persiste en una tabla simple `app_settings` gestionada por Drift con SQL manual, sin paquetes externos.
+- El progreso anual usa solo libros `completed` con `finishedAt/completedDate` dentro del ano actual.
+- Al entrar en estado `completed`, la app debe ofrecer valoracion y resena opcional; la resena se guarda en `Book.notes`.

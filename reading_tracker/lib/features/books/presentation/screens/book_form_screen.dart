@@ -11,6 +11,7 @@ import '../../domain/enums/book_status.dart';
 import '../../../stats/presentation/providers/stats_provider.dart';
 import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 import '../providers/books_provider.dart';
+import '../widgets/completion_review_sheet.dart';
 
 class BookFormScreen extends ConsumerStatefulWidget {
   const BookFormScreen({super.key});
@@ -194,6 +195,31 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     await ref.read(booksProvider.notifier).addBook(book);
     ref.invalidate(statsProvider);
     ref.invalidate(statisticsSummaryProvider);
+
+    if (!mounted) return;
+
+    if (_selectedStatus == BookStatus.completed) {
+      final review = await showModalBottomSheet<CompletionReview>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => CompletionReviewSheet(title: book.title),
+      );
+
+      if (review != null && review.hasContent) {
+        await ref
+            .read(booksProvider.notifier)
+            .updateBook(
+              book.copyWith(
+                rating: review.rating,
+                notes: review.note,
+                updatedAt: DateTime.now(),
+              ),
+            );
+        ref.invalidate(statsProvider);
+        ref.invalidate(statisticsSummaryProvider);
+      }
+    }
 
     if (mounted) Navigator.pop(context, _selectedStatus);
   }

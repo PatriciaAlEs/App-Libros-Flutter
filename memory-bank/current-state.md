@@ -64,6 +64,9 @@ Estado actual implementado:
 - Persistencia reutiliza los campos existentes `createdAt`, `startDate` y `completedDate`.
 - En el formulario de alta aparecen fechas cuando el estado inicial lo requiere.
 - En detalle se pueden editar manualmente fecha de inicio y fecha de finalizacion.
+- Si un libro entra en estado `completed`, se ofrece valorar con estrellas y resena opcional.
+- La valoracion de completado se reutiliza en alta directa como completado y en cambio de estado desde detalle.
+- La resena usa el campo persistido existente `notes`.
 
 ## Biblioteca y navegacion
 
@@ -102,6 +105,10 @@ Estado actual implementado:
 - La UI basica muestra tarjetas para total, completados, leyendo, pausados, abandonados, pendientes, paginas leidas, rating medio y lecturas actuales.
 - La pantalla maneja loading, error, empty state y datos disponibles.
 - Los flujos de alta, detalle y Home invalidan `statisticsSummaryProvider` tras mutaciones de libros.
+- El objetivo anual de lectura se persiste como `annualReadingGoal` en `app_settings`.
+- `StatisticsSummary` expone objetivo anual, completados del ano actual, porcentaje, restantes y meta alcanzada.
+- La seccion "Objetivo anual" aparece en `/stats`.
+- El usuario puede definir o editar la meta anual desde un dialogo simple en `/stats`.
 - No se usan `ReadingSession` todavia en esta base nueva.
 - Quedan preparados futuros bloques de objetivos anuales, rachas, sesiones y graficas, sin implementarlos todavia.
 

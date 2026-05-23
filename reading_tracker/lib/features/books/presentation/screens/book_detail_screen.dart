@@ -6,6 +6,7 @@ import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/enums/book_status.dart';
 import '../providers/books_provider.dart';
+import '../widgets/completion_review_sheet.dart';
 
 class BookDetailScreen extends ConsumerWidget {
   const BookDetailScreen({super.key, required this.bookId});
@@ -52,11 +53,15 @@ class _BookDetailView extends ConsumerWidget {
     WidgetRef ref,
   ) async {
     final completionReview = newStatus == BookStatus.completed
-        ? await showModalBottomSheet<_CompletionReview>(
+        ? await showModalBottomSheet<CompletionReview>(
             context: context,
             isScrollControlled: true,
             showDragHandle: true,
-            builder: (_) => _CompletionReviewSheet(book: book),
+            builder: (_) => CompletionReviewSheet(
+              title: book.title,
+              initialRating: book.rating,
+              initialNote: book.notes,
+            ),
           )
         : null;
 
@@ -78,7 +83,7 @@ class _BookDetailView extends ConsumerWidget {
 
   Book _updatedBookForStatus(
     BookStatus newStatus,
-    _CompletionReview? completionReview,
+    CompletionReview? completionReview,
   ) {
     return Book(
       id: book.id,
@@ -330,142 +335,6 @@ class _StatusSectionState extends State<_StatusSection> {
         ),
       ],
     );
-  }
-}
-
-class _CompletionReview {
-  const _CompletionReview({this.rating, this.note});
-
-  final double? rating;
-  final String? note;
-}
-
-class _CompletionReviewSheet extends StatefulWidget {
-  const _CompletionReviewSheet({required this.book});
-
-  final Book book;
-
-  @override
-  State<_CompletionReviewSheet> createState() => _CompletionReviewSheetState();
-}
-
-class _CompletionReviewSheetState extends State<_CompletionReviewSheet> {
-  late double _rating;
-  late final TextEditingController _noteController;
-
-  @override
-  void initState() {
-    super.initState();
-    _rating = widget.book.rating?.clamp(1, 5).toDouble() ?? 5;
-    _noteController = TextEditingController(text: widget.book.notes ?? '');
-  }
-
-  @override
-  void dispose() {
-    _noteController.dispose();
-    super.dispose();
-  }
-
-  void _save() {
-    final note = _noteController.text.trim();
-    Navigator.pop(
-      context,
-      _CompletionReview(rating: _rating, note: note.isEmpty ? null : note),
-    );
-  }
-
-  void _skip() {
-    Navigator.pop(context, const _CompletionReview());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
-
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(24, 0, 24, bottomInset + 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Valora tu lectura',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              widget.book.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 20),
-            Semantics(
-              label: 'Valoracion de ${_formatRating(_rating)} de 5 estrellas',
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (var index = 1; index <= 5; index++)
-                        Icon(
-                          _starIcon(index),
-                          color: theme.colorScheme.primary,
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${_formatRating(_rating)} / 5',
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  Slider(
-                    value: _rating,
-                    min: 1,
-                    max: 5,
-                    divisions: 16,
-                    label: _formatRating(_rating),
-                    onChanged: (value) => setState(() => _rating = value),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _noteController,
-              maxLines: 3,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Resena u opinion corta',
-                hintText: 'Opcional',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: _save,
-              child: const Text('Guardar valoracion'),
-            ),
-            const SizedBox(height: 8),
-            TextButton(onPressed: _skip, child: const Text('Omitir')),
-          ],
-        ),
-      ),
-    );
-  }
-
-  IconData _starIcon(int index) {
-    if (_rating >= index) return Icons.star;
-    if (_rating >= index - 0.5) return Icons.star_half;
-    return Icons.star_border;
-  }
-
-  String _formatRating(double rating) {
-    return rating.toStringAsFixed(rating % 1 == 0 ? 1 : 2);
   }
 }
 

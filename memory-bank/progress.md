@@ -24,6 +24,10 @@
 - UI basica de Estadisticas MVP creada con tarjetas simples.
 - Estados loading, error, empty y datos disponibles cubiertos en Stats.
 - Mutaciones de libros invalidan `statisticsSummaryProvider` para refrescar la UI basica de Stats.
+- Objetivo anual de libros persistido como `annualReadingGoal`.
+- Progreso anual calculado desde libros completados en el ano actual.
+- Seccion "Objetivo anual" integrada en `/stats`.
+- Dialogo simple para definir/editar meta anual.
 - Busqueda con Open Library.
 - Open Library autorrellena `totalPages` con `number_of_pages` o `number_of_pages_median` cuando estan disponibles.
 - `totalPages` permanece editable manualmente.
@@ -46,6 +50,8 @@
 - Accion "Anadir total de paginas" desde Home cuando falta `totalPages`.
 - Progreso visible como porcentaje y "Pagina X de Y" cuando hay datos suficientes.
 - Valoracion final con decimales en pasos de `0.25`.
+- Valoracion final al completar libro reutilizada en alta directa y cambio de estado.
+- Resena opcional de completado soportada con `notes`.
 - Biblioteca con icono de libros.
 - Biblioteca ordena primero libros en estado `Leyendo` en la vista general.
 - Tests ajustados para el formulario con multiples campos de texto.

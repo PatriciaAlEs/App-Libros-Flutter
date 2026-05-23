@@ -4,7 +4,7 @@
 
 Hito 2: Estadisticas MVP.
 
-Segundo sprint: UI basica de Estadisticas MVP consumiendo `statisticsSummaryProvider`.
+Ultimo sprint del Hito 2: objetivo anual de lectura.
 
 La Home ya funciona como dashboard principal y concentra:
 
@@ -14,7 +14,7 @@ La Home ya funciona como dashboard principal y concentra:
 - Actividad reciente.
 - Acciones rapidas de progreso.
 
-Graficas, objetivos, rachas y sesiones quedan fuera de este sprint.
+Graficas, rachas, sesiones, objetivos mensuales y paginas anuales quedan fuera de este sprint.
 
 ## Estado reciente
 
@@ -29,6 +29,13 @@ Graficas, objetivos, rachas y sesiones quedan fuera de este sprint.
 - La pantalla maneja loading, error, empty state y datos disponibles.
 - Los flujos de mutacion de libros invalidan tambien `statisticsSummaryProvider` para evitar datos cacheados.
 - No se agregaron graficas, objetivos, rachas, `ReadingSession` ni librerias externas.
+- Se agrego persistencia para `annualReadingGoal` en `app_settings`.
+- `StatisticsSummary` incluye objetivo anual, completados del ano, progreso, restantes y estado de meta alcanzada.
+- El calculo del objetivo anual usa solo libros `completed` con `finishedAt/completedDate` del ano actual.
+- La pantalla `/stats` muestra una seccion destacada "Objetivo anual".
+- La meta anual se puede crear/editar desde un dialogo simple en `/stats`.
+- Regla de ciclo de vida: cuando un libro entra en `completed`, la app ofrece valorar con estrellas y resena opcional.
+- La resena ya se soporta con el campo existente `notes`; no se requiere migracion.
 - El calculo actual usa solo datos de `Book`: `status`, `currentPage`, `totalPages`, `rating`, `startedAt` y `finishedAt` cuando apliquen en futuras metricas.
 - No se introdujo `ReadingSession` en la nueva base MVP.
 - Se inicio un sprint de refinamiento del ciclo de vida del libro antes de Estadisticas MVP.
@@ -70,6 +77,7 @@ Graficas, objetivos, rachas y sesiones quedan fuera de este sprint.
 - `reading_tracker/lib/features/stats/presentation/screens/stats_screen.dart`
 - `reading_tracker/lib/features/books/presentation/screens/book_form_screen.dart`
 - `reading_tracker/lib/features/books/presentation/screens/book_detail_screen.dart`
+- `reading_tracker/lib/features/books/presentation/widgets/completion_review_sheet.dart`
 - `reading_tracker/lib/features/home/presentation/screens/home_screen.dart`
 - `reading_tracker/lib/features/books/data/datasources/book_api_datasource.dart`
 - `reading_tracker/lib/features/books/domain/entities/book.dart`

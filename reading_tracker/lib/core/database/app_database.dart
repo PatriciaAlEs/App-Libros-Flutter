@@ -16,11 +16,14 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(openDatabaseConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (migrator) => migrator.createAll(),
+    onCreate: (migrator) async {
+      await migrator.createAll();
+      await _createAppSettingsTable();
+    },
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
         await migrator.addColumn(booksTable, booksTable.genre);
@@ -28,6 +31,19 @@ class AppDatabase extends _$AppDatabase {
         await migrator.addColumn(booksTable, booksTable.updatedAt);
         await migrator.createTable(readingSessionsTable);
       }
+      if (from < 3) {
+        await _createAppSettingsTable();
+      }
     },
   );
+
+  Future<void> _createAppSettingsTable() {
+    return customStatement('''
+      CREATE TABLE IF NOT EXISTS app_settings (
+        key TEXT NOT NULL PRIMARY KEY,
+        int_value INTEGER,
+        updated_at INTEGER
+      )
+    ''');
+  }
 }

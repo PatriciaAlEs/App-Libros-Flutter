@@ -9,6 +9,11 @@ class StatisticsSummary {
     required this.totalPagesRead,
     required this.averageRating,
     required this.currentlyReadingCount,
+    required this.annualReadingGoal,
+    required this.completedThisYear,
+    required this.annualGoalProgress,
+    required this.booksRemainingForAnnualGoal,
+    required this.isAnnualGoalReached,
   });
 
   const StatisticsSummary.empty()
@@ -20,7 +25,12 @@ class StatisticsSummary {
       toReadBooks = 0,
       totalPagesRead = 0,
       averageRating = null,
-      currentlyReadingCount = 0;
+      currentlyReadingCount = 0,
+      annualReadingGoal = null,
+      completedThisYear = 0,
+      annualGoalProgress = null,
+      booksRemainingForAnnualGoal = null,
+      isAnnualGoalReached = false;
 
   final int totalBooks;
   final int completedBooks;
@@ -31,4 +41,9 @@ class StatisticsSummary {
   final int totalPagesRead;
   final double? averageRating;
   final int currentlyReadingCount;
+  final int? annualReadingGoal;
+  final int completedThisYear;
+  final double? annualGoalProgress;
+  final int? booksRemainingForAnnualGoal;
+  final bool isAnnualGoalReached;
 }
