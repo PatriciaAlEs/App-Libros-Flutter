@@ -32,6 +32,12 @@ final readingSessionsForDayProvider =
       return repository.getSessionsForDay(day);
     });
 
+final readingSessionsForBookProvider =
+    FutureProvider.family<List<ReadingSession>, String>((ref, bookId) {
+      final repository = ref.watch(readingSessionRepositoryProvider);
+      return repository.getSessionsForBook(bookId);
+    });
+
 final sessionsTotalMinutesProvider = Provider.family<int, List<ReadingSession>>(
   (ref, sessions) {
     return sessions.fold<int>(0, (total, session) => total + session.minutes);

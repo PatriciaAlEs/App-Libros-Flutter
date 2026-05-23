@@ -1058,6 +1058,18 @@ class $ReadingSessionsTableTable extends ReadingSessionsTable
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _pagesReadMeta = const VerificationMeta(
+    'pagesRead',
+  );
+  @override
+  late final GeneratedColumn<int> pagesRead = GeneratedColumn<int>(
+    'pages_read',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _noteMeta = const VerificationMeta('note');
   @override
   late final GeneratedColumn<String> note = GeneratedColumn<String>(
@@ -1079,14 +1091,27 @@ class $ReadingSessionsTableTable extends ReadingSessionsTable
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     bookId,
     date,
     minutes,
+    pagesRead,
     note,
     createdAt,
+    updatedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1129,6 +1154,12 @@ class $ReadingSessionsTableTable extends ReadingSessionsTable
     } else if (isInserting) {
       context.missing(_minutesMeta);
     }
+    if (data.containsKey('pages_read')) {
+      context.handle(
+        _pagesReadMeta,
+        pagesRead.isAcceptableOrUnknown(data['pages_read']!, _pagesReadMeta),
+      );
+    }
     if (data.containsKey('note')) {
       context.handle(
         _noteMeta,
@@ -1139,6 +1170,12 @@ class $ReadingSessionsTableTable extends ReadingSessionsTable
       context.handle(
         _createdAtMeta,
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
     return context;
@@ -1169,6 +1206,10 @@ class $ReadingSessionsTableTable extends ReadingSessionsTable
         DriftSqlType.int,
         data['${effectivePrefix}minutes'],
       )!,
+      pagesRead: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pages_read'],
+      )!,
       note: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}note'],
@@ -1177,6 +1218,10 @@ class $ReadingSessionsTableTable extends ReadingSessionsTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
     );
   }
 
@@ -1192,15 +1237,19 @@ class ReadingSessionsTableData extends DataClass
   final String bookId;
   final DateTime date;
   final int minutes;
+  final int pagesRead;
   final String? note;
   final DateTime createdAt;
+  final DateTime? updatedAt;
   const ReadingSessionsTableData({
     required this.id,
     required this.bookId,
     required this.date,
     required this.minutes,
+    required this.pagesRead,
     this.note,
     required this.createdAt,
+    this.updatedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1209,10 +1258,14 @@ class ReadingSessionsTableData extends DataClass
     map['book_id'] = Variable<String>(bookId);
     map['date'] = Variable<DateTime>(date);
     map['minutes'] = Variable<int>(minutes);
+    map['pages_read'] = Variable<int>(pagesRead);
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
     return map;
   }
 
@@ -1222,8 +1275,12 @@ class ReadingSessionsTableData extends DataClass
       bookId: Value(bookId),
       date: Value(date),
       minutes: Value(minutes),
+      pagesRead: Value(pagesRead),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       createdAt: Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
     );
   }
 
@@ -1237,8 +1294,10 @@ class ReadingSessionsTableData extends DataClass
       bookId: serializer.fromJson<String>(json['bookId']),
       date: serializer.fromJson<DateTime>(json['date']),
       minutes: serializer.fromJson<int>(json['minutes']),
+      pagesRead: serializer.fromJson<int>(json['pagesRead']),
       note: serializer.fromJson<String?>(json['note']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
     );
   }
   @override
@@ -1249,8 +1308,10 @@ class ReadingSessionsTableData extends DataClass
       'bookId': serializer.toJson<String>(bookId),
       'date': serializer.toJson<DateTime>(date),
       'minutes': serializer.toJson<int>(minutes),
+      'pagesRead': serializer.toJson<int>(pagesRead),
       'note': serializer.toJson<String?>(note),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
     };
   }
 
@@ -1259,15 +1320,19 @@ class ReadingSessionsTableData extends DataClass
     String? bookId,
     DateTime? date,
     int? minutes,
+    int? pagesRead,
     Value<String?> note = const Value.absent(),
     DateTime? createdAt,
+    Value<DateTime?> updatedAt = const Value.absent(),
   }) => ReadingSessionsTableData(
     id: id ?? this.id,
     bookId: bookId ?? this.bookId,
     date: date ?? this.date,
     minutes: minutes ?? this.minutes,
+    pagesRead: pagesRead ?? this.pagesRead,
     note: note.present ? note.value : this.note,
     createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
   );
   ReadingSessionsTableData copyWithCompanion(
     ReadingSessionsTableCompanion data,
@@ -1277,8 +1342,10 @@ class ReadingSessionsTableData extends DataClass
       bookId: data.bookId.present ? data.bookId.value : this.bookId,
       date: data.date.present ? data.date.value : this.date,
       minutes: data.minutes.present ? data.minutes.value : this.minutes,
+      pagesRead: data.pagesRead.present ? data.pagesRead.value : this.pagesRead,
       note: data.note.present ? data.note.value : this.note,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
 
@@ -1289,14 +1356,25 @@ class ReadingSessionsTableData extends DataClass
           ..write('bookId: $bookId, ')
           ..write('date: $date, ')
           ..write('minutes: $minutes, ')
+          ..write('pagesRead: $pagesRead, ')
           ..write('note: $note, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, bookId, date, minutes, note, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    bookId,
+    date,
+    minutes,
+    pagesRead,
+    note,
+    createdAt,
+    updatedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1305,8 +1383,10 @@ class ReadingSessionsTableData extends DataClass
           other.bookId == this.bookId &&
           other.date == this.date &&
           other.minutes == this.minutes &&
+          other.pagesRead == this.pagesRead &&
           other.note == this.note &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
 }
 
 class ReadingSessionsTableCompanion
@@ -1315,16 +1395,20 @@ class ReadingSessionsTableCompanion
   final Value<String> bookId;
   final Value<DateTime> date;
   final Value<int> minutes;
+  final Value<int> pagesRead;
   final Value<String?> note;
   final Value<DateTime> createdAt;
+  final Value<DateTime?> updatedAt;
   final Value<int> rowid;
   const ReadingSessionsTableCompanion({
     this.id = const Value.absent(),
     this.bookId = const Value.absent(),
     this.date = const Value.absent(),
     this.minutes = const Value.absent(),
+    this.pagesRead = const Value.absent(),
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ReadingSessionsTableCompanion.insert({
@@ -1332,8 +1416,10 @@ class ReadingSessionsTableCompanion
     required String bookId,
     required DateTime date,
     required int minutes,
+    this.pagesRead = const Value.absent(),
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        bookId = Value(bookId),
@@ -1344,8 +1430,10 @@ class ReadingSessionsTableCompanion
     Expression<String>? bookId,
     Expression<DateTime>? date,
     Expression<int>? minutes,
+    Expression<int>? pagesRead,
     Expression<String>? note,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1353,8 +1441,10 @@ class ReadingSessionsTableCompanion
       if (bookId != null) 'book_id': bookId,
       if (date != null) 'date': date,
       if (minutes != null) 'minutes': minutes,
+      if (pagesRead != null) 'pages_read': pagesRead,
       if (note != null) 'note': note,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1364,8 +1454,10 @@ class ReadingSessionsTableCompanion
     Value<String>? bookId,
     Value<DateTime>? date,
     Value<int>? minutes,
+    Value<int>? pagesRead,
     Value<String?>? note,
     Value<DateTime>? createdAt,
+    Value<DateTime?>? updatedAt,
     Value<int>? rowid,
   }) {
     return ReadingSessionsTableCompanion(
@@ -1373,8 +1465,10 @@ class ReadingSessionsTableCompanion
       bookId: bookId ?? this.bookId,
       date: date ?? this.date,
       minutes: minutes ?? this.minutes,
+      pagesRead: pagesRead ?? this.pagesRead,
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1394,11 +1488,17 @@ class ReadingSessionsTableCompanion
     if (minutes.present) {
       map['minutes'] = Variable<int>(minutes.value);
     }
+    if (pagesRead.present) {
+      map['pages_read'] = Variable<int>(pagesRead.value);
+    }
     if (note.present) {
       map['note'] = Variable<String>(note.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1413,8 +1513,10 @@ class ReadingSessionsTableCompanion
           ..write('bookId: $bookId, ')
           ..write('date: $date, ')
           ..write('minutes: $minutes, ')
+          ..write('pagesRead: $pagesRead, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2016,8 +2118,10 @@ typedef $$ReadingSessionsTableTableCreateCompanionBuilder =
       required String bookId,
       required DateTime date,
       required int minutes,
+      Value<int> pagesRead,
       Value<String?> note,
       Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
       Value<int> rowid,
     });
 typedef $$ReadingSessionsTableTableUpdateCompanionBuilder =
@@ -2026,8 +2130,10 @@ typedef $$ReadingSessionsTableTableUpdateCompanionBuilder =
       Value<String> bookId,
       Value<DateTime> date,
       Value<int> minutes,
+      Value<int> pagesRead,
       Value<String?> note,
       Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
       Value<int> rowid,
     });
 
@@ -2088,6 +2194,11 @@ class $$ReadingSessionsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get pagesRead => $composableBuilder(
+    column: $table.pagesRead,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get note => $composableBuilder(
     column: $table.note,
     builder: (column) => ColumnFilters(column),
@@ -2095,6 +2206,11 @@ class $$ReadingSessionsTableTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2146,6 +2262,11 @@ class $$ReadingSessionsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get pagesRead => $composableBuilder(
+    column: $table.pagesRead,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get note => $composableBuilder(
     column: $table.note,
     builder: (column) => ColumnOrderings(column),
@@ -2153,6 +2274,11 @@ class $$ReadingSessionsTableTableOrderingComposer
 
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2198,11 +2324,17 @@ class $$ReadingSessionsTableTableAnnotationComposer
   GeneratedColumn<int> get minutes =>
       $composableBuilder(column: $table.minutes, builder: (column) => column);
 
+  GeneratedColumn<int> get pagesRead =>
+      $composableBuilder(column: $table.pagesRead, builder: (column) => column);
+
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   $$BooksTableTableAnnotationComposer get bookId {
     final $$BooksTableTableAnnotationComposer composer = $composerBuilder(
@@ -2268,16 +2400,20 @@ class $$ReadingSessionsTableTableTableManager
                 Value<String> bookId = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
                 Value<int> minutes = const Value.absent(),
+                Value<int> pagesRead = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ReadingSessionsTableCompanion(
                 id: id,
                 bookId: bookId,
                 date: date,
                 minutes: minutes,
+                pagesRead: pagesRead,
                 note: note,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2286,16 +2422,20 @@ class $$ReadingSessionsTableTableTableManager
                 required String bookId,
                 required DateTime date,
                 required int minutes,
+                Value<int> pagesRead = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ReadingSessionsTableCompanion.insert(
                 id: id,
                 bookId: bookId,
                 date: date,
                 minutes: minutes,
+                pagesRead: pagesRead,
                 note: note,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

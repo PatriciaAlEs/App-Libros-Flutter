@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
 import '../../../stats/presentation/providers/stats_provider.dart';
+import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 import '../../data/repositories/reading_session_repository_provider.dart';
 import '../../domain/entities/reading_session.dart';
+import '../../domain/usecases/register_reading_session.dart';
+import '../providers/reading_sessions_provider.dart';
+import '../providers/register_reading_session_provider.dart';
 
 class SessionFormScreen extends ConsumerStatefulWidget {
   const SessionFormScreen({super.key, this.initialDate, this.session});
@@ -21,6 +24,7 @@ class SessionFormScreen extends ConsumerStatefulWidget {
 
 class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _pagesReadController = TextEditingController();
   final _minutesController = TextEditingController();
   final _noteController = TextEditingController();
   String? _bookId;
@@ -36,6 +40,9 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
     _date = DateTime(initial.year, initial.month, initial.day);
     if (widget.session case final session?) {
       _bookId = session.bookId;
+      _pagesReadController.text = session.pagesRead > 0
+          ? session.pagesRead.toString()
+          : '';
       _minutesController.text = session.minutes.toString();
       _noteController.text = session.note ?? '';
     }
@@ -43,6 +50,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
 
   @override
   void dispose() {
+    _pagesReadController.dispose();
     _minutesController.dispose();
     _noteController.dispose();
     super.dispose();
@@ -53,25 +61,43 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
 
     setState(() => _isSaving = true);
     try {
-      final repository = ref.read(readingSessionRepositoryProvider);
+      final pagesRead = int.tryParse(_pagesReadController.text.trim()) ?? 0;
+      final minutes = int.tryParse(_minutesController.text.trim()) ?? 0;
+      final note = _noteController.text.trim().isEmpty
+          ? null
+          : _noteController.text.trim();
       final existingSession = widget.session;
-      final session = ReadingSession(
-        id: existingSession?.id ?? const Uuid().v4(),
-        bookId: _bookId!,
-        date: _date,
-        minutes: int.parse(_minutesController.text.trim()),
-        note: _noteController.text.trim().isEmpty
-            ? null
-            : _noteController.text.trim(),
-        createdAt: existingSession?.createdAt ?? DateTime.now(),
-      );
 
       if (_isEditing) {
+        final repository = ref.read(readingSessionRepositoryProvider);
+        final session = ReadingSession(
+          id: existingSession!.id,
+          bookId: _bookId!,
+          date: _date,
+          minutes: minutes,
+          pagesRead: pagesRead,
+          note: note,
+          createdAt: existingSession.createdAt,
+          updatedAt: DateTime.now(),
+        );
         await repository.updateSession(session);
       } else {
-        await repository.addSession(session);
+        await ref
+            .read(registerReadingSessionProvider)
+            .call(
+              RegisterReadingSessionInput(
+                bookId: _bookId!,
+                sessionDate: _date,
+                pagesRead: pagesRead,
+                minutes: minutes,
+                note: note,
+              ),
+            );
       }
       ref.invalidate(statsProvider);
+      ref.invalidate(statisticsSummaryProvider);
+      ref.invalidate(booksProvider);
+      ref.invalidate(readingSessionsForDayProvider(_date));
       if (mounted) Navigator.pop(context, true);
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -140,6 +166,17 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  controller: _pagesReadController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Paginas leidas',
+                    suffixText: 'pag',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (_) => _activityValidator(),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
                   controller: _minutesController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
@@ -147,13 +184,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
                     suffixText: 'min',
                     border: OutlineInputBorder(),
                   ),
-                  validator: (value) {
-                    final minutes = int.tryParse(value?.trim() ?? '');
-                    if (minutes == null || minutes <= 0) {
-                      return 'Indica minutos válidos';
-                    }
-                    return null;
-                  },
+                  validator: (_) => _activityValidator(),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -180,6 +211,18 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
         },
       ),
     );
+  }
+
+  String? _activityValidator() {
+    final pagesRead = int.tryParse(_pagesReadController.text.trim()) ?? 0;
+    final minutes = int.tryParse(_minutesController.text.trim()) ?? 0;
+    if (pagesRead < 0 || minutes < 0) {
+      return 'Usa valores positivos';
+    }
+    if (pagesRead == 0 && minutes == 0) {
+      return 'Indica paginas o minutos';
+    }
+    return null;
   }
 
   Future<void> _pickDate() async {

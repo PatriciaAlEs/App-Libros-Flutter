@@ -117,6 +117,9 @@ class _FakeReadingSessionRepository implements ReadingSessionRepository {
   Future<void> addSession(ReadingSession session) async {}
 
   @override
+  Future<void> updateSession(ReadingSession session) async {}
+
+  @override
   Future<void> deleteSession(String id) async {
     deletedSessionId = id;
   }
@@ -127,15 +130,17 @@ class _FakeReadingSessionRepository implements ReadingSessionRepository {
   }
 
   @override
+  Future<List<ReadingSession>> getSessionsForBook(String bookId) async {
+    return sessionsForDay.where((session) => session.bookId == bookId).toList();
+  }
+
+  @override
   Future<List<ReadingSession>> getSessionsInRange(
     DateTime start,
     DateTime end,
   ) async {
     return sessionsForDay;
   }
-
-  @override
-  Future<void> updateSession(ReadingSession session) async {}
 
   @override
   Stream<List<ReadingSession>> watchSessionsInRange(

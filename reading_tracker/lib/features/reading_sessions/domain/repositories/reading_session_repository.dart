@@ -6,6 +6,7 @@ abstract interface class ReadingSessionRepository {
   Future<void> deleteSession(String id);
   Future<List<ReadingSession>> getSessionsForDay(DateTime day);
   Future<List<ReadingSession>> getSessionsInRange(DateTime start, DateTime end);
+  Future<List<ReadingSession>> getSessionsForBook(String bookId);
   Stream<List<ReadingSession>> watchSessionsInRange(
     DateTime start,
     DateTime end,

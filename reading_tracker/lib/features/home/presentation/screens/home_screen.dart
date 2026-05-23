@@ -4,9 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
-import '../../../reading_sessions/data/repositories/reading_session_repository_provider.dart';
 import '../../../reading_sessions/domain/entities/reading_session.dart';
+import '../../../reading_sessions/domain/usecases/register_reading_session.dart';
 import '../../../reading_sessions/presentation/providers/reading_sessions_provider.dart';
+import '../../../reading_sessions/presentation/providers/register_reading_session_provider.dart';
 import '../../../stats/domain/stats_calculator.dart';
 import '../../../stats/presentation/providers/stats_provider.dart';
 import '../../../stats/presentation/providers/statistics_summary_provider.dart';
@@ -170,34 +171,23 @@ class HomeScreen extends ConsumerWidget {
       return;
     }
 
-    final now = DateTime.now();
     await ref
-        .read(booksProvider.notifier)
-        .updateBook(
-          book.copyWith(
-            currentPage: update.currentPage ?? book.currentPage,
-            totalPages: update.totalPages ?? book.totalPages,
-            updatedAt: now,
+        .read(registerReadingSessionProvider)
+        .call(
+          RegisterReadingSessionInput(
+            bookId: book.id,
+            sessionDate: DateTime.now(),
+            pagesRead: update.pagesAdded,
+            minutes: update.minutes,
+            currentPage: update.currentPage,
+            totalPages: update.totalPages,
+            note: null,
           ),
         );
 
-    if (update.hasReadingActivity) {
-      await ref
-          .read(readingSessionRepositoryProvider)
-          .addSession(
-            ReadingSession(
-              id: 'session-${now.microsecondsSinceEpoch}',
-              bookId: book.id,
-              date: now,
-              minutes: update.minutes,
-              note: update.activityNote,
-              createdAt: now,
-            ),
-          );
-    }
-
     ref.invalidate(statsProvider);
     ref.invalidate(statisticsSummaryProvider);
+    ref.invalidate(booksProvider);
     ref.invalidate(readingSessionsForRangeProvider(recentActivityRange));
     if (!context.mounted) return;
     ScaffoldMessenger.of(
@@ -637,7 +627,11 @@ class _QuickReadingDialogState extends State<_QuickReadingDialog> {
     final currentPageInput = int.tryParse(_currentPageController.text.trim());
     final totalPagesInput = int.tryParse(_totalPagesController.text.trim());
     final previousPage = widget.book.currentPage ?? 0;
-    final currentPage = currentPageInput ?? previousPage + pagesRead;
+    final currentPageWasEdited =
+        currentPageInput != null && currentPageInput != previousPage;
+    final currentPage = currentPageWasEdited
+        ? currentPageInput
+        : previousPage + pagesRead;
     final pagesAdded = pagesRead > 0
         ? pagesRead
         : currentPage > previousPage
@@ -897,7 +891,7 @@ class _ActivityTile extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        trailing: Text('${session.minutes} min'),
+        trailing: Text(_activityValue(session)),
         onTap: book == null
             ? null
             : () => Navigator.pushNamed(
@@ -913,9 +907,18 @@ class _ActivityTile extends StatelessWidget {
     final parts = <String>[
       _formatDateTime(session.createdAt),
       if (book?.author?.isNotEmpty == true) book!.author!,
+      if (session.pagesRead > 0) '${session.pagesRead} paginas leidas',
       if (session.note?.isNotEmpty == true) session.note!,
     ];
     return parts.join(' · ');
+  }
+
+  String _activityValue(ReadingSession session) {
+    final parts = <String>[
+      if (session.pagesRead > 0) '${session.pagesRead} pag.',
+      if (session.minutes > 0) '${session.minutes} min',
+    ];
+    return parts.isEmpty ? '-' : parts.join(' · ');
   }
 
   String _formatDateTime(DateTime date) {

@@ -46,8 +46,8 @@ void main() {
     expect(find.text('Current Book'), findsOneWidget);
     expect(find.text('Original note'), findsOneWidget);
 
-    await tester.enterText(find.byType(TextFormField).at(0), '45');
-    await tester.enterText(find.byType(TextFormField).at(1), 'Updated note');
+    await tester.enterText(find.byType(TextFormField).at(1), '45');
+    await tester.enterText(find.byType(TextFormField).at(2), 'Updated note');
     await tester.tap(find.text('Guardar cambios'));
     await tester.pumpAndSettle();
 
@@ -187,6 +187,11 @@ class _FakeReadingSessionRepository implements ReadingSessionRepository {
   @override
   Future<List<ReadingSession>> getSessionsForDay(DateTime day) async {
     return sessionsForDay;
+  }
+
+  @override
+  Future<List<ReadingSession>> getSessionsForBook(String bookId) async {
+    return sessionsForDay.where((session) => session.bookId == bookId).toList();
   }
 
   @override

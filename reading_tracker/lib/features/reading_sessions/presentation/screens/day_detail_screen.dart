@@ -221,7 +221,7 @@ class _SessionTile extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('${session.minutes} min'),
+            Text(_sessionValue(session)),
             IconButton(
               tooltip: 'Editar rato de lectura',
               icon: const Icon(Icons.edit_outlined),
@@ -245,6 +245,14 @@ class _SessionTile extends StatelessWidget {
               },
       ),
     );
+  }
+
+  String _sessionValue(ReadingSession session) {
+    final parts = <String>[
+      if (session.pagesRead > 0) '${session.pagesRead} pag.',
+      if (session.minutes > 0) '${session.minutes} min',
+    ];
+    return parts.isEmpty ? '-' : parts.join(' · ');
   }
 }
 

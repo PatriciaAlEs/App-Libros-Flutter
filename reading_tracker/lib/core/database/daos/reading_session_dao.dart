@@ -48,6 +48,16 @@ class ReadingSessionDao extends DatabaseAccessor<AppDatabase>
     return _sessionsInRange(start, end).get();
   }
 
+  Future<List<ReadingSessionsTableData>> getSessionsForBook(String bookId) {
+    return (select(readingSessionsTable)
+          ..where((table) => table.bookId.equals(bookId))
+          ..orderBy([
+            (table) => OrderingTerm.desc(table.date),
+            (table) => OrderingTerm.desc(table.createdAt),
+          ]))
+        .get();
+  }
+
   Stream<List<ReadingSessionsTableData>> watchSessionsInRange(
     DateTime start,
     DateTime end,

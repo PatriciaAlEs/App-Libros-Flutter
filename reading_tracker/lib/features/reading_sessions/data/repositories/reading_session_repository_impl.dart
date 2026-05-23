@@ -49,6 +49,13 @@ class ReadingSessionRepositoryImpl implements ReadingSessionRepository {
   }
 
   @override
+  Future<List<ReadingSession>> getSessionsForBook(String bookId) async {
+    await _seeder.seedIfNeeded();
+    final rows = await _dao.getSessionsForBook(bookId);
+    return rows.map((row) => row.toDomain()).toList();
+  }
+
+  @override
   Stream<List<ReadingSession>> watchSessionsInRange(
     DateTime start,
     DateTime end,

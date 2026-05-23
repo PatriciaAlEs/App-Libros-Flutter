@@ -10,8 +10,10 @@ extension ReadingSessionDriftMapper on ReadingSession {
       bookId: Value(bookId),
       date: Value(DateTime(date.year, date.month, date.day)),
       minutes: Value(minutes),
+      pagesRead: Value(pagesRead),
       note: Value(note),
       createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
     );
   }
 }
@@ -23,8 +25,10 @@ extension ReadingSessionsTableDataMapper on ReadingSessionsTableData {
       bookId: bookId,
       date: date,
       minutes: minutes,
+      pagesRead: pagesRead,
       note: note,
       createdAt: createdAt,
+      updatedAt: updatedAt,
     );
   }
 }

@@ -395,13 +395,18 @@ class _WeekSessionRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Text(
-            '${session.minutes} min',
-            style: Theme.of(context).textTheme.labelLarge,
-          ),
+          Text(_sessionValue(), style: Theme.of(context).textTheme.labelLarge),
         ],
       ),
     );
+  }
+
+  String _sessionValue() {
+    final parts = <String>[
+      if (session.pagesRead > 0) '${session.pagesRead} pag.',
+      if (session.minutes > 0) '${session.minutes} min',
+    ];
+    return parts.isEmpty ? '-' : parts.join(' · ');
   }
 }
 
