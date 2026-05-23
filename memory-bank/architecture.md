@@ -36,12 +36,13 @@ reading_tracker/lib/
 
 - `books`: busqueda Open Library, repositorio, entidad `Book`, estado de libro y UI de listado/detalle/formulario.
 - `reading_sessions`: entidad `ReadingSession`, repositorio, calendario, detalle de dia y formulario de sesion.
-- `stats`: calculos, provider y pantalla. Estado parcial.
+- `stats`: calculos, provider y pantalla.
 
 ## Persistencia
 
-- `AppDatabase` tiene `schemaVersion = 2`.
+- `AppDatabase` tiene `schemaVersion = 3`.
 - Tablas: `books`, `reading_sessions`.
+- Tabla manual adicional: `app_settings` para configuracion simple como `annualReadingGoal`.
 - IO: `NativeDatabase` sobre `reading_tracker.sqlite`.
 - Web: `WebDatabase` con IndexedDB (`reading_tracker`).
 - Seed debug en `DatabaseSeeder`, solo si la base esta vacia.
@@ -53,6 +54,7 @@ reading_tracker/lib/
 - Sesiones por rango usan `StreamProvider.family`.
 - Sesiones por dia usan `FutureProvider.family`.
 - `statsProvider` calcula con libros y sesiones reales desde repositorios/DAO.
+- `statisticsSummaryProvider` expone la base nueva de Estadisticas MVP calculada desde libros.
 
 ## Integraciones reales
 
@@ -106,6 +108,13 @@ reading_tracker/lib/
 - Decision: definir rutas en `MaterialApp.onGenerateRoute`.
 - Motivo observado: centralizar navegacion entre listado, detalle de libro, calendario, detalle de dia, alta de sesion y stats.
 - Evidencia: `reading_tracker/lib/app.dart` contiene rutas `/`, `/book/add`, `/book/detail`, `/calendar`, `/calendar/day`, `/session/add`, `/stats`.
+
+### Reading sessions como base de Hito 3
+
+- Decision: reutilizar `ReadingSession` y la funcionalidad existente de "ratos de lectura" como base de Reading Sessions & Activity Tracking.
+- Motivo observado: ya existe entidad de dominio, tabla Drift, DAO, repositorio, providers por dia/rango y UI de calendario/formulario.
+- Deuda observada: falta `pagesRead` estructurado, `updatedAt` y consulta por libro; Home guarda paginas en la nota al crear sesiones desde avance rapido.
+- Evidencia: `features/reading_sessions/domain/entities/reading_session.dart`, `core/database/tables/reading_sessions_table.dart`, `features/reading_sessions/presentation/providers/reading_sessions_provider.dart`.
 
 ### Seed data solo en debug
 

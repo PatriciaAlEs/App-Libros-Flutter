@@ -41,6 +41,32 @@ Estado actual implementado:
 - Si hay varias sesiones hoy, aparecen dentro de un contenedor con altura maxima y scroll interno.
 - Empty state actual: "Aun no hay actividad hoy. Registra una sesion para ver tu ritmo de lectura."
 
+## Hito 3 - Reading Sessions & Activity Tracking
+
+Auditoria inicial realizada:
+
+- Ya existe una entidad de dominio `ReadingSession`.
+- Ya existe tabla Drift `reading_sessions`.
+- Ya existe `ReadingSessionDao`.
+- Ya existe contrato `ReadingSessionRepository` e implementacion `ReadingSessionRepositoryImpl`.
+- Ya existen providers para sesiones por dia y por rango.
+- Ya existen pantallas para calendario, detalle de dia y formulario de rato de lectura.
+- La funcionalidad actual de "ratos de lectura" equivale conceptualmente a la base de `ReadingSession`; no se debe crear una segunda entidad paralela.
+- Las sesiones ya se asocian a un libro mediante `bookId`.
+- Las sesiones ya se persisten localmente.
+- Las sesiones ya pueden consultarse por dia y por rango.
+- Home ya crea sesiones desde el registro rapido cuando hay paginas o minutos.
+- El calendario ya consume sesiones por rango/dia.
+
+Deuda detectada para consolidar Hito 3:
+
+- `ReadingSession` no guarda `pagesRead` como campo estructurado; Home lo conserva en `note` como texto.
+- `ReadingSession` no tiene `updatedAt`.
+- No existe consulta directa por libro en el repositorio.
+- El formulario general de sesiones registra minutos y nota, pero no paginas leidas.
+- La actualizacion de `currentPage` esta en flujos de UI concretos, no centralizada como caso de uso de sesion.
+- Aun no hay regla central para evitar superar `totalPages` o completar automaticamente si se llega al final.
+
 ## Libros y progreso
 
 Estado actual implementado:
