@@ -154,7 +154,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
         _finishedAt = null;
       } else if (status == BookStatus.completed) {
         _startedAt ??= now;
-        _finishedAt ??= now;
+        _finishedAt = null;
       } else {
         _startedAt ??= now;
         _finishedAt = null;
