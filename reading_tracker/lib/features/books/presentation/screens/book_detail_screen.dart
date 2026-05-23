@@ -93,12 +93,35 @@ class _BookDetailView extends ConsumerWidget {
       genre: book.genre,
       language: book.language,
       status: newStatus,
-      startDate: newStatus == BookStatus.reading
+      startDate: newStatus == BookStatus.reading && book.startDate == null
           ? DateTime.now()
           : book.startDate,
       completedDate: newStatus == BookStatus.completed
           ? DateTime.now()
           : book.completedDate,
+      createdAt: book.createdAt,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  Book _updatedBookForDates(_DatesEditResult dates) {
+    return Book(
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      totalPages: book.totalPages,
+      currentPage: book.currentPage,
+      rating: book.rating,
+      notes: book.notes,
+      publisher: book.publisher,
+      coverUrl: book.coverUrl,
+      isbn: book.isbn,
+      firstPublishYear: book.firstPublishYear,
+      genre: book.genre,
+      language: book.language,
+      status: book.status,
+      startDate: dates.startedAt,
+      completedDate: dates.finishedAt,
       createdAt: book.createdAt,
       updatedAt: DateTime.now(),
     );
@@ -139,7 +162,24 @@ class _BookDetailView extends ConsumerWidget {
     if (!context.mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Páginas actualizadas')));
+    ).showSnackBar(const SnackBar(content: Text('Paginas actualizadas')));
+  }
+
+  Future<void> _openDatesEditor(BuildContext context, WidgetRef ref) async {
+    final dates = await showDialog<_DatesEditResult>(
+      context: context,
+      builder: (_) => _DatesEditDialog(book: book),
+    );
+    if (dates == null) return;
+
+    await ref
+        .read(booksProvider.notifier)
+        .updateBook(_updatedBookForDates(dates));
+    ref.invalidate(statsProvider);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Fechas actualizadas')));
   }
 
   @override
@@ -170,7 +210,10 @@ class _BookDetailView extends ConsumerWidget {
             onEditPages: () => _openPagesEditor(context, ref),
           ),
           const SizedBox(height: 24),
-          _DatesSection(book: book),
+          _DatesSection(
+            book: book,
+            onEditDates: () => _openDatesEditor(context, ref),
+          ),
         ],
       ),
     );
@@ -392,7 +435,7 @@ class _CompletionReviewSheetState extends State<_CompletionReviewSheet> {
               maxLines: 3,
               textCapitalization: TextCapitalization.sentences,
               decoration: const InputDecoration(
-                labelText: 'Reseña u opinion corta',
+                labelText: 'Resena u opinion corta',
                 hintText: 'Opcional',
                 border: OutlineInputBorder(),
               ),
@@ -400,7 +443,7 @@ class _CompletionReviewSheetState extends State<_CompletionReviewSheet> {
             const SizedBox(height: 20),
             FilledButton(
               onPressed: _save,
-              child: const Text('Guardar valoración'),
+              child: const Text('Guardar valoracion'),
             ),
             const SizedBox(height: 8),
             TextButton(onPressed: _skip, child: const Text('Omitir')),
@@ -444,12 +487,12 @@ class _ReaderDataSection extends StatelessWidget {
         const SizedBox(height: 8),
         _DateRow(label: 'Progreso', value: progress.isEmpty ? '-' : progress),
         _DateRow(
-          label: 'Total de páginas',
+          label: 'Total de paginas',
           value: book.totalPages == null ? '-' : '${book.totalPages}',
         ),
         _DateRow(
-          label: 'Valoración',
-          value: book.rating == null ? '-' : '${book.rating}/5',
+          label: 'Valoracion',
+          value: book.rating == null ? '-' : '${_formatRating(book.rating!)}/5',
         ),
         const SizedBox(height: 8),
         Align(
@@ -457,7 +500,7 @@ class _ReaderDataSection extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: onEditPages,
             icon: const Icon(Icons.edit_outlined),
-            label: const Text('Editar páginas'),
+            label: const Text('Editar paginas'),
           ),
         ),
         if (book.notes != null && book.notes!.isNotEmpty) ...[
@@ -466,6 +509,10 @@ class _ReaderDataSection extends StatelessWidget {
         ],
       ],
     );
+  }
+
+  String _formatRating(double rating) {
+    return rating.toStringAsFixed(rating % 1 == 0 ? 1 : 2);
   }
 }
 
@@ -535,7 +582,7 @@ class _PagesEditSheetState extends State<_PagesEditSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Editar páginas',
+              'Editar paginas',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -545,7 +592,7 @@ class _PagesEditSheetState extends State<_PagesEditSheet> {
               controller: _currentPageController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                labelText: 'Página actual',
+                labelText: 'Pagina actual',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -554,14 +601,14 @@ class _PagesEditSheetState extends State<_PagesEditSheet> {
               controller: _totalPagesController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                labelText: 'Total de páginas',
+                labelText: 'Total de paginas',
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 20),
             FilledButton(
               onPressed: _save,
-              child: const Text('Guardar páginas'),
+              child: const Text('Guardar paginas'),
             ),
           ],
         ),
@@ -571,9 +618,10 @@ class _PagesEditSheetState extends State<_PagesEditSheet> {
 }
 
 class _DatesSection extends StatelessWidget {
-  const _DatesSection({required this.book});
+  const _DatesSection({required this.book, required this.onEditDates});
 
   final Book book;
+  final VoidCallback onEditDates;
 
   String _format(DateTime? date) {
     if (date == null) return '-';
@@ -587,9 +635,134 @@ class _DatesSection extends StatelessWidget {
       children: [
         Text('Fechas', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        _DateRow(label: 'Añadido', value: _format(book.createdAt)),
-        _DateRow(label: 'Empezado', value: _format(book.startDate)),
-        _DateRow(label: 'Terminado', value: _format(book.completedDate)),
+        _DateRow(label: 'Anadido', value: _format(book.addedAt)),
+        _DateRow(label: 'Empezado', value: _format(book.startedAt)),
+        _DateRow(label: 'Terminado', value: _format(book.finishedAt)),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: OutlinedButton.icon(
+            onPressed: onEditDates,
+            icon: const Icon(Icons.event_outlined),
+            label: const Text('Editar fechas'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DatesEditResult {
+  const _DatesEditResult({this.startedAt, this.finishedAt});
+
+  final DateTime? startedAt;
+  final DateTime? finishedAt;
+}
+
+class _DatesEditDialog extends StatefulWidget {
+  const _DatesEditDialog({required this.book});
+
+  final Book book;
+
+  @override
+  State<_DatesEditDialog> createState() => _DatesEditDialogState();
+}
+
+class _DatesEditDialogState extends State<_DatesEditDialog> {
+  DateTime? _startedAt;
+  DateTime? _finishedAt;
+
+  @override
+  void initState() {
+    super.initState();
+    _startedAt = widget.book.startedAt;
+    _finishedAt = widget.book.finishedAt;
+  }
+
+  Future<void> _pickStartedAt() async {
+    final selected = await _pickDate(_startedAt);
+    if (selected != null) {
+      setState(() => _startedAt = selected);
+    }
+  }
+
+  Future<void> _pickFinishedAt() async {
+    final selected = await _pickDate(_finishedAt);
+    if (selected != null) {
+      setState(() => _finishedAt = selected);
+    }
+  }
+
+  Future<DateTime?> _pickDate(DateTime? initialDate) {
+    final now = DateTime.now();
+    return showDatePicker(
+      context: context,
+      initialDate: initialDate ?? now,
+      firstDate: DateTime(1900),
+      lastDate: DateTime(now.year + 5),
+    );
+  }
+
+  void _save() {
+    Navigator.pop(
+      context,
+      _DatesEditResult(startedAt: _startedAt, finishedAt: _finishedAt),
+    );
+  }
+
+  String _format(DateTime? date) {
+    if (date == null) return 'Sin fecha';
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Editar fechas'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Anadido'),
+              subtitle: Text(_format(widget.book.addedAt)),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Empezado'),
+              subtitle: Text(_format(_startedAt)),
+              trailing: IconButton(
+                tooltip: 'Quitar fecha de inicio',
+                icon: const Icon(Icons.close),
+                onPressed: _startedAt == null
+                    ? null
+                    : () => setState(() => _startedAt = null),
+              ),
+              onTap: _pickStartedAt,
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Terminado'),
+              subtitle: Text(_format(_finishedAt)),
+              trailing: IconButton(
+                tooltip: 'Quitar fecha de fin',
+                icon: const Icon(Icons.close),
+                onPressed: _finishedAt == null
+                    ? null
+                    : () => setState(() => _finishedAt = null),
+              ),
+              onTap: _pickFinishedAt,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(onPressed: _save, child: const Text('Guardar fechas')),
       ],
     );
   }
@@ -657,7 +830,7 @@ class _DeleteDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Eliminar libro'),
-      content: const Text('Esta acción no se puede deshacer.'),
+      content: const Text('Esta accion no se puede deshacer.'),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),

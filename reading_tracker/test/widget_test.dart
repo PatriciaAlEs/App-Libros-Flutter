@@ -78,11 +78,17 @@ void main() {
 
     await tester.tap(find.text('Libro de prueba'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Pendiente'));
+    await tester.tap(find.byType(DropdownButtonFormField<BookStatus>));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Leyendo').last);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Guardar libro'));
+    final saveButton = find.widgetWithText(FilledButton, 'Guardar libro');
+    await tester.scrollUntilVisible(
+      saveButton,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(saveButton);
     await tester.pumpAndSettle();
 
     expect(repository.addedBook, isNotNull);

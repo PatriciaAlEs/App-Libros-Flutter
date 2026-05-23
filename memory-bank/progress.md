@@ -14,6 +14,12 @@
 - Calendario de lectura.
 - Estadisticas basicas iniciales.
 - Busqueda con Open Library.
+- Open Library autorrellena `totalPages` con `number_of_pages` o `number_of_pages_median` cuando estan disponibles.
+- `totalPages` permanece editable manualmente.
+- Estados de libro ampliados con `paused` y `abandoned`.
+- Fechas de lectura `startedAt` y `finishedAt` editables manualmente desde detalle.
+- Formulario de alta muestra fechas cuando el estado inicial lo requiere.
+- Biblioteca muestra estado, progreso en libros en lectura y rating en completados valorados.
 - Home convertida en dashboard principal.
 - CTA/card "Anadir nuevo libro" en Home.
 - Eliminado FAB/boton redundante de anadir libro.
@@ -32,10 +38,12 @@
 - Biblioteca con icono de libros.
 - Biblioteca ordena primero libros en estado `Leyendo` en la vista general.
 - Tests ajustados para el formulario con multiples campos de texto.
+- Test de estado inicial ajustado para hacer visible "Guardar libro" antes de tocarlo.
 
 ## Parcial / en seguimiento
 
 - Validacion final del Sprint UX Home pendiente en terminal del usuario.
+- Validacion final del sprint de ciclo de vida del libro pendiente en terminal del usuario.
 - Revisión de textos y consistencia visual fina pendiente para el sprint visual/UI.
 - Stats MVP queda como siguiente bloque funcional despues de cerrar Home.
 - Open Library puede mejorar resultados en espanol, pero queda para una fase posterior.
@@ -45,21 +53,14 @@
 El usuario debe ejecutar:
 
 ```bash
-dart format lib/features/books/presentation/screens/book_form_screen.dart lib/features/books/presentation/screens/book_detail_screen.dart lib/features/books/presentation/screens/books_list_screen.dart lib/features/home/presentation/screens/home_screen.dart test/widget_test.dart
-flutter analyze
+dart format lib/features/books/data/datasources/book_api_datasource.dart lib/features/books/domain/entities/book.dart lib/features/books/domain/entities/book_search_result.dart lib/features/books/domain/enums/book_status.dart lib/features/books/presentation/screens/book_detail_screen.dart lib/features/books/presentation/screens/book_form_screen.dart lib/features/books/presentation/widgets/book_card.dart test/widget_test.dart
 flutter test
-```
-
-Luego revisar:
-
-```bash
-git status
-git diff
+flutter analyze
 ```
 
 ## Pendiente futuro
 
-- Cerrar Sprint UX Home tras validacion.
+- Cerrar sprint de ciclo de vida del libro tras validacion.
 - Continuar con Stats MVP.
 - Investigar Open Library para mejorar resultados en espanol.
 - Hacer sprint visual/UI: paleta, estilo, referencias y design system.

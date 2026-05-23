@@ -1,7 +1,9 @@
 enum BookStatus {
   pending,
   reading,
-  completed;
+  completed,
+  paused,
+  abandoned;
 
   static BookStatus fromString(String value) {
     return BookStatus.values.firstWhere(
@@ -20,6 +22,10 @@ enum BookStatus {
         return 'Leyendo';
       case BookStatus.completed:
         return 'Completado';
+      case BookStatus.paused:
+        return 'Pausado';
+      case BookStatus.abandoned:
+        return 'Abandonado';
     }
   }
 }

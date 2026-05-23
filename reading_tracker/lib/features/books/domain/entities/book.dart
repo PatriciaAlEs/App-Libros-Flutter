@@ -41,6 +41,10 @@ class Book {
   final DateTime createdAt;
   final DateTime? updatedAt;
 
+  DateTime get addedAt => createdAt;
+  DateTime? get startedAt => startDate;
+  DateTime? get finishedAt => completedDate;
+
   Book copyWith({
     String? id,
     String? title,

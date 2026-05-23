@@ -26,7 +26,7 @@
 - Tratar `Stats` como area separada: no tocarla en tareas de calendario/sesiones salvo que se pida.
 - El usuario ejecuta `dart format`, `flutter analyze` y `flutter test` en su terminal de VS Code salvo peticion explicita en contrario.
 - No hacer commit ni push automaticamente.
-- Antes de cerrar un bloque, comprobar cambios reales con `git status` y `git diff`.
+- No revisar `git status` ni `git diff` salvo que el usuario lo pida explicitamente.
 - No confiar solo en resumen conversacional; verificar archivos modificados.
 - Mantener cambios pequenos y acotados por problema.
 - No tocar Open Library, modelos ni persistencia salvo que el requisito lo pida claramente.

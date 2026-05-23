@@ -6,6 +6,7 @@ class BookSearchResult {
     this.coverUrl,
     this.isbn,
     this.firstPublishYear,
+    this.numberOfPages,
   });
 
   final String title;
@@ -14,4 +15,5 @@ class BookSearchResult {
   final String? coverUrl;
   final String? isbn;
   final int? firstPublishYear;
+  final int? numberOfPages;
 }

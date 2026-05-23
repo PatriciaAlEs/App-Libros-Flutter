@@ -30,6 +30,8 @@ class BookApiDatasource {
         'cover_i',
         'isbn',
         'first_publish_year',
+        'number_of_pages',
+        'number_of_pages_median',
       ].join(','),
     });
 
@@ -61,6 +63,9 @@ class BookApiDatasource {
           : null,
       isbn: isbns.isEmpty ? null : isbns.first,
       firstPublishYear: json['first_publish_year'] as int?,
+      numberOfPages:
+          _intValue(json['number_of_pages']) ??
+          _intValue(json['number_of_pages_median']),
     );
   }
 
@@ -77,5 +82,17 @@ class BookApiDatasource {
           .toList();
     }
     return const [];
+  }
+
+  int? _intValue(Object? value) {
+    if (value is int && value > 0) return value;
+    if (value is num && value > 0) return value.round();
+    if (value is List) {
+      for (final item in value) {
+        final parsed = _intValue(item);
+        if (parsed != null) return parsed;
+      }
+    }
+    return null;
   }
 }
