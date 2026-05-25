@@ -72,6 +72,8 @@ Consolidacion minima implementada:
 - El formulario general permite seleccionar una fecha pasada o la fecha actual; no permite crear sesiones futuras.
 - El registro rapido desde Home preselecciona hoy pero permite cambiar a una fecha pasada antes de guardar.
 - La actividad reciente, detalle de dia y calendario muestran paginas/minutos cuando existen.
+- El calendario muestra intensidad diaria por `ReadingSession` con niveles sin actividad, baja, media y alta.
+- El calendario muestra resumen del periodo visible con paginas leidas, minutos leidos y dias activos.
 - Cuando una sesion nueva con paginas leidas hace que el progreso alcance `totalPages`, la app ofrece completar el libro y abrir valoracion/resena opcional, sin completar automaticamente.
 - Las rachas de lectura se calculan desde dias con al menos una `ReadingSession`, agrupando por fecha sin hora.
 - La racha actual cuenta hasta hoy si hay sesion hoy, o hasta ayer si ayer tuvo sesion y hoy aun no.

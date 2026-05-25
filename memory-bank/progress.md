@@ -61,6 +61,7 @@
 - Finalizacion inteligente desde sesiones implementada: al alcanzar `totalPages`, se ofrece completar y valorar sin hacerlo automaticamente.
 - Reading Streaks implementado en Estadisticas: racha actual y mejor racha basadas en dias con `ReadingSession`.
 - Registro de sesiones pasadas habilitado desde formulario general y registro rapido de Home, bloqueando fechas futuras.
+- Calendario enriquecido por intensidad implementado con resumen de actividad y leyenda visual.
 
 ## Parcial / en seguimiento
 

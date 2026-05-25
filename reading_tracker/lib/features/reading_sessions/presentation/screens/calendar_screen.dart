@@ -3,9 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../books/domain/entities/book.dart';
 import '../../domain/entities/reading_session.dart';
+import '../models/reading_day_activity.dart';
 import '../providers/reading_sessions_provider.dart';
 
 enum CalendarMode { month, week }
+
+Color _activityColor(
+  BuildContext context,
+  ReadingActivityIntensity intensity,
+) {
+  final colorScheme = Theme.of(context).colorScheme;
+  return switch (intensity) {
+    ReadingActivityIntensity.none => colorScheme.surface,
+    ReadingActivityIntensity.low => colorScheme.secondaryContainer,
+    ReadingActivityIntensity.medium => colorScheme.tertiaryContainer,
+    ReadingActivityIntensity.high => colorScheme.primaryContainer,
+  };
+}
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -53,6 +67,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         error: (error, _) => Center(child: Text('Error: $error')),
         data: (sessions) {
           final sessionsByDay = _groupSessionsByDay(sessions);
+          final activitiesByDay = ReadingDayActivity.fromSessions(sessions);
+          final summary = ReadingActivitySummary.fromActivities(
+            activitiesByDay.values,
+          );
           return Column(
             children: [
               _CalendarHeader(
@@ -68,16 +86,25 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       : _focusedDate.add(const Duration(days: 7));
                 }),
               ),
+              _ActivitySummaryCard(
+                title: _mode == CalendarMode.month
+                    ? 'Resumen mensual'
+                    : 'Resumen semanal',
+                summary: summary,
+              ),
+              const _ActivityLegend(),
               Expanded(
                 child: _mode == CalendarMode.month
                     ? _MonthCalendar(
                         focusedDate: _focusedDate,
                         sessionsByDay: sessionsByDay,
+                        activitiesByDay: activitiesByDay,
                         booksById: booksById,
                       )
                     : _WeekCalendar(
                         focusedDate: _focusedDate,
                         sessionsByDay: sessionsByDay,
+                        activitiesByDay: activitiesByDay,
                         booksById: booksById,
                       ),
               ),
@@ -183,15 +210,149 @@ class _CalendarHeader extends StatelessWidget {
   }
 }
 
+class _ActivitySummaryCard extends StatelessWidget {
+  const _ActivitySummaryCard({required this.title, required this.summary});
+
+  final String title;
+  final ReadingActivitySummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+      child: Card(
+        elevation: 0,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 16,
+                runSpacing: 8,
+                children: [
+                  _SummaryMetric(
+                    label: 'Paginas',
+                    value: '${summary.pagesRead}',
+                  ),
+                  _SummaryMetric(
+                    label: 'Minutos',
+                    value: '${summary.minutes}',
+                  ),
+                  _SummaryMetric(
+                    label: 'Dias activos',
+                    value: '${summary.activeDays}',
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SummaryMetric extends StatelessWidget {
+  const _SummaryMetric({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      width: 92,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: theme.textTheme.bodySmall),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActivityLegend extends StatelessWidget {
+  const _ActivityLegend();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 8,
+        children: const [
+          _LegendItem(
+            label: 'Sin actividad',
+            intensity: ReadingActivityIntensity.none,
+          ),
+          _LegendItem(label: 'Baja', intensity: ReadingActivityIntensity.low),
+          _LegendItem(label: 'Media', intensity: ReadingActivityIntensity.medium),
+          _LegendItem(label: 'Alta', intensity: ReadingActivityIntensity.high),
+        ],
+      ),
+    );
+  }
+}
+
+class _LegendItem extends StatelessWidget {
+  const _LegendItem({required this.label, required this.intensity});
+
+  final String label;
+  final ReadingActivityIntensity intensity;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 14,
+          height: 14,
+          decoration: BoxDecoration(
+            color: _activityColor(context, intensity),
+            border: Border.all(color: Theme.of(context).dividerColor),
+            borderRadius: BorderRadius.circular(3),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
+      ],
+    );
+  }
+}
+
 class _MonthCalendar extends StatelessWidget {
   const _MonthCalendar({
     required this.focusedDate,
     required this.sessionsByDay,
+    required this.activitiesByDay,
     required this.booksById,
   });
 
   final DateTime focusedDate;
   final Map<DateTime, List<ReadingSession>> sessionsByDay;
+  final Map<DateTime, ReadingDayActivity> activitiesByDay;
   final Map<String, Book> booksById;
 
   @override
@@ -216,6 +377,7 @@ class _MonthCalendar extends StatelessWidget {
                 day: day,
                 isMuted: day.month != focusedDate.month,
                 sessions: sessionsByDay[_dateOnly(day)] ?? const [],
+                activity: activitiesByDay[_dateOnly(day)],
                 booksById: booksById,
                 compact: true,
               );
@@ -240,11 +402,13 @@ class _WeekCalendar extends StatelessWidget {
   const _WeekCalendar({
     required this.focusedDate,
     required this.sessionsByDay,
+    required this.activitiesByDay,
     required this.booksById,
   });
 
   final DateTime focusedDate;
   final Map<DateTime, List<ReadingSession>> sessionsByDay;
+  final Map<DateTime, ReadingDayActivity> activitiesByDay;
   final Map<String, Book> booksById;
 
   @override
@@ -263,6 +427,7 @@ class _WeekCalendar extends StatelessWidget {
           _WeekDaySection(
             day: day,
             sessions: sessionsByDay[_dateOnly(day)] ?? const [],
+            activity: activitiesByDay[_dateOnly(day)],
             booksById: booksById,
           ),
       ],
@@ -299,22 +464,25 @@ class _WeekDaySection extends StatelessWidget {
   const _WeekDaySection({
     required this.day,
     required this.sessions,
+    required this.activity,
     required this.booksById,
   });
 
   final DateTime day;
   final List<ReadingSession> sessions;
+  final ReadingDayActivity? activity;
   final Map<String, Book> booksById;
 
   @override
   Widget build(BuildContext context) {
-    final totalMinutes = sessions.fold<int>(
-      0,
-      (total, session) => total + session.minutes,
-    );
+    final activity = this.activity;
+    final totalPages = activity?.pagesRead ?? 0;
+    final totalMinutes = activity?.minutes ?? 0;
+    final intensity = activity?.intensity ?? ReadingActivityIntensity.none;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
+      color: _activityColor(context, intensity),
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: () =>
@@ -332,9 +500,9 @@ class _WeekDaySection extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                   ),
-                  if (totalMinutes > 0)
+                  if (totalPages > 0 || totalMinutes > 0)
                     Text(
-                      '$totalMinutes min',
+                      _activityValue(totalPages, totalMinutes),
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                 ],
@@ -356,6 +524,14 @@ class _WeekDaySection extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _activityValue(int pagesRead, int minutes) {
+    final parts = <String>[
+      if (pagesRead > 0) '$pagesRead pag.',
+      if (minutes > 0) '$minutes min',
+    ];
+    return parts.join(' · ');
   }
 
   String _dayTitle(DateTime date) {
@@ -438,6 +614,7 @@ class _CalendarDayCell extends StatelessWidget {
   const _CalendarDayCell({
     required this.day,
     required this.sessions,
+    required this.activity,
     required this.booksById,
     this.isMuted = false,
     this.compact = false,
@@ -445,6 +622,7 @@ class _CalendarDayCell extends StatelessWidget {
 
   final DateTime day;
   final List<ReadingSession> sessions;
+  final ReadingDayActivity? activity;
   final Map<String, Book> booksById;
   final bool isMuted;
   final bool compact;
@@ -455,8 +633,12 @@ class _CalendarDayCell extends StatelessWidget {
     final maxCovers = compact ? 2 : 3;
     final visibleBooks = books.take(maxCovers).toList();
     final extraCount = books.length - visibleBooks.length;
-    final coverWidth = compact ? 22.0 : 28.0;
-    final coverHeight = compact ? 32.0 : 40.0;
+    final coverWidth = compact ? 16.0 : 28.0;
+    final coverHeight = compact ? 22.0 : 40.0;
+    final intensity = activity?.intensity ?? ReadingActivityIntensity.none;
+    final totalPages = activity?.pagesRead ?? 0;
+    final totalMinutes = activity?.minutes ?? 0;
+    final isToday = _isToday(day);
 
     return InkWell(
       borderRadius: BorderRadius.circular(8),
@@ -465,10 +647,13 @@ class _CalendarDayCell extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(compact ? 4 : 6),
         decoration: BoxDecoration(
-          color: _isToday(day)
-              ? Theme.of(context).colorScheme.primaryContainer
-              : Theme.of(context).colorScheme.surface,
-          border: Border.all(color: Theme.of(context).dividerColor),
+          color: _activityColor(context, intensity),
+          border: Border.all(
+            color: isToday
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).dividerColor,
+            width: isToday ? 2 : 1,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -488,15 +673,28 @@ class _CalendarDayCell extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Expanded(
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: _MiniCoverRow(
-                  books: visibleBooks,
-                  extraCount: extraCount,
-                  coverWidth: coverWidth,
-                  coverHeight: coverHeight,
-                  compact: compact,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _MiniCoverRow(
+                    books: visibleBooks,
+                    extraCount: extraCount,
+                    coverWidth: coverWidth,
+                    coverHeight: coverHeight,
+                    compact: compact,
+                  ),
+                  const Spacer(),
+                  if (totalPages > 0 || totalMinutes > 0)
+                    Text(
+                      _activityLabel(totalPages, totalMinutes),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontSize: compact ? 10 : null,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                ],
               ),
             ),
           ],
@@ -521,6 +719,11 @@ class _CalendarDayCell extends StatelessWidget {
     return date.year == now.year &&
         date.month == now.month &&
         date.day == now.day;
+  }
+
+  String _activityLabel(int pagesRead, int minutes) {
+    if (pagesRead > 0) return '$pagesRead pag.';
+    return '$minutes min';
   }
 }
 

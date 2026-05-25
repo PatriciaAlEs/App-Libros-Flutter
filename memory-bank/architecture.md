@@ -132,6 +132,12 @@ reading_tracker/lib/
 - `StatisticsCalculator` agrupa sesiones por fecha normalizada y mantiene la logica fuera de widgets.
 - `BookStatisticsRepository` combina libros, objetivo anual y sesiones existentes para construir el resumen de `/stats`.
 
+### Calendario por intensidad
+
+- Decision: enriquecer el calendario con un modelo local de presentacion (`ReadingDayActivity`) calculado desde sesiones existentes.
+- La intensidad diaria se basa primero en paginas leidas: 1-20 baja, 21-50 media, 51+ alta; si no hay paginas pero si minutos, baja.
+- No requiere tablas, migraciones, paquetes ni entidades de persistencia nuevas.
+
 ### Seed data solo en debug
 
 - Decision: poblar datos de prueba solo en debug y si la base esta vacia.
