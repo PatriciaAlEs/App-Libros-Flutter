@@ -6,7 +6,7 @@
 
 ## Descripcion
 
-App Flutter mobile-first para seguimiento personal de lectura. Permite registrar libros, sesiones de lectura, visualizar actividad en calendario, consultar estadisticas e insights iniciales.
+App Flutter mobile-first para seguimiento personal de lectura. Permite registrar libros, sesiones de lectura, visualizar actividad en calendario, consultar estadisticas e insights de lectura.
 
 ## Problema
 
@@ -54,13 +54,16 @@ Una persona lectora puede tener varios libros pendientes, en curso o completados
 ### Insights
 
 - Hito 4 iniciado.
-- Sprint 1 implementado y validado.
+- Sprint 1 y Sprint 2 implementados y validados.
 - Pantalla `/insights`.
 - Muestra libro mas leido, autor mas leido y genero favorito.
+- Muestra paginas por sesion, minutos por sesion y paginas por dia.
+- Muestra prediccion simple de fin de libro para lecturas activas con datos suficientes.
+- Muestra forecast anual simple de libros completados.
 - Los calculos usan paginas leidas acumuladas desde `ReadingSession.pagesRead`.
 - Genero favorito usa el campo existente `Book.genre` cuando esta disponible.
 - Si no hay datos suficientes, muestra estados vacios claros.
-- No incluye predicciones ni IA.
+- No incluye IA, rankings ni dashboard premium.
 
 ## Fuera del MVP actual
 
@@ -106,4 +109,4 @@ Relaciones:
 - El calendario refleja sesiones guardadas.
 - El detalle de dia muestra sesiones y total de minutos.
 - Stats muestra metricas calculadas desde datos reales.
-- Insights muestra libro mas leido, autor mas leido y genero favorito cuando hay sesiones con paginas leidas.
+- Insights muestra preferencias, ritmo de lectura, prediccion simple de fin de libro y forecast anual cuando hay datos suficientes.

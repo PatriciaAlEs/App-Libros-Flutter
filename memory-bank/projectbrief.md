@@ -2,7 +2,7 @@
 
 ## Producto
 
-`reading_tracker` es una app Flutter para seguimiento personal de lectura. La app permite guardar libros, cambiar su estado, registrar sesiones de lectura, consultar actividad en calendario, ver estadisticas e insights iniciales.
+`reading_tracker` es una app Flutter para seguimiento personal de lectura. La app permite guardar libros, cambiar su estado, registrar sesiones de lectura, consultar actividad en calendario, ver estadisticas e insights de lectura.
 
 ## Estado real del MVP
 
@@ -15,6 +15,7 @@ El proyecto ya contiene una app funcional en `reading_tracker/` con:
 - Calendario mensual/semanal y detalle de dia.
 - Stats implementado con datos reales.
 - Reading Insights Sprint 1 implementado: libro mas leido, autor mas leido y genero favorito.
+- Reading Insights Sprint 2 implementado: paginas por sesion, minutos por sesion, paginas por dia, prediccion simple de fin de libro y forecast anual.
 
 ## Principios de documentacion
 

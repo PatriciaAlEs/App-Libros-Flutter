@@ -42,7 +42,7 @@ reading_tracker/lib/
 - `books`: busqueda Open Library, repositorio, entidad `Book`, estado de libro y UI de listado/detalle/formulario.
 - `reading_sessions`: entidad `ReadingSession`, repositorio, calendario, detalle de dia y formulario de sesion.
 - `stats`: calculos, provider y pantalla.
-- `insights`: resumen inicial de lectura con libro mas leido, autor mas leido y genero favorito.
+- `insights`: resumen de lectura con preferencias, ritmo, prediccion simple de fin de libro y forecast anual.
 
 ## Persistencia
 
@@ -61,7 +61,7 @@ reading_tracker/lib/
 - Sesiones por dia usan `FutureProvider.family`.
 - `statsProvider` calcula con libros y sesiones reales desde repositorios/DAO.
 - `statisticsSummaryProvider` expone la base nueva de Estadisticas MVP calculada desde libros y sesiones cuando aplica.
-- `readingInsightsSummaryProvider` expone los insights iniciales calculados desde libros y sesiones reales.
+- `readingInsightsSummaryProvider` expone insights calculados desde libros y sesiones reales.
 
 ## Integraciones reales
 
@@ -157,7 +157,19 @@ reading_tracker/lib/
 - Genero favorito: genero con mas paginas leidas acumuladas usando `Book.genre`.
 - Si `Book.genre` no existe en un libro o esta vacio, se ignora para el insight de genero y la UI muestra fallback cuando no hay datos.
 - La ruta `/insights` muestra `InsightsScreen` con tres cards simples.
-- No se implementaron predicciones, IA ni Sprint 2.
+- En Sprint 1 no se implementaron predicciones, IA ni Sprint 2.
+
+### Reading Insights Sprint 2
+
+- Decision: extender la feature `features/insights` existente sin crear tablas nuevas ni servicios externos.
+- `ReadingInsightsSummary` incorpora metricas de ritmo, prediccion de fin de libro y forecast anual.
+- Paginas por sesion: promedio de `ReadingSession.pagesRead` en sesiones con paginas leidas.
+- Minutos por sesion: promedio de `ReadingSession.minutes` en sesiones con minutos registrados.
+- Paginas por dia: paginas leidas acumuladas divididas entre dias activos con paginas.
+- Prediccion de fin de libro: usa el libro `reading` mas reciente con `totalPages` y `currentPage`, calcula paginas restantes y divide por el ritmo reciente de paginas por dia activo del propio libro.
+- Forecast anual: cuenta libros `completed` con `finishedAt/completedDate` del ano actual y proyecta linealmente al final del ano.
+- La UI de `/insights` mantiene cards simples y agrega secciones `Reading Pace`, `Finish Prediction` y `Annual Forecast`.
+- No se implementaron rankings ni dashboard premium.
 
 ### Seed data solo en debug
 

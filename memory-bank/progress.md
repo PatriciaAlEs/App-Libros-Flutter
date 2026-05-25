@@ -77,6 +77,12 @@
 - Mutaciones relevantes de libros y sesiones invalidan el provider de Insights.
 - Tests focalizados de Reading Insights agregados.
 - Validacion confirmada por el usuario: `flutter analyze` OK y `flutter test` OK.
+- Hito 4 Sprint 2 de Reading Insights completado.
+- Reading Insights ahora incluye paginas por sesion, minutos por sesion y paginas por dia.
+- Reading Insights ahora incluye prediccion simple de fin de libro para libros en estado `reading`.
+- Reading Insights ahora incluye forecast anual simple de libros completados.
+- Sprint 2 usa solo datos reales existentes de `Book` y `ReadingSession`; no crea tablas nuevas ni usa IA.
+- Validacion Sprint 2 confirmada por el usuario: `dart format` OK, `flutter analyze` OK y `flutter test` OK (30 tests).
 
 ## Parcial / en seguimiento
 
@@ -85,8 +91,8 @@
 
 ## Pendiente inmediato
 
-- Definir alcance del Sprint 2 de Reading Insights cuando el usuario lo pida.
-- Mantener fuera predicciones e IA hasta peticion explicita.
+- Definir el siguiente bloque funcional cuando el usuario lo pida.
+- Mantener fuera rankings y dashboard premium hasta peticion explicita.
 
 ## Pendiente futuro
 

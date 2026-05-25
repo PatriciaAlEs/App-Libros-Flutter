@@ -40,7 +40,7 @@ Estado: implementado con datos reales.
 ## Consultar insights
 
 1. Usuario abre Insights.
-2. La app muestra libro mas leido, autor mas leido y genero favorito.
-3. Usuario ve estos insights cuando existen sesiones con paginas leidas.
+2. La app muestra preferencias, ritmo de lectura, prediccion simple de fin de libro y forecast anual.
+3. Usuario ve estos insights cuando existen sesiones, libros en lectura o completados del ano con datos suficientes.
 
-Estado: Hito 4 Sprint 1 implementado y validado.
+Estado: Hito 4 Sprint 1 y Sprint 2 implementados y validados.

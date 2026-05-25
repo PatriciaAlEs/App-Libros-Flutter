@@ -4,7 +4,7 @@
 
 Hito 4: Reading Insights.
 
-Sprint 1 de Reading Insights completado y validado.
+Sprint 2 de Reading Insights completado y validado.
 
 La Home ya funciona como dashboard principal y concentra:
 
@@ -14,7 +14,7 @@ La Home ya funciona como dashboard principal y concentra:
 - Actividad reciente.
 - Acciones rapidas de progreso.
 
-Predicciones, IA y Sprint 2 quedan fuera hasta peticion explicita.
+Rankings y dashboard premium quedan fuera hasta peticion explicita.
 
 ## Estado reciente
 
@@ -77,9 +77,17 @@ Predicciones, IA y Sprint 2 quedan fuera hasta peticion explicita.
 - Sprint 1 muestra libro mas leido, autor mas leido y genero favorito.
 - Los calculos usan paginas leidas acumuladas desde `ReadingSession.pagesRead`.
 - El insight de genero usa `Book.genre` si existe; si no hay datos fiables, muestra fallback.
-- No se agregaron migraciones, tablas, predicciones ni IA.
+- En Sprint 1 no se agregaron migraciones, tablas, predicciones ni IA.
 - Se agregaron tests focalizados para Reading Insights.
 - Validacion confirmada: `flutter analyze` OK y `flutter test` OK.
+- Se completo Hito 4 Sprint 2.
+- `ReadingInsightsSummary` se extendio con ritmo de lectura, prediccion de fin y forecast anual.
+- `InsightsRepositoryImpl` calcula paginas por sesion, minutos por sesion y paginas por dia desde `ReadingSession`.
+- La prediccion de fin usa paginas restantes y ritmo reciente del libro en lectura.
+- El forecast anual usa libros completados del ano actual y una proyeccion lineal hasta fin de ano.
+- `InsightsScreen` suma secciones `Reading Pace`, `Finish Prediction` y `Annual Forecast`.
+- Se agregaron tests para paginas por sesion, minutos por sesion, prediccion de finalizacion, forecast anual y estados vacios.
+- Validacion Sprint 2 confirmada: `dart format` OK, `flutter analyze` OK y `flutter test` OK (30 tests).
 
 ## Archivos tocados recientemente
 
@@ -122,15 +130,16 @@ Predicciones, IA y Sprint 2 quedan fuera hasta peticion explicita.
 
 El usuario ejecuta las validaciones en su terminal de VS Code. No ejecutarlas desde Codex salvo que lo pida explicitamente.
 
-Estado confirmado para Hito 4 Sprint 1:
+Estado confirmado para Hito 4 Sprint 2:
 
+- `dart format` OK.
 - `flutter analyze` OK.
-- `flutter test` OK.
+- `flutter test` OK (30 tests).
 
 ## Pendientes reales
 
-1. Definir Sprint 2 de Reading Insights cuando el usuario lo pida.
-2. Mantener fuera predicciones e IA hasta peticion explicita.
+1. Definir siguiente bloque funcional cuando el usuario lo pida.
+2. Mantener fuera rankings y dashboard premium hasta peticion explicita.
 3. Mas adelante investigar Open Library para mejorar resultados en espanol.
 4. Dejar el sprint visual/UI para despues: paleta, estilo, referencias y design system.
 

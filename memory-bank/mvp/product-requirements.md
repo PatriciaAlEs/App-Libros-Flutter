@@ -45,10 +45,12 @@ Crear una app sencilla y mantenible para registrar libros y sesiones de lectura,
   - Seccion implementada con datos reales desde libros y sesiones.
   - Incluye resumen de progreso, actividad, objetivo anual, rachas y ritmo de lectura.
 - Insights:
-  - Hito 4 Sprint 1 implementado y validado.
+  - Hito 4 Sprint 1 y Sprint 2 implementados y validados.
   - Muestra libro mas leido, autor mas leido y genero favorito.
+  - Muestra paginas por sesion, minutos por sesion y paginas por dia.
+  - Muestra prediccion simple de fin de libro y forecast anual cuando hay datos suficientes.
   - Usa paginas leidas acumuladas desde `ReadingSession.pagesRead`.
-  - No incluye predicciones ni IA.
+  - No incluye IA, rankings ni dashboard premium.
 
 ## 7. Funcionalidades fuera del MVP
 
@@ -233,4 +235,4 @@ No inventes funcionalidades no presentes en el contexto.
 
 ## 14. Conclusion
 
-`reading_tracker` tiene una base solida para un MVP de seguimiento de lectura: libros, sesiones, calendario, estadisticas e insights iniciales ya forman el flujo principal. Los siguientes pasos deben mantener el enfoque mobile-first y la arquitectura simple que ya existe.
+`reading_tracker` tiene una base solida para un MVP de seguimiento de lectura: libros, sesiones, calendario, estadisticas e insights ya forman el flujo principal. Los siguientes pasos deben mantener el enfoque mobile-first y la arquitectura simple que ya existe.

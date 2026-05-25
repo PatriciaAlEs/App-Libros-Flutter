@@ -10,7 +10,7 @@ Crear una app sencilla para registrar libros y sesiones de lectura, visualizar h
 - Sesiones: crear sesiones asociadas a libros en lectura.
 - Calendario: mes, semana y detalle de dia.
 - Estadisticas: resumen de actividad y progreso.
-- Insights: libro mas leido, autor mas leido y genero favorito.
+- Insights: preferencias, ritmo de lectura, prediccion simple de fin de libro y forecast anual.
 
 ## Criterios de calidad
 

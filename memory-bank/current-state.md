@@ -2,7 +2,7 @@
 
 ## Producto
 
-`reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario, estadisticas basicas e insights iniciales de lectura.
+`reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario, estadisticas basicas e insights de lectura.
 
 La Home ya funciona como dashboard principal. Actualmente ofrece:
 
@@ -133,7 +133,7 @@ Estado actual implementado:
 - Hito 4 - Reading Insights iniciado.
 - Sprint 1 completado y validado.
 - Existe la feature `features/insights` con capas `domain`, `data` y `presentation`.
-- `ReadingInsightsSummary` centraliza los tres insights iniciales.
+- `ReadingInsightsSummary` centraliza preferencias, ritmo de lectura, prediccion de fin y forecast anual.
 - `InsightsRepository` define el contrato de acceso.
 - `InsightsRepositoryImpl` calcula insights usando `BookRepository` y `ReadingSessionRepository`.
 - `GetReadingInsightsSummary` encapsula el caso de uso.
@@ -148,13 +148,21 @@ Estado actual implementado:
 - La pantalla maneja loading, error y empty state.
 - Las mutaciones de libros y sesiones invalidan `readingInsightsSummaryProvider` cuando corresponde.
 - Hay tests focalizados para el calculo de insights.
+- Hito 4 Sprint 2 completado y validado.
+- `ReadingInsightsSummary` tambien expone paginas por sesion, minutos por sesion y paginas por dia.
+- La prediccion de fin de libro estima paginas restantes, ritmo reciente, dias restantes y fecha aproximada para un libro en estado `reading`.
+- El forecast anual proyecta libros completados para final de ano usando el ritmo actual de completados.
+- Los calculos de Sprint 2 usan solo `Book` y `ReadingSession`; no hay tablas nuevas, servicios externos ni IA.
+- La pantalla `InsightsScreen` muestra secciones para Preferencias, Reading Pace, Finish Prediction y Annual Forecast.
+- Los estados vacios cubren falta de sesiones, falta de libro en lectura o datos insuficientes.
 
 ## Validacion
 
 Estado confirmado por el usuario:
 
 - `flutter analyze` OK.
-- `flutter test` OK.
+- `flutter test` OK (30 tests).
+- `dart format` OK.
 - El usuario ejecuta `dart format`, `flutter analyze` y `flutter test` desde VS Code.
 
 ## Estadisticas MVP
@@ -182,6 +190,6 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Definir Sprint 2 de Reading Insights solo cuando el usuario lo pida.
-2. Mantener fuera predicciones e IA hasta peticion explicita.
+1. Definir el siguiente bloque funcional cuando el usuario lo pida.
+2. Mantener fuera rankings y dashboard premium hasta peticion explicita.
 3. Continuar con el siguiente bloque que priorice el usuario.
