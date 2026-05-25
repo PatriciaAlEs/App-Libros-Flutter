@@ -4,7 +4,7 @@
 
 Hito 4: Reading Insights.
 
-Sprint 2 de Reading Insights completado y validado.
+Sprint 3 de Reading Insights completado y validado.
 
 La Home ya funciona como dashboard principal y concentra:
 
@@ -14,7 +14,7 @@ La Home ya funciona como dashboard principal y concentra:
 - Actividad reciente.
 - Acciones rapidas de progreso.
 
-Rankings y dashboard premium quedan fuera hasta peticion explicita.
+Dashboard premium queda fuera hasta peticion explicita.
 
 ## Estado reciente
 
@@ -88,6 +88,14 @@ Rankings y dashboard premium quedan fuera hasta peticion explicita.
 - `InsightsScreen` suma secciones `Reading Pace`, `Finish Prediction` y `Annual Forecast`.
 - Se agregaron tests para paginas por sesion, minutos por sesion, prediccion de finalizacion, forecast anual y estados vacios.
 - Validacion Sprint 2 confirmada: `dart format` OK, `flutter analyze` OK y `flutter test` OK (30 tests).
+- Se completo Hito 4 Sprint 3.
+- `ReadingInsightsSummary` se extendio con Top Lecturas del Año y Ranking Personal.
+- `InsightsRepositoryImpl` calcula mejor valorado, libro mas largo, mas tiempo invertido y mas sesiones.
+- `InsightsRepositoryImpl` calcula Top 3 autores, generos y libros por paginas leidas acumuladas.
+- La mejor racha de Ranking Personal reutiliza `StatisticsCalculator`.
+- `InsightsScreen` suma secciones `Top Lecturas del Año` y `Ranking Personal`.
+- Se agregaron tests para mejor valorado, libro mas largo, libro con mas sesiones, libro con mas tiempo invertido, rankings y estados vacios.
+- Validacion Sprint 3 confirmada: `dart format` OK, `flutter analyze` OK y `flutter test` OK (33 tests).
 
 ## Archivos tocados recientemente
 
@@ -130,16 +138,16 @@ Rankings y dashboard premium quedan fuera hasta peticion explicita.
 
 El usuario ejecuta las validaciones en su terminal de VS Code. No ejecutarlas desde Codex salvo que lo pida explicitamente.
 
-Estado confirmado para Hito 4 Sprint 2:
+Estado confirmado para Hito 4 Sprint 3:
 
 - `dart format` OK.
 - `flutter analyze` OK.
-- `flutter test` OK (30 tests).
+- `flutter test` OK (33 tests).
 
 ## Pendientes reales
 
 1. Definir siguiente bloque funcional cuando el usuario lo pida.
-2. Mantener fuera rankings y dashboard premium hasta peticion explicita.
+2. Mantener fuera dashboard premium hasta peticion explicita.
 3. Mas adelante investigar Open Library para mejorar resultados en espanol.
 4. Dejar el sprint visual/UI para despues: paleta, estilo, referencias y design system.
 

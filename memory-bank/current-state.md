@@ -155,13 +155,20 @@ Estado actual implementado:
 - Los calculos de Sprint 2 usan solo `Book` y `ReadingSession`; no hay tablas nuevas, servicios externos ni IA.
 - La pantalla `InsightsScreen` muestra secciones para Preferencias, Reading Pace, Finish Prediction y Annual Forecast.
 - Los estados vacios cubren falta de sesiones, falta de libro en lectura o datos insuficientes.
+- Hito 4 Sprint 3 completado y validado.
+- `ReadingInsightsSummary` tambien expone Top Lecturas del Año y Ranking Personal.
+- Top Lecturas del Año incluye mejor valorado, mas largo, mas tiempo invertido y mas sesiones.
+- Ranking Personal incluye Top 3 autores, generos y libros por paginas leidas acumuladas.
+- Ranking Personal reutiliza la mejor racha existente calculada por `StatisticsCalculator`.
+- La pantalla `InsightsScreen` suma secciones para Top Lecturas del Año y Ranking Personal.
+- Dashboard premium no esta implementado.
 
 ## Validacion
 
 Estado confirmado por el usuario:
 
 - `flutter analyze` OK.
-- `flutter test` OK (30 tests).
+- `flutter test` OK (33 tests).
 - `dart format` OK.
 - El usuario ejecuta `dart format`, `flutter analyze` y `flutter test` desde VS Code.
 
@@ -191,5 +198,5 @@ Estado actual implementado:
 ## Siguiente paso recomendado
 
 1. Definir el siguiente bloque funcional cuando el usuario lo pida.
-2. Mantener fuera rankings y dashboard premium hasta peticion explicita.
+2. Mantener fuera dashboard premium hasta peticion explicita.
 3. Continuar con el siguiente bloque que priorice el usuario.

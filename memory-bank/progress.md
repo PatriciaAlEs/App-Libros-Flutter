@@ -83,6 +83,15 @@
 - Reading Insights ahora incluye forecast anual simple de libros completados.
 - Sprint 2 usa solo datos reales existentes de `Book` y `ReadingSession`; no crea tablas nuevas ni usa IA.
 - Validacion Sprint 2 confirmada por el usuario: `dart format` OK, `flutter analyze` OK y `flutter test` OK (30 tests).
+- Hito 4 Sprint 3 de Reading Insights completado.
+- Reading Insights ahora incluye "Top Lecturas del Año".
+- Top Lecturas del Año muestra mejor valorado, mas largo, mas tiempo invertido y mas sesiones.
+- Reading Insights ahora incluye "Ranking Personal".
+- Ranking Personal muestra Top 3 autores, generos y libros por paginas leidas acumuladas.
+- Ranking Personal reutiliza la mejor racha calculada por `StatisticsCalculator`.
+- Sprint 3 usa solo datos reales existentes de `Book` y `ReadingSession`; no crea tablas nuevas, dependencias externas ni IA.
+- Dashboard premium queda fuera de Sprint 3.
+- Validacion Sprint 3 confirmada por el usuario: `dart format` OK, `flutter analyze` OK y `flutter test` OK (33 tests).
 
 ## Parcial / en seguimiento
 
@@ -92,7 +101,7 @@
 ## Pendiente inmediato
 
 - Definir el siguiente bloque funcional cuando el usuario lo pida.
-- Mantener fuera rankings y dashboard premium hasta peticion explicita.
+- Mantener fuera dashboard premium hasta peticion explicita.
 
 ## Pendiente futuro
 

@@ -42,7 +42,7 @@ reading_tracker/lib/
 - `books`: busqueda Open Library, repositorio, entidad `Book`, estado de libro y UI de listado/detalle/formulario.
 - `reading_sessions`: entidad `ReadingSession`, repositorio, calendario, detalle de dia y formulario de sesion.
 - `stats`: calculos, provider y pantalla.
-- `insights`: resumen de lectura con preferencias, ritmo, prediccion simple de fin de libro y forecast anual.
+- `insights`: resumen de lectura con preferencias, ritmo, prediccion simple de fin de libro, forecast anual, rankings y destacados anuales.
 
 ## Persistencia
 
@@ -170,6 +170,20 @@ reading_tracker/lib/
 - Forecast anual: cuenta libros `completed` con `finishedAt/completedDate` del ano actual y proyecta linealmente al final del ano.
 - La UI de `/insights` mantiene cards simples y agrega secciones `Reading Pace`, `Finish Prediction` y `Annual Forecast`.
 - No se implementaron rankings ni dashboard premium.
+
+### Reading Insights Sprint 3
+
+- Decision: extender la feature `features/insights` existente sin crear tablas nuevas, dependencias externas ni IA.
+- `ReadingInsightsSummary` incorpora Top Lecturas del Año y Ranking Personal.
+- Top Lecturas del Año usa libros y sesiones del año actual cuando hay fecha disponible.
+- Mejor valorado: libro `completed` del año actual con mayor `rating`.
+- Mas largo: libro `completed` del año actual con mayor `totalPages`.
+- Mas tiempo invertido: libro con mas minutos acumulados en `ReadingSession` durante el año actual.
+- Mas sesiones: libro con mas sesiones registradas durante el año actual.
+- Ranking Personal: Top 3 autores, generos y libros por paginas leidas acumuladas desde `ReadingSession.pagesRead`.
+- Mejor racha: se reutiliza `StatisticsCalculator` para no duplicar la logica existente de rachas.
+- La UI de `/insights` mantiene cards simples y agrega secciones `Top Lecturas del Año` y `Ranking Personal`.
+- No se implemento dashboard premium.
 
 ### Seed data solo en debug
 
