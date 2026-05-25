@@ -6,7 +6,7 @@
 
 ## Descripcion
 
-App Flutter mobile-first para seguimiento personal de lectura. Permite registrar libros, sesiones de lectura, visualizar actividad en calendario y consultar estadisticas.
+App Flutter mobile-first para seguimiento personal de lectura. Permite registrar libros, sesiones de lectura, visualizar actividad en calendario, consultar estadisticas e insights iniciales.
 
 ## Problema
 
@@ -47,9 +47,20 @@ Una persona lectora puede tener varios libros pendientes, en curso o completados
 
 ### Stats
 
-- Parcialmente implementado.
+- Implementado con datos reales desde libros y sesiones.
 - Existen calculadora, provider, pantalla, widgets y tests de calculo.
-- Pendiente cerrar UX, textos y validacion funcional final.
+- Incluye resumen de biblioteca, progreso, objetivo anual, rachas y ritmo de lectura.
+
+### Insights
+
+- Hito 4 iniciado.
+- Sprint 1 implementado y validado.
+- Pantalla `/insights`.
+- Muestra libro mas leido, autor mas leido y genero favorito.
+- Los calculos usan paginas leidas acumuladas desde `ReadingSession.pagesRead`.
+- Genero favorito usa el campo existente `Book.genre` cuando esta disponible.
+- Si no hay datos suficientes, muestra estados vacios claros.
+- No incluye predicciones ni IA.
 
 ## Fuera del MVP actual
 
@@ -69,7 +80,7 @@ Campos principales: `id`, `title`, `author`, `publisher`, `coverUrl`, `isbn`, `f
 
 ### ReadingSession
 
-Campos: `id`, `bookId`, `date`, `minutes`, `note`, `createdAt`.
+Campos: `id`, `bookId`, `date`, `minutes`, `pagesRead`, `note`, `createdAt`, `updatedAt`.
 
 Relaciones:
 
@@ -94,4 +105,5 @@ Relaciones:
 - Se puede registrar una sesion para libros en lectura.
 - El calendario refleja sesiones guardadas.
 - El detalle de dia muestra sesiones y total de minutos.
-- Stats existe, pero no debe considerarse cerrado hasta validar UX y datos finales.
+- Stats muestra metricas calculadas desde datos reales.
+- Insights muestra libro mas leido, autor mas leido y genero favorito cuando hay sesiones con paginas leidas.

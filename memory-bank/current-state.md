@@ -2,7 +2,7 @@
 
 ## Producto
 
-`reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario y estadisticas basicas.
+`reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario, estadisticas basicas e insights iniciales de lectura.
 
 La Home ya funciona como dashboard principal. Actualmente ofrece:
 
@@ -126,15 +126,36 @@ Estado actual implementado:
 - Los libros en lectura muestran progreso si tienen `currentPage` y `totalPages`.
 - Los libros completados muestran rating si estan valorados.
 
+## Reading Insights
+
+Estado actual implementado:
+
+- Hito 4 - Reading Insights iniciado.
+- Sprint 1 completado y validado.
+- Existe la feature `features/insights` con capas `domain`, `data` y `presentation`.
+- `ReadingInsightsSummary` centraliza los tres insights iniciales.
+- `InsightsRepository` define el contrato de acceso.
+- `InsightsRepositoryImpl` calcula insights usando `BookRepository` y `ReadingSessionRepository`.
+- `GetReadingInsightsSummary` encapsula el caso de uso.
+- `readingInsightsSummaryProvider` expone el resumen a la UI.
+- La pantalla `InsightsScreen` muestra tres cards: libro mas leido, autor mas leido y genero favorito.
+- La ruta `/insights` esta conectada.
+- El calculo se basa en paginas leidas acumuladas desde `ReadingSession.pagesRead`.
+- El libro mas leido es el libro con mas paginas leidas registradas en sesiones.
+- El autor mas leido acumula paginas entre sus libros.
+- El genero favorito acumula paginas por `Book.genre`.
+- Si `Book.genre` esta vacio o no disponible, el insight de genero queda en fallback sin inventar campos.
+- La pantalla maneja loading, error y empty state.
+- Las mutaciones de libros y sesiones invalidan `readingInsightsSummaryProvider` cuando corresponde.
+- Hay tests focalizados para el calculo de insights.
+
 ## Validacion
 
-Validaciones pendientes de ejecutar por el usuario:
+Estado confirmado por el usuario:
 
-```bash
-dart format lib/features/stats/domain/entities/statistics_summary.dart lib/features/stats/domain/services/statistics_calculator.dart lib/features/stats/domain/repositories/statistics_repository.dart lib/features/stats/domain/usecases/get_statistics_summary.dart lib/features/stats/data/repositories/book_statistics_repository.dart lib/features/stats/data/repositories/statistics_repository_provider.dart lib/features/stats/presentation/providers/statistics_summary_provider.dart lib/features/stats/presentation/screens/stats_screen.dart lib/features/books/presentation/screens/book_form_screen.dart lib/features/books/presentation/screens/book_detail_screen.dart lib/features/home/presentation/screens/home_screen.dart
-flutter test
-flutter analyze
-```
+- `flutter analyze` OK.
+- `flutter test` OK.
+- El usuario ejecuta `dart format`, `flutter analyze` y `flutter test` desde VS Code.
 
 ## Estadisticas MVP
 
@@ -161,7 +182,6 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Usuario ejecuta formato, tests y analisis.
-2. Revisar cualquier fallo que aparezca.
-3. Si todo esta correcto, cerrar el segundo sprint de UI basica Estadisticas MVP.
-4. Continuar con el siguiente bloque que priorice el usuario.
+1. Definir Sprint 2 de Reading Insights solo cuando el usuario lo pida.
+2. Mantener fuera predicciones e IA hasta peticion explicita.
+3. Continuar con el siguiente bloque que priorice el usuario.

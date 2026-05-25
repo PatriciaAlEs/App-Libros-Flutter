@@ -64,30 +64,33 @@
 - Registro de sesiones pasadas habilitado desde formulario general y registro rapido de Home, bloqueando fechas futuras.
 - Calendario enriquecido por intensidad implementado con resumen de actividad y leyenda visual.
 - Estadisticas avanzadas de lectura implementadas desde `ReadingSession`: paginas/minutos por semana y mes, promedios por dia activo, dias activos y dia mas activo.
+- Hito 4 - Reading Insights iniciado.
+- Sprint 1 de Reading Insights completado con nueva feature `insights`.
+- `ReadingInsightsSummary` creado como entidad de dominio.
+- Contrato `InsightsRepository` y caso de uso `GetReadingInsightsSummary` creados.
+- `InsightsRepositoryImpl` calcula insights desde `BookRepository` y `ReadingSessionRepository`.
+- Provider Riverpod `readingInsightsSummaryProvider` creado.
+- Pantalla `InsightsScreen` creada y ruta `/insights` conectada.
+- Insights Sprint 1 muestra libro mas leido, autor mas leido y genero favorito.
+- El calculo usa paginas leidas acumuladas desde `ReadingSession.pagesRead`.
+- Genero favorito usa `Book.genre` cuando existe; si no hay genero registrado, muestra fallback vacio.
+- Mutaciones relevantes de libros y sesiones invalidan el provider de Insights.
+- Tests focalizados de Reading Insights agregados.
+- Validacion confirmada por el usuario: `flutter analyze` OK y `flutter test` OK.
 
 ## Parcial / en seguimiento
 
-- Validacion final del Sprint UX Home pendiente en terminal del usuario.
-- Validacion final del segundo sprint de Estadisticas MVP pendiente en terminal del usuario.
 - Revisión de textos y consistencia visual fina pendiente para el sprint visual/UI.
-- Stats MVP queda como siguiente bloque funcional despues de cerrar Home.
 - Open Library puede mejorar resultados en espanol, pero queda para una fase posterior.
 
 ## Pendiente inmediato
 
-El usuario debe ejecutar:
-
-```bash
-dart format lib/features/stats/domain/entities/statistics_summary.dart lib/features/stats/domain/services/statistics_calculator.dart lib/features/stats/domain/repositories/statistics_repository.dart lib/features/stats/domain/usecases/get_statistics_summary.dart lib/features/stats/data/repositories/book_statistics_repository.dart lib/features/stats/data/repositories/statistics_repository_provider.dart lib/features/stats/presentation/providers/statistics_summary_provider.dart lib/features/stats/presentation/screens/stats_screen.dart lib/features/books/presentation/screens/book_form_screen.dart lib/features/books/presentation/screens/book_detail_screen.dart lib/features/home/presentation/screens/home_screen.dart
-flutter test
-flutter analyze
-```
+- Definir alcance del Sprint 2 de Reading Insights cuando el usuario lo pida.
+- Mantener fuera predicciones e IA hasta peticion explicita.
 
 ## Pendiente futuro
 
-- Cerrar segundo sprint de Estadisticas MVP tras validacion.
-- Definir siguiente iteracion de Stats sin introducir complejidad visual prematura.
+- Definir siguiente iteracion de Stats o Insights sin introducir complejidad visual prematura.
 - Investigar Open Library para mejorar resultados en espanol.
 - Hacer sprint visual/UI: paleta, estilo, referencias y design system.
 - Ampliar tests de flujos criticos si el alcance del siguiente sprint lo requiere.
-- Hito 3 siguientes sprints: actividad avanzada, visualizaciones o metricas de sesiones sin introducir gamificacion prematura.

@@ -22,6 +22,11 @@ reading_tracker/lib/
       domain/
       presentation/
     stats/
+      data/
+      domain/
+      presentation/
+    insights/
+      data/
       domain/
       presentation/
 ```
@@ -37,6 +42,7 @@ reading_tracker/lib/
 - `books`: busqueda Open Library, repositorio, entidad `Book`, estado de libro y UI de listado/detalle/formulario.
 - `reading_sessions`: entidad `ReadingSession`, repositorio, calendario, detalle de dia y formulario de sesion.
 - `stats`: calculos, provider y pantalla.
+- `insights`: resumen inicial de lectura con libro mas leido, autor mas leido y genero favorito.
 
 ## Persistencia
 
@@ -55,6 +61,7 @@ reading_tracker/lib/
 - Sesiones por dia usan `FutureProvider.family`.
 - `statsProvider` calcula con libros y sesiones reales desde repositorios/DAO.
 - `statisticsSummaryProvider` expone la base nueva de Estadisticas MVP calculada desde libros y sesiones cuando aplica.
+- `readingInsightsSummaryProvider` expone los insights iniciales calculados desde libros y sesiones reales.
 
 ## Integraciones reales
 
@@ -138,6 +145,19 @@ reading_tracker/lib/
 - Decision: enriquecer el calendario con un modelo local de presentacion (`ReadingDayActivity`) calculado desde sesiones existentes.
 - La intensidad diaria se basa primero en paginas leidas: 1-20 baja, 21-50 media, 51+ alta; si no hay paginas pero si minutos, baja.
 - No requiere tablas, migraciones, paquetes ni entidades de persistencia nuevas.
+
+### Reading Insights Sprint 1
+
+- Decision: crear una feature propia `features/insights` respetando Clean Architecture y Repository Pattern.
+- `ReadingInsightsSummary` vive en dominio y no depende de Drift ni Flutter.
+- `InsightsRepository` define el contrato y `InsightsRepositoryImpl` combina `BookRepository` con `ReadingSessionRepository`.
+- El calculo usa `ReadingSession.pagesRead` como fuente de paginas leidas, sin migraciones ni campos nuevos.
+- Libro mas leido: libro con mayor numero de paginas leidas acumuladas en sesiones.
+- Autor mas leido: autor con mas paginas leidas acumuladas entre sus libros.
+- Genero favorito: genero con mas paginas leidas acumuladas usando `Book.genre`.
+- Si `Book.genre` no existe en un libro o esta vacio, se ignora para el insight de genero y la UI muestra fallback cuando no hay datos.
+- La ruta `/insights` muestra `InsightsScreen` con tres cards simples.
+- No se implementaron predicciones, IA ni Sprint 2.
 
 ### Seed data solo en debug
 

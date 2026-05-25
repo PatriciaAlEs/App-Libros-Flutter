@@ -35,4 +35,12 @@
 2. La app muestra un resumen calculado desde libros y sesiones.
 3. Usuario ve metricas utiles para entender progreso y habitos.
 
-Estado: parcialmente implementado; pendiente cerrar funcionalmente antes de considerar Stats completo.
+Estado: implementado con datos reales.
+
+## Consultar insights
+
+1. Usuario abre Insights.
+2. La app muestra libro mas leido, autor mas leido y genero favorito.
+3. Usuario ve estos insights cuando existen sesiones con paginas leidas.
+
+Estado: Hito 4 Sprint 1 implementado y validado.

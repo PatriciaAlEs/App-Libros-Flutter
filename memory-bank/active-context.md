@@ -2,9 +2,9 @@
 
 ## Foco actual
 
-Hito 2: Estadisticas MVP.
+Hito 4: Reading Insights.
 
-Ultimo sprint del Hito 2: objetivo anual de lectura.
+Sprint 1 de Reading Insights completado y validado.
 
 La Home ya funciona como dashboard principal y concentra:
 
@@ -14,7 +14,7 @@ La Home ya funciona como dashboard principal y concentra:
 - Actividad reciente.
 - Acciones rapidas de progreso.
 
-Graficas, rachas, sesiones, objetivos mensuales y paginas anuales quedan fuera de este sprint.
+Predicciones, IA y Sprint 2 quedan fuera hasta peticion explicita.
 
 ## Estado reciente
 
@@ -64,6 +64,22 @@ Graficas, rachas, sesiones, objetivos mensuales y paginas anuales quedan fuera d
 - En navegacion, Biblioteca usa un icono de libros.
 - En Biblioteca, la vista general prioriza libros en estado `Leyendo` y despues el resto.
 - Se corrigieron tests que fallaban porque el formulario de libro ahora tiene mas de un `TextField`.
+- Se inicio Hito 4 - Reading Insights.
+- Se creo `features/insights` con capas `domain`, `data` y `presentation`.
+- Se agrego `ReadingInsightsSummary`.
+- Se agrego el contrato `InsightsRepository`.
+- Se agrego el caso de uso `GetReadingInsightsSummary`.
+- Se agrego `InsightsRepositoryImpl`, que calcula desde `BookRepository` y `ReadingSessionRepository`.
+- Se agrego `readingInsightsSummaryProvider`.
+- Se agrego `InsightsScreen`.
+- Se conecto la ruta `/insights`.
+- Home tiene acceso a Insights desde la barra superior.
+- Sprint 1 muestra libro mas leido, autor mas leido y genero favorito.
+- Los calculos usan paginas leidas acumuladas desde `ReadingSession.pagesRead`.
+- El insight de genero usa `Book.genre` si existe; si no hay datos fiables, muestra fallback.
+- No se agregaron migraciones, tablas, predicciones ni IA.
+- Se agregaron tests focalizados para Reading Insights.
+- Validacion confirmada: `flutter analyze` OK y `flutter test` OK.
 
 ## Archivos tocados recientemente
 
@@ -89,27 +105,34 @@ Graficas, rachas, sesiones, objetivos mensuales y paginas anuales quedan fuera d
 - `reading_tracker/lib/features/books/presentation/widgets/book_card.dart`
 - `reading_tracker/lib/features/home/presentation/screens/home_screen.dart`
 - `reading_tracker/test/widget_test.dart`
+- `reading_tracker/lib/features/insights/domain/entities/reading_insights_summary.dart`
+- `reading_tracker/lib/features/insights/domain/repositories/insights_repository.dart`
+- `reading_tracker/lib/features/insights/domain/usecases/get_reading_insights_summary.dart`
+- `reading_tracker/lib/features/insights/data/repositories/insights_repository_impl.dart`
+- `reading_tracker/lib/features/insights/data/repositories/insights_repository_provider.dart`
+- `reading_tracker/lib/features/insights/presentation/providers/reading_insights_summary_provider.dart`
+- `reading_tracker/lib/features/insights/presentation/screens/insights_screen.dart`
+- `reading_tracker/lib/app.dart`
+- `reading_tracker/lib/features/reading_sessions/presentation/screens/session_form_screen.dart`
+- `reading_tracker/lib/features/reading_sessions/presentation/screens/day_detail_screen.dart`
+- `reading_tracker/lib/features/reading_sessions/presentation/utils/session_completion_flow.dart`
+- `reading_tracker/test/reading_insights_summary_test.dart`
 
-## Validaciones pendientes
+## Validaciones
 
 El usuario ejecuta las validaciones en su terminal de VS Code. No ejecutarlas desde Codex salvo que lo pida explicitamente.
 
-Comandos pendientes sugeridos:
+Estado confirmado para Hito 4 Sprint 1:
 
-```bash
-dart format lib/features/stats/domain/entities/statistics_summary.dart lib/features/stats/domain/services/statistics_calculator.dart lib/features/stats/domain/repositories/statistics_repository.dart lib/features/stats/domain/usecases/get_statistics_summary.dart lib/features/stats/data/repositories/book_statistics_repository.dart lib/features/stats/data/repositories/statistics_repository_provider.dart lib/features/stats/presentation/providers/statistics_summary_provider.dart lib/features/stats/presentation/screens/stats_screen.dart lib/features/books/presentation/screens/book_form_screen.dart lib/features/books/presentation/screens/book_detail_screen.dart lib/features/home/presentation/screens/home_screen.dart
-flutter test
-flutter analyze
-```
+- `flutter analyze` OK.
+- `flutter test` OK.
 
 ## Pendientes reales
 
-1. Validar la UI basica de Estadisticas MVP con `dart format`, `flutter test` y `flutter analyze`.
-2. Corregir cualquier fallo de test/analyze que reporte el usuario.
-3. Cerrar el segundo sprint de Estadisticas MVP si las validaciones pasan.
-4. Preparar metricas visuales mas avanzadas solo despues de estabilizar esta UI basica.
-5. Mas adelante investigar Open Library para mejorar resultados en espanol.
-6. Dejar el sprint visual/UI para despues: paleta, estilo, referencias y design system.
+1. Definir Sprint 2 de Reading Insights cuando el usuario lo pida.
+2. Mantener fuera predicciones e IA hasta peticion explicita.
+3. Mas adelante investigar Open Library para mejorar resultados en espanol.
+4. Dejar el sprint visual/UI para despues: paleta, estilo, referencias y design system.
 
 ## Riesgos / notas
 

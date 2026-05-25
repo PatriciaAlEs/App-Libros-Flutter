@@ -41,8 +41,10 @@ Campos:
 - `bookId`
 - `date`
 - `minutes`
+- `pagesRead`
 - `note`
 - `createdAt`
+- `updatedAt`
 
 ## Relaciones
 

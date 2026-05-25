@@ -42,8 +42,13 @@ Crear una app sencilla y mantenible para registrar libros y sesiones de lectura,
   - Vista semanal con mas detalle diario.
   - Detalle de dia con sesiones, portadas, titulos, notas y total de minutos.
 - Estadisticas:
-  - Seccion parcialmente implementada.
-  - Debe cerrarse funcionalmente con datos reales, copy final y comportamiento validado antes de considerarse completa.
+  - Seccion implementada con datos reales desde libros y sesiones.
+  - Incluye resumen de progreso, actividad, objetivo anual, rachas y ritmo de lectura.
+- Insights:
+  - Hito 4 Sprint 1 implementado y validado.
+  - Muestra libro mas leido, autor mas leido y genero favorito.
+  - Usa paginas leidas acumuladas desde `ReadingSession.pagesRead`.
+  - No incluye predicciones ni IA.
 
 ## 7. Funcionalidades fuera del MVP
 
@@ -170,7 +175,8 @@ Relaciones:
 - El detalle de dia muestra el total de minutos leidos.
 - Si no hay sesiones en un dia, se muestra un empty state claro.
 - Los datos persisten tras cerrar o refrescar la app.
-- Stats aparece como seccion parcialmente implementada hasta cerrar su comportamiento final.
+- Stats aparece como seccion implementada con datos reales.
+- Insights aparece como seccion inicial implementada para libro mas leido, autor mas leido y genero favorito.
 
 ## 12. Backlog priorizado
 
@@ -204,7 +210,8 @@ Contexto:
 - Debe permitir registrar libros, sesiones de lectura, progreso, calendario y estadisticas.
 - Usa Riverpod para estado y Drift + SQLite para persistencia.
 - La arquitectura debe ser simple, mantenible y sin sobredimensionar.
-- La seccion Stats esta parcialmente implementada y no debe marcarse como cerrada.
+- La seccion Stats esta implementada con datos reales.
+- La seccion Insights inicial esta implementada para Hito 4 Sprint 1.
 
 Incluye:
 1. Nombre del producto.
@@ -226,4 +233,4 @@ No inventes funcionalidades no presentes en el contexto.
 
 ## 14. Conclusion
 
-`reading_tracker` tiene una base solida para un MVP de seguimiento de lectura: libros, sesiones y calendario ya forman el flujo principal. El siguiente paso de producto es cerrar las operaciones pendientes sobre sesiones y terminar Stats con datos reales, manteniendo el enfoque mobile-first y la arquitectura simple que ya existe.
+`reading_tracker` tiene una base solida para un MVP de seguimiento de lectura: libros, sesiones, calendario, estadisticas e insights iniciales ya forman el flujo principal. Los siguientes pasos deben mantener el enfoque mobile-first y la arquitectura simple que ya existe.
