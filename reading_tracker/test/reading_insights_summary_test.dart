@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reading_tracker/features/books/domain/entities/book.dart';
+import 'package:reading_tracker/features/books/domain/enums/book_status.dart';
 import 'package:reading_tracker/features/books/domain/repositories/book_repository.dart';
 import 'package:reading_tracker/features/insights/data/repositories/insights_repository_impl.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/entities/reading_session.dart';
@@ -103,6 +104,132 @@ void main() {
     expect(summary.favoriteGenre, isNull);
     expect(summary.favoriteGenrePages, 0);
   });
+
+  test('insights summary calculates reading pace averages', () async {
+    final today = DateTime(2026, 5, 25);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final repository = InsightsRepositoryImpl(
+      bookRepository: _FakeBookRepository([
+        Book(id: 'book-1', title: 'Book One', createdAt: today),
+      ]),
+      readingSessionRepository: _FakeReadingSessionRepository([
+        _session('session-1', 'book-1', today, pagesRead: 20, minutes: 30),
+        _session('session-2', 'book-1', today, pagesRead: 40, minutes: 50),
+        _session('session-3', 'book-1', yesterday, pagesRead: 0, minutes: 10),
+      ]),
+      now: () => today,
+    );
+
+    final summary = await repository.getSummary();
+
+    expect(summary.averagePagesPerSession, 30);
+    expect(summary.averageMinutesPerSession, 30);
+    expect(summary.averagePagesPerActiveDay, 60);
+  });
+
+  test(
+    'insights summary predicts finish date for current reading book',
+    () async {
+      final today = DateTime(2026, 5, 25);
+      final yesterday = today.subtract(const Duration(days: 1));
+      final repository = InsightsRepositoryImpl(
+        bookRepository: _FakeBookRepository([
+          Book(
+            id: 'book-1',
+            title: 'Current Book',
+            createdAt: today,
+            updatedAt: today,
+            status: BookStatus.reading,
+            totalPages: 200,
+            currentPage: 120,
+          ),
+        ]),
+        readingSessionRepository: _FakeReadingSessionRepository([
+          _session('session-1', 'book-1', today, pagesRead: 20, minutes: 30),
+          _session(
+            'session-2',
+            'book-1',
+            yesterday,
+            pagesRead: 20,
+            minutes: 30,
+          ),
+        ]),
+        now: () => today,
+      );
+
+      final summary = await repository.getSummary();
+
+      expect(summary.finishPredictionBookTitle, 'Current Book');
+      expect(summary.finishPredictionRemainingPages, 80);
+      expect(summary.finishPredictionRecentPagesPerDay, 20);
+      expect(summary.finishPredictionDaysRemaining, 4);
+      expect(summary.finishPredictionDate, DateTime(2026, 5, 29));
+    },
+  );
+
+  test('insights summary calculates annual forecast', () async {
+    final today = DateTime(2026, 5, 25);
+    final repository = InsightsRepositoryImpl(
+      bookRepository: _FakeBookRepository([
+        Book(
+          id: 'book-1',
+          title: 'Completed One',
+          createdAt: today,
+          status: BookStatus.completed,
+          completedDate: DateTime(2026, 2, 1),
+        ),
+        Book(
+          id: 'book-2',
+          title: 'Completed Two',
+          createdAt: today,
+          status: BookStatus.completed,
+          completedDate: DateTime(2026, 5, 1),
+        ),
+        Book(
+          id: 'book-3',
+          title: 'Last Year',
+          createdAt: today,
+          status: BookStatus.completed,
+          completedDate: DateTime(2025, 12, 31),
+        ),
+      ]),
+      readingSessionRepository: const _FakeReadingSessionRepository([]),
+      now: () => today,
+    );
+
+    final summary = await repository.getSummary();
+
+    expect(summary.completedBooksThisYear, 2);
+    expect(summary.annualBooksForecast, 5);
+  });
+
+  test(
+    'insights summary exposes empty states for pace and predictions',
+    () async {
+      final today = DateTime(2026, 5, 25);
+      final repository = InsightsRepositoryImpl(
+        bookRepository: _FakeBookRepository([
+          Book(
+            id: 'book-1',
+            title: 'Pending Book',
+            createdAt: today,
+            status: BookStatus.pending,
+          ),
+        ]),
+        readingSessionRepository: const _FakeReadingSessionRepository([]),
+        now: () => today,
+      );
+
+      final summary = await repository.getSummary();
+
+      expect(summary.averagePagesPerSession, isNull);
+      expect(summary.averageMinutesPerSession, isNull);
+      expect(summary.averagePagesPerActiveDay, isNull);
+      expect(summary.hasFinishPrediction, isFalse);
+      expect(summary.annualBooksForecast, isNull);
+      expect(summary.hasAnyInsight, isFalse);
+    },
+  );
 }
 
 ReadingSession _session(
