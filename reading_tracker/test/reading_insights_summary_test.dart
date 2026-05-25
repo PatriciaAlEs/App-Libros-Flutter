@@ -227,9 +227,173 @@ void main() {
       expect(summary.averagePagesPerActiveDay, isNull);
       expect(summary.hasFinishPrediction, isFalse);
       expect(summary.annualBooksForecast, isNull);
+      expect(summary.topRatedBookTitle, isNull);
+      expect(summary.longestBookTitle, isNull);
+      expect(summary.mostTimeBookTitle, isNull);
+      expect(summary.mostSessionsBookTitle, isNull);
+      expect(summary.topAuthors, isEmpty);
+      expect(summary.topGenres, isEmpty);
+      expect(summary.topBooks, isEmpty);
+      expect(summary.bestStreakDays, 0);
       expect(summary.hasAnyInsight, isFalse);
     },
   );
+
+  test('insights summary finds top reads of the year', () async {
+    final today = DateTime(2026, 5, 25);
+    final repository = InsightsRepositoryImpl(
+      bookRepository: _FakeBookRepository([
+        Book(
+          id: 'book-1',
+          title: 'Best Rated',
+          createdAt: today,
+          status: BookStatus.completed,
+          totalPages: 200,
+          rating: 5,
+          completedDate: DateTime(2026, 3, 1),
+        ),
+        Book(
+          id: 'book-2',
+          title: 'Longest Book',
+          createdAt: today,
+          status: BookStatus.completed,
+          totalPages: 450,
+          rating: 4,
+          completedDate: DateTime(2026, 4, 1),
+        ),
+        Book(
+          id: 'book-3',
+          title: 'Last Year Favorite',
+          createdAt: today,
+          status: BookStatus.completed,
+          totalPages: 900,
+          rating: 5,
+          completedDate: DateTime(2025, 12, 1),
+        ),
+        Book(
+          id: 'book-4',
+          title: 'Most Time',
+          createdAt: today,
+          status: BookStatus.reading,
+        ),
+        Book(
+          id: 'book-5',
+          title: 'Most Sessions',
+          createdAt: today,
+          status: BookStatus.reading,
+        ),
+      ]),
+      readingSessionRepository: _FakeReadingSessionRepository([
+        _session('session-1', 'book-4', today, pagesRead: 20, minutes: 90),
+        _session('session-2', 'book-4', today, pagesRead: 10, minutes: 60),
+        _session('session-3', 'book-5', today, pagesRead: 5, minutes: 10),
+        _session('session-4', 'book-5', today, pagesRead: 5, minutes: 10),
+        _session('session-5', 'book-5', today, pagesRead: 5, minutes: 10),
+        _session(
+          'session-6',
+          'book-3',
+          DateTime(2025, 12, 1),
+          pagesRead: 50,
+          minutes: 500,
+        ),
+      ]),
+      now: () => today,
+    );
+
+    final summary = await repository.getSummary();
+
+    expect(summary.topRatedBookTitle, 'Best Rated');
+    expect(summary.topRatedBookRating, 5);
+    expect(summary.longestBookTitle, 'Longest Book');
+    expect(summary.longestBookPages, 450);
+    expect(summary.mostTimeBookTitle, 'Most Time');
+    expect(summary.mostTimeBookMinutes, 150);
+    expect(summary.mostSessionsBookTitle, 'Most Sessions');
+    expect(summary.mostSessionsCount, 3);
+  });
+
+  test('insights summary calculates personal rankings top three', () async {
+    final today = DateTime(2026, 5, 25);
+    final repository = InsightsRepositoryImpl(
+      bookRepository: _FakeBookRepository([
+        Book(
+          id: 'book-1',
+          title: 'Alpha',
+          author: 'Author A',
+          genre: 'Fantasy',
+          createdAt: today,
+        ),
+        Book(
+          id: 'book-2',
+          title: 'Beta',
+          author: 'Author B',
+          genre: 'Essay',
+          createdAt: today,
+        ),
+        Book(
+          id: 'book-3',
+          title: 'Gamma',
+          author: 'Author A',
+          genre: 'Fantasy',
+          createdAt: today,
+        ),
+        Book(
+          id: 'book-4',
+          title: 'Delta',
+          author: 'Author C',
+          genre: 'Memoir',
+          createdAt: today,
+        ),
+      ]),
+      readingSessionRepository: _FakeReadingSessionRepository([
+        _session('session-1', 'book-1', today, pagesRead: 40),
+        _session('session-2', 'book-2', today, pagesRead: 80),
+        _session('session-3', 'book-3', today, pagesRead: 70),
+        _session('session-4', 'book-4', today, pagesRead: 20),
+      ]),
+      now: () => today,
+    );
+
+    final summary = await repository.getSummary();
+
+    expect(summary.topAuthors.map((item) => item.label), [
+      'Author A',
+      'Author B',
+      'Author C',
+    ]);
+    expect(summary.topAuthors.map((item) => item.value), [110, 80, 20]);
+    expect(summary.topGenres.map((item) => item.label), [
+      'Fantasy',
+      'Essay',
+      'Memoir',
+    ]);
+    expect(summary.topGenres.map((item) => item.value), [110, 80, 20]);
+    expect(summary.topBooks.map((item) => item.label), [
+      'Beta',
+      'Gamma',
+      'Alpha',
+    ]);
+    expect(summary.topBooks.map((item) => item.value), [80, 70, 40]);
+  });
+
+  test('insights summary reuses statistics best streak', () async {
+    final today = DateTime(2026, 5, 25);
+    final repository = InsightsRepositoryImpl(
+      bookRepository: _FakeBookRepository([
+        Book(id: 'book-1', title: 'Book One', createdAt: today),
+      ]),
+      readingSessionRepository: _FakeReadingSessionRepository([
+        _session('session-1', 'book-1', DateTime(2026, 5, 20), pagesRead: 10),
+        _session('session-2', 'book-1', DateTime(2026, 5, 21), pagesRead: 10),
+        _session('session-3', 'book-1', DateTime(2026, 5, 23), pagesRead: 10),
+      ]),
+      now: () => today,
+    );
+
+    final summary = await repository.getSummary();
+
+    expect(summary.bestStreakDays, 2);
+  });
 }
 
 ReadingSession _session(

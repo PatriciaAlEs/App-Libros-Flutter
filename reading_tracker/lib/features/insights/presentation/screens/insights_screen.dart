@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/entities/reading_insights_summary.dart';
 import '../../../stats/presentation/widgets/stat_card.dart';
 import '../providers/reading_insights_summary_provider.dart';
 
@@ -137,6 +138,75 @@ class InsightsScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 24),
+              _InsightsSection(
+                title: 'Top Lecturas del Año',
+                children: [
+                  StatCard(
+                    icon: Icons.star_border,
+                    title: 'Mejor valorado',
+                    value: summary.topRatedBookTitle ?? 'Sin datos',
+                    subtitle: summary.topRatedBookRating == null
+                        ? 'Aun no hay libros valorados este ano'
+                        : '${_formatRating(summary.topRatedBookRating!)} / 5',
+                  ),
+                  StatCard(
+                    icon: Icons.menu_book_outlined,
+                    title: 'Mas largo',
+                    value: summary.longestBookTitle ?? 'Sin datos',
+                    subtitle: summary.longestBookPages == null
+                        ? 'Aun no hay libros completados con paginas'
+                        : '${summary.longestBookPages} pag.',
+                  ),
+                  StatCard(
+                    icon: Icons.hourglass_bottom_outlined,
+                    title: 'Mas tiempo invertido',
+                    value: summary.mostTimeBookTitle ?? 'Sin datos',
+                    subtitle: summary.mostTimeBookMinutes == null
+                        ? 'Aun no hay sesiones este ano'
+                        : _formatMinutes(summary.mostTimeBookMinutes!),
+                  ),
+                  StatCard(
+                    icon: Icons.format_list_numbered,
+                    title: 'Mas sesiones',
+                    value: summary.mostSessionsBookTitle ?? 'Sin datos',
+                    subtitle: summary.mostSessionsCount == null
+                        ? 'Aun no hay sesiones este ano'
+                        : _formatCount(summary.mostSessionsCount!, 'sesion'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _InsightsSection(
+                title: 'Ranking Personal',
+                children: [
+                  _RankingCard(
+                    icon: Icons.person_outline,
+                    title: 'Top autores',
+                    items: summary.topAuthors,
+                  ),
+                  _RankingCard(
+                    icon: Icons.category_outlined,
+                    title: 'Top generos',
+                    items: summary.topGenres,
+                  ),
+                  _RankingCard(
+                    icon: Icons.local_library_outlined,
+                    title: 'Top libros',
+                    items: summary.topBooks,
+                  ),
+                  StatCard(
+                    icon: Icons.emoji_events_outlined,
+                    title: 'Mejor racha',
+                    value: summary.bestStreakDays > 0
+                        ? '${summary.bestStreakDays}'
+                        : 'Sin datos',
+                    subtitle: summary.bestStreakDays > 0
+                        ? _formatCount(summary.bestStreakDays, 'dia')
+                        : 'Aun no hay suficientes sesiones',
+                  ),
+                ],
+              ),
             ],
           );
         },
@@ -156,6 +226,23 @@ class InsightsScreen extends ConsumerWidget {
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  String _formatRating(double rating) {
+    return rating.toStringAsFixed(rating % 1 == 0 ? 1 : 2);
+  }
+
+  String _formatMinutes(int minutes) {
+    if (minutes < 60) return '$minutes min';
+    final hours = minutes ~/ 60;
+    final remainingMinutes = minutes % 60;
+    if (remainingMinutes == 0) return '${hours}h';
+    return '${hours}h ${remainingMinutes}min';
+  }
+
+  String _formatCount(int value, String singular) {
+    if (value == 1) return '1 $singular';
+    return '$value ${singular}s';
   }
 }
 
@@ -178,6 +265,81 @@ class _InsightsSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         _InsightsCardGrid(children: children),
+      ],
+    );
+  }
+}
+
+class _RankingCard extends StatelessWidget {
+  const _RankingCard({
+    required this.icon,
+    required this.title,
+    required this.items,
+  });
+
+  final IconData icon;
+  final String title;
+  final List<ReadingInsightRankingItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = theme.colorScheme.primary;
+
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        constraints: const BoxConstraints(minWidth: 150, maxWidth: 260),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 12),
+            Text(title, style: theme.textTheme.labelLarge),
+            const SizedBox(height: 8),
+            if (items.isEmpty)
+              Text(
+                'Aun no hay datos suficientes',
+                style: theme.textTheme.bodySmall,
+              )
+            else
+              for (var index = 0; index < items.length; index++) ...[
+                _RankingRow(position: index + 1, item: items[index]),
+                if (index < items.length - 1) const SizedBox(height: 6),
+              ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RankingRow extends StatelessWidget {
+  const _RankingRow({required this.position, required this.item});
+
+  final int position;
+  final ReadingInsightRankingItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text('$position. ', style: Theme.of(context).textTheme.bodySmall),
+        Expanded(
+          child: Text(
+            item.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '${item.value} pag.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
       ],
     );
   }

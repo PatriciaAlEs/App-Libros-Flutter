@@ -16,6 +16,18 @@ class ReadingInsightsSummary {
     this.finishPredictionDate,
     this.completedBooksThisYear = 0,
     this.annualBooksForecast,
+    this.topRatedBookTitle,
+    this.topRatedBookRating,
+    this.longestBookTitle,
+    this.longestBookPages,
+    this.mostTimeBookTitle,
+    this.mostTimeBookMinutes,
+    this.mostSessionsBookTitle,
+    this.mostSessionsCount,
+    this.topAuthors = const [],
+    this.topGenres = const [],
+    this.topBooks = const [],
+    this.bestStreakDays = 0,
   });
 
   const ReadingInsightsSummary.empty()
@@ -34,7 +46,19 @@ class ReadingInsightsSummary {
       finishPredictionDaysRemaining = null,
       finishPredictionDate = null,
       completedBooksThisYear = 0,
-      annualBooksForecast = null;
+      annualBooksForecast = null,
+      topRatedBookTitle = null,
+      topRatedBookRating = null,
+      longestBookTitle = null,
+      longestBookPages = null,
+      mostTimeBookTitle = null,
+      mostTimeBookMinutes = null,
+      mostSessionsBookTitle = null,
+      mostSessionsCount = null,
+      topAuthors = const [],
+      topGenres = const [],
+      topBooks = const [],
+      bestStreakDays = 0;
 
   final String? mostReadBookTitle;
   final int mostReadBookPages;
@@ -52,6 +76,18 @@ class ReadingInsightsSummary {
   final DateTime? finishPredictionDate;
   final int completedBooksThisYear;
   final int? annualBooksForecast;
+  final String? topRatedBookTitle;
+  final double? topRatedBookRating;
+  final String? longestBookTitle;
+  final int? longestBookPages;
+  final String? mostTimeBookTitle;
+  final int? mostTimeBookMinutes;
+  final String? mostSessionsBookTitle;
+  final int? mostSessionsCount;
+  final List<ReadingInsightRankingItem> topAuthors;
+  final List<ReadingInsightRankingItem> topGenres;
+  final List<ReadingInsightRankingItem> topBooks;
+  final int bestStreakDays;
 
   bool get hasReadingActivity =>
       mostReadBookPages > 0 ||
@@ -71,9 +107,30 @@ class ReadingInsightsSummary {
 
   bool get hasAnnualForecast => annualBooksForecast != null;
 
+  bool get hasTopReadsOfYear =>
+      topRatedBookTitle != null ||
+      longestBookTitle != null ||
+      mostTimeBookTitle != null ||
+      mostSessionsBookTitle != null;
+
+  bool get hasPersonalRanking =>
+      topAuthors.isNotEmpty ||
+      topGenres.isNotEmpty ||
+      topBooks.isNotEmpty ||
+      bestStreakDays > 0;
+
   bool get hasAnyInsight =>
       hasReadingActivity ||
       hasReadingPace ||
       hasFinishPrediction ||
-      hasAnnualForecast;
+      hasAnnualForecast ||
+      hasTopReadsOfYear ||
+      hasPersonalRanking;
+}
+
+class ReadingInsightRankingItem {
+  const ReadingInsightRankingItem({required this.label, required this.value});
+
+  final String label;
+  final int value;
 }

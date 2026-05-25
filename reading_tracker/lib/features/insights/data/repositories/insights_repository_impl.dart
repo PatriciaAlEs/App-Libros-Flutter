@@ -5,19 +5,23 @@ import 'package:reading_tracker/features/insights/domain/entities/reading_insigh
 import 'package:reading_tracker/features/insights/domain/repositories/insights_repository.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/entities/reading_session.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/repositories/reading_session_repository.dart';
+import 'package:reading_tracker/features/stats/domain/services/statistics_calculator.dart';
 
 class InsightsRepositoryImpl implements InsightsRepository {
   const InsightsRepositoryImpl({
     required BookRepository bookRepository,
     required ReadingSessionRepository readingSessionRepository,
     DateTime Function()? now,
+    StatisticsCalculator statisticsCalculator = const StatisticsCalculator(),
   }) : _bookRepository = bookRepository,
        _readingSessionRepository = readingSessionRepository,
-       _now = now ?? DateTime.now;
+       _now = now ?? DateTime.now,
+       _statisticsCalculator = statisticsCalculator;
 
   final BookRepository _bookRepository;
   final ReadingSessionRepository _readingSessionRepository;
   final DateTime Function() _now;
+  final StatisticsCalculator _statisticsCalculator;
 
   @override
   Future<ReadingInsightsSummary> getSummary() async {
@@ -95,6 +99,13 @@ class InsightsRepositoryImpl implements InsightsRepository {
       today,
     );
     final annualForecast = _calculateAnnualForecast(books, today);
+    final topReadsOfYear = _calculateTopReadsOfYear(books, sessions, today);
+    final personalRanking = _calculatePersonalRanking(booksById, pagesSessions);
+    final statisticsSummary = _statisticsCalculator.calculateFromBooks(
+      books,
+      sessions: sessions,
+      now: today,
+    );
 
     return ReadingInsightsSummary(
       mostReadBookTitle: topBook?.title,
@@ -113,6 +124,18 @@ class InsightsRepositoryImpl implements InsightsRepository {
       finishPredictionDate: finishPrediction?.estimatedFinishDate,
       completedBooksThisYear: annualForecast.completedBooksThisYear,
       annualBooksForecast: annualForecast.projectedBooks,
+      topRatedBookTitle: topReadsOfYear.topRatedBook?.title,
+      topRatedBookRating: topReadsOfYear.topRatedBook?.rating,
+      longestBookTitle: topReadsOfYear.longestBook?.title,
+      longestBookPages: topReadsOfYear.longestBook?.totalPages,
+      mostTimeBookTitle: topReadsOfYear.mostTimeBook?.title,
+      mostTimeBookMinutes: topReadsOfYear.mostTimeMinutes,
+      mostSessionsBookTitle: topReadsOfYear.mostSessionsBook?.title,
+      mostSessionsCount: topReadsOfYear.mostSessionsCount,
+      topAuthors: personalRanking.topAuthors,
+      topGenres: personalRanking.topGenres,
+      topBooks: personalRanking.topBooks,
+      bestStreakDays: statisticsSummary.bestStreakDays,
     );
   }
 
@@ -236,6 +259,171 @@ class InsightsRepositoryImpl implements InsightsRepository {
     );
   }
 
+  _TopReadsOfYear _calculateTopReadsOfYear(
+    List<Book> books,
+    List<ReadingSession> sessions,
+    DateTime today,
+  ) {
+    final completedThisYear = books.where((book) {
+      final finishedAt = book.finishedAt;
+      final finishedDay = finishedAt == null ? null : _dateOnly(finishedAt);
+      return book.status == BookStatus.completed &&
+          finishedDay != null &&
+          finishedDay.year == today.year &&
+          !finishedDay.isAfter(today);
+    }).toList();
+    final sessionsThisYear = sessions.where((session) {
+      final date = _dateOnly(session.date);
+      return date.year == today.year && !date.isAfter(today);
+    }).toList();
+    final booksById = {for (final book in books) book.id: book};
+    final minutesByBookId = <String, int>{};
+    final sessionsByBookId = <String, int>{};
+
+    for (final session in sessionsThisYear) {
+      if (!booksById.containsKey(session.bookId)) continue;
+      if (session.minutes > 0) {
+        minutesByBookId.update(
+          session.bookId,
+          (minutes) => minutes + session.minutes,
+          ifAbsent: () => session.minutes,
+        );
+      }
+      sessionsByBookId.update(
+        session.bookId,
+        (count) => count + 1,
+        ifAbsent: () => 1,
+      );
+    }
+
+    final mostTimeEntry = _topEntry(minutesByBookId);
+    final mostSessionsEntry = _topEntry(sessionsByBookId);
+
+    return _TopReadsOfYear(
+      topRatedBook: _topRatedBook(completedThisYear),
+      longestBook: _longestBook(completedThisYear),
+      mostTimeBook: mostTimeEntry == null ? null : booksById[mostTimeEntry.key],
+      mostTimeMinutes: mostTimeEntry?.value,
+      mostSessionsBook: mostSessionsEntry == null
+          ? null
+          : booksById[mostSessionsEntry.key],
+      mostSessionsCount: mostSessionsEntry?.value,
+    );
+  }
+
+  Book? _topRatedBook(List<Book> completedBooks) {
+    final ratedBooks = completedBooks
+        .where((book) => book.rating != null)
+        .toList();
+    if (ratedBooks.isEmpty) return null;
+
+    ratedBooks.sort((a, b) {
+      final ratingComparison = b.rating!.compareTo(a.rating!);
+      if (ratingComparison != 0) return ratingComparison;
+      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+    });
+    return ratedBooks.first;
+  }
+
+  Book? _longestBook(List<Book> completedBooks) {
+    final booksWithPages = completedBooks
+        .where((book) => book.totalPages != null && book.totalPages! > 0)
+        .toList();
+    if (booksWithPages.isEmpty) return null;
+
+    booksWithPages.sort((a, b) {
+      final pagesComparison = b.totalPages!.compareTo(a.totalPages!);
+      if (pagesComparison != 0) return pagesComparison;
+      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+    });
+    return booksWithPages.first;
+  }
+
+  _PersonalRanking _calculatePersonalRanking(
+    Map<String, Book> booksById,
+    List<ReadingSession> sessions,
+  ) {
+    final pagesByAuthor = <String, int>{};
+    final pagesByGenre = <String, int>{};
+    final pagesByBookId = <String, int>{};
+
+    for (final session in sessions) {
+      final book = booksById[session.bookId];
+      if (book == null) continue;
+
+      pagesByBookId.update(
+        book.id,
+        (pages) => pages + session.pagesRead,
+        ifAbsent: () => session.pagesRead,
+      );
+
+      final author = _cleanValue(book.author);
+      if (author != null) {
+        pagesByAuthor.update(
+          author,
+          (pages) => pages + session.pagesRead,
+          ifAbsent: () => session.pagesRead,
+        );
+      }
+
+      final genre = _cleanValue(book.genre);
+      if (genre != null) {
+        pagesByGenre.update(
+          genre,
+          (pages) => pages + session.pagesRead,
+          ifAbsent: () => session.pagesRead,
+        );
+      }
+    }
+
+    return _PersonalRanking(
+      topAuthors: _topRankingItems(pagesByAuthor),
+      topGenres: _topRankingItems(pagesByGenre),
+      topBooks: _topBookRankingItems(pagesByBookId, booksById),
+    );
+  }
+
+  List<ReadingInsightRankingItem> _topBookRankingItems(
+    Map<String, int> pagesByBookId,
+    Map<String, Book> booksById,
+  ) {
+    final entries = pagesByBookId.entries.toList()
+      ..sort((a, b) {
+        final valueComparison = b.value.compareTo(a.value);
+        if (valueComparison != 0) return valueComparison;
+        final aTitle = booksById[a.key]?.title ?? a.key;
+        final bTitle = booksById[b.key]?.title ?? b.key;
+        return aTitle.toLowerCase().compareTo(bTitle.toLowerCase());
+      });
+
+    return entries
+        .take(3)
+        .map(
+          (entry) => ReadingInsightRankingItem(
+            label: booksById[entry.key]?.title ?? entry.key,
+            value: entry.value,
+          ),
+        )
+        .toList();
+  }
+
+  List<ReadingInsightRankingItem> _topRankingItems(Map<String, int> values) {
+    final entries = values.entries.toList()
+      ..sort((a, b) {
+        final valueComparison = b.value.compareTo(a.value);
+        if (valueComparison != 0) return valueComparison;
+        return a.key.toLowerCase().compareTo(b.key.toLowerCase());
+      });
+
+    return entries
+        .take(3)
+        .map(
+          (entry) =>
+              ReadingInsightRankingItem(label: entry.key, value: entry.value),
+        )
+        .toList();
+  }
+
   MapEntry<String, int>? _topEntry(Map<String, int> pagesByKey) {
     if (pagesByKey.isEmpty) return null;
 
@@ -284,4 +472,34 @@ class _AnnualForecast {
 
   final int completedBooksThisYear;
   final int? projectedBooks;
+}
+
+class _TopReadsOfYear {
+  const _TopReadsOfYear({
+    this.topRatedBook,
+    this.longestBook,
+    this.mostTimeBook,
+    this.mostTimeMinutes,
+    this.mostSessionsBook,
+    this.mostSessionsCount,
+  });
+
+  final Book? topRatedBook;
+  final Book? longestBook;
+  final Book? mostTimeBook;
+  final int? mostTimeMinutes;
+  final Book? mostSessionsBook;
+  final int? mostSessionsCount;
+}
+
+class _PersonalRanking {
+  const _PersonalRanking({
+    required this.topAuthors,
+    required this.topGenres,
+    required this.topBooks,
+  });
+
+  final List<ReadingInsightRankingItem> topAuthors;
+  final List<ReadingInsightRankingItem> topGenres;
+  final List<ReadingInsightRankingItem> topBooks;
 }
