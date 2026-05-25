@@ -8,6 +8,7 @@ import '../../../reading_sessions/domain/entities/reading_session.dart';
 import '../../../reading_sessions/domain/usecases/register_reading_session.dart';
 import '../../../reading_sessions/presentation/providers/reading_sessions_provider.dart';
 import '../../../reading_sessions/presentation/providers/register_reading_session_provider.dart';
+import '../../../reading_sessions/presentation/utils/session_completion_flow.dart';
 import '../../../stats/domain/stats_calculator.dart';
 import '../../../stats/presentation/providers/stats_provider.dart';
 import '../../../stats/presentation/providers/statistics_summary_provider.dart';
@@ -189,6 +190,15 @@ class HomeScreen extends ConsumerWidget {
     ref.invalidate(statisticsSummaryProvider);
     ref.invalidate(booksProvider);
     ref.invalidate(readingSessionsForRangeProvider(recentActivityRange));
+    if (!context.mounted) return;
+    await maybeOfferSessionCompletion(
+      context: context,
+      ref: ref,
+      book: book,
+      pagesRead: update.pagesAdded,
+      explicitCurrentPage: update.currentPage,
+      totalPages: update.totalPages,
+    );
     if (!context.mounted) return;
     ScaffoldMessenger.of(
       context,

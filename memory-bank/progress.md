@@ -57,7 +57,7 @@
 - Tests ajustados para el formulario con multiples campos de texto.
 - Test de estado inicial ajustado para hacer visible "Guardar libro" antes de tocarlo.
 - Auditoria inicial de Hito 3 completada: "ratos de lectura" existentes se consolidan como base de `ReadingSession`.
-- Documentada deuda tecnica de sesiones: falta `pagesRead` estructurado, `updatedAt`, consulta por libro y caso de uso central para registrar sesion + actualizar progreso.
+- Consolidacion minima de `ReadingSession` implementada con `pagesRead`, `updatedAt`, consulta por libro y caso de uso central para registrar sesion + actualizar progreso.
 
 ## Parcial / en seguimiento
 
@@ -84,4 +84,4 @@ flutter analyze
 - Investigar Open Library para mejorar resultados en espanol.
 - Hacer sprint visual/UI: paleta, estilo, referencias y design system.
 - Ampliar tests de flujos criticos si el alcance del siguiente sprint lo requiere.
-- Hito 3 siguiente sprint: migracion minima de `ReadingSession` para `pagesRead` y `updatedAt`, mas caso de uso centralizado para registrar sesiones sin duplicar logica de UI.
+- Hito 3 siguiente sprint: si una sesion alcanza `totalPages`, ofrecer completar libro y valorar sin hacerlo automaticamente.

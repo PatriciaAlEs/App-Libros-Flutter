@@ -58,14 +58,23 @@ Auditoria inicial realizada:
 - Home ya crea sesiones desde el registro rapido cuando hay paginas o minutos.
 - El calendario ya consume sesiones por rango/dia.
 
+Consolidacion minima implementada:
+
+- `ReadingSession` ahora soporta `pagesRead` como dato estructurado.
+- `ReadingSession` ahora soporta `updatedAt`.
+- La tabla Drift `reading_sessions` incluye `pages_read` con default `0` y `updated_at` nullable.
+- `AppDatabase` sube a `schemaVersion = 4`.
+- La migracion `from < 4` anade las columnas nuevas sin borrar datos previos.
+- El repositorio permite consultar sesiones por `bookId`.
+- Existe el caso de uso `RegisterReadingSession` para crear sesion y actualizar progreso del libro.
+- Home usa `RegisterReadingSession` y ya no guarda paginas dentro de `note`.
+- El formulario general de ratos permite registrar paginas leidas, minutos y nota opcional.
+- La actividad reciente, detalle de dia y calendario muestran paginas/minutos cuando existen.
+- Cuando una sesion nueva con paginas leidas hace que el progreso alcance `totalPages`, la app ofrece completar el libro y abrir valoracion/resena opcional, sin completar automaticamente.
+
 Deuda detectada para consolidar Hito 3:
 
-- `ReadingSession` no guarda `pagesRead` como campo estructurado; Home lo conserva en `note` como texto.
-- `ReadingSession` no tiene `updatedAt`.
-- No existe consulta directa por libro en el repositorio.
-- El formulario general de sesiones registra minutos y nota, pero no paginas leidas.
-- La actualizacion de `currentPage` esta en flujos de UI concretos, no centralizada como caso de uso de sesion.
-- Aun no hay regla central para evitar superar `totalPages` o completar automaticamente si se llega al final.
+- La edicion de una sesion existente actualiza los datos de la sesion, pero no recalcula el progreso historico del libro.
 
 ## Libros y progreso
 

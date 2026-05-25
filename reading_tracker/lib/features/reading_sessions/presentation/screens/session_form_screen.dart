@@ -11,6 +11,7 @@ import '../../domain/entities/reading_session.dart';
 import '../../domain/usecases/register_reading_session.dart';
 import '../providers/reading_sessions_provider.dart';
 import '../providers/register_reading_session_provider.dart';
+import '../utils/session_completion_flow.dart';
 
 class SessionFormScreen extends ConsumerStatefulWidget {
   const SessionFormScreen({super.key, this.initialDate, this.session});
@@ -67,6 +68,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
           ? null
           : _noteController.text.trim();
       final existingSession = widget.session;
+      final selectedBook = _selectedBookFromCache();
 
       if (_isEditing) {
         final repository = ref.read(readingSessionRepositoryProvider);
@@ -98,6 +100,15 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
       ref.invalidate(statisticsSummaryProvider);
       ref.invalidate(booksProvider);
       ref.invalidate(readingSessionsForDayProvider(_date));
+      if (!mounted) return;
+      if (!_isEditing && selectedBook != null) {
+        await maybeOfferSessionCompletion(
+          context: context,
+          ref: ref,
+          book: selectedBook,
+          pagesRead: pagesRead,
+        );
+      }
       if (mounted) Navigator.pop(context, true);
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -241,6 +252,15 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
   String _bookLabel(Book book) {
     if (book.author == null || book.author!.isEmpty) return book.title;
     return '${book.title} - ${book.author}';
+  }
+
+  Book? _selectedBookFromCache() {
+    final books = ref.read(booksProvider).valueOrNull;
+    if (books == null) return null;
+    for (final book in books) {
+      if (book.id == _bookId) return book;
+    }
+    return null;
   }
 
   List<Book> _selectableBooks(List<Book> books) {

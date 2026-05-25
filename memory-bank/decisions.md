@@ -42,3 +42,5 @@
 - La busqueda Open Library en alta debe mostrar pocos resultados inicialmente y permitir cargar mas para no empujar demasiado el CTA de guardado.
 - Hito 3 debe reutilizar la entidad existente `ReadingSession` como base de "ratos de lectura"; no crear una entidad paralela mientras esta cubra el concepto principal.
 - Antes de usar sesiones para estadisticas avanzadas, rachas y actividad, consolidar campos estructurados minimos como `pagesRead` y `updatedAt`.
+- Registrar sesiones nuevas debe pasar por `RegisterReadingSession`, que centraliza crear la sesion y actualizar el progreso del libro.
+- Al registrar una sesion que haga llegar el progreso a `totalPages`, no completar automaticamente el libro sin confirmacion; si el usuario confirma, marcar como `completed`, fijar `finishedAt/completedDate` si estaba vacio y ofrecer valoracion/resena opcional.

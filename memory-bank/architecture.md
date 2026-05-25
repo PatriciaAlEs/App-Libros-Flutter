@@ -40,7 +40,7 @@ reading_tracker/lib/
 
 ## Persistencia
 
-- `AppDatabase` tiene `schemaVersion = 3`.
+- `AppDatabase` tiene `schemaVersion = 4`.
 - Tablas: `books`, `reading_sessions`.
 - Tabla manual adicional: `app_settings` para configuracion simple como `annualReadingGoal`.
 - IO: `NativeDatabase` sobre `reading_tracker.sqlite`.
@@ -115,6 +115,15 @@ reading_tracker/lib/
 - Motivo observado: ya existe entidad de dominio, tabla Drift, DAO, repositorio, providers por dia/rango y UI de calendario/formulario.
 - Deuda observada: falta `pagesRead` estructurado, `updatedAt` y consulta por libro; Home guarda paginas en la nota al crear sesiones desde avance rapido.
 - Evidencia: `features/reading_sessions/domain/entities/reading_session.dart`, `core/database/tables/reading_sessions_table.dart`, `features/reading_sessions/presentation/providers/reading_sessions_provider.dart`.
+
+### Consolidacion minima de ReadingSession
+
+- Decision: ampliar `ReadingSession` existente con `pagesRead` y `updatedAt`, sin crear una entidad nueva.
+- Persistencia: `reading_sessions.pages_read` usa default `0`; `reading_sessions.updated_at` es nullable para mantener compatibilidad con datos anteriores.
+- Migracion: `schemaVersion = 4`, con `addColumn` para ambas columnas.
+- Caso de uso: `RegisterReadingSession` centraliza alta de sesion y actualizacion de progreso del libro.
+- Consulta nueva: `ReadingSessionRepository.getSessionsForBook(bookId)` devuelve sesiones por libro ordenadas por fecha descendente y `createdAt` descendente.
+- Finalizacion inteligente: la decision de completar tras alcanzar `totalPages` vive en presentacion y exige confirmacion del usuario antes de cambiar `Book.status`; reutiliza `CompletionReviewSheet`.
 
 ### Seed data solo en debug
 
