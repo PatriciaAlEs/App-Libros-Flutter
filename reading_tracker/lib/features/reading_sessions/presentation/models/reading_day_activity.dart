@@ -67,7 +67,9 @@ class ReadingActivitySummary {
         (total, activity) => total + activity.minutes,
       ),
       activeDays: activities
-          .where((activity) => activity.intensity != ReadingActivityIntensity.none)
+          .where(
+            (activity) => activity.intensity != ReadingActivityIntensity.none,
+          )
           .length,
     );
   }

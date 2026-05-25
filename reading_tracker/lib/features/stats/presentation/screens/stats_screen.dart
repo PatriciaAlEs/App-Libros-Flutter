@@ -99,6 +99,54 @@ class StatsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
               _StatsSection(
+                title: 'Ritmo de lectura',
+                children: [
+                  StatCard(
+                    icon: Icons.view_week_outlined,
+                    title: 'Paginas esta semana',
+                    value: '${summary.pagesReadThisWeek}',
+                  ),
+                  StatCard(
+                    icon: Icons.calendar_month_outlined,
+                    title: 'Paginas este mes',
+                    value: '${summary.pagesReadThisMonth}',
+                  ),
+                  StatCard(
+                    icon: Icons.timer_outlined,
+                    title: 'Tiempo esta semana',
+                    value: _formatMinutes(summary.minutesReadThisWeek),
+                  ),
+                  StatCard(
+                    icon: Icons.hourglass_bottom_outlined,
+                    title: 'Tiempo este mes',
+                    value: _formatMinutes(summary.minutesReadThisMonth),
+                  ),
+                  StatCard(
+                    icon: Icons.trending_up_outlined,
+                    title: 'Promedio por dia activo',
+                    value:
+                        '${_formatAverage(summary.averagePagesPerActiveDay)} pag.',
+                    subtitle:
+                        '${_formatAverage(summary.averageMinutesPerActiveDay)} min',
+                  ),
+                  StatCard(
+                    icon: Icons.event_available_outlined,
+                    title: 'Dias activos este mes',
+                    value: '${summary.activeDaysThisMonth}',
+                  ),
+                  StatCard(
+                    icon: Icons.bolt_outlined,
+                    title: 'Dia mas activo',
+                    value: _formatMostActiveDay(summary.mostActiveDayDate),
+                    subtitle: _formatMostActiveDayActivity(
+                      summary.mostActiveDayPages,
+                      summary.mostActiveDayMinutes,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _StatsSection(
                 title: 'Rachas',
                 children: [
                   StatCard(
@@ -136,6 +184,31 @@ class StatsScreen extends ConsumerWidget {
   String _formatAverageRating(double? rating) {
     if (rating == null) return '-';
     return rating.toStringAsFixed(rating % 1 == 0 ? 1 : 2);
+  }
+
+  String _formatAverage(double value) {
+    return value.toStringAsFixed(value % 1 == 0 ? 0 : 1);
+  }
+
+  String _formatMinutes(int minutes) {
+    if (minutes < 60) return '$minutes min';
+    final hours = minutes ~/ 60;
+    final remainingMinutes = minutes % 60;
+    if (remainingMinutes == 0) return '${hours}h';
+    return '${hours}h ${remainingMinutes}min';
+  }
+
+  String _formatMostActiveDay(DateTime? date) {
+    if (date == null) return '-';
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  String _formatMostActiveDayActivity(int pagesRead, int minutes) {
+    final parts = <String>[
+      if (pagesRead > 0) '$pagesRead pag.',
+      if (minutes > 0) '$minutes min',
+    ];
+    return parts.isEmpty ? 'Sin sesiones' : parts.join(' · ');
   }
 
   Future<void> _editAnnualGoal(

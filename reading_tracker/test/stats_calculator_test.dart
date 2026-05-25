@@ -232,14 +232,71 @@ void main() {
       expect(summary.bestStreakDays, 1);
     },
   );
+
+  test('statistics summary calculates advanced session metrics', () {
+    final today = DateTime(2026, 5, 21);
+    final monday = DateTime(2026, 5, 18);
+    final earlierThisMonth = DateTime(2026, 5, 10);
+    final outsideMonth = DateTime(2026, 4, 30);
+    final future = DateTime(2026, 5, 22);
+
+    final summary = const StatisticsCalculator().calculateFromBooks(
+      const [],
+      sessions: [
+        _session('s1', 'book-1', monday, 20, pagesRead: 10),
+        _session('s2', 'book-1', today, 30, pagesRead: 0),
+        _session('s3', 'book-1', earlierThisMonth, 50, pagesRead: 40),
+        _session('s4', 'book-1', outsideMonth, 100, pagesRead: 100),
+        _session('s5', 'book-1', future, 200, pagesRead: 200),
+      ],
+      now: today,
+    );
+
+    expect(summary.pagesReadThisWeek, 10);
+    expect(summary.minutesReadThisWeek, 50);
+    expect(summary.pagesReadThisMonth, 50);
+    expect(summary.minutesReadThisMonth, 100);
+    expect(summary.activeDaysThisMonth, 3);
+    expect(summary.averagePagesPerActiveDay, closeTo(37.5, 0.001));
+    expect(summary.averageMinutesPerActiveDay, closeTo(50, 0.001));
+    expect(summary.mostActiveDayDate, outsideMonth);
+    expect(summary.mostActiveDayPages, 100);
+    expect(summary.mostActiveDayMinutes, 100);
+  });
+
+  test('statistics summary advanced metrics are neutral without sessions', () {
+    final summary = const StatisticsCalculator().calculateFromBooks(
+      const [],
+      sessions: const [],
+      now: DateTime(2026, 5, 21),
+    );
+
+    expect(summary.pagesReadThisWeek, 0);
+    expect(summary.pagesReadThisMonth, 0);
+    expect(summary.minutesReadThisWeek, 0);
+    expect(summary.minutesReadThisMonth, 0);
+    expect(summary.activeDaysThisMonth, 0);
+    expect(summary.averagePagesPerActiveDay, 0);
+    expect(summary.averageMinutesPerActiveDay, 0);
+    expect(summary.mostActiveDayDate, isNull);
+    expect(summary.mostActiveDayPages, 0);
+    expect(summary.mostActiveDayMinutes, 0);
+  });
 }
 
-ReadingSession _session(String id, String bookId, DateTime date, int minutes) {
+ReadingSession _session(
+  String id,
+  String bookId,
+  DateTime date,
+  int minutes, {
+  int pagesRead = 0,
+}) {
   return ReadingSession(
     id: id,
     bookId: bookId,
     date: date,
     minutes: minutes,
+    pagesRead: pagesRead,
     createdAt: date,
   );
 }

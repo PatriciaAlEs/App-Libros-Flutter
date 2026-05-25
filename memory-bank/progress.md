@@ -62,6 +62,7 @@
 - Reading Streaks implementado en Estadisticas: racha actual y mejor racha basadas en dias con `ReadingSession`.
 - Registro de sesiones pasadas habilitado desde formulario general y registro rapido de Home, bloqueando fechas futuras.
 - Calendario enriquecido por intensidad implementado con resumen de actividad y leyenda visual.
+- Estadisticas avanzadas de lectura implementadas desde `ReadingSession`: paginas/minutos por semana y mes, promedios por dia activo, dias activos y dia mas activo.
 
 ## Parcial / en seguimiento
 

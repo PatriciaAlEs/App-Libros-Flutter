@@ -139,15 +139,15 @@ flutter analyze
 
 Estado actual implementado:
 
-- Existe una capa nueva desacoplada para estadisticas basada en `Book` y, para rachas, en `ReadingSession`.
-- `StatisticsSummary` centraliza metricas base: total, completados, leyendo, pausados, abandonados, pendientes, paginas leidas, rating medio, lecturas actuales, racha actual y mejor racha.
+- Existe una capa nueva desacoplada para estadisticas basada en `Book` y, para rachas/actividad avanzada, en `ReadingSession`.
+- `StatisticsSummary` centraliza metricas base: total, completados, leyendo, pausados, abandonados, pendientes, paginas leidas, rating medio, lecturas actuales, racha actual, mejor racha y ritmo de lectura.
 - `StatisticsCalculator` contiene la logica pura de calculo fuera de widgets y pantallas.
 - `StatisticsRepository` define el contrato de acceso a estadisticas.
 - `BookStatisticsRepository` calcula estadisticas usando `BookRepository` y sesiones existentes desde `ReadingSessionRepository`.
 - `GetStatisticsSummary` encapsula el caso de uso.
 - `statisticsSummaryProvider` es el punto unico preparado para que la UI consuma estas metricas en futuros sprints.
 - La pantalla `/stats` ya consume `statisticsSummaryProvider`.
-- La UI basica muestra tarjetas para total, completados, leyendo, pausados, abandonados, pendientes, paginas leidas, rating medio, lecturas actuales y rachas.
+- La UI basica muestra tarjetas para total, completados, leyendo, pausados, abandonados, pendientes, paginas leidas, rating medio, lecturas actuales, rachas y ritmo de lectura.
 - La pantalla maneja loading, error, empty state y datos disponibles.
 - Los flujos de alta, detalle y Home invalidan `statisticsSummaryProvider` tras mutaciones de libros.
 - El objetivo anual de lectura se persiste como `annualReadingGoal` en `app_settings`.
@@ -155,6 +155,7 @@ Estado actual implementado:
 - La seccion "Objetivo anual" aparece en `/stats`.
 - El usuario puede definir o editar la meta anual desde un dialogo simple en `/stats`.
 - La seccion "Rachas" aparece en `/stats` con racha actual y mejor racha.
+- La seccion "Ritmo de lectura" aparece en `/stats` con paginas/minutos por semana y mes, promedios por dia activo, dias activos del mes y dia mas activo.
 - Quedan preparados futuros bloques de sesiones avanzadas y graficas, sin implementarlos todavia.
 
 ## Siguiente paso recomendado

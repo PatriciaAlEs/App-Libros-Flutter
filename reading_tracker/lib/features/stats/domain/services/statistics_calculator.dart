@@ -14,7 +14,10 @@ class StatisticsCalculator {
     DateTime? now,
   }) {
     final referenceDate = now ?? DateTime.now();
-    final activeDays = _activeSessionDays(sessions);
+    final today = _dateOnly(referenceDate);
+    final dailyActivity = _dailyActivity(sessions, today);
+    final activeDays = dailyActivity.keys.toSet();
+    final recentActivity = _calculateRecentActivity(dailyActivity, today);
 
     final completedBooks = _countByStatus(books, BookStatus.completed);
     final readingBooks = _countByStatus(books, BookStatus.reading);
@@ -52,6 +55,16 @@ class StatisticsCalculator {
       ),
       currentStreakDays: _calculateCurrentStreak(activeDays, referenceDate),
       bestStreakDays: _calculateBestStreak(activeDays),
+      pagesReadThisWeek: recentActivity.pagesReadThisWeek,
+      pagesReadThisMonth: recentActivity.pagesReadThisMonth,
+      minutesReadThisWeek: recentActivity.minutesReadThisWeek,
+      minutesReadThisMonth: recentActivity.minutesReadThisMonth,
+      averagePagesPerActiveDay: recentActivity.averagePagesPerActiveDay,
+      averageMinutesPerActiveDay: recentActivity.averageMinutesPerActiveDay,
+      mostActiveDayDate: recentActivity.mostActiveDayDate,
+      mostActiveDayPages: recentActivity.mostActiveDayPages,
+      mostActiveDayMinutes: recentActivity.mostActiveDayMinutes,
+      activeDaysThisMonth: recentActivity.activeDaysThisMonth,
     );
   }
 
@@ -123,11 +136,24 @@ class StatisticsCalculator {
     return completedThisYear >= annualReadingGoal;
   }
 
-  Set<DateTime> _activeSessionDays(List<ReadingSession> sessions) {
-    return sessions.map((session) {
-      final date = session.date;
-      return DateTime(date.year, date.month, date.day);
-    }).toSet();
+  DateTime _dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+  Map<DateTime, _DailyReadingActivity> _dailyActivity(
+    List<ReadingSession> sessions,
+    DateTime today,
+  ) {
+    final dailyActivity = <DateTime, _DailyReadingActivity>{};
+    for (final session in sessions) {
+      final date = _dateOnly(session.date);
+      if (date.isAfter(today)) continue;
+      dailyActivity
+          .putIfAbsent(date, () => _DailyReadingActivity(date))
+          .add(session);
+    }
+    dailyActivity.removeWhere((_, activity) => !activity.isActive);
+    return dailyActivity;
   }
 
   int _calculateCurrentStreak(Set<DateTime> activeDays, DateTime now) {
@@ -176,4 +202,104 @@ class StatisticsCalculator {
 
     return bestStreak;
   }
+
+  _RecentReadingActivity _calculateRecentActivity(
+    Map<DateTime, _DailyReadingActivity> dailyActivity,
+    DateTime today,
+  ) {
+    if (dailyActivity.isEmpty) return const _RecentReadingActivity();
+
+    final weekStart = today.subtract(Duration(days: today.weekday - 1));
+    final monthStart = DateTime(today.year, today.month);
+    var pagesReadThisWeek = 0;
+    var pagesReadThisMonth = 0;
+    var minutesReadThisWeek = 0;
+    var minutesReadThisMonth = 0;
+    var activeDaysThisMonth = 0;
+    var totalPagesOnActiveDays = 0;
+    var totalMinutesOnActiveDays = 0;
+    _DailyReadingActivity? mostActiveDay;
+
+    for (final activity in dailyActivity.values) {
+      final date = activity.date;
+      totalPagesOnActiveDays += activity.pagesRead;
+      totalMinutesOnActiveDays += activity.minutes;
+
+      if (!date.isBefore(weekStart) && !date.isAfter(today)) {
+        pagesReadThisWeek += activity.pagesRead;
+        minutesReadThisWeek += activity.minutes;
+      }
+
+      if (!date.isBefore(monthStart) && !date.isAfter(today)) {
+        pagesReadThisMonth += activity.pagesRead;
+        minutesReadThisMonth += activity.minutes;
+        activeDaysThisMonth += 1;
+      }
+
+      if (mostActiveDay == null ||
+          activity.pagesRead > mostActiveDay.pagesRead ||
+          (activity.pagesRead == mostActiveDay.pagesRead &&
+              activity.minutes > mostActiveDay.minutes) ||
+          (activity.pagesRead == mostActiveDay.pagesRead &&
+              activity.minutes == mostActiveDay.minutes &&
+              activity.date.isAfter(mostActiveDay.date))) {
+        mostActiveDay = activity;
+      }
+    }
+
+    final activeDays = dailyActivity.length;
+    return _RecentReadingActivity(
+      pagesReadThisWeek: pagesReadThisWeek,
+      pagesReadThisMonth: pagesReadThisMonth,
+      minutesReadThisWeek: minutesReadThisWeek,
+      minutesReadThisMonth: minutesReadThisMonth,
+      averagePagesPerActiveDay: totalPagesOnActiveDays / activeDays,
+      averageMinutesPerActiveDay: totalMinutesOnActiveDays / activeDays,
+      mostActiveDayDate: mostActiveDay?.date,
+      mostActiveDayPages: mostActiveDay?.pagesRead ?? 0,
+      mostActiveDayMinutes: mostActiveDay?.minutes ?? 0,
+      activeDaysThisMonth: activeDaysThisMonth,
+    );
+  }
+}
+
+class _DailyReadingActivity {
+  _DailyReadingActivity(this.date);
+
+  final DateTime date;
+  var pagesRead = 0;
+  var minutes = 0;
+
+  bool get isActive => pagesRead > 0 || minutes > 0;
+
+  void add(ReadingSession session) {
+    pagesRead += session.pagesRead;
+    minutes += session.minutes;
+  }
+}
+
+class _RecentReadingActivity {
+  const _RecentReadingActivity({
+    this.pagesReadThisWeek = 0,
+    this.pagesReadThisMonth = 0,
+    this.minutesReadThisWeek = 0,
+    this.minutesReadThisMonth = 0,
+    this.averagePagesPerActiveDay = 0,
+    this.averageMinutesPerActiveDay = 0,
+    this.mostActiveDayDate,
+    this.mostActiveDayPages = 0,
+    this.mostActiveDayMinutes = 0,
+    this.activeDaysThisMonth = 0,
+  });
+
+  final int pagesReadThisWeek;
+  final int pagesReadThisMonth;
+  final int minutesReadThisWeek;
+  final int minutesReadThisMonth;
+  final double averagePagesPerActiveDay;
+  final double averageMinutesPerActiveDay;
+  final DateTime? mostActiveDayDate;
+  final int mostActiveDayPages;
+  final int mostActiveDayMinutes;
+  final int activeDaysThisMonth;
 }

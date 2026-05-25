@@ -48,3 +48,5 @@
 - Al registrar una sesion que haga llegar el progreso a `totalPages`, no completar automaticamente el libro sin confirmacion; si el usuario confirma, marcar como `completed`, fijar `finishedAt/completedDate` si estaba vacio y ofrecer valoracion/resena opcional.
 - Las rachas se basan en dias con al menos una `ReadingSession`; hoy mantiene racha activa, ayer tambien si hoy aun no tiene sesion, y cualquier otro ultimo dia activo da racha actual 0.
 - La mejor racha historica se calcula con la secuencia maxima de dias consecutivos con sesiones, ignorando hora y duplicados del mismo dia.
+- Las metricas avanzadas de lectura agrupan `ReadingSession` por fecha sin hora, ignoran fechas futuras y calculan semana actual de lunes a domingo y mes actual desde el dia 1 hasta hoy.
+- El dia mas activo se elige por mayor numero de paginas leidas y usa minutos como desempate.

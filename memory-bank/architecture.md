@@ -131,6 +131,7 @@ reading_tracker/lib/
 - `StatisticsSummary` expone `currentStreakDays` y `bestStreakDays`.
 - `StatisticsCalculator` agrupa sesiones por fecha normalizada y mantiene la logica fuera de widgets.
 - `BookStatisticsRepository` combina libros, objetivo anual y sesiones existentes para construir el resumen de `/stats`.
+- Las metricas avanzadas de actividad tambien viven en `StatisticsCalculator` y reutilizan sesiones existentes: semana actual, mes actual, promedios por dia activo y dia mas activo.
 
 ### Calendario por intensidad
 

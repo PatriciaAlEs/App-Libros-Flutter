@@ -16,6 +16,16 @@ class StatisticsSummary {
     required this.isAnnualGoalReached,
     required this.currentStreakDays,
     required this.bestStreakDays,
+    required this.pagesReadThisWeek,
+    required this.pagesReadThisMonth,
+    required this.minutesReadThisWeek,
+    required this.minutesReadThisMonth,
+    required this.averagePagesPerActiveDay,
+    required this.averageMinutesPerActiveDay,
+    required this.mostActiveDayDate,
+    required this.mostActiveDayPages,
+    required this.mostActiveDayMinutes,
+    required this.activeDaysThisMonth,
   });
 
   const StatisticsSummary.empty()
@@ -34,7 +44,17 @@ class StatisticsSummary {
       booksRemainingForAnnualGoal = null,
       isAnnualGoalReached = false,
       currentStreakDays = 0,
-      bestStreakDays = 0;
+      bestStreakDays = 0,
+      pagesReadThisWeek = 0,
+      pagesReadThisMonth = 0,
+      minutesReadThisWeek = 0,
+      minutesReadThisMonth = 0,
+      averagePagesPerActiveDay = 0,
+      averageMinutesPerActiveDay = 0,
+      mostActiveDayDate = null,
+      mostActiveDayPages = 0,
+      mostActiveDayMinutes = 0,
+      activeDaysThisMonth = 0;
 
   final int totalBooks;
   final int completedBooks;
@@ -52,4 +72,14 @@ class StatisticsSummary {
   final bool isAnnualGoalReached;
   final int currentStreakDays;
   final int bestStreakDays;
+  final int pagesReadThisWeek;
+  final int pagesReadThisMonth;
+  final int minutesReadThisWeek;
+  final int minutesReadThisMonth;
+  final double averagePagesPerActiveDay;
+  final double averageMinutesPerActiveDay;
+  final DateTime? mostActiveDayDate;
+  final int mostActiveDayPages;
+  final int mostActiveDayMinutes;
+  final int activeDaysThisMonth;
 }

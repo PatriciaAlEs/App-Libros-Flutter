@@ -8,10 +8,7 @@ import '../providers/reading_sessions_provider.dart';
 
 enum CalendarMode { month, week }
 
-Color _activityColor(
-  BuildContext context,
-  ReadingActivityIntensity intensity,
-) {
+Color _activityColor(BuildContext context, ReadingActivityIntensity intensity) {
   final colorScheme = Theme.of(context).colorScheme;
   return switch (intensity) {
     ReadingActivityIntensity.none => colorScheme.surface,
@@ -244,10 +241,7 @@ class _ActivitySummaryCard extends StatelessWidget {
                     label: 'Paginas',
                     value: '${summary.pagesRead}',
                   ),
-                  _SummaryMetric(
-                    label: 'Minutos',
-                    value: '${summary.minutes}',
-                  ),
+                  _SummaryMetric(label: 'Minutos', value: '${summary.minutes}'),
                   _SummaryMetric(
                     label: 'Dias activos',
                     value: '${summary.activeDays}',
@@ -307,7 +301,10 @@ class _ActivityLegend extends StatelessWidget {
             intensity: ReadingActivityIntensity.none,
           ),
           _LegendItem(label: 'Baja', intensity: ReadingActivityIntensity.low),
-          _LegendItem(label: 'Media', intensity: ReadingActivityIntensity.medium),
+          _LegendItem(
+            label: 'Media',
+            intensity: ReadingActivityIntensity.medium,
+          ),
           _LegendItem(label: 'Alta', intensity: ReadingActivityIntensity.high),
         ],
       ),
