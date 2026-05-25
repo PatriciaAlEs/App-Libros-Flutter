@@ -58,6 +58,8 @@
 - Test de estado inicial ajustado para hacer visible "Guardar libro" antes de tocarlo.
 - Auditoria inicial de Hito 3 completada: "ratos de lectura" existentes se consolidan como base de `ReadingSession`.
 - Consolidacion minima de `ReadingSession` implementada con `pagesRead`, `updatedAt`, consulta por libro y caso de uso central para registrar sesion + actualizar progreso.
+- Finalizacion inteligente desde sesiones implementada: al alcanzar `totalPages`, se ofrece completar y valorar sin hacerlo automaticamente.
+- Reading Streaks implementado en Estadisticas: racha actual y mejor racha basadas en dias con `ReadingSession`.
 
 ## Parcial / en seguimiento
 
@@ -84,4 +86,4 @@ flutter analyze
 - Investigar Open Library para mejorar resultados en espanol.
 - Hacer sprint visual/UI: paleta, estilo, referencias y design system.
 - Ampliar tests de flujos criticos si el alcance del siguiente sprint lo requiere.
-- Hito 3 siguiente sprint: si una sesion alcanza `totalPages`, ofrecer completar libro y valorar sin hacerlo automaticamente.
+- Hito 3 siguientes sprints: actividad avanzada, visualizaciones o metricas de sesiones sin introducir gamificacion prematura.

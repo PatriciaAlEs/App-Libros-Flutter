@@ -99,6 +99,24 @@ class StatsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
               _StatsSection(
+                title: 'Rachas',
+                children: [
+                  StatCard(
+                    icon: Icons.local_fire_department_outlined,
+                    title: 'Racha actual',
+                    value: '${summary.currentStreakDays}',
+                    subtitle: 'dias seguidos',
+                  ),
+                  StatCard(
+                    icon: Icons.emoji_events_outlined,
+                    title: 'Mejor racha',
+                    value: '${summary.bestStreakDays}',
+                    subtitle: 'mejor racha',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _StatsSection(
                 title: 'Valoraciones',
                 children: [
                   StatCard(

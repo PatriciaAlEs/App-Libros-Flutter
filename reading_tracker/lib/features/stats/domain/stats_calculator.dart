@@ -223,10 +223,16 @@ int _calculateCurrentStreak(Set<DateTime> activeDays, DateTime today) {
       .map((day) => DateTime(day.year, day.month, day.day))
       .toSet();
   final currentDay = DateTime(today.year, today.month, today.day);
-  if (!days.contains(currentDay)) return 0;
+  final yesterday = currentDay.subtract(const Duration(days: 1));
+  final streakEnd = days.contains(currentDay)
+      ? currentDay
+      : days.contains(yesterday)
+      ? yesterday
+      : null;
+  if (streakEnd == null) return 0;
 
   var streak = 0;
-  var cursor = currentDay;
+  var cursor = streakEnd;
 
   while (days.contains(cursor)) {
     streak += 1;

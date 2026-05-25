@@ -30,10 +30,10 @@
 - No confiar solo en resumen conversacional; verificar archivos modificados.
 - Mantener cambios pequenos y acotados por problema.
 - No tocar Open Library, modelos ni persistencia salvo que el requisito lo pida claramente.
-- La base nueva de Estadisticas MVP se calcula desde `Book` y no usa `ReadingSession` hasta un sprint posterior.
+- La base nueva de Estadisticas MVP se calcula principalmente desde `Book`; las rachas se calculan desde `ReadingSession` sin crear tablas ni entidades nuevas.
 - La logica de calculo de estadisticas debe vivir fuera de widgets y pantallas.
 - La UI futura debe consumir estadisticas desde un punto unico: `statisticsSummaryProvider`.
-- La pantalla `/stats` debe permanecer simple en MVP: tarjetas basicas, sin charts, objetivos, rachas ni sesiones hasta nuevos sprints.
+- La pantalla `/stats` debe permanecer simple en MVP: tarjetas basicas, sin charts, badges, notificaciones ni gamificacion avanzada.
 - Las mutaciones de libros deben invalidar `statisticsSummaryProvider` ademas de cualquier provider legacy de Stats mientras convivan ambas rutas.
 - El objetivo anual se persiste en una tabla simple `app_settings` gestionada por Drift con SQL manual, sin paquetes externos.
 - El progreso anual usa solo libros `completed` con `finishedAt/completedDate` dentro del ano actual.
@@ -44,3 +44,5 @@
 - Antes de usar sesiones para estadisticas avanzadas, rachas y actividad, consolidar campos estructurados minimos como `pagesRead` y `updatedAt`.
 - Registrar sesiones nuevas debe pasar por `RegisterReadingSession`, que centraliza crear la sesion y actualizar el progreso del libro.
 - Al registrar una sesion que haga llegar el progreso a `totalPages`, no completar automaticamente el libro sin confirmacion; si el usuario confirma, marcar como `completed`, fijar `finishedAt/completedDate` si estaba vacio y ofrecer valoracion/resena opcional.
+- Las rachas se basan en dias con al menos una `ReadingSession`; hoy mantiene racha activa, ayer tambien si hoy aun no tiene sesion, y cualquier otro ultimo dia activo da racha actual 0.
+- La mejor racha historica se calcula con la secuencia maxima de dias consecutivos con sesiones, ignorando hora y duplicados del mismo dia.

@@ -14,6 +14,8 @@ class StatisticsSummary {
     required this.annualGoalProgress,
     required this.booksRemainingForAnnualGoal,
     required this.isAnnualGoalReached,
+    required this.currentStreakDays,
+    required this.bestStreakDays,
   });
 
   const StatisticsSummary.empty()
@@ -30,7 +32,9 @@ class StatisticsSummary {
       completedThisYear = 0,
       annualGoalProgress = null,
       booksRemainingForAnnualGoal = null,
-      isAnnualGoalReached = false;
+      isAnnualGoalReached = false,
+      currentStreakDays = 0,
+      bestStreakDays = 0;
 
   final int totalBooks;
   final int completedBooks;
@@ -46,4 +50,6 @@ class StatisticsSummary {
   final double? annualGoalProgress;
   final int? booksRemainingForAnnualGoal;
   final bool isAnnualGoalReached;
+  final int currentStreakDays;
+  final int bestStreakDays;
 }

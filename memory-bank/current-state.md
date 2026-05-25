@@ -71,6 +71,9 @@ Consolidacion minima implementada:
 - El formulario general de ratos permite registrar paginas leidas, minutos y nota opcional.
 - La actividad reciente, detalle de dia y calendario muestran paginas/minutos cuando existen.
 - Cuando una sesion nueva con paginas leidas hace que el progreso alcance `totalPages`, la app ofrece completar el libro y abrir valoracion/resena opcional, sin completar automaticamente.
+- Las rachas de lectura se calculan desde dias con al menos una `ReadingSession`, agrupando por fecha sin hora.
+- La racha actual cuenta hasta hoy si hay sesion hoy, o hasta ayer si ayer tuvo sesion y hoy aun no.
+- La mejor racha historica recorre todos los dias con sesiones y conserva la secuencia maxima de dias consecutivos.
 
 Deuda detectada para consolidar Hito 3:
 
@@ -132,23 +135,23 @@ flutter analyze
 
 Estado actual implementado:
 
-- Existe una capa nueva desacoplada para estadisticas basada solo en `Book`.
-- `StatisticsSummary` centraliza metricas base: total, completados, leyendo, pausados, abandonados, pendientes, paginas leidas, rating medio y lecturas actuales.
+- Existe una capa nueva desacoplada para estadisticas basada en `Book` y, para rachas, en `ReadingSession`.
+- `StatisticsSummary` centraliza metricas base: total, completados, leyendo, pausados, abandonados, pendientes, paginas leidas, rating medio, lecturas actuales, racha actual y mejor racha.
 - `StatisticsCalculator` contiene la logica pura de calculo fuera de widgets y pantallas.
 - `StatisticsRepository` define el contrato de acceso a estadisticas.
-- `BookStatisticsRepository` calcula estadisticas usando `BookRepository`.
+- `BookStatisticsRepository` calcula estadisticas usando `BookRepository` y sesiones existentes desde `ReadingSessionRepository`.
 - `GetStatisticsSummary` encapsula el caso de uso.
 - `statisticsSummaryProvider` es el punto unico preparado para que la UI consuma estas metricas en futuros sprints.
 - La pantalla `/stats` ya consume `statisticsSummaryProvider`.
-- La UI basica muestra tarjetas para total, completados, leyendo, pausados, abandonados, pendientes, paginas leidas, rating medio y lecturas actuales.
+- La UI basica muestra tarjetas para total, completados, leyendo, pausados, abandonados, pendientes, paginas leidas, rating medio, lecturas actuales y rachas.
 - La pantalla maneja loading, error, empty state y datos disponibles.
 - Los flujos de alta, detalle y Home invalidan `statisticsSummaryProvider` tras mutaciones de libros.
 - El objetivo anual de lectura se persiste como `annualReadingGoal` en `app_settings`.
 - `StatisticsSummary` expone objetivo anual, completados del ano actual, porcentaje, restantes y meta alcanzada.
 - La seccion "Objetivo anual" aparece en `/stats`.
 - El usuario puede definir o editar la meta anual desde un dialogo simple en `/stats`.
-- No se usan `ReadingSession` todavia en esta base nueva.
-- Quedan preparados futuros bloques de objetivos anuales, rachas, sesiones y graficas, sin implementarlos todavia.
+- La seccion "Rachas" aparece en `/stats` con racha actual y mejor racha.
+- Quedan preparados futuros bloques de sesiones avanzadas y graficas, sin implementarlos todavia.
 
 ## Siguiente paso recomendado
 

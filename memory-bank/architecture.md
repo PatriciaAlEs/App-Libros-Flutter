@@ -54,7 +54,7 @@ reading_tracker/lib/
 - Sesiones por rango usan `StreamProvider.family`.
 - Sesiones por dia usan `FutureProvider.family`.
 - `statsProvider` calcula con libros y sesiones reales desde repositorios/DAO.
-- `statisticsSummaryProvider` expone la base nueva de Estadisticas MVP calculada desde libros.
+- `statisticsSummaryProvider` expone la base nueva de Estadisticas MVP calculada desde libros y sesiones cuando aplica.
 
 ## Integraciones reales
 
@@ -124,6 +124,13 @@ reading_tracker/lib/
 - Caso de uso: `RegisterReadingSession` centraliza alta de sesion y actualizacion de progreso del libro.
 - Consulta nueva: `ReadingSessionRepository.getSessionsForBook(bookId)` devuelve sesiones por libro ordenadas por fecha descendente y `createdAt` descendente.
 - Finalizacion inteligente: la decision de completar tras alcanzar `totalPages` vive en presentacion y exige confirmacion del usuario antes de cambiar `Book.status`; reutiliza `CompletionReviewSheet`.
+
+### Reading streaks
+
+- Decision: calcular rachas desde `ReadingSession` sin tablas, migraciones ni entidades nuevas.
+- `StatisticsSummary` expone `currentStreakDays` y `bestStreakDays`.
+- `StatisticsCalculator` agrupa sesiones por fecha normalizada y mantiene la logica fuera de widgets.
+- `BookStatisticsRepository` combina libros, objetivo anual y sesiones existentes para construir el resumen de `/stats`.
 
 ### Seed data solo en debug
 

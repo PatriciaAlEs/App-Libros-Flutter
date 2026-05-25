@@ -3,6 +3,7 @@ import 'package:reading_tracker/features/books/domain/entities/book.dart';
 import 'package:reading_tracker/features/books/domain/enums/book_status.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/entities/reading_session.dart';
 import 'package:reading_tracker/features/stats/domain/stats_calculator.dart';
+import 'package:reading_tracker/features/stats/domain/services/statistics_calculator.dart';
 
 void main() {
   test('calculateStats computes summary correctly', () {
@@ -78,7 +79,7 @@ void main() {
     expect(stats.averageReadingProgress, closeTo(50, 0.001));
     expect(stats.totalMinutesRead, 120);
     expect(stats.daysWithActivity, 2);
-    expect(stats.currentStreakDays, 0);
+    expect(stats.currentStreakDays, 2);
     expect(stats.bestDay, yesterday);
     expect(stats.bestDayMinutes, 90);
     expect(stats.topRatedBooks.first.title, 'Book Two');
@@ -104,7 +105,7 @@ void main() {
     expect(stats.currentStreakDays, 3);
   });
 
-  test('current streak is zero when last active day is not today', () {
+  test('current streak remains active when last active day is yesterday', () {
     final today = DateTime(2026, 5, 21);
     final yesterday = today.subtract(const Duration(days: 1));
 
@@ -112,7 +113,7 @@ void main() {
       _session('s1', 'book-1', yesterday, 30),
     ], today: today);
 
-    expect(stats.currentStreakDays, 0);
+    expect(stats.currentStreakDays, 1);
   });
 
   test('completed books count total pages before current page', () {
@@ -192,6 +193,45 @@ void main() {
     expect(stats.topAuthors, isEmpty);
     expect(stats.topBooksByTime, isEmpty);
   });
+
+  test('statistics summary calculates current and best reading streaks', () {
+    final today = DateTime(2026, 5, 21);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final twoDaysAgo = today.subtract(const Duration(days: 2));
+    final fourDaysAgo = today.subtract(const Duration(days: 4));
+    final fiveDaysAgo = today.subtract(const Duration(days: 5));
+
+    final summary = const StatisticsCalculator().calculateFromBooks(
+      const [],
+      sessions: [
+        _session('s1', 'book-1', fiveDaysAgo, 10),
+        _session('s2', 'book-1', fourDaysAgo, 20),
+        _session('s3', 'book-1', twoDaysAgo, 30),
+        _session('s4', 'book-1', yesterday, 40),
+      ],
+      now: today,
+    );
+
+    expect(summary.currentStreakDays, 2);
+    expect(summary.bestStreakDays, 2);
+  });
+
+  test(
+    'statistics summary current streak is zero without today or yesterday',
+    () {
+      final today = DateTime(2026, 5, 21);
+      final twoDaysAgo = today.subtract(const Duration(days: 2));
+
+      final summary = const StatisticsCalculator().calculateFromBooks(
+        const [],
+        sessions: [_session('s1', 'book-1', twoDaysAgo, 10)],
+        now: today,
+      );
+
+      expect(summary.currentStreakDays, 0);
+      expect(summary.bestStreakDays, 1);
+    },
+  );
 }
 
 ReadingSession _session(String id, String bookId, DateTime date, int minutes) {
