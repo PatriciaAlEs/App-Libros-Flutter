@@ -7,6 +7,7 @@ import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
 import '../../../books/presentation/widgets/completion_review_sheet.dart';
+import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
 import '../../../stats/presentation/providers/stats_provider.dart';
 import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 
@@ -109,6 +110,7 @@ void _invalidateCompletionProviders(WidgetRef ref) {
   ref.invalidate(booksProvider);
   ref.invalidate(statsProvider);
   ref.invalidate(statisticsSummaryProvider);
+  ref.invalidate(readingInsightsSummaryProvider);
 }
 
 class _SessionCompletionDialog extends StatelessWidget {

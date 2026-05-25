@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../books/domain/entities/book.dart';
 import '../../../books/presentation/providers/books_provider.dart';
+import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
 import '../../../stats/presentation/providers/stats_provider.dart';
 import '../../data/repositories/reading_session_repository_provider.dart';
 import '../../domain/entities/reading_session.dart';
@@ -121,6 +122,7 @@ class DayDetailScreen extends ConsumerWidget {
 
     await ref.read(readingSessionRepositoryProvider).deleteSession(session.id);
     ref.invalidate(statsProvider);
+    ref.invalidate(readingInsightsSummaryProvider);
     ref.invalidate(readingSessionsForDayProvider(day));
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(

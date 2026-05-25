@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
+import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
 import '../../../stats/presentation/providers/stats_provider.dart';
 import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 import '../../data/repositories/reading_session_repository_provider.dart';
@@ -99,6 +100,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
       }
       ref.invalidate(statsProvider);
       ref.invalidate(statisticsSummaryProvider);
+      ref.invalidate(readingInsightsSummaryProvider);
       ref.invalidate(booksProvider);
       ref.invalidate(readingSessionsForDayProvider(_date));
       if (!mounted) return;

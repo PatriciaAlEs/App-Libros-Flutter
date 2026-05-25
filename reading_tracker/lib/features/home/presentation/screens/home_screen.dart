@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
+import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
 import '../../../reading_sessions/domain/entities/reading_session.dart';
 import '../../../reading_sessions/domain/usecases/register_reading_session.dart';
 import '../../../reading_sessions/presentation/providers/reading_sessions_provider.dart';
@@ -44,6 +45,11 @@ class HomeScreen extends ConsumerWidget {
             icon: const Icon(Icons.calendar_month_outlined),
             onPressed: () => Navigator.pushNamed(context, '/calendar'),
           ),
+          IconButton(
+            tooltip: 'Ver insights',
+            icon: const Icon(Icons.insights_outlined),
+            onPressed: () => Navigator.pushNamed(context, '/insights'),
+          ),
         ],
       ),
       body: booksAsync.when(
@@ -63,6 +69,7 @@ class HomeScreen extends ConsumerWidget {
               ref.invalidate(booksProvider);
               ref.invalidate(statsProvider);
               ref.invalidate(statisticsSummaryProvider);
+              ref.invalidate(readingInsightsSummaryProvider);
             },
             child: CustomScrollView(
               slivers: [
@@ -149,6 +156,7 @@ class HomeScreen extends ConsumerWidget {
         );
     ref.invalidate(statsProvider);
     ref.invalidate(statisticsSummaryProvider);
+    ref.invalidate(readingInsightsSummaryProvider);
     if (!context.mounted) return;
     ScaffoldMessenger.of(
       context,
@@ -188,6 +196,7 @@ class HomeScreen extends ConsumerWidget {
 
     ref.invalidate(statsProvider);
     ref.invalidate(statisticsSummaryProvider);
+    ref.invalidate(readingInsightsSummaryProvider);
     ref.invalidate(booksProvider);
     ref.invalidate(readingSessionsForRangeProvider(recentActivityRange));
     if (!context.mounted) return;

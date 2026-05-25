@@ -5,6 +5,7 @@ import 'features/books/presentation/screens/book_detail_screen.dart';
 import 'features/books/presentation/screens/book_form_screen.dart';
 import 'features/books/presentation/screens/books_list_screen.dart';
 import 'features/home/presentation/screens/home_screen.dart';
+import 'features/insights/presentation/screens/insights_screen.dart';
 import 'features/reading_sessions/presentation/screens/calendar_screen.dart';
 import 'features/reading_sessions/presentation/screens/day_detail_screen.dart';
 import 'features/reading_sessions/presentation/screens/session_form_screen.dart';
@@ -66,6 +67,9 @@ class App extends StatelessWidget {
 
       case '/stats':
         return MaterialPageRoute(builder: (_) => const StatsScreen());
+
+      case '/insights':
+        return MaterialPageRoute(builder: (_) => const InsightsScreen());
 
       default:
         return _notFoundRoute();
