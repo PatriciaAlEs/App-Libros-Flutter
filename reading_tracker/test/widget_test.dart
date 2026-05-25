@@ -94,6 +94,10 @@ void main() {
     expect(repository.addedBook, isNotNull);
     expect(repository.addedBook!.status, BookStatus.reading);
     expect(repository.addedBook!.startDate, isNotNull);
+    expect(
+      _dateOnly(repository.addedBook!.startDate!).isAfter(_today()),
+      false,
+    );
     expect(repository.addedBook!.completedDate, isNull);
   });
 
@@ -166,6 +170,13 @@ void main() {
 }
 
 Finder _searchField() => find.byType(TextField).first;
+
+DateTime _dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
+
+DateTime _today() {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+}
 
 http.Response _searchResponse(String title) {
   return http.Response(

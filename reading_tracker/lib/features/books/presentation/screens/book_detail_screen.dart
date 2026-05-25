@@ -101,17 +101,21 @@ class _BookDetailView extends ConsumerWidget {
       language: book.language,
       status: newStatus,
       startDate: newStatus == BookStatus.reading && book.startDate == null
-          ? DateTime.now()
-          : book.startDate,
+          ? _today()
+          : _clampDate(book.startDate),
       completedDate: newStatus == BookStatus.completed
-          ? DateTime.now()
-          : book.completedDate,
+          ? _today()
+          : _clampDate(book.completedDate),
       createdAt: book.createdAt,
       updatedAt: DateTime.now(),
     );
   }
 
   Book _updatedBookForDates(_DatesEditResult dates) {
+    final normalizedDates = _normalizeDates(
+      startedAt: dates.startedAt,
+      finishedAt: dates.finishedAt,
+    );
     return Book(
       id: book.id,
       title: book.title,
@@ -127,11 +131,37 @@ class _BookDetailView extends ConsumerWidget {
       genre: book.genre,
       language: book.language,
       status: book.status,
-      startDate: dates.startedAt,
-      completedDate: dates.finishedAt,
+      startDate: normalizedDates.startedAt,
+      completedDate: normalizedDates.finishedAt,
       createdAt: book.createdAt,
       updatedAt: DateTime.now(),
     );
+  }
+
+  ({DateTime? startedAt, DateTime? finishedAt}) _normalizeDates({
+    required DateTime? startedAt,
+    required DateTime? finishedAt,
+  }) {
+    final normalizedStartedAt = _clampDate(startedAt);
+    var normalizedFinishedAt = _clampDate(finishedAt);
+    if (normalizedStartedAt != null &&
+        normalizedFinishedAt != null &&
+        normalizedFinishedAt.isBefore(normalizedStartedAt)) {
+      normalizedFinishedAt = null;
+    }
+    return (startedAt: normalizedStartedAt, finishedAt: normalizedFinishedAt);
+  }
+
+  DateTime? _clampDate(DateTime? date) {
+    if (date == null) return null;
+    final day = DateTime(date.year, date.month, date.day);
+    final today = _today();
+    return day.isAfter(today) ? today : day;
+  }
+
+  DateTime _today() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
   }
 
   Future<void> _onDelete(WidgetRef ref, BuildContext context) async {
@@ -549,8 +579,13 @@ class _DatesEditDialogState extends State<_DatesEditDialog> {
   @override
   void initState() {
     super.initState();
-    _startedAt = widget.book.startedAt;
-    _finishedAt = widget.book.finishedAt;
+    _startedAt = _clampDate(widget.book.startedAt);
+    _finishedAt = _clampDate(widget.book.finishedAt);
+    if (_startedAt != null &&
+        _finishedAt != null &&
+        _finishedAt!.isBefore(_startedAt!)) {
+      _finishedAt = null;
+    }
   }
 
   Future<void> _pickStartedAt() async {
@@ -576,25 +611,44 @@ class _DatesEditDialogState extends State<_DatesEditDialog> {
   }
 
   Future<DateTime?> _pickDate(DateTime? initialDate, {DateTime? firstDate}) {
-    final now = DateTime.now();
+    final today = _today();
     final effectiveFirstDate = firstDate ?? DateTime(1900);
-    final effectiveInitialDate =
-        initialDate != null && initialDate.isBefore(effectiveFirstDate)
+    final clampedInitialDate = _clampDate(initialDate ?? today)!;
+    final effectiveInitialDate = clampedInitialDate.isBefore(effectiveFirstDate)
         ? effectiveFirstDate
-        : initialDate ?? now;
+        : clampedInitialDate;
     return showDatePicker(
       context: context,
       initialDate: effectiveInitialDate,
       firstDate: effectiveFirstDate,
-      lastDate: DateTime(now.year + 5),
+      lastDate: today,
     );
   }
 
   void _save() {
+    final startedAt = _clampDate(_startedAt);
+    var finishedAt = _clampDate(_finishedAt);
+    if (startedAt != null &&
+        finishedAt != null &&
+        finishedAt.isBefore(startedAt)) {
+      finishedAt = null;
+    }
     Navigator.pop(
       context,
-      _DatesEditResult(startedAt: _startedAt, finishedAt: _finishedAt),
+      _DatesEditResult(startedAt: startedAt, finishedAt: finishedAt),
     );
+  }
+
+  DateTime? _clampDate(DateTime? date) {
+    if (date == null) return null;
+    final day = DateTime(date.year, date.month, date.day);
+    final today = _today();
+    return day.isAfter(today) ? today : day;
+  }
+
+  DateTime _today() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
   }
 
   String _format(DateTime? date) {

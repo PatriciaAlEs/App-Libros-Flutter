@@ -145,7 +145,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   }
 
   void _changeStatus(BookStatus status) {
-    final now = DateTime.now();
+    final today = _today();
     setState(() {
       _selectedStatus = status;
 
@@ -153,10 +153,10 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
         _startedAt = null;
         _finishedAt = null;
       } else if (status == BookStatus.completed) {
-        _startedAt ??= now;
+        _startedAt = _clampDate(_startedAt ?? today);
         _finishedAt = null;
       } else {
-        _startedAt ??= now;
+        _startedAt = _clampDate(_startedAt ?? today);
         _finishedAt = null;
       }
     });
@@ -185,17 +185,17 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   }
 
   Future<DateTime?> _pickDate(DateTime? initialDate, {DateTime? firstDate}) {
-    final now = DateTime.now();
+    final today = _today();
     final effectiveFirstDate = firstDate ?? DateTime(1900);
-    final effectiveInitialDate =
-        initialDate != null && initialDate.isBefore(effectiveFirstDate)
+    final clampedInitialDate = _clampDate(initialDate ?? today)!;
+    final effectiveInitialDate = clampedInitialDate.isBefore(effectiveFirstDate)
         ? effectiveFirstDate
-        : initialDate ?? now;
+        : clampedInitialDate;
     return showDatePicker(
       context: context,
       initialDate: effectiveInitialDate,
       firstDate: effectiveFirstDate,
-      lastDate: DateTime(now.year + 5),
+      lastDate: today,
     );
   }
 
@@ -204,6 +204,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     if (selectedBook == null) return;
 
     setState(() => _isSaving = true);
+    final normalizedDates = _normalizedReadingDates();
 
     final book = Book(
       id: const Uuid().v4(),
@@ -215,8 +216,8 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
       firstPublishYear: selectedBook.firstPublishYear,
       totalPages: int.tryParse(_totalPagesController.text.trim()),
       status: _selectedStatus,
-      startDate: _startedAt,
-      completedDate: _finishedAt,
+      startDate: normalizedDates.startedAt,
+      completedDate: normalizedDates.finishedAt,
       createdAt: DateTime.now(),
     );
 
@@ -250,6 +251,29 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     }
 
     if (mounted) Navigator.pop(context, _selectedStatus);
+  }
+
+  ({DateTime? startedAt, DateTime? finishedAt}) _normalizedReadingDates() {
+    final startedAt = _clampDate(_startedAt);
+    var finishedAt = _clampDate(_finishedAt);
+    if (startedAt != null &&
+        finishedAt != null &&
+        finishedAt.isBefore(startedAt)) {
+      finishedAt = null;
+    }
+    return (startedAt: startedAt, finishedAt: finishedAt);
+  }
+
+  DateTime? _clampDate(DateTime? date) {
+    if (date == null) return null;
+    final day = DateTime(date.year, date.month, date.day);
+    final today = _today();
+    return day.isAfter(today) ? today : day;
+  }
+
+  DateTime _today() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
   }
 
   @override

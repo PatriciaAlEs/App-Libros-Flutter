@@ -33,6 +33,7 @@
 - `totalPages` permanece editable manualmente.
 - Estados de libro ampliados con `paused` y `abandoned`.
 - Fechas de lectura `startedAt` y `finishedAt` editables manualmente desde detalle.
+- Fechas de lectura de libros limitadas a hoy o pasado en alta y detalle.
 - Formulario de alta muestra fechas cuando el estado inicial lo requiere.
 - Biblioteca muestra estado, progreso en libros en lectura y rating en completados valorados.
 - Home convertida en dashboard principal.
