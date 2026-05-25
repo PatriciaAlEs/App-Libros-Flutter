@@ -43,6 +43,7 @@
 - Hito 3 debe reutilizar la entidad existente `ReadingSession` como base de "ratos de lectura"; no crear una entidad paralela mientras esta cubra el concepto principal.
 - Antes de usar sesiones para estadisticas avanzadas, rachas y actividad, consolidar campos estructurados minimos como `pagesRead` y `updatedAt`.
 - Registrar sesiones nuevas debe pasar por `RegisterReadingSession`, que centraliza crear la sesion y actualizar el progreso del libro.
+- Las sesiones de lectura pueden registrarse en fechas pasadas o en la fecha actual, pero no en fechas futuras.
 - Al registrar una sesion que haga llegar el progreso a `totalPages`, no completar automaticamente el libro sin confirmacion; si el usuario confirma, marcar como `completed`, fijar `finishedAt/completedDate` si estaba vacio y ofrecer valoracion/resena opcional.
 - Las rachas se basan en dias con al menos una `ReadingSession`; hoy mantiene racha activa, ayer tambien si hoy aun no tiene sesion, y cualquier otro ultimo dia activo da racha actual 0.
 - La mejor racha historica se calcula con la secuencia maxima de dias consecutivos con sesiones, ignorando hora y duplicados del mismo dia.

@@ -12,6 +12,44 @@ import 'package:reading_tracker/features/reading_sessions/presentation/screens/d
 import 'package:reading_tracker/features/reading_sessions/presentation/screens/session_form_screen.dart';
 
 void main() {
+  testWidgets('session form creates a session with a past initial date', (
+    tester,
+  ) async {
+    final pastDate = DateTime(2026, 5, 18);
+    final sessionRepository = _FakeReadingSessionRepository();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookRepositoryProvider.overrideWithValue(
+            _FakeBookRepository([
+              _book('book-1', 'Reading Book', BookStatus.reading),
+            ]),
+          ),
+          readingSessionRepositoryProvider.overrideWithValue(sessionRepository),
+        ],
+        child: MaterialApp(home: _OpenFormHost(initialDate: pastDate)),
+      ),
+    );
+
+    await tester.tap(find.text('Open form'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('18/5/2026'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextFormField).at(0), '12');
+    await tester.enterText(find.byType(TextFormField).at(1), '30');
+    await tester.tap(find.text('Guardar tiempo de lectura'));
+    await tester.pumpAndSettle();
+
+    final added = sessionRepository.addedSession;
+    expect(added, isNotNull);
+    expect(added!.bookId, 'book-1');
+    expect(added.date, pastDate);
+    expect(added.pagesRead, 12);
+    expect(added.minutes, 30);
+  });
+
   testWidgets('session form updates an existing session', (tester) async {
     final createdAt = DateTime(2026, 5, 20, 10);
     final session = ReadingSession(
@@ -112,9 +150,10 @@ void main() {
 }
 
 class _OpenFormHost extends StatelessWidget {
-  const _OpenFormHost({required this.session});
+  const _OpenFormHost({this.initialDate, this.session});
 
-  final ReadingSession session;
+  final DateTime? initialDate;
+  final ReadingSession? session;
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +164,10 @@ class _OpenFormHost extends StatelessWidget {
             Navigator.push<void>(
               context,
               MaterialPageRoute(
-                builder: (_) => SessionFormScreen(session: session),
+                builder: (_) => SessionFormScreen(
+                  initialDate: initialDate,
+                  session: session,
+                ),
               ),
             );
           },

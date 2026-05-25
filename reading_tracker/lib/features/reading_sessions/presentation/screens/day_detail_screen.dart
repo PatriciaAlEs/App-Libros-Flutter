@@ -17,6 +17,7 @@ class DayDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final sessionsAsync = ref.watch(readingSessionsForDayProvider(day));
     final booksAsync = ref.watch(booksProvider);
+    final canAddSession = !_isFutureDay(day);
 
     return Scaffold(
       appBar: AppBar(
@@ -25,7 +26,9 @@ class DayDetailScreen extends ConsumerWidget {
           IconButton(
             tooltip: 'Añadir tiempo de lectura',
             icon: const Icon(Icons.add),
-            onPressed: () => _openSessionForm(context, ref),
+            onPressed: canAddSession
+                ? () => _openSessionForm(context, ref)
+                : null,
           ),
         ],
       ),
@@ -48,7 +51,9 @@ class DayDetailScreen extends ConsumerWidget {
               _TotalCard(totalMinutes: total, sessionCount: sessions.length),
               const SizedBox(height: 12),
               _AddSessionButton(
-                onPressed: () => _openSessionForm(context, ref),
+                onPressed: canAddSession
+                    ? () => _openSessionForm(context, ref)
+                    : null,
               ),
               const SizedBox(height: 12),
               if (sessions.isEmpty)
@@ -126,12 +131,19 @@ class DayDetailScreen extends ConsumerWidget {
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
+
+  bool _isFutureDay(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dayOnly = DateTime(date.year, date.month, date.day);
+    return dayOnly.isAfter(today);
+  }
 }
 
 class _AddSessionButton extends StatelessWidget {
   const _AddSessionButton({required this.onPressed});
 
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {

@@ -69,6 +69,8 @@ Consolidacion minima implementada:
 - Existe el caso de uso `RegisterReadingSession` para crear sesion y actualizar progreso del libro.
 - Home usa `RegisterReadingSession` y ya no guarda paginas dentro de `note`.
 - El formulario general de ratos permite registrar paginas leidas, minutos y nota opcional.
+- El formulario general permite seleccionar una fecha pasada o la fecha actual; no permite crear sesiones futuras.
+- El registro rapido desde Home preselecciona hoy pero permite cambiar a una fecha pasada antes de guardar.
 - La actividad reciente, detalle de dia y calendario muestran paginas/minutos cuando existen.
 - Cuando una sesion nueva con paginas leidas hace que el progreso alcance `totalPages`, la app ofrece completar el libro y abrir valoracion/resena opcional, sin completar automaticamente.
 - Las rachas de lectura se calculan desde dias con al menos una `ReadingSession`, agrupando por fecha sin hora.

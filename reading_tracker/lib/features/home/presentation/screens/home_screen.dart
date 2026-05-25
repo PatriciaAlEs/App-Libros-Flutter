@@ -177,7 +177,7 @@ class HomeScreen extends ConsumerWidget {
         .call(
           RegisterReadingSessionInput(
             bookId: book.id,
-            sessionDate: DateTime.now(),
+            sessionDate: update.sessionDate,
             pagesRead: update.pagesAdded,
             minutes: update.minutes,
             currentPage: update.currentPage,
@@ -571,6 +571,7 @@ class _PendingReadingSuggestions extends StatelessWidget {
 
 class _QuickReadingUpdate {
   const _QuickReadingUpdate({
+    required this.sessionDate,
     this.currentPage,
     this.totalPages,
     this.pagesAdded = 0,
@@ -578,6 +579,7 @@ class _QuickReadingUpdate {
     this.openDetail = false,
   });
 
+  final DateTime sessionDate;
   final int? currentPage;
   final int? totalPages;
   final int pagesAdded;
@@ -609,10 +611,12 @@ class _QuickReadingDialogState extends State<_QuickReadingDialog> {
   late final TextEditingController _currentPageController;
   late final TextEditingController _totalPagesController;
   late final TextEditingController _minutesController;
+  late DateTime _sessionDate;
 
   @override
   void initState() {
     super.initState();
+    _sessionDate = _today();
     _pagesReadController = TextEditingController();
     _currentPageController = TextEditingController(
       text: widget.book.currentPage?.toString() ?? '',
@@ -652,6 +656,7 @@ class _QuickReadingDialogState extends State<_QuickReadingDialog> {
     Navigator.pop(
       context,
       _QuickReadingUpdate(
+        sessionDate: _sessionDate,
         currentPage: currentPage > 0 ? currentPage : null,
         totalPages: totalPagesInput != null && totalPagesInput > 0
             ? totalPagesInput
@@ -660,6 +665,25 @@ class _QuickReadingDialogState extends State<_QuickReadingDialog> {
         minutes: minutes,
       ),
     );
+  }
+
+  Future<void> _pickSessionDate() async {
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: _sessionDate,
+      firstDate: DateTime(2000),
+      lastDate: _today(),
+    );
+    if (selected == null) return;
+    setState(
+      () =>
+          _sessionDate = DateTime(selected.year, selected.month, selected.day),
+    );
+  }
+
+  DateTime _today() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
   }
 
   @override
@@ -688,11 +712,19 @@ class _QuickReadingDialogState extends State<_QuickReadingDialog> {
                 style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: 20),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Fecha'),
+                subtitle: Text(_formatDate(_sessionDate)),
+                trailing: const Icon(Icons.calendar_month),
+                onTap: _pickSessionDate,
+              ),
+              const SizedBox(height: 12),
               TextField(
                 controller: _pagesReadController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Páginas leídas hoy',
+                  labelText: 'Páginas leídas',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -719,7 +751,7 @@ class _QuickReadingDialogState extends State<_QuickReadingDialog> {
                 controller: _minutesController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Minutos de lectura de hoy',
+                  labelText: 'Minutos de lectura',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -733,7 +765,10 @@ class _QuickReadingDialogState extends State<_QuickReadingDialog> {
                 onPressed: () {
                   Navigator.pop(
                     context,
-                    const _QuickReadingUpdate(openDetail: true),
+                    _QuickReadingUpdate(
+                      sessionDate: _sessionDate,
+                      openDetail: true,
+                    ),
                   );
                 },
                 child: const Text('Ir al detalle completo del libro'),
@@ -743,6 +778,10 @@ class _QuickReadingDialogState extends State<_QuickReadingDialog> {
         ),
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 }
 

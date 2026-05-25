@@ -60,6 +60,7 @@
 - Consolidacion minima de `ReadingSession` implementada con `pagesRead`, `updatedAt`, consulta por libro y caso de uso central para registrar sesion + actualizar progreso.
 - Finalizacion inteligente desde sesiones implementada: al alcanzar `totalPages`, se ofrece completar y valorar sin hacerlo automaticamente.
 - Reading Streaks implementado en Estadisticas: racha actual y mejor racha basadas en dias con `ReadingSession`.
+- Registro de sesiones pasadas habilitado desde formulario general y registro rapido de Home, bloqueando fechas futuras.
 
 ## Parcial / en seguimiento
 

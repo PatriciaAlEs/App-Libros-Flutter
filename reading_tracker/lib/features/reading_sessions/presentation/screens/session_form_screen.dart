@@ -38,7 +38,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
     super.initState();
     final now = DateTime.now();
     final initial = widget.session?.date ?? widget.initialDate ?? now;
-    _date = DateTime(initial.year, initial.month, initial.day);
+    _date = _clampToToday(initial);
     if (widget.session case final session?) {
       _bookId = session.bookId;
       _pagesReadController.text = session.pagesRead > 0
@@ -59,6 +59,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate() || _bookId == null) return;
+    if (_date.isAfter(_today())) return;
 
     setState(() => _isSaving = true);
     try {
@@ -237,16 +238,28 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
   }
 
   Future<void> _pickDate() async {
+    final today = _today();
     final selected = await showDatePicker(
       context: context,
       initialDate: _date,
       firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      lastDate: today,
     );
     if (selected == null) return;
     setState(
       () => _date = DateTime(selected.year, selected.month, selected.day),
     );
+  }
+
+  DateTime _clampToToday(DateTime date) {
+    final day = DateTime(date.year, date.month, date.day);
+    final today = _today();
+    return day.isAfter(today) ? today : day;
+  }
+
+  DateTime _today() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
   }
 
   String _bookLabel(Book book) {
