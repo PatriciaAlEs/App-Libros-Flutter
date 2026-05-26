@@ -9,6 +9,7 @@ class AppSpacing {
   static const double lg = 16;
   static const double xl = 24;
   static const double xxl = 32;
+  static const double section = 40;
 }
 
 class AppRadii {
@@ -26,8 +27,9 @@ class AppElevations {
   const AppElevations._();
 
   static const double none = 0;
-  static const double sm = 1;
-  static const double md = 2;
+  static const double sm = 2;
+  static const double md = 4;
+  static const double lg = 8;
 }
 
 class AppShadows {
@@ -35,9 +37,17 @@ class AppShadows {
 
   static List<BoxShadow> soft(Color color) => [
     BoxShadow(
+      color: color.withValues(alpha: 0.10),
+      blurRadius: 20,
+      offset: const Offset(0, 10),
+    ),
+  ];
+
+  static List<BoxShadow> editorial(Color color) => [
+    BoxShadow(
       color: color.withValues(alpha: 0.08),
-      blurRadius: 16,
-      offset: const Offset(0, 8),
+      blurRadius: 28,
+      offset: const Offset(0, 14),
     ),
   ];
 }

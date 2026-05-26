@@ -27,11 +27,12 @@ class InsightCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 42,
+              height: 42,
               decoration: BoxDecoration(
                 color: theme.colorScheme.primaryContainer,
                 borderRadius: AppRadii.card,
+                boxShadow: AppShadows.soft(theme.colorScheme.primary),
               ),
               child: Icon(icon, color: theme.colorScheme.primary),
             ),

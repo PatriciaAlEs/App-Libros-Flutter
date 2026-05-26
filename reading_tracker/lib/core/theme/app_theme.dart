@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'app_theme_tokens.dart';
+import 'app_typography.dart';
 
 enum ReadingTrackerTheme {
   burgundy(
@@ -70,18 +72,30 @@ class AppTheme {
           tertiary: theme.primaryDark,
           surface: theme.surface,
           onSurface: const Color(0xFF241B1D),
+          onSurfaceVariant: const Color(0xFF665C5E),
           surfaceContainerHighest: theme.background,
-          outline: theme.primary.withValues(alpha: 0.36),
-          outlineVariant: theme.primary.withValues(alpha: 0.14),
+          outline: theme.primaryDark.withValues(alpha: 0.34),
+          outlineVariant: theme.primary.withValues(alpha: 0.16),
         );
 
     final textTheme = _textTheme(colorScheme);
 
     return ThemeData(
       colorScheme: colorScheme,
+      fontFamily: AppTypography.contentFontFamily,
+      fontFamilyFallback: AppTypography.contentFallback,
       scaffoldBackgroundColor: theme.background,
       textTheme: textTheme,
       useMaterial3: true,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+        },
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: theme.background,
         foregroundColor: colorScheme.onSurface,
@@ -91,9 +105,9 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: theme.surface,
-        elevation: AppElevations.sm,
+        elevation: AppElevations.md,
         margin: EdgeInsets.zero,
-        shadowColor: theme.primary.withValues(alpha: 0.12),
+        shadowColor: theme.primaryDark.withValues(alpha: 0.12),
         shape: RoundedRectangleBorder(borderRadius: AppRadii.card),
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -105,6 +119,7 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          elevation: AppElevations.sm,
           shape: RoundedRectangleBorder(borderRadius: AppRadii.control),
         ),
       ),
@@ -118,65 +133,79 @@ class AppTheme {
         fillColor: theme.surface,
         border: OutlineInputBorder(borderRadius: AppRadii.control),
       ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: theme.primary,
+        foregroundColor: Colors.white,
+        elevation: AppElevations.lg,
+        focusElevation: AppElevations.lg,
+        hoverElevation: AppElevations.lg,
+        shape: RoundedRectangleBorder(borderRadius: AppRadii.card),
+      ),
     );
   }
 
   static TextTheme _textTheme(ColorScheme colorScheme) {
-    const fontFamilyFallback = <String>['Roboto'];
-
     return TextTheme(
       displaySmall: TextStyle(
         color: colorScheme.onSurface,
-        fontFamilyFallback: fontFamilyFallback,
+        fontFamily: AppTypography.displayFontFamily,
+        fontFamilyFallback: AppTypography.displayFallback,
         fontSize: 32,
         fontWeight: FontWeight.w700,
         height: 1.14,
       ),
       headlineSmall: TextStyle(
         color: colorScheme.onSurface,
-        fontFamilyFallback: fontFamilyFallback,
+        fontFamily: AppTypography.displayFontFamily,
+        fontFamilyFallback: AppTypography.displayFallback,
         fontSize: 24,
         fontWeight: FontWeight.w700,
         height: 1.2,
       ),
       titleLarge: TextStyle(
         color: colorScheme.onSurface,
-        fontFamilyFallback: fontFamilyFallback,
+        fontFamily: AppTypography.displayFontFamily,
+        fontFamilyFallback: AppTypography.displayFallback,
         fontSize: 20,
         fontWeight: FontWeight.w700,
         height: 1.25,
       ),
       titleMedium: TextStyle(
         color: colorScheme.onSurface,
-        fontFamilyFallback: fontFamilyFallback,
+        fontFamily: AppTypography.displayFontFamily,
+        fontFamilyFallback: AppTypography.displayFallback,
         fontSize: 16,
         fontWeight: FontWeight.w700,
         height: 1.28,
       ),
       bodyMedium: TextStyle(
         color: colorScheme.onSurface,
-        fontFamilyFallback: fontFamilyFallback,
+        fontFamily: AppTypography.contentFontFamily,
+        fontFamilyFallback: AppTypography.contentFallback,
         fontSize: 14,
         fontWeight: FontWeight.w400,
         height: 1.45,
       ),
       bodySmall: TextStyle(
         color: colorScheme.onSurfaceVariant,
-        fontFamilyFallback: fontFamilyFallback,
+        fontFamily: AppTypography.contentFontFamily,
+        fontFamilyFallback: AppTypography.contentFallback,
         fontSize: 12,
         fontWeight: FontWeight.w400,
         height: 1.35,
       ),
       labelLarge: TextStyle(
         color: colorScheme.onSurface,
-        fontFamilyFallback: fontFamilyFallback,
+        fontFamily: AppTypography.contentFontFamily,
+        fontFamilyFallback: AppTypography.contentFallback,
         fontSize: 14,
         fontWeight: FontWeight.w700,
         height: 1.2,
       ),
       labelSmall: TextStyle(
         color: colorScheme.onSurfaceVariant,
-        fontFamilyFallback: fontFamilyFallback,
+        fontFamily: AppTypography.contentFontFamily,
+        fontFamilyFallback: AppTypography.contentFallback,
         fontSize: 11,
         fontWeight: FontWeight.w600,
         height: 1.2,

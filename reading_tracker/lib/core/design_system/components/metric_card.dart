@@ -22,13 +22,13 @@ class MetricCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: theme.colorScheme.primary, size: 24),
-            const SizedBox(height: AppSpacing.md),
+            Icon(icon, color: theme.colorScheme.primary, size: 22),
+            const SizedBox(height: AppSpacing.sm),
             Text(value, style: theme.textTheme.headlineSmall),
             const SizedBox(height: AppSpacing.xs),
             Text(label, style: theme.textTheme.labelLarge),

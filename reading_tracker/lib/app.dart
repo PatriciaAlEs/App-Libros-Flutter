@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/design_system/design_system.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_theme_controller.dart';
 import 'features/books/presentation/screens/book_detail_screen.dart';
@@ -28,6 +29,8 @@ class App extends ConsumerWidget {
       title: 'Reading Tracker',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(selectedTheme),
+      themeAnimationDuration: AppMotion.slow,
+      themeAnimationCurve: AppMotion.emphasized,
       initialRoute: '/',
       onGenerateRoute: _onGenerateRoute,
     );

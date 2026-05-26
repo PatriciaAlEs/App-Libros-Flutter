@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design_system/design_system.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
@@ -10,8 +12,7 @@ import '../../../reading_sessions/domain/usecases/register_reading_session.dart'
 import '../../../reading_sessions/presentation/providers/reading_sessions_provider.dart';
 import '../../../reading_sessions/presentation/providers/register_reading_session_provider.dart';
 import '../../../reading_sessions/presentation/utils/session_completion_flow.dart';
-import '../../../stats/domain/stats_calculator.dart';
-import '../../../stats/presentation/providers/stats_provider.dart';
+import '../../../stats/domain/entities/statistics_summary.dart';
 import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -19,97 +20,120 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final booksAsync = ref.watch(booksProvider);
-    final statsAsync = ref.watch(statsProvider);
-    final today = DateTime.now();
-    final todayStart = DateTime(today.year, today.month, today.day);
+    final summaryAsync = ref.watch(statisticsSummaryProvider);
+    final now = DateTime.now();
     final recentActivityRange = DateRange(
-      start: todayStart,
-      end: todayStart.add(const Duration(days: 1)),
+      start: DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(const Duration(days: 30)),
+      end: DateTime(now.year, now.month, now.day).add(const Duration(days: 1)),
     );
     final recentSessionsAsync = ref.watch(
       readingSessionsForRangeProvider(recentActivityRange),
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Inicio')),
-      body: booksAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) =>
-            const Center(child: Text('No se pudo cargar el inicio.')),
-        data: (books) {
-          final stats = statsAsync.valueOrNull;
-          final recentSessions = recentSessionsAsync.valueOrNull ?? const [];
-          final booksById = {for (final book in books) book.id: book};
-          final currentBooks = _currentReadingBooks(books);
-          final pendingBooks = _pendingBooks(books);
-          final dashboard = _DashboardData.fromBooksAndStats(books, stats);
-
-          return RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(booksProvider);
-              ref.invalidate(statsProvider);
-              ref.invalidate(statisticsSummaryProvider);
-              ref.invalidate(readingInsightsSummaryProvider);
-            },
-            child: CustomScrollView(
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                  sliver: SliverList.list(
-                    children: [
-                      _SectionHeader(
-                        title: 'Lectura actual',
-                        actionLabel: currentBooks.isEmpty
-                            ? 'Añadir libro'
-                            : null,
-                        onAction: () {
-                          if (currentBooks.isEmpty) {
-                            _openAddBook(context);
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      _CurrentReadingSection(
-                        books: currentBooks,
-                        pendingBooks: pendingBooks,
-                        onOpenProgress: (book) => _openQuickProgress(
-                          context,
-                          ref,
-                          book,
-                          recentActivityRange,
-                        ),
-                        onStartReading: (book) =>
-                            _startReading(context, ref, book),
-                      ),
-                      const SizedBox(height: 12),
-                      _AddBookCtaCard(onPressed: () => _openAddBook(context)),
-                      const SizedBox(height: 18),
-                      const _SectionHeader(title: 'Resumen rapido'),
-                      const SizedBox(height: 6),
-                      _QuickStatsGrid(data: dashboard),
-                      const SizedBox(height: 18),
-                      _SectionHeader(
-                        title: 'Actividad reciente',
-                        actionLabel: 'Registrar',
-                        onAction: () => Navigator.pushNamed(
-                          context,
-                          '/session/add',
-                          arguments: DateTime.now(),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      _RecentActivityList(
-                        sessions: recentSessions,
-                        booksById: booksById,
-                      ),
-                    ],
-                  ),
-                ),
+      backgroundColor: theme.colorScheme.primary,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _openAddBook(context),
+        icon: const Icon(AppIcons.add),
+        label: const Text('Anadir libro'),
+      ),
+      body: SafeArea(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                theme.colorScheme.primary,
+                theme.colorScheme.primary,
+                theme.scaffoldBackgroundColor,
+                theme.scaffoldBackgroundColor,
               ],
+              stops: const [0, 0.24, 0.24, 1],
             ),
-          );
-        },
+          ),
+          child: booksAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) =>
+                const Center(child: Text('No se pudo cargar el inicio.')),
+            data: (books) {
+              final summary =
+                  summaryAsync.valueOrNull ?? const StatisticsSummary.empty();
+              final recentSessions =
+                  recentSessionsAsync.valueOrNull ?? const [];
+              final booksById = {for (final book in books) book.id: book};
+              final currentBooks = _currentReadingBooks(books);
+              final pendingBooks = _pendingBooks(books);
+
+              return RefreshIndicator(
+                onRefresh: () async {
+                  ref.invalidate(booksProvider);
+                  ref.invalidate(statisticsSummaryProvider);
+                  ref.invalidate(readingInsightsSummaryProvider);
+                  ref.invalidate(
+                    readingSessionsForRangeProvider(recentActivityRange),
+                  );
+                },
+                child: CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.md,
+                        AppSpacing.lg,
+                        96,
+                      ),
+                      sliver: SliverList.list(
+                        children: [
+                          _HomeHeader(greeting: _contextualGreeting(now)),
+                          const SizedBox(height: AppSpacing.md),
+                          Transform.translate(
+                            offset: const Offset(0, 12),
+                            child: _CurrentReadingCards(
+                              books: currentBooks,
+                              pendingBooks: pendingBooks,
+                              onOpenProgress: (book) => _openQuickProgress(
+                                context,
+                                ref,
+                                book,
+                                recentActivityRange,
+                              ),
+                              onAddBook: () => _openAddBook(context),
+                              onStartReading: (book) =>
+                                  _startReading(context, ref, book),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+                          _QuickMetrics(summary: summary),
+                          const SizedBox(height: AppSpacing.lg),
+                          _AnnualGoalCard(summary: summary),
+                          const SizedBox(height: AppSpacing.xl),
+                          SectionHeader(
+                            title: 'Actividad reciente',
+                            actionLabel: 'Ver actividad',
+                            onAction: () =>
+                                Navigator.pushNamed(context, '/calendar'),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          _RecentActivityList(
+                            sessions: recentSessions,
+                            booksById: booksById,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -133,7 +157,6 @@ class HomeScreen extends ConsumerWidget {
             updatedAt: now,
           ),
         );
-    ref.invalidate(statsProvider);
     ref.invalidate(statisticsSummaryProvider);
     ref.invalidate(readingInsightsSummaryProvider);
     if (!context.mounted) return;
@@ -173,7 +196,6 @@ class HomeScreen extends ConsumerWidget {
           ),
         );
 
-    ref.invalidate(statsProvider);
     ref.invalidate(statisticsSummaryProvider);
     ref.invalidate(readingInsightsSummaryProvider);
     ref.invalidate(booksProvider);
@@ -213,249 +235,243 @@ class HomeScreen extends ConsumerWidget {
     pendingBooks.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     return pendingBooks;
   }
-}
 
-class _DashboardData {
-  const _DashboardData({
-    required this.booksReadThisYear,
-    required this.pagesRead,
-    required this.averageRating,
-  });
-
-  final int booksReadThisYear;
-  final int pagesRead;
-  final double? averageRating;
-
-  factory _DashboardData.fromBooksAndStats(List<Book> books, StatsData? stats) {
-    final currentYear = DateTime.now().year;
-    final ratedBooks = books.where((book) => book.rating != null).toList();
-    final averageRating = ratedBooks.isEmpty
-        ? null
-        : ratedBooks.fold<double>(0, (sum, book) => sum + book.rating!) /
-              ratedBooks.length;
-
-    return _DashboardData(
-      booksReadThisYear: books.where((book) {
-        final completedDate = book.completedDate;
-        return completedDate != null && completedDate.year == currentYear;
-      }).length,
-      pagesRead: stats?.pagesRead ?? _fallbackPagesRead(books),
-      averageRating: averageRating,
-    );
-  }
-
-  static int _fallbackPagesRead(List<Book> books) {
-    return books.fold<int>(0, (sum, book) {
-      if (book.status == BookStatus.completed && book.totalPages != null) {
-        return sum + book.totalPages!;
-      }
-      return sum + (book.currentPage ?? 0);
-    });
+  String _contextualGreeting(DateTime now) {
+    if (now.hour < 12) return 'Buenos dias';
+    if (now.hour < 20) return 'Buenas tardes';
+    return 'Buenas noches';
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, this.actionLabel, this.onAction});
+class _HomeHeader extends StatelessWidget {
+  const _HomeHeader({required this.greeting});
 
-  final String title;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
-        ),
-        if (actionLabel != null && onAction != null)
-          TextButton(onPressed: onAction, child: Text(actionLabel!)),
-      ],
-    );
-  }
-}
-
-class _AddBookCtaCard extends StatelessWidget {
-  const _AddBookCtaCard({required this.onPressed});
-
-  final VoidCallback onPressed;
+  final String greeting;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: colorScheme.secondaryContainer,
-                foregroundColor: colorScheme.onSecondaryContainer,
-                child: const Icon(Icons.add),
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.88),
+        borderRadius: AppRadii.card,
+        boxShadow: AppShadows.soft(theme.colorScheme.primary),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                borderRadius: AppRadii.card,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Añadir nuevo libro',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+              child: Icon(AppIcons.book, color: theme.colorScheme.primary),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Hola, Reader',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Busca en Open Library o crea una nueva lectura.',
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ],
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '$greeting. Tu biblioteca te espera.',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
+              ),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.secondaryContainer,
+                borderRadius: AppRadii.card,
+              ),
+              child: Text(
+                '+ lectura',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSecondaryContainer,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
-              const SizedBox(width: 8),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _CurrentReadingSection extends StatelessWidget {
-  const _CurrentReadingSection({
+class _CurrentReadingCards extends StatelessWidget {
+  const _CurrentReadingCards({
     required this.books,
     required this.pendingBooks,
     required this.onOpenProgress,
+    required this.onAddBook,
     required this.onStartReading,
   });
 
   final List<Book> books;
   final List<Book> pendingBooks;
   final ValueChanged<Book> onOpenProgress;
+  final VoidCallback onAddBook;
   final ValueChanged<Book> onStartReading;
 
   @override
   Widget build(BuildContext context) {
     if (books.isEmpty) {
-      return _PendingReadingSuggestions(
-        books: pendingBooks,
+      return _EmptyCurrentReadingCard(
+        pendingBooks: pendingBooks,
+        onAddBook: onAddBook,
         onStartReading: onStartReading,
       );
     }
 
+    final primaryBook = books.first;
+    final secondaryBooks = books.skip(1).take(2).toList();
+
     return Column(
       children: [
-        for (var index = 0; index < books.length; index++) ...[
-          _CurrentReadingCard(
-            book: books[index],
-            onOpenProgress: () => onOpenProgress(books[index]),
+        _CurrentReadingHero(
+          book: primaryBook,
+          onOpenProgress: () => onOpenProgress(primaryBook),
+        ),
+        for (final book in secondaryBooks) ...[
+          const SizedBox(height: AppSpacing.md),
+          _CurrentReadingMiniCard(
+            book: book,
+            onOpenProgress: () => onOpenProgress(book),
           ),
-          if (index < books.length - 1) const SizedBox(height: 12),
         ],
       ],
     );
   }
 }
 
-class _CurrentReadingCard extends StatelessWidget {
-  const _CurrentReadingCard({required this.book, required this.onOpenProgress});
+class _CurrentReadingHero extends StatelessWidget {
+  const _CurrentReadingHero({required this.book, required this.onOpenProgress});
 
   final Book book;
   final VoidCallback onOpenProgress;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final currentBook = book;
+    final theme = Theme.of(context);
     final progress = _bookProgress(currentBook);
-    final progressLabel = '${(progress * 100).round()}%';
+    final progressPercent = (progress * 100).round();
 
-    return Semantics(
-      button: true,
-      label:
-          'Libro actual ${currentBook.title}. Progreso de lectura $progressLabel. Toca para registrar avance.',
-      child: Card(
-        elevation: 0,
-        color: colorScheme.primaryContainer,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer,
+        borderRadius: AppRadii.card,
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+      ),
+      child: Material(
+        color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: AppRadii.card,
           onTap: onOpenProgress,
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _BookCover(url: currentBook.coverUrl, width: 72, height: 104),
-                const SizedBox(width: 16),
+                _BookCover(url: currentBook.coverUrl, width: 116, height: 172),
+                const SizedBox(width: AppSpacing.lg),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
+                        'Actualmente leyendo',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          letterSpacing: 0.6,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
                         currentBook.title,
-                        maxLines: 2,
+                        maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: colorScheme.onPrimaryContainer,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          color: theme.colorScheme.onPrimaryContainer,
+                          fontFamily: AppTypography.displayFontFamily,
+                          fontFamilyFallback: AppTypography.displayFallback,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       if (currentBook.author?.isNotEmpty == true) ...[
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xs),
                         Text(
                           currentBook.author!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onPrimaryContainer,
+                            color: theme.colorScheme.onPrimaryContainer
+                                .withValues(alpha: 0.72),
                           ),
                         ),
                       ],
-                      const SizedBox(height: 16),
-                      if (currentBook.totalPages == null)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: FilledButton.tonalIcon(
-                            onPressed: onOpenProgress,
-                            icon: const Icon(Icons.edit_outlined),
-                            label: const Text('Añadir total de páginas'),
+                      const SizedBox(height: AppSpacing.md),
+                      Row(
+                        children: [
+                          Text(
+                            '$progressPercent%',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
-                        )
-                      else ...[
-                        LinearProgressIndicator(value: progress),
-                        const SizedBox(height: 8),
-                        Text(
-                          _progressText(currentBook, progressLabel),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onPrimaryContainer,
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Text(
+                              _pageProgressText(currentBook),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onPrimaryContainer
+                                    .withValues(alpha: 0.68),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      ClipRRect(
+                        borderRadius: AppRadii.control,
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 8,
+                          backgroundColor: theme.colorScheme.primary.withValues(
+                            alpha: 0.16,
                           ),
                         ),
-                      ],
-                      const SizedBox(height: 12),
-                      Text(
-                        'Registrar avance',
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w700,
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      FilledButton.icon(
+                        onPressed: onOpenProgress,
+                        icon: const Icon(AppIcons.edit),
+                        label: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            currentBook.totalPages == null
+                                ? 'Registrar avance'
+                                : 'Continuar lectura',
+                          ),
                         ),
                       ),
                     ],
@@ -478,82 +494,372 @@ class _CurrentReadingCard extends StatelessWidget {
     return (currentPage / totalPages).clamp(0, 1).toDouble();
   }
 
-  String _progressText(Book book, String progressLabel) {
-    if (book.currentPage == null) {
-      return 'Actualiza la página actual para ver tu avance.';
+  String _pageProgressText(Book book) {
+    if (book.currentPage == null || book.totalPages == null) {
+      return 'Actualiza paginas para ver tu avance';
     }
-    return '$progressLabel · Página ${book.currentPage} de ${book.totalPages}';
+    return 'Pagina ${book.currentPage} / ${book.totalPages}';
   }
 }
 
-class _PendingReadingSuggestions extends StatelessWidget {
-  const _PendingReadingSuggestions({
-    required this.books,
-    required this.onStartReading,
+class _CurrentReadingMiniCard extends StatelessWidget {
+  const _CurrentReadingMiniCard({
+    required this.book,
+    required this.onOpenProgress,
   });
 
-  final List<Book> books;
-  final ValueChanged<Book> onStartReading;
+  final Book book;
+  final VoidCallback onOpenProgress;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final visibleBooks = books.take(3).toList();
+    final progress = _bookProgress(book);
 
-    return Card(
-      elevation: 0,
-      color: colorScheme.surfaceContainerHighest,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '¿Quieres empezar alguna de tus lecturas pendientes?',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 12),
-            if (visibleBooks.isEmpty)
-              const Text('Añade libros pendientes para tener sugerencias aquí.')
-            else
-              for (final book in visibleBooks)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: _BookCover(
-                    url: book.coverUrl,
-                    width: 42,
-                    height: 56,
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.92),
+        borderRadius: AppRadii.card,
+        boxShadow: AppShadows.soft(theme.colorScheme.primary),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: AppRadii.card,
+          onTap: onOpenProgress,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              children: [
+                _BookCover(url: book.coverUrl, width: 52, height: 72),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        book.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      if (book.author?.isNotEmpty == true)
+                        Text(
+                          book.author!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      const SizedBox(height: AppSpacing.sm),
+                      LinearProgressIndicator(value: progress),
+                    ],
                   ),
-                  title: Text(
-                    book.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text(
-                    book.author?.isNotEmpty == true
-                        ? book.author!
-                        : 'Pendiente desde ${_formatDate(book.createdAt)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: FilledButton.tonal(
-                    onPressed: () => onStartReading(book),
-                    child: const Text('Empezar'),
-                  ),
-                  onTap: () => onStartReading(book),
                 ),
-          ],
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  '${(progress * 100).round()}%',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+  double _bookProgress(Book book) {
+    final currentPage = book.currentPage;
+    final totalPages = book.totalPages;
+    if (currentPage == null || totalPages == null || totalPages <= 0) {
+      return 0;
+    }
+    return (currentPage / totalPages).clamp(0, 1).toDouble();
+  }
+}
+
+class _EmptyCurrentReadingCard extends StatelessWidget {
+  const _EmptyCurrentReadingCard({
+    required this.pendingBooks,
+    required this.onAddBook,
+    required this.onStartReading,
+  });
+
+  final List<Book> pendingBooks;
+  final VoidCallback onAddBook;
+  final ValueChanged<Book> onStartReading;
+
+  @override
+  Widget build(BuildContext context) {
+    final visibleBooks = pendingBooks.take(2).toList();
+
+    if (visibleBooks.isEmpty) {
+      return EmptyStateCard(
+        icon: AppIcons.library,
+        title: 'Tu proxima lectura te espera',
+        message: 'Anade un libro para empezar a construir tu biblioteca.',
+        actionLabel: 'Anadir lectura',
+        onAction: onAddBook,
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: AppRadii.card,
+        boxShadow: AppShadows.soft(Theme.of(context).colorScheme.primary),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SectionHeader(title: 'Elige tu proxima lectura'),
+            const SizedBox(height: AppSpacing.sm),
+            for (final book in visibleBooks)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: _BookCover(url: book.coverUrl, width: 42, height: 58),
+                title: Text(
+                  book.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  book.author?.isNotEmpty == true ? book.author! : 'Pendiente',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: FilledButton.tonal(
+                  onPressed: () => onStartReading(book),
+                  child: const Text('Empezar'),
+                ),
+                onTap: () => onStartReading(book),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickMetrics extends StatelessWidget {
+  const _QuickMetrics({required this.summary});
+
+  final StatisticsSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      children: [
+        Expanded(
+          child: _CompactMetricCard(
+            icon: AppIcons.fire,
+            value: '${summary.currentStreakDays}',
+            label: 'Racha',
+            backgroundColor: theme.colorScheme.primary,
+            foregroundColor: theme.colorScheme.onPrimary,
+            iconBackgroundColor: theme.colorScheme.onPrimary.withValues(
+              alpha: 0.14,
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _CompactMetricCard(
+            icon: AppIcons.book,
+            value: '${summary.completedThisYear}',
+            label: 'Este ano',
+            backgroundColor: theme.colorScheme.secondaryContainer,
+            foregroundColor: theme.colorScheme.onSecondaryContainer,
+            iconBackgroundColor: theme.colorScheme.secondary.withValues(
+              alpha: 0.18,
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _CompactMetricCard(
+            icon: AppIcons.pages,
+            value: _compactNumber(summary.totalPagesRead),
+            label: 'Paginas',
+            backgroundColor: theme.colorScheme.tertiary,
+            foregroundColor: theme.colorScheme.onPrimary,
+            iconBackgroundColor: theme.colorScheme.onPrimary.withValues(
+              alpha: 0.14,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _compactNumber(int value) {
+    if (value >= 1000) {
+      final compact = value / 1000;
+      return '${compact.toStringAsFixed(compact >= 10 ? 0 : 1)}k';
+    }
+    return '$value';
+  }
+}
+
+class _CompactMetricCard extends StatelessWidget {
+  const _CompactMetricCard({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.backgroundColor,
+    required this.foregroundColor,
+    required this.iconBackgroundColor,
+  });
+
+  final IconData icon;
+  final String value;
+  final String label;
+  final Color backgroundColor;
+  final Color foregroundColor;
+  final Color iconBackgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: AppRadii.card,
+        boxShadow: AppShadows.soft(backgroundColor),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.md,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: iconBackgroundColor,
+                borderRadius: AppRadii.card,
+              ),
+              child: Icon(icon, color: foregroundColor, size: 20),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: foregroundColor,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: foregroundColor.withValues(alpha: 0.76),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AnnualGoalCard extends StatelessWidget {
+  const _AnnualGoalCard({required this.summary});
+
+  final StatisticsSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final goal = summary.annualReadingGoal;
+    final progress = summary.annualGoalProgress ?? 0;
+    final safeProgress = progress.clamp(0.0, 1.0).toDouble();
+    final goalValue = goal == null
+        ? '${summary.completedThisYear}'
+        : '${summary.completedThisYear} / $goal';
+    final subtitle = goal == null
+        ? 'Define un objetivo anual desde Progreso.'
+        : '${(safeProgress * 100).round()}% completado';
+
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary,
+        borderRadius: AppRadii.card,
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(AppIcons.flag, color: theme.colorScheme.onPrimary),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    'Objetivo lector',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+                Text(
+                  goalValue,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            ClipRRect(
+              borderRadius: AppRadii.control,
+              child: LinearProgressIndicator(
+                value: safeProgress,
+                minHeight: 8,
+                backgroundColor: theme.colorScheme.onPrimary.withValues(
+                  alpha: 0.18,
+                ),
+                color: theme.colorScheme.secondary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              subtitle,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onPrimary.withValues(alpha: 0.78),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => Navigator.pushNamed(context, '/stats'),
+                child: Text(
+                  'Ver objetivo',
+                  style: TextStyle(color: theme.colorScheme.onPrimary),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -573,16 +879,6 @@ class _QuickReadingUpdate {
   final int pagesAdded;
   final int minutes;
   final bool openDetail;
-
-  bool get hasReadingActivity => pagesAdded > 0 || minutes > 0;
-
-  String? get activityNote {
-    final parts = <String>[
-      if (pagesAdded > 0) '$pagesAdded páginas añadidas',
-      if (currentPage != null) 'Página actual $currentPage',
-    ];
-    return parts.isEmpty ? null : parts.join(' · ');
-  }
 }
 
 class _QuickReadingDialog extends StatefulWidget {
@@ -680,12 +976,7 @@ class _QuickReadingDialogState extends State<_QuickReadingDialog> {
     final screenHeight = MediaQuery.sizeOf(context).height;
 
     return AlertDialog(
-      title: Text(
-        'Registrar avance',
-        style: theme.textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w700,
-        ),
-      ),
+      title: Text('Registrar avance', style: theme.textTheme.titleLarge),
       content: ConstrainedBox(
         constraints: BoxConstraints(maxHeight: screenHeight * 0.7),
         child: SingleChildScrollView(
@@ -699,56 +990,48 @@ class _QuickReadingDialogState extends State<_QuickReadingDialog> {
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodyMedium,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.lg),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Fecha'),
                 subtitle: Text(_formatDate(_sessionDate)),
-                trailing: const Icon(Icons.calendar_month),
+                trailing: const Icon(AppIcons.calendar),
                 onTap: _pickSessionDate,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: _pagesReadController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Páginas leídas',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: const InputDecoration(labelText: 'Paginas leidas'),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: _currentPageController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Página actual',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: const InputDecoration(labelText: 'Pagina actual'),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: _totalPagesController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Total de páginas',
-                  border: OutlineInputBorder(),
+                  labelText: 'Total de paginas',
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: _minutesController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'Minutos de lectura',
-                  border: OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.lg),
               FilledButton(
                 onPressed: _save,
                 child: const Text('Guardar cambios'),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               TextButton(
                 onPressed: () {
                   Navigator.pop(
@@ -773,98 +1056,6 @@ class _QuickReadingDialogState extends State<_QuickReadingDialog> {
   }
 }
 
-class _QuickStatsGrid extends StatelessWidget {
-  const _QuickStatsGrid({required this.data});
-
-  final _DashboardData data;
-
-  @override
-  Widget build(BuildContext context) {
-    final rating = data.averageRating == null
-        ? '-'
-        : data.averageRating!.toStringAsFixed(1);
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 360 ? 3 : 2;
-        return GridView.count(
-          crossAxisCount: columns,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          childAspectRatio: constraints.maxWidth >= 640 ? 2.8 : 1.2,
-          children: [
-            _MetricCard(
-              icon: Icons.emoji_events_outlined,
-              label: 'Leidos este año',
-              value: '${data.booksReadThisYear}',
-            ),
-            _MetricCard(
-              icon: Icons.menu_book_outlined,
-              label: 'Paginas leidas',
-              value: '${data.pagesRead}',
-            ),
-            _MetricCard(
-              icon: Icons.star_border,
-              label: 'Valoracion media',
-              value: rating,
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _MetricCard extends StatelessWidget {
-  const _MetricCard({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: theme.colorScheme.primary, size: 18),
-            const SizedBox(height: 6),
-            Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelSmall,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _RecentActivityList extends StatelessWidget {
   const _RecentActivityList({required this.sessions, required this.booksById});
 
@@ -875,32 +1066,31 @@ class _RecentActivityList extends StatelessWidget {
   Widget build(BuildContext context) {
     final recentSessions = [...sessions]
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final visibleSessions = recentSessions.take(3).toList();
 
-    if (recentSessions.isEmpty) {
-      return Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: const Padding(
-          padding: EdgeInsets.all(16),
-          child: Text(
-            'Aún no hay actividad hoy. Registra una sesión para ver tu ritmo de lectura.',
-          ),
-        ),
+    if (visibleSessions.isEmpty) {
+      return EmptyStateCard(
+        icon: AppIcons.time,
+        title: 'Sin actividad reciente',
+        message: 'Cuando registres una sesion, aparecera aqui.',
       );
     }
 
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 320),
-      child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: recentSessions.length,
-        itemBuilder: (context, index) {
-          final session = recentSessions[index];
-          return _ActivityTile(
-            session: session,
-            book: booksById[session.bookId],
-          );
-        },
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+        child: Column(
+          children: [
+            for (var index = 0; index < visibleSessions.length; index++) ...[
+              _ActivityTile(
+                session: visibleSessions[index],
+                book: booksById[visibleSessions[index].bookId],
+              ),
+              if (index < visibleSessions.length - 1)
+                const Divider(height: 1, indent: 72),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -914,31 +1104,33 @@ class _ActivityTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        leading: _BookCover(url: book?.coverUrl, width: 42, height: 56),
-        title: Text(
-          book?.title ?? 'Libro no encontrado',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Text(
-          _activitySubtitle(session, book),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        trailing: Text(_activityValue(session)),
-        onTap: book == null
-            ? null
-            : () => Navigator.pushNamed(
-                context,
-                '/book/detail',
-                arguments: book!.id,
-              ),
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
       ),
+      leading: _BookCover(url: book?.coverUrl, width: 40, height: 54),
+      title: Text(
+        book?.title ?? 'Libro no encontrado',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        _activitySubtitle(session, book),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: Text(
+        _activityValue(session),
+        style: Theme.of(context).textTheme.labelLarge,
+      ),
+      onTap: book == null
+          ? null
+          : () => Navigator.pushNamed(
+              context,
+              '/book/detail',
+              arguments: book!.id,
+            ),
     );
   }
 
@@ -946,10 +1138,9 @@ class _ActivityTile extends StatelessWidget {
     final parts = <String>[
       _formatDateTime(session.createdAt),
       if (book?.author?.isNotEmpty == true) book!.author!,
-      if (session.pagesRead > 0) '${session.pagesRead} paginas leidas',
-      if (session.note?.isNotEmpty == true) session.note!,
+      if (session.pagesRead > 0) '${session.pagesRead} paginas',
     ];
-    return parts.join(' · ');
+    return parts.join(' - ');
   }
 
   String _activityValue(ReadingSession session) {
@@ -957,13 +1148,13 @@ class _ActivityTile extends StatelessWidget {
       if (session.pagesRead > 0) '${session.pagesRead} pag.',
       if (session.minutes > 0) '${session.minutes} min',
     ];
-    return parts.isEmpty ? '-' : parts.join(' · ');
+    return parts.isEmpty ? '-' : parts.join('\n');
   }
 
   String _formatDateTime(DateTime date) {
     final hour = date.hour.toString().padLeft(2, '0');
     final minute = date.minute.toString().padLeft(2, '0');
-    return '${date.day}/${date.month}/${date.year} $hour:$minute';
+    return '${date.day}/${date.month} $hour:$minute';
   }
 }
 
@@ -985,15 +1176,15 @@ class _BookCover extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: AppRadii.card,
       ),
-      child: const Icon(Icons.menu_book_outlined),
+      child: const Icon(AppIcons.book),
     );
 
     if (url == null || url!.isEmpty) return placeholder;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: AppRadii.card,
       child: Image.network(
         url!,
         width: width,
