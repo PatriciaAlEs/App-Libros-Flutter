@@ -17,6 +17,7 @@
 - No implementar backend, login ni JWT por ahora.
 - Mantener UX mobile-first.
 - Evitar complejidad prematura.
+- Las secciones principales deben estar accesibles desde navegacion principal, no escondidas en acciones secundarias.
 
 ## Decisiones de trabajo con IA
 
@@ -50,3 +51,6 @@
 - La mejor racha historica se calcula con la secuencia maxima de dias consecutivos con sesiones, ignorando hora y duplicados del mismo dia.
 - Las metricas avanzadas de lectura agrupan `ReadingSession` por fecha sin hora, ignoran fechas futuras y calculan semana actual de lunes a domingo y mes actual desde el dia 1 hasta hoy.
 - El dia mas activo se elige por mayor numero de paginas leidas y usa minutos como desempate.
+- Hito 5 Sprint 1 usa `NavigationBar` Material 3 como shell principal con Inicio, Biblioteca, Progreso, Insights y Ajustes.
+- `Progreso` es un hub de acceso a estadisticas, Reading Challenge y activity tracking; no duplica ni reemplaza la logica existente.
+- `Ajustes` empieza como placeholder simple hasta que exista una necesidad real de preferencias o perfil.

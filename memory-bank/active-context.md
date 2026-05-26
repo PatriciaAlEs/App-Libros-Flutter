@@ -2,9 +2,9 @@
 
 ## Foco actual
 
-Hito 4: Reading Insights.
+Hito 5: UX/UI Premium Redesign.
 
-Sprint 4 de Reading Insights implementado como perfil lector premium.
+Sprint 1 iniciado e implementado: navegacion principal con Material 3 `NavigationBar`.
 
 La Home ya funciona como dashboard principal y concentra:
 
@@ -15,6 +15,14 @@ La Home ya funciona como dashboard principal y concentra:
 - Acciones rapidas de progreso.
 
 Insights ya no funciona como segunda pantalla de estadisticas: la UI se organiza como perfil lector.
+
+La navegacion principal ahora expone directamente:
+
+- Inicio.
+- Biblioteca.
+- Progreso.
+- Insights.
+- Ajustes.
 
 ## Estado reciente
 
@@ -104,6 +112,14 @@ Insights ya no funciona como segunda pantalla de estadisticas: la UI se organiza
 - `Curiosidades` muestra libro mas largo, mes con mas lectura, franja horaria habitual y dia mas activo.
 - Sprint 4 reutiliza `Book` y `ReadingSession`; no agrega tablas, servicios externos ni metricas complejas.
 - Los campos legacy de prediccion, forecast, rankings y racha se conservan en dominio para compatibilidad de tests existentes, pero ya no se muestran en la UI de Insights.
+- Se inicio Hito 5 - UX/UI Premium Redesign.
+- Se agrego `MainNavigationScreen` como entrada principal en `/`.
+- La navegacion usa `NavigationBar` de Material 3 con tabs Inicio, Biblioteca, Progreso, Insights y Ajustes.
+- Se agrego `ProgressScreen` como hub de progreso.
+- `ProgressScreen` da acceso a Estadisticas, Reading Challenge, Activity Tracking/calendario y registro de sesion.
+- Se agrego `SettingsScreen` como placeholder simple para Ajustes.
+- Las rutas existentes se mantienen: `/home`, `/books`, `/stats`, `/progress`, `/calendar`, `/insights`, `/settings` y flujos internos.
+- No se tocaron Drift, modelos de datos, autenticacion ni servicios externos.
 
 ## Archivos tocados recientemente
 
@@ -154,8 +170,8 @@ Estado confirmado para Hito 4 Sprint 3:
 
 ## Pendientes reales
 
-1. Definir siguiente bloque funcional cuando el usuario lo pida.
-2. Validar Sprint 4 desde la terminal del usuario cuando corresponda.
+1. Validar Hito 5 Sprint 1 desde la terminal del usuario cuando corresponda.
+2. Definir siguiente sprint visual/UI cuando el usuario lo pida.
 3. Mas adelante investigar Open Library para mejorar resultados en espanol.
 4. Dejar el sprint visual/UI para despues: paleta, estilo, referencias y design system.
 

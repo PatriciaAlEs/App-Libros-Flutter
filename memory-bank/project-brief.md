@@ -18,6 +18,7 @@
 - Calendario: vista mensual, vista semanal y detalle de dia.
 - Estadisticas: resumen basico a partir de libros y sesiones reales.
 - Insights: perfil lector, mejores lecturas y curiosidades a partir de datos reales.
+- Navegacion principal: tabs Inicio, Biblioteca, Progreso, Insights y Ajustes.
 
 ## Fuera de alcance por ahora
 

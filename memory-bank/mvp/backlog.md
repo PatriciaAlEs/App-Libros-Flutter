@@ -14,7 +14,6 @@
 
 ## Baja prioridad
 
-- Bottom navigation si crecen las secciones.
 - Migrar web a `WasmDatabase` si `WebDatabase` legacy empieza a limitar.
 - Mejoras visuales finas del calendario semanal.
 

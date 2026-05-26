@@ -31,11 +31,20 @@
 
 ## Consultar estadisticas
 
-1. Usuario abre Stats.
-2. La app muestra un resumen calculado desde libros y sesiones.
-3. Usuario ve metricas utiles para entender progreso y habitos.
+1. Usuario abre Progreso.
+2. Pulsa Estadisticas.
+3. La app muestra un resumen calculado desde libros y sesiones.
+4. Usuario ve metricas utiles para entender progreso y habitos.
 
 Estado: implementado con datos reales.
+
+## Navegar secciones principales
+
+1. Usuario usa la navegacion inferior.
+2. Cambia directamente entre Inicio, Biblioteca, Progreso, Insights y Ajustes.
+3. La app mantiene rutas internas para detalle, formularios, calendario y estadisticas.
+
+Estado: Hito 5 Sprint 1 implementado y pendiente de validacion local.
 
 ## Consultar insights
 

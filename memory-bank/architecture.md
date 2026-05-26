@@ -113,8 +113,20 @@ reading_tracker/lib/
 ### Navegacion centralizada con rutas nombradas
 
 - Decision: definir rutas en `MaterialApp.onGenerateRoute`.
-- Motivo observado: centralizar navegacion entre listado, detalle de libro, calendario, detalle de dia, alta de sesion y stats.
-- Evidencia: `reading_tracker/lib/app.dart` contiene rutas `/`, `/book/add`, `/book/detail`, `/calendar`, `/calendar/day`, `/session/add`, `/stats`.
+- Motivo observado: centralizar navegacion entre shell principal, listado, detalle de libro, calendario, detalle de dia, alta de sesion, stats e insights.
+- Evidencia: `reading_tracker/lib/app.dart` contiene rutas `/`, `/home`, `/books`, `/book/add`, `/book/detail`, `/calendar`, `/calendar/day`, `/session/add`, `/stats`, `/progress`, `/insights` y `/settings`.
+
+### Navegacion principal Hito 5 Sprint 1
+
+- Decision: usar una `NavigationBar` Material 3 en `MainNavigationScreen` como entrada principal de la app.
+- Tabs principales: Inicio, Biblioteca, Progreso, Insights y Ajustes.
+- `/` abre `MainNavigationScreen`.
+- `/home` conserva acceso directo a `HomeScreen` para no romper navegacion interna o pruebas futuras.
+- `Progreso` funciona como hub y no reemplaza las pantallas existentes.
+- `ProgressScreen` enlaza a `/stats`, `/calendar` y `/session/add`; Reading Challenge usa `/stats` porque el objetivo anual ya vive ahi.
+- `Insights` abre directamente la pantalla existente `InsightsScreen` dentro del tab.
+- `Ajustes` es un placeholder simple; no hay perfil real, autenticacion, Firebase ni persistencia nueva.
+- Las rutas internas existentes siguen disponibles para push desde cards, detalle, formularios y calendario.
 
 ### Reading sessions como base de Hito 3
 

@@ -15,7 +15,16 @@ import '../../../stats/presentation/providers/stats_provider.dart';
 import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({
+    super.key,
+    this.onOpenLibrary,
+    this.onOpenProgress,
+    this.onOpenInsights,
+  });
+
+  final VoidCallback? onOpenLibrary;
+  final VoidCallback? onOpenProgress;
+  final VoidCallback? onOpenInsights;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -38,17 +47,22 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             tooltip: 'Ver biblioteca',
             icon: const Icon(Icons.auto_stories_outlined),
-            onPressed: () => Navigator.pushNamed(context, '/books'),
+            onPressed:
+                onOpenLibrary ?? (() => Navigator.pushNamed(context, '/books')),
           ),
           IconButton(
-            tooltip: 'Ver calendario',
-            icon: const Icon(Icons.calendar_month_outlined),
-            onPressed: () => Navigator.pushNamed(context, '/calendar'),
+            tooltip: 'Ver progreso',
+            icon: const Icon(Icons.bar_chart_outlined),
+            onPressed:
+                onOpenProgress ??
+                (() => Navigator.pushNamed(context, '/progress')),
           ),
           IconButton(
             tooltip: 'Ver insights',
             icon: const Icon(Icons.insights_outlined),
-            onPressed: () => Navigator.pushNamed(context, '/insights'),
+            onPressed:
+                onOpenInsights ??
+                (() => Navigator.pushNamed(context, '/insights')),
           ),
         ],
       ),
@@ -86,7 +100,11 @@ class HomeScreen extends ConsumerWidget {
                           if (currentBooks.isEmpty) {
                             _openAddBook(context);
                           } else {
-                            Navigator.pushNamed(context, '/books');
+                            if (onOpenLibrary != null) {
+                              onOpenLibrary!();
+                            } else {
+                              Navigator.pushNamed(context, '/books');
+                            }
                           }
                         },
                       ),

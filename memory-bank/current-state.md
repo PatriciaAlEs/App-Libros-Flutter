@@ -118,6 +118,14 @@ Estado actual implementado:
 
 Estado actual implementado:
 
+- La app entra por una navegacion principal con `NavigationBar` Material 3.
+- Tabs principales: Inicio, Biblioteca, Progreso, Insights y Ajustes.
+- Inicio muestra la Home/dashboard actual.
+- Biblioteca abre la lista de libros existente.
+- Progreso abre un hub con accesos a Estadisticas, Reading Challenge, Activity Tracking/calendario y registro de sesion.
+- Insights abre directamente la pantalla Insights existente.
+- Ajustes existe como placeholder simple; no implementa perfil real ni preferencias persistidas.
+- Las rutas existentes se mantienen para navegacion interna y compatibilidad.
 - Biblioteca usa un icono de libros.
 - La vista general de Biblioteca muestra primero libros en estado `Leyendo`.
 - Despues se muestran el resto de estados.
@@ -178,6 +186,7 @@ Estado confirmado por el usuario:
 - `dart format` OK.
 - El usuario ejecuta `dart format`, `flutter analyze` y `flutter test` desde VS Code.
 - Sprint 4 esta pendiente de validacion local por el usuario.
+- Hito 5 Sprint 1 esta pendiente de validacion local por el usuario.
 
 ## Estadisticas MVP
 
@@ -204,6 +213,5 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Definir el siguiente bloque funcional cuando el usuario lo pida.
-2. Mantener fuera dashboard premium hasta peticion explicita.
-3. Continuar con el siguiente bloque que priorice el usuario.
+1. Validar Hito 5 Sprint 1 cuando el usuario lo decida.
+2. Continuar con el siguiente sprint visual/UI que priorice el usuario.

@@ -65,6 +65,17 @@ Una persona lectora puede tener varios libros pendientes, en curso o completados
 - Si no hay datos suficientes, muestra estados vacios claros.
 - No incluye IA, servicios externos ni tablas nuevas.
 
+### Navegacion principal
+
+- Hito 5 Sprint 1 implementado.
+- Navegacion principal con tabs Inicio, Biblioteca, Progreso, Insights y Ajustes.
+- Inicio muestra el dashboard actual.
+- Biblioteca abre la lista de libros.
+- Progreso da acceso a Estadisticas, Reading Challenge, Activity Tracking/calendario y registro de sesion.
+- Insights abre la pantalla Insights existente.
+- Ajustes existe como placeholder simple.
+- No incluye autenticacion, perfil real, Firebase, servicios externos ni cambios de datos.
+
 ## Fuera del MVP actual
 
 - Backend.
@@ -110,3 +121,4 @@ Relaciones:
 - El detalle de dia muestra sesiones y total de minutos.
 - Stats muestra metricas calculadas desde datos reales.
 - Insights muestra perfil lector, mejores lecturas y curiosidades cuando hay datos suficientes.
+- Las secciones principales son accesibles desde la navegacion inferior.

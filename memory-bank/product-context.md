@@ -17,10 +17,12 @@ Usuario individual que quiere registrar su biblioteca personal y entender cuanto
 - Abrir un dia concreto y revisar las sesiones registradas.
 - Consultar estadisticas simples de progreso y actividad.
 - Consultar un perfil lector con mejores lecturas y curiosidades.
+- Acceder a secciones principales desde navegacion inferior.
 
 ## Experiencia deseada
 
 - Rapida de usar con una mano.
 - Formularios cortos y claros.
 - Calendario compacto en mes y mas detallado en semana/dia.
+- Navegacion principal clara y accesible.
 - Estados vacios utiles, con llamadas a la accion cuando proceda.

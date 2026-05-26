@@ -53,6 +53,12 @@ Crear una app sencilla y mantenible para registrar libros y sesiones de lectura,
   - Sprint 4: reorganiza Insights como perfil lector premium con mejores lecturas y curiosidades.
   - Usa paginas leidas acumuladas desde `ReadingSession.pagesRead`.
   - No incluye IA, servicios externos ni tablas nuevas.
+- Navegacion principal:
+  - Hito 5 Sprint 1 implementado.
+  - Tabs Inicio, Biblioteca, Progreso, Insights y Ajustes.
+  - Progreso da acceso a Estadisticas, Reading Challenge y Activity Tracking.
+  - Ajustes es placeholder simple.
+  - No incluye autenticacion ni perfil real.
 
 ## 7. Funcionalidades fuera del MVP
 
@@ -185,6 +191,7 @@ Relaciones:
 - Los datos persisten tras cerrar o refrescar la app.
 - Stats aparece como seccion implementada con datos reales.
 - Insights aparece como seccion implementada con Sprint 1, Sprint 2, Sprint 3 y Sprint 4: perfil lector, mejores lecturas y curiosidades.
+- Navegacion principal muestra Inicio, Biblioteca, Progreso, Insights y Ajustes como secciones de primer nivel.
 
 ## 12. Backlog priorizado
 

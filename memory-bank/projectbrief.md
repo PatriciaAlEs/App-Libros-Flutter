@@ -18,6 +18,7 @@ El proyecto ya contiene una app funcional en `reading_tracker/` con:
 - Reading Insights Sprint 2 implementado: ritmo de lectura, prediccion simple de fin de libro y forecast anual.
 - Reading Insights Sprint 3 implementado: Top Lecturas del Año y Ranking Personal.
 - Reading Insights Sprint 4 implementado: perfil lector premium con mejores lecturas y curiosidades.
+- Hito 5 Sprint 1 implementado: navegacion principal con tabs Inicio, Biblioteca, Progreso, Insights y Ajustes.
 
 ## Principios de documentacion
 

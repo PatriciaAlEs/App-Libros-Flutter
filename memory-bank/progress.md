@@ -99,16 +99,23 @@
 - `Tus mejores lecturas` muestra Top 3 lecturas del año por rating.
 - `Curiosidades` muestra libro mas largo, mes con mas lectura, franja horaria habitual y dia mas activo.
 - Sprint 4 reutiliza `Book` y `ReadingSession`; no crea tablas nuevas, servicios externos ni dependencias.
+- Hito 5 - UX/UI Premium Redesign iniciado.
+- Hito 5 Sprint 1 implementado: navegacion principal con `NavigationBar` Material 3.
+- Tabs principales: Inicio, Biblioteca, Progreso, Insights y Ajustes.
+- Progreso funciona como hub hacia Estadisticas, Reading Challenge, Activity Tracking/calendario y registro de sesion.
+- Ajustes se creo como placeholder simple, sin perfil real ni autenticacion.
+- Las rutas existentes se mantienen para navegacion interna.
 
 ## Parcial / en seguimiento
 
 - Revisión de textos y consistencia visual fina pendiente para el sprint visual/UI.
 - Open Library puede mejorar resultados en espanol, pero queda para una fase posterior.
 - Validacion local de Sprint 4 pendiente en terminal del usuario.
+- Validacion local de Hito 5 Sprint 1 pendiente en terminal del usuario.
 
 ## Pendiente inmediato
 
-- Validar Sprint 4 cuando el usuario lo decida.
+- Validar Hito 5 Sprint 1 cuando el usuario lo decida.
 - Definir el siguiente bloque funcional cuando el usuario lo pida.
 
 ## Pendiente futuro

@@ -6,10 +6,13 @@ import 'features/books/presentation/screens/book_form_screen.dart';
 import 'features/books/presentation/screens/books_list_screen.dart';
 import 'features/home/presentation/screens/home_screen.dart';
 import 'features/insights/presentation/screens/insights_screen.dart';
+import 'features/navigation/presentation/screens/main_navigation_screen.dart';
+import 'features/progress/presentation/screens/progress_screen.dart';
 import 'features/reading_sessions/presentation/screens/calendar_screen.dart';
 import 'features/reading_sessions/presentation/screens/day_detail_screen.dart';
 import 'features/reading_sessions/presentation/screens/session_form_screen.dart';
 import 'features/reading_sessions/domain/entities/reading_session.dart';
+import 'features/settings/presentation/screens/settings_screen.dart';
 import 'features/stats/presentation/screens/stats_screen.dart';
 
 class App extends StatelessWidget {
@@ -29,6 +32,9 @@ class App extends StatelessWidget {
   Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
+        return MaterialPageRoute(builder: (_) => const MainNavigationScreen());
+
+      case '/home':
         return MaterialPageRoute(builder: (_) => const HomeScreen());
 
       case '/books':
@@ -68,8 +74,14 @@ class App extends StatelessWidget {
       case '/stats':
         return MaterialPageRoute(builder: (_) => const StatsScreen());
 
+      case '/progress':
+        return MaterialPageRoute(builder: (_) => const ProgressScreen());
+
       case '/insights':
         return MaterialPageRoute(builder: (_) => const InsightsScreen());
+
+      case '/settings':
+        return MaterialPageRoute(builder: (_) => const SettingsScreen());
 
       default:
         return _notFoundRoute();
