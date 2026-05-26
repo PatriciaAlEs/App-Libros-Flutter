@@ -125,7 +125,7 @@ Estado actual implementado:
 - Biblioteca abre la lista de libros existente.
 - Progreso abre un hub con accesos a Estadisticas, Reading Challenge, Activity Tracking/calendario y registro de sesion.
 - Insights abre directamente la pantalla Insights existente.
-- Ajustes existe como placeholder simple; no implementa perfil real ni preferencias persistidas.
+- Ajustes incluye selector de tema Burgundy/Forest con preferencia persistida localmente; no implementa perfil real ni login.
 - Las rutas existentes se mantienen para navegacion interna y compatibilidad.
 - Home mantiene su dashboard, pero el resumen rapido usa cards mas compactas.
 - Biblioteca usa un icono de libros.
@@ -189,6 +189,8 @@ Estado confirmado por el usuario:
 - El usuario ejecuta `dart format`, `flutter analyze` y `flutter test` desde VS Code.
 - Sprint 4 esta pendiente de validacion local por el usuario.
 - Hito 5 Sprint 1 esta pendiente de validacion local por el usuario.
+- Hito 5 Sprint 2 - Design System esta implementado y pendiente de validacion local por el usuario.
+- Sprint 2 agrega temas Burgundy/Forest, tokens visuales y componentes reutilizables sin redisenar Home, Biblioteca, Estadisticas ni Insights.
 
 ## Estadisticas MVP
 
@@ -215,5 +217,6 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Validar Hito 5 Sprint 1 cuando el usuario lo decida.
+1. Ejecutar `flutter pub get` antes de validar Sprint 2 por la nueva dependencia `shared_preferences`.
+2. Validar Hito 5 Sprint 1 y Sprint 2 cuando el usuario lo decida.
 2. Continuar con el siguiente sprint visual/UI que priorice el usuario.

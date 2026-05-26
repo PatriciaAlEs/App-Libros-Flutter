@@ -57,8 +57,14 @@ Crear una app sencilla y mantenible para registrar libros y sesiones de lectura,
   - Hito 5 Sprint 1 implementado.
   - Tabs Inicio, Biblioteca, Progreso, Insights y Ajustes.
   - Progreso da acceso a Estadisticas, Reading Challenge y Activity Tracking.
-  - Ajustes es placeholder simple.
+  - Ajustes permite elegir tema Burgundy o Forest con preferencia persistida localmente.
   - No incluye autenticacion ni perfil real.
+- Design System:
+  - Hito 5 Sprint 2 implementado.
+  - Tema Burgundy por defecto y tema Forest seleccionable.
+  - Tokens visuales de spacing, radios, elevaciones y sombras suaves.
+  - Componentes base reutilizables: `MetricCard`, `InsightCard`, `ProgressCard`, `SectionHeader` y `EmptyStateCard`.
+  - No redisenia todavia pantallas completas.
 
 ## 7. Funcionalidades fuera del MVP
 
@@ -192,6 +198,7 @@ Relaciones:
 - Stats aparece como seccion implementada con datos reales.
 - Insights aparece como seccion implementada con Sprint 1, Sprint 2, Sprint 3 y Sprint 4: perfil lector, mejores lecturas y curiosidades.
 - Navegacion principal muestra Inicio, Biblioteca, Progreso, Insights y Ajustes como secciones de primer nivel.
+- Ajustes permite seleccionar y conservar localmente el tema visual.
 
 ## 12. Backlog priorizado
 

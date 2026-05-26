@@ -4,7 +4,7 @@
 
 Hito 5: UX/UI Premium Redesign.
 
-Sprint 1 iniciado e implementado: navegacion principal con Material 3 `NavigationBar`.
+Sprint 2 iniciado e implementado: Design System base con temas seleccionables, tokens visuales y componentes reutilizables.
 
 La Home ya funciona como dashboard principal y concentra:
 
@@ -23,6 +23,14 @@ La navegacion principal ahora expone directamente:
 - Progreso.
 - Insights.
 - Ajustes.
+
+El sistema visual base ahora incluye:
+
+- Tema Burgundy por defecto.
+- Tema Forest seleccionable desde Ajustes.
+- Tokens de spacing, radios, elevaciones y sombras suaves.
+- Componentes base `MetricCard`, `InsightCard`, `ProgressCard`, `SectionHeader` y `EmptyStateCard`.
+- Persistencia local de preferencia de tema con `shared_preferences`.
 
 ## Estado reciente
 
@@ -117,12 +125,18 @@ La navegacion principal ahora expone directamente:
 - La navegacion usa `NavigationBar` de Material 3 con tabs Inicio, Biblioteca, Progreso, Insights y Ajustes.
 - Se agrego `ProgressScreen` como hub de progreso.
 - `ProgressScreen` da acceso a Estadisticas, Reading Challenge, Activity Tracking/calendario y registro de sesion.
-- Se agrego `SettingsScreen` como placeholder simple para Ajustes.
+- Se agrego `SettingsScreen` para Ajustes; en Sprint 2 se extendio con selector de tema.
 - Las rutas existentes se mantienen: `/home`, `/books`, `/stats`, `/progress`, `/calendar`, `/insights`, `/settings` y flujos internos.
 - No se tocaron Drift, modelos de datos, autenticacion ni servicios externos.
 - Correccion UX de Sprint 1: la Home ya no duplica accesos principales en el AppBar.
 - Correccion UX de Sprint 1: se elimino el CTA `Ver biblioteca` de `Lectura actual`.
 - Correccion UX de Sprint 1: el resumen rapido de Home se compacto con cards mas densas.
+- Se implemento Hito 5 Sprint 2 - Design System.
+- `AppTheme` ahora soporta los temas Burgundy y Forest con Material 3.
+- Se agrego `AppThemeController` con Riverpod para cargar y guardar el tema seleccionado localmente.
+- Se agregaron tokens reutilizables de spacing, radios, elevaciones y sombras.
+- Se agregaron componentes base de design system sin redisenar pantallas existentes.
+- `SettingsScreen` dejo de ser solo placeholder y ahora incluye selector de tema; sigue sin perfil real ni login.
 
 ## Archivos tocados recientemente
 
@@ -156,6 +170,17 @@ La navegacion principal ahora expone directamente:
 - `reading_tracker/lib/features/insights/presentation/providers/reading_insights_summary_provider.dart`
 - `reading_tracker/lib/features/insights/presentation/screens/insights_screen.dart`
 - `reading_tracker/lib/app.dart`
+- `reading_tracker/lib/core/theme/app_theme.dart`
+- `reading_tracker/lib/core/theme/app_theme_controller.dart`
+- `reading_tracker/lib/core/theme/app_theme_tokens.dart`
+- `reading_tracker/lib/core/design_system/design_system.dart`
+- `reading_tracker/lib/core/design_system/components/metric_card.dart`
+- `reading_tracker/lib/core/design_system/components/insight_card.dart`
+- `reading_tracker/lib/core/design_system/components/progress_card.dart`
+- `reading_tracker/lib/core/design_system/components/section_header.dart`
+- `reading_tracker/lib/core/design_system/components/empty_state_card.dart`
+- `reading_tracker/lib/features/settings/presentation/screens/settings_screen.dart`
+- `reading_tracker/pubspec.yaml`
 - `reading_tracker/lib/features/reading_sessions/presentation/screens/session_form_screen.dart`
 - `reading_tracker/lib/features/reading_sessions/presentation/screens/day_detail_screen.dart`
 - `reading_tracker/lib/features/reading_sessions/presentation/utils/session_completion_flow.dart`
@@ -173,8 +198,9 @@ Estado confirmado para Hito 4 Sprint 3:
 
 ## Pendientes reales
 
-1. Validar Hito 5 Sprint 1 desde la terminal del usuario cuando corresponda.
-2. Definir siguiente sprint visual/UI cuando el usuario lo pida.
+1. Ejecutar `flutter pub get` antes de validar Sprint 2, por la nueva dependencia `shared_preferences`.
+2. Validar Hito 5 Sprint 1/Sprint 2 desde la terminal del usuario cuando corresponda.
+3. Definir siguiente sprint visual/UI cuando el usuario lo pida.
 3. Mas adelante investigar Open Library para mejorar resultados en espanol.
 4. Dejar el sprint visual/UI para despues: paleta, estilo, referencias y design system.
 

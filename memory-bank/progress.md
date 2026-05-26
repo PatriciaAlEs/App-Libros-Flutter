@@ -103,11 +103,19 @@
 - Hito 5 Sprint 1 implementado: navegacion principal con `NavigationBar` Material 3.
 - Tabs principales: Inicio, Biblioteca, Progreso, Insights y Ajustes.
 - Progreso funciona como hub hacia Estadisticas, Reading Challenge, Activity Tracking/calendario y registro de sesion.
-- Ajustes se creo como placeholder simple, sin perfil real ni autenticacion.
+- Ajustes se creo inicialmente como placeholder simple, sin perfil real ni autenticacion.
 - Las rutas existentes se mantienen para navegacion interna.
 - Correcciones UX Hito 5 Sprint 1 aplicadas: Home sin accesos principales duplicados en AppBar.
 - Correcciones UX Hito 5 Sprint 1 aplicadas: eliminado `Ver biblioteca` de la seccion `Lectura actual`.
 - Correcciones UX Hito 5 Sprint 1 aplicadas: resumen rapido de Home compactado.
+- Hito 5 Sprint 2 implementado: Design System base.
+- Tema Burgundy definido como tema principal por defecto.
+- Tema Forest definido como alternativa seleccionable.
+- Selector de tema agregado en Ajustes con persistencia local mediante `shared_preferences`.
+- `AppTheme` extendido para generar ThemeData Material 3 desde temas configurables.
+- Tokens de spacing, radios, elevaciones y sombras suaves agregados.
+- Componentes reutilizables creados: `MetricCard`, `InsightCard`, `ProgressCard`, `SectionHeader` y `EmptyStateCard`.
+- No se redisenaron Home, Biblioteca, Estadisticas ni Insights en Sprint 2.
 
 ## Parcial / en seguimiento
 
@@ -115,15 +123,17 @@
 - Open Library puede mejorar resultados en espanol, pero queda para una fase posterior.
 - Validacion local de Sprint 4 pendiente en terminal del usuario.
 - Validacion local de Hito 5 Sprint 1 pendiente en terminal del usuario.
+- Validacion local de Hito 5 Sprint 2 pendiente en terminal del usuario.
 
 ## Pendiente inmediato
 
-- Validar Hito 5 Sprint 1 cuando el usuario lo decida.
+- Ejecutar `flutter pub get` para incorporar `shared_preferences`.
+- Validar Hito 5 Sprint 1 y Sprint 2 cuando el usuario lo decida.
 - Definir el siguiente bloque funcional cuando el usuario lo pida.
 
 ## Pendiente futuro
 
 - Definir siguiente iteracion de Stats o Insights sin introducir complejidad visual prematura.
 - Investigar Open Library para mejorar resultados en espanol.
-- Hacer sprint visual/UI: paleta, estilo, referencias y design system.
+- Redisenar pantallas principales usando el Design System ya creado.
 - Ampliar tests de flujos criticos si el alcance del siguiente sprint lo requiere.

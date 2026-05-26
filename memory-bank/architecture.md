@@ -10,6 +10,7 @@ La app usa una arquitectura Flutter simple por features. No hay backend, autenti
 reading_tracker/lib/
   core/
     database/
+    design_system/
     theme/
     utils/
   features/
@@ -34,7 +35,8 @@ reading_tracker/lib/
 ## Core
 
 - `core/database`: Drift, tablas, DAOs, conexion por plataforma y seed data.
-- `core/theme`: tema Material compartido.
+- `core/theme`: tema Material compartido, tokens visuales y controlador de tema.
+- `core/design_system`: componentes visuales reutilizables.
 - `core/utils`: utilidades de fecha e IDs.
 
 ## Features
@@ -125,8 +127,20 @@ reading_tracker/lib/
 - `Progreso` funciona como hub y no reemplaza las pantallas existentes.
 - `ProgressScreen` enlaza a `/stats`, `/calendar` y `/session/add`; Reading Challenge usa `/stats` porque el objetivo anual ya vive ahi.
 - `Insights` abre directamente la pantalla existente `InsightsScreen` dentro del tab.
-- `Ajustes` es un placeholder simple; no hay perfil real, autenticacion, Firebase ni persistencia nueva.
+- `Ajustes` incluye selector de tema; no hay perfil real, autenticacion, Firebase ni persistencia de negocio nueva.
 - Las rutas internas existentes siguen disponibles para push desde cards, detalle, formularios y calendario.
+
+### Design System Hito 5 Sprint 2
+
+- Decision: centralizar temas, tokens y componentes visuales base antes de redisenar pantallas completas.
+- Temas disponibles: Burgundy por defecto y Forest seleccionable.
+- `ReadingTrackerTheme` define los valores de color y permite anadir futuros temas con un nuevo enum value.
+- `AppTheme.light(theme)` genera `ThemeData` Material 3 desde el tema activo.
+- `AppThemeController` usa Riverpod y `shared_preferences` para persistir la preferencia local de tema sin tocar Drift ni repositorios.
+- `appThemeControllerProvider` es consumido por `App`, que reconstruye `MaterialApp` con el tema elegido.
+- `core/theme/app_theme_tokens.dart` define spacing, radios, elevaciones y sombras suaves reutilizables.
+- `core/design_system` expone `MetricCard`, `InsightCard`, `ProgressCard`, `SectionHeader` y `EmptyStateCard`.
+- `SettingsScreen` incluye selector de tema y mantiene fuera de alcance login, perfil real y servicios externos.
 
 ### Reading sessions como base de Hito 3
 

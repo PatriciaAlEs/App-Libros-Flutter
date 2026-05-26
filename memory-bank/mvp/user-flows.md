@@ -46,6 +46,14 @@ Estado: implementado con datos reales.
 
 Estado: Hito 5 Sprint 1 implementado y pendiente de validacion local.
 
+## Seleccionar tema visual
+
+1. Usuario abre Ajustes desde la navegacion inferior.
+2. Selecciona Burgundy o Forest.
+3. La app aplica el tema y conserva la preferencia localmente.
+
+Estado: Hito 5 Sprint 2 implementado y pendiente de validacion local.
+
 ## Consultar insights
 
 1. Usuario abre Insights.

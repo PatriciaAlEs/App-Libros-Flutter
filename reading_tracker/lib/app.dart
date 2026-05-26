@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/app_theme.dart';
+import 'core/theme/app_theme_controller.dart';
 import 'features/books/presentation/screens/book_detail_screen.dart';
 import 'features/books/presentation/screens/book_form_screen.dart';
 import 'features/books/presentation/screens/books_list_screen.dart';
@@ -15,15 +17,17 @@ import 'features/reading_sessions/domain/entities/reading_session.dart';
 import 'features/settings/presentation/screens/settings_screen.dart';
 import 'features/stats/presentation/screens/stats_screen.dart';
 
-class App extends StatelessWidget {
+class App extends ConsumerWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedTheme = ref.watch(appThemeControllerProvider);
+
     return MaterialApp(
       title: 'Reading Tracker',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
+      theme: AppTheme.light(selectedTheme),
       initialRoute: '/',
       onGenerateRoute: _onGenerateRoute,
     );

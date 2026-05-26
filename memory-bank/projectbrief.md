@@ -19,6 +19,7 @@ El proyecto ya contiene una app funcional en `reading_tracker/` con:
 - Reading Insights Sprint 3 implementado: Top Lecturas del Año y Ranking Personal.
 - Reading Insights Sprint 4 implementado: perfil lector premium con mejores lecturas y curiosidades.
 - Hito 5 Sprint 1 implementado: navegacion principal con tabs Inicio, Biblioteca, Progreso, Insights y Ajustes.
+- Hito 5 Sprint 2 implementado: Design System base con temas Burgundy/Forest, tokens visuales y componentes reutilizables.
 
 ## Principios de documentacion
 

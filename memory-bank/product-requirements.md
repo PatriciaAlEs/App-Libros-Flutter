@@ -73,8 +73,17 @@ Una persona lectora puede tener varios libros pendientes, en curso o completados
 - Biblioteca abre la lista de libros.
 - Progreso da acceso a Estadisticas, Reading Challenge, Activity Tracking/calendario y registro de sesion.
 - Insights abre la pantalla Insights existente.
-- Ajustes existe como placeholder simple.
+- Ajustes permite elegir tema Burgundy o Forest y persiste la preferencia localmente.
 - No incluye autenticacion, perfil real, Firebase, servicios externos ni cambios de datos.
+
+### Design System
+
+- Hito 5 Sprint 2 implementado.
+- Tema Burgundy por defecto y tema Forest seleccionable.
+- Tipografia Material 3 definida para display, headline, title, body y label.
+- Tokens reutilizables de spacing, radios, elevaciones y sombras suaves.
+- Componentes base creados: `MetricCard`, `InsightCard`, `ProgressCard`, `SectionHeader` y `EmptyStateCard`.
+- No redisenia todavia Home, Biblioteca, Estadisticas ni Insights.
 
 ## Fuera del MVP actual
 
@@ -122,3 +131,4 @@ Relaciones:
 - Stats muestra metricas calculadas desde datos reales.
 - Insights muestra perfil lector, mejores lecturas y curiosidades cuando hay datos suficientes.
 - Las secciones principales son accesibles desde la navegacion inferior.
+- El usuario puede seleccionar y conservar localmente el tema visual.

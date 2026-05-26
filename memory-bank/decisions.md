@@ -53,5 +53,14 @@
 - El dia mas activo se elige por mayor numero de paginas leidas y usa minutos como desempate.
 - Hito 5 Sprint 1 usa `NavigationBar` Material 3 como shell principal con Inicio, Biblioteca, Progreso, Insights y Ajustes.
 - `Progreso` es un hub de acceso a estadisticas, Reading Challenge y activity tracking; no duplica ni reemplaza la logica existente.
-- `Ajustes` empieza como placeholder simple hasta que exista una necesidad real de preferencias o perfil.
+- `Ajustes` incluye preferencias visuales locales; perfil real, login y sincronizacion siguen fuera de alcance.
 - La navegacion principal debe vivir solo en la `NavigationBar`; evitar duplicar esos accesos en AppBars o CTAs de Home.
+
+## Design System Hito 5 Sprint 2
+
+- El tema principal por defecto es Burgundy.
+- Forest queda disponible como segundo tema seleccionable.
+- La preferencia de tema se persiste con `shared_preferences`, no con Drift, para no tocar tablas ni repositorios.
+- Los componentes base del Design System viven en `core/design_system` y no reemplazan todavia las pantallas existentes.
+- Los tokens visuales viven en `core/theme/app_theme_tokens.dart`.
+- El sprint no redisenia pantallas completas; solo prepara la base reutilizable.

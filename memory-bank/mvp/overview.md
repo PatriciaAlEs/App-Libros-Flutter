@@ -12,6 +12,7 @@ Crear una app sencilla para registrar libros y sesiones de lectura, visualizar h
 - Estadisticas: resumen de actividad y progreso.
 - Insights: perfil lector, mejores lecturas y curiosidades.
 - Navegacion principal: Inicio, Biblioteca, Progreso, Insights y Ajustes.
+- Design System: temas Burgundy/Forest, tokens visuales y componentes base reutilizables.
 
 ## Criterios de calidad
 
