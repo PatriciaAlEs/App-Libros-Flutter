@@ -31,11 +31,11 @@ Crear una app sencilla y mantenible para registrar libros y sesiones de lectura,
   - Guardar metadatos del libro.
   - Listar libros.
   - Ver detalle de libro.
-  - Cambiar estado entre `pending`, `reading` y `completed`.
+  - Cambiar estado entre `pending`, `reading`, `completed`, `paused` y `abandoned`.
   - Eliminar libros.
 - Sesiones de lectura:
   - Registrar sesiones asociadas a libros en estado `reading`.
-  - Guardar fecha, minutos leidos y nota opcional.
+  - Guardar fecha, minutos leidos, paginas leidas (`pagesRead`) y nota opcional.
   - Persistir sesiones con Drift + SQLite.
 - Calendario:
   - Vista mensual compacta.
@@ -45,12 +45,13 @@ Crear una app sencilla y mantenible para registrar libros y sesiones de lectura,
   - Seccion implementada con datos reales desde libros y sesiones.
   - Incluye resumen de progreso, actividad, objetivo anual, rachas y ritmo de lectura.
 - Insights:
-  - Hito 4 Sprint 1 y Sprint 2 implementados y validados.
-  - Muestra libro mas leido, autor mas leido y genero favorito.
-  - Muestra paginas por sesion, minutos por sesion y paginas por dia.
-  - Muestra prediccion simple de fin de libro y forecast anual cuando hay datos suficientes.
+  - Hito 4 Sprint 1, Sprint 2 y Sprint 3 implementados y validados.
+  - Sprint 1: muestra libro mas leido, autor mas leido y genero favorito.
+  - Sprint 2: muestra ritmo de lectura, prediccion simple de fin de libro y forecast anual cuando hay datos suficientes.
+  - Sprint 3: muestra Top Lecturas del Año y Ranking Personal.
   - Usa paginas leidas acumuladas desde `ReadingSession.pagesRead`.
-  - No incluye IA, rankings ni dashboard premium.
+  - No incluye IA ni dashboard premium.
+  - Sprint 4: Dashboard Insights Premium pendiente de implementacion.
 
 ## 7. Funcionalidades fuera del MVP
 
@@ -75,7 +76,7 @@ Crear una app sencilla y mantenible para registrar libros y sesiones de lectura,
 ### Cambio de estado
 
 1. El usuario abre el detalle de un libro.
-2. Cambia su estado a `pending`, `reading` o `completed`.
+2. Cambia su estado a `pending`, `reading`, `completed`, `paused` o `abandoned`.
 3. La app persiste el cambio.
 
 ### Registro de sesion
@@ -83,7 +84,7 @@ Crear una app sencilla y mantenible para registrar libros y sesiones de lectura,
 1. El usuario abre calendario o detalle de dia.
 2. Pulsa anadir sesion.
 3. Selecciona un libro en estado `reading`.
-4. Confirma fecha, minutos y nota opcional.
+4. Confirma fecha, minutos, paginas leidas y nota opcional.
 5. La app guarda la sesion y actualiza calendario/detalle.
 
 ### Revision de calendario
@@ -131,6 +132,8 @@ Estados permitidos:
 - `pending`
 - `reading`
 - `completed`
+- `paused`
+- `abandoned`
 
 ### ReadingSession
 
@@ -142,8 +145,10 @@ Campos:
 - `bookId`
 - `date`
 - `minutes`
+- `pagesRead`
 - `note`
 - `createdAt`
+- `updatedAt`
 
 Relaciones:
 
@@ -178,7 +183,7 @@ Relaciones:
 - Si no hay sesiones en un dia, se muestra un empty state claro.
 - Los datos persisten tras cerrar o refrescar la app.
 - Stats aparece como seccion implementada con datos reales.
-- Insights aparece como seccion inicial implementada para libro mas leido, autor mas leido y genero favorito.
+- Insights aparece como seccion implementada con Sprint 1, Sprint 2 y Sprint 3: preferencias, ritmo, prediccion, forecast anual, Top Lecturas del Año y Ranking Personal.
 
 ## 12. Backlog priorizado
 
@@ -213,7 +218,7 @@ Contexto:
 - Usa Riverpod para estado y Drift + SQLite para persistencia.
 - La arquitectura debe ser simple, mantenible y sin sobredimensionar.
 - La seccion Stats esta implementada con datos reales.
-- La seccion Insights inicial esta implementada para Hito 4 Sprint 1.
+- La seccion Insights esta implementada para Hito 4 Sprint 1, Sprint 2 y Sprint 3; Dashboard Insights Premium queda pendiente como Sprint 4.
 
 Incluye:
 1. Nombre del producto.

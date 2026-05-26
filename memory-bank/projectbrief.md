@@ -15,7 +15,9 @@ El proyecto ya contiene una app funcional en `reading_tracker/` con:
 - Calendario mensual/semanal y detalle de dia.
 - Stats implementado con datos reales.
 - Reading Insights Sprint 1 implementado: libro mas leido, autor mas leido y genero favorito.
-- Reading Insights Sprint 2 implementado: paginas por sesion, minutos por sesion, paginas por dia, prediccion simple de fin de libro y forecast anual.
+- Reading Insights Sprint 2 implementado: ritmo de lectura, prediccion simple de fin de libro y forecast anual.
+- Reading Insights Sprint 3 implementado: Top Lecturas del Año y Ranking Personal.
+- Dashboard Insights Premium pendiente de implementacion.
 
 ## Principios de documentacion
 

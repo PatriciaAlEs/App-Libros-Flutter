@@ -26,14 +26,14 @@ Una persona lectora puede tener varios libros pendientes, en curso o completados
 - Filtro por estado.
 - Alta desde busqueda en Open Library.
 - Detalle de libro.
-- Cambio de estado: `pending`, `reading`, `completed`.
+- Cambio de estado: `pending`, `reading`, `completed`, `paused`, `abandoned`.
 - Eliminacion de libros.
 
 ### Sesiones de lectura
 
 - Alta de sesiones asociadas a libros en estado `reading`.
 - Fecha preseleccionada desde calendario/detalle de dia.
-- Campo de minutos con validacion `> 0`.
+- Campos para minutos y paginas leidas (`pagesRead`) con validacion.
 - Nota opcional.
 - Persistencia en Drift.
 
@@ -61,7 +61,7 @@ Una persona lectora puede tener varios libros pendientes, en curso o completados
 - Muestra prediccion simple de fin de libro para lecturas activas con datos suficientes.
 - Muestra forecast anual simple de libros completados.
 - Muestra Top Lecturas del Año: mejor valorado, mas largo, mas tiempo invertido y mas sesiones.
-- Muestra Ranking Personal: Top 3 autores, generos y libros por paginas leidas, mas mejor racha.
+- Muestra Ranking Personal: Top 3 autores, generos y libros por paginas leidas, y mejor racha.
 - Los calculos usan paginas leidas acumuladas desde `ReadingSession.pagesRead`.
 - Genero favorito usa el campo existente `Book.genre` cuando esta disponible.
 - Si no hay datos suficientes, muestra estados vacios claros.
