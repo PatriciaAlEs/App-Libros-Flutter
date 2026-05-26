@@ -11,11 +11,12 @@ Usuario individual que quiere registrar su biblioteca personal y entender cuanto
 ## Casos de uso principales
 
 - Buscar un libro y guardarlo con metadatos de Open Library.
-- Marcar libros como `pending`, `reading` o `completed`.
-- Registrar una sesion de lectura con fecha, minutos y nota opcional.
+- Marcar libros como `pending`, `reading`, `completed`, `paused` o `abandoned`.
+- Registrar una sesion de lectura con fecha, minutos, paginas leidas y nota opcional.
 - Ver en calendario que dias tuvo actividad.
 - Abrir un dia concreto y revisar las sesiones registradas.
 - Consultar estadisticas simples de progreso y actividad.
+- Consultar un perfil lector con mejores lecturas y curiosidades.
 
 ## Experiencia deseada
 

@@ -30,6 +30,8 @@ Estados:
 - `pending`
 - `reading`
 - `completed`
+- `paused`
+- `abandoned`
 
 ## ReadingSession
 

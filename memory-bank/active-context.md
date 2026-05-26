@@ -4,7 +4,7 @@
 
 Hito 4: Reading Insights.
 
-Sprint 3 de Reading Insights completado y validado.
+Sprint 4 de Reading Insights implementado como perfil lector premium.
 
 La Home ya funciona como dashboard principal y concentra:
 
@@ -14,7 +14,7 @@ La Home ya funciona como dashboard principal y concentra:
 - Actividad reciente.
 - Acciones rapidas de progreso.
 
-Dashboard premium queda fuera hasta peticion explicita.
+Insights ya no funciona como segunda pantalla de estadisticas: la UI se organiza como perfil lector.
 
 ## Estado reciente
 
@@ -96,6 +96,14 @@ Dashboard premium queda fuera hasta peticion explicita.
 - `InsightsScreen` suma secciones `Top Lecturas del Año` y `Ranking Personal`.
 - Se agregaron tests para mejor valorado, libro mas largo, libro con mas sesiones, libro con mas tiempo invertido, rankings y estados vacios.
 - Validacion Sprint 3 confirmada: `dart format` OK, `flutter analyze` OK y `flutter test` OK (33 tests).
+- Se implemento Hito 4 Sprint 4 como reorganizacion premium de Insights.
+- La UI de `/insights` ahora muestra `Tu perfil lector`, `Tus mejores lecturas` y `Curiosidades`.
+- Se retiraron de la UI `Finish Prediction`, `Annual Forecast`, `Ranking Personal` y `Mejor racha`.
+- `Tu perfil lector` muestra autor favorito, genero favorito y libro al que mas tiempo se dedico.
+- `Tus mejores lecturas` muestra Top 3 lecturas del año por rating.
+- `Curiosidades` muestra libro mas largo, mes con mas lectura, franja horaria habitual y dia mas activo.
+- Sprint 4 reutiliza `Book` y `ReadingSession`; no agrega tablas, servicios externos ni metricas complejas.
+- Los campos legacy de prediccion, forecast, rankings y racha se conservan en dominio para compatibilidad de tests existentes, pero ya no se muestran en la UI de Insights.
 
 ## Archivos tocados recientemente
 
@@ -147,7 +155,7 @@ Estado confirmado para Hito 4 Sprint 3:
 ## Pendientes reales
 
 1. Definir siguiente bloque funcional cuando el usuario lo pida.
-2. Mantener fuera dashboard premium hasta peticion explicita.
+2. Validar Sprint 4 desde la terminal del usuario cuando corresponda.
 3. Mas adelante investigar Open Library para mejorar resultados en espanol.
 4. Dejar el sprint visual/UI para despues: paleta, estilo, referencias y design system.
 

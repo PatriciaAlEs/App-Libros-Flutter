@@ -46,12 +46,13 @@ Crear una app sencilla y mantenible para registrar libros y sesiones de lectura,
   - Incluye resumen de progreso, actividad, objetivo anual, rachas y ritmo de lectura.
 - Insights:
   - Hito 4 Sprint 1, Sprint 2 y Sprint 3 implementados y validados.
+  - Hito 4 Sprint 4 implementado y pendiente de validacion local.
   - Sprint 1: muestra libro mas leido, autor mas leido y genero favorito.
   - Sprint 2: muestra ritmo de lectura, prediccion simple de fin de libro y forecast anual cuando hay datos suficientes.
   - Sprint 3: muestra Top Lecturas del Año y Ranking Personal.
+  - Sprint 4: reorganiza Insights como perfil lector premium con mejores lecturas y curiosidades.
   - Usa paginas leidas acumuladas desde `ReadingSession.pagesRead`.
-  - No incluye IA ni dashboard premium.
-  - Sprint 4: Dashboard Insights Premium pendiente de implementacion.
+  - No incluye IA, servicios externos ni tablas nuevas.
 
 ## 7. Funcionalidades fuera del MVP
 
@@ -183,7 +184,7 @@ Relaciones:
 - Si no hay sesiones en un dia, se muestra un empty state claro.
 - Los datos persisten tras cerrar o refrescar la app.
 - Stats aparece como seccion implementada con datos reales.
-- Insights aparece como seccion implementada con Sprint 1, Sprint 2 y Sprint 3: preferencias, ritmo, prediccion, forecast anual, Top Lecturas del Año y Ranking Personal.
+- Insights aparece como seccion implementada con Sprint 1, Sprint 2, Sprint 3 y Sprint 4: perfil lector, mejores lecturas y curiosidades.
 
 ## 12. Backlog priorizado
 
@@ -218,7 +219,7 @@ Contexto:
 - Usa Riverpod para estado y Drift + SQLite para persistencia.
 - La arquitectura debe ser simple, mantenible y sin sobredimensionar.
 - La seccion Stats esta implementada con datos reales.
-- La seccion Insights esta implementada para Hito 4 Sprint 1, Sprint 2 y Sprint 3; Dashboard Insights Premium queda pendiente como Sprint 4.
+- La seccion Insights esta implementada para Hito 4 Sprint 1, Sprint 2, Sprint 3 y Sprint 4 como perfil lector premium.
 
 Incluye:
 1. Nombre del producto.

@@ -55,17 +55,15 @@ Una persona lectora puede tener varios libros pendientes, en curso o completados
 
 - Hito 4 iniciado.
 - Sprint 1, Sprint 2 y Sprint 3 implementados y validados.
+- Sprint 4 implementado como perfil lector premium.
 - Pantalla `/insights`.
-- Muestra libro mas leido, autor mas leido y genero favorito.
-- Muestra paginas por sesion, minutos por sesion y paginas por dia.
-- Muestra prediccion simple de fin de libro para lecturas activas con datos suficientes.
-- Muestra forecast anual simple de libros completados.
-- Muestra Top Lecturas del Año: mejor valorado, mas largo, mas tiempo invertido y mas sesiones.
-- Muestra Ranking Personal: Top 3 autores, generos y libros por paginas leidas, y mejor racha.
+- Muestra `Tu perfil lector`: autor favorito, genero favorito y libro al que mas tiempo se dedico.
+- Muestra `Tus mejores lecturas`: Top 3 lecturas del año por rating.
+- Muestra `Curiosidades`: libro mas largo, mes con mas lectura, franja horaria habitual y dia mas activo.
 - Los calculos usan paginas leidas acumuladas desde `ReadingSession.pagesRead`.
 - Genero favorito usa el campo existente `Book.genre` cuando esta disponible.
 - Si no hay datos suficientes, muestra estados vacios claros.
-- No incluye IA ni dashboard premium.
+- No incluye IA, servicios externos ni tablas nuevas.
 
 ## Fuera del MVP actual
 
@@ -111,4 +109,4 @@ Relaciones:
 - El calendario refleja sesiones guardadas.
 - El detalle de dia muestra sesiones y total de minutos.
 - Stats muestra metricas calculadas desde datos reales.
-- Insights muestra preferencias, ritmo de lectura, prediccion simple de fin de libro, forecast anual, rankings y destacados anuales cuando hay datos suficientes.
+- Insights muestra perfil lector, mejores lecturas y curiosidades cuando hay datos suficientes.

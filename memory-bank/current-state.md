@@ -133,7 +133,7 @@ Estado actual implementado:
 - Hito 4 - Reading Insights iniciado.
 - Sprint 1 completado y validado.
 - Existe la feature `features/insights` con capas `domain`, `data` y `presentation`.
-- `ReadingInsightsSummary` centraliza preferencias, ritmo de lectura, prediccion de fin y forecast anual.
+- `ReadingInsightsSummary` centraliza datos de perfil lector, mejores lecturas y curiosidades, manteniendo campos legacy de sprints anteriores.
 - `InsightsRepository` define el contrato de acceso.
 - `InsightsRepositoryImpl` calcula insights usando `BookRepository` y `ReadingSessionRepository`.
 - `GetReadingInsightsSummary` encapsula el caso de uso.
@@ -161,7 +161,13 @@ Estado actual implementado:
 - Ranking Personal incluye Top 3 autores, generos y libros por paginas leidas acumuladas.
 - Ranking Personal reutiliza la mejor racha existente calculada por `StatisticsCalculator`.
 - La pantalla `InsightsScreen` suma secciones para Top Lecturas del Año y Ranking Personal.
-- Dashboard premium no esta implementado.
+- Hito 4 Sprint 4 implementado como perfil lector premium.
+- La pantalla `InsightsScreen` ya no muestra Finish Prediction, Annual Forecast, Ranking Personal ni Mejor racha.
+- La pantalla se reorganiza en `Tu perfil lector`, `Tus mejores lecturas` y `Curiosidades`.
+- `Tu perfil lector` muestra autor favorito, genero favorito y libro al que mas tiempo se dedico.
+- `Tus mejores lecturas` muestra Top 3 lecturas del año por rating.
+- `Curiosidades` muestra libro mas largo, mes con mas lectura, franja horaria habitual y dia mas activo.
+- Sprint 4 reutiliza datos existentes de `Book` y `ReadingSession`; no hay tablas nuevas, servicios externos ni IA.
 
 ## Validacion
 
@@ -171,6 +177,7 @@ Estado confirmado por el usuario:
 - `flutter test` OK (33 tests).
 - `dart format` OK.
 - El usuario ejecuta `dart format`, `flutter analyze` y `flutter test` desde VS Code.
+- Sprint 4 esta pendiente de validacion local por el usuario.
 
 ## Estadisticas MVP
 

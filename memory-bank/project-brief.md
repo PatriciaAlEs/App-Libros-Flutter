@@ -17,7 +17,7 @@
 - Sesiones de lectura: crear sesiones por libro y dia, con minutos y nota opcional.
 - Calendario: vista mensual, vista semanal y detalle de dia.
 - Estadisticas: resumen basico a partir de libros y sesiones reales.
-- Insights: preferencias, ritmo de lectura, prediccion simple de fin de libro y forecast anual a partir de datos reales.
+- Insights: perfil lector, mejores lecturas y curiosidades a partir de datos reales.
 
 ## Fuera de alcance por ahora
 

@@ -92,16 +92,24 @@
 - Sprint 3 usa solo datos reales existentes de `Book` y `ReadingSession`; no crea tablas nuevas, dependencias externas ni IA.
 - Dashboard premium queda fuera de Sprint 3.
 - Validacion Sprint 3 confirmada por el usuario: `dart format` OK, `flutter analyze` OK y `flutter test` OK (33 tests).
+- Hito 4 Sprint 4 de Reading Insights implementado como perfil lector premium.
+- Insights deja de mostrar Finish Prediction, Annual Forecast, Ranking Personal y Mejor racha en la UI.
+- Insights ahora se organiza en `Tu perfil lector`, `Tus mejores lecturas` y `Curiosidades`.
+- `Tu perfil lector` muestra autor favorito, genero favorito y libro al que mas tiempo se dedico.
+- `Tus mejores lecturas` muestra Top 3 lecturas del año por rating.
+- `Curiosidades` muestra libro mas largo, mes con mas lectura, franja horaria habitual y dia mas activo.
+- Sprint 4 reutiliza `Book` y `ReadingSession`; no crea tablas nuevas, servicios externos ni dependencias.
 
 ## Parcial / en seguimiento
 
 - Revisión de textos y consistencia visual fina pendiente para el sprint visual/UI.
 - Open Library puede mejorar resultados en espanol, pero queda para una fase posterior.
+- Validacion local de Sprint 4 pendiente en terminal del usuario.
 
 ## Pendiente inmediato
 
+- Validar Sprint 4 cuando el usuario lo decida.
 - Definir el siguiente bloque funcional cuando el usuario lo pida.
-- Mantener fuera dashboard premium hasta peticion explicita.
 
 ## Pendiente futuro
 

@@ -101,6 +101,7 @@ class InsightsRepositoryImpl implements InsightsRepository {
     final annualForecast = _calculateAnnualForecast(books, today);
     final topReadsOfYear = _calculateTopReadsOfYear(books, sessions, today);
     final personalRanking = _calculatePersonalRanking(booksById, pagesSessions);
+    final curiosities = _calculateCuriosities(sessions, today);
     final statisticsSummary = _statisticsCalculator.calculateFromBooks(
       books,
       sessions: sessions,
@@ -126,6 +127,7 @@ class InsightsRepositoryImpl implements InsightsRepository {
       annualBooksForecast: annualForecast.projectedBooks,
       topRatedBookTitle: topReadsOfYear.topRatedBook?.title,
       topRatedBookRating: topReadsOfYear.topRatedBook?.rating,
+      topRatedBooks: topReadsOfYear.topRatedBooks,
       longestBookTitle: topReadsOfYear.longestBook?.title,
       longestBookPages: topReadsOfYear.longestBook?.totalPages,
       mostTimeBookTitle: topReadsOfYear.mostTimeBook?.title,
@@ -135,6 +137,14 @@ class InsightsRepositoryImpl implements InsightsRepository {
       topAuthors: personalRanking.topAuthors,
       topGenres: personalRanking.topGenres,
       topBooks: personalRanking.topBooks,
+      mostActiveMonth: curiosities.mostActiveMonth,
+      mostActiveMonthPages: curiosities.mostActiveMonthPages,
+      mostActiveMonthMinutes: curiosities.mostActiveMonthMinutes,
+      usualReadingTimeSlot: curiosities.usualReadingTimeSlot,
+      usualReadingTimeSlotSessions: curiosities.usualReadingTimeSlotSessions,
+      mostActiveDay: curiosities.mostActiveDay,
+      mostActiveDayPages: curiosities.mostActiveDayPages,
+      mostActiveDayMinutes: curiosities.mostActiveDayMinutes,
       bestStreakDays: statisticsSummary.bestStreakDays,
     );
   }
@@ -301,6 +311,7 @@ class InsightsRepositoryImpl implements InsightsRepository {
 
     return _TopReadsOfYear(
       topRatedBook: _topRatedBook(completedThisYear),
+      topRatedBooks: _topRatedBooks(completedThisYear),
       longestBook: _longestBook(completedThisYear),
       mostTimeBook: mostTimeEntry == null ? null : booksById[mostTimeEntry.key],
       mostTimeMinutes: mostTimeEntry?.value,
@@ -323,6 +334,27 @@ class InsightsRepositoryImpl implements InsightsRepository {
       return a.title.toLowerCase().compareTo(b.title.toLowerCase());
     });
     return ratedBooks.first;
+  }
+
+  List<ReadingInsightRatedBook> _topRatedBooks(List<Book> completedBooks) {
+    final ratedBooks = completedBooks
+        .where((book) => book.rating != null)
+        .toList();
+    if (ratedBooks.isEmpty) return const [];
+
+    ratedBooks.sort((a, b) {
+      final ratingComparison = b.rating!.compareTo(a.rating!);
+      if (ratingComparison != 0) return ratingComparison;
+      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+    });
+
+    return ratedBooks
+        .take(3)
+        .map(
+          (book) =>
+              ReadingInsightRatedBook(title: book.title, rating: book.rating!),
+        )
+        .toList();
   }
 
   Book? _longestBook(List<Book> completedBooks) {
@@ -383,6 +415,57 @@ class InsightsRepositoryImpl implements InsightsRepository {
     );
   }
 
+  _ReadingCuriosities _calculateCuriosities(
+    List<ReadingSession> sessions,
+    DateTime today,
+  ) {
+    final validSessions = sessions
+        .where(
+          (session) =>
+              !_dateOnly(session.date).isAfter(today) &&
+              (session.pagesRead > 0 || session.minutes > 0),
+        )
+        .toList();
+    if (validSessions.isEmpty) return const _ReadingCuriosities();
+
+    final activityByMonth = <DateTime, _ActivityTotals>{};
+    final activityByDay = <DateTime, _ActivityTotals>{};
+    final sessionsByTimeSlot = <String, int>{};
+
+    for (final session in validSessions) {
+      final day = _dateOnly(session.date);
+      final month = DateTime(day.year, day.month);
+      activityByMonth
+          .putIfAbsent(month, () => _ActivityTotals())
+          .add(session.pagesRead, session.minutes);
+      activityByDay
+          .putIfAbsent(day, () => _ActivityTotals())
+          .add(session.pagesRead, session.minutes);
+
+      final timeSlot = _timeSlotFor(session.createdAt);
+      sessionsByTimeSlot.update(
+        timeSlot,
+        (count) => count + 1,
+        ifAbsent: () => 1,
+      );
+    }
+
+    final topMonth = _topActivityEntry(activityByMonth);
+    final topDay = _topActivityEntry(activityByDay);
+    final topTimeSlot = _topEntry(sessionsByTimeSlot);
+
+    return _ReadingCuriosities(
+      mostActiveMonth: topMonth?.key,
+      mostActiveMonthPages: topMonth?.value.pages ?? 0,
+      mostActiveMonthMinutes: topMonth?.value.minutes ?? 0,
+      usualReadingTimeSlot: topTimeSlot?.key,
+      usualReadingTimeSlotSessions: topTimeSlot?.value ?? 0,
+      mostActiveDay: topDay?.key,
+      mostActiveDayPages: topDay?.value.pages ?? 0,
+      mostActiveDayMinutes: topDay?.value.minutes ?? 0,
+    );
+  }
+
   List<ReadingInsightRankingItem> _topBookRankingItems(
     Map<String, int> pagesByBookId,
     Map<String, Book> booksById,
@@ -437,6 +520,31 @@ class InsightsRepositoryImpl implements InsightsRepository {
     return entries.first;
   }
 
+  MapEntry<DateTime, _ActivityTotals>? _topActivityEntry(
+    Map<DateTime, _ActivityTotals> activityByDate,
+  ) {
+    if (activityByDate.isEmpty) return null;
+
+    final entries = activityByDate.entries.toList()
+      ..sort((a, b) {
+        final pagesComparison = b.value.pages.compareTo(a.value.pages);
+        if (pagesComparison != 0) return pagesComparison;
+        final minutesComparison = b.value.minutes.compareTo(a.value.minutes);
+        if (minutesComparison != 0) return minutesComparison;
+        return b.key.compareTo(a.key);
+      });
+
+    return entries.first;
+  }
+
+  String _timeSlotFor(DateTime dateTime) {
+    final hour = dateTime.hour;
+    if (hour >= 5 && hour < 12) return 'Mañana';
+    if (hour >= 12 && hour < 18) return 'Tarde';
+    if (hour >= 18 && hour < 24) return 'Noche';
+    return 'Madrugada';
+  }
+
   String? _cleanValue(String? value) {
     final trimmed = value?.trim();
     if (trimmed == null || trimmed.isEmpty) return null;
@@ -477,6 +585,7 @@ class _AnnualForecast {
 class _TopReadsOfYear {
   const _TopReadsOfYear({
     this.topRatedBook,
+    this.topRatedBooks = const [],
     this.longestBook,
     this.mostTimeBook,
     this.mostTimeMinutes,
@@ -485,11 +594,44 @@ class _TopReadsOfYear {
   });
 
   final Book? topRatedBook;
+  final List<ReadingInsightRatedBook> topRatedBooks;
   final Book? longestBook;
   final Book? mostTimeBook;
   final int? mostTimeMinutes;
   final Book? mostSessionsBook;
   final int? mostSessionsCount;
+}
+
+class _ReadingCuriosities {
+  const _ReadingCuriosities({
+    this.mostActiveMonth,
+    this.mostActiveMonthPages = 0,
+    this.mostActiveMonthMinutes = 0,
+    this.usualReadingTimeSlot,
+    this.usualReadingTimeSlotSessions = 0,
+    this.mostActiveDay,
+    this.mostActiveDayPages = 0,
+    this.mostActiveDayMinutes = 0,
+  });
+
+  final DateTime? mostActiveMonth;
+  final int mostActiveMonthPages;
+  final int mostActiveMonthMinutes;
+  final String? usualReadingTimeSlot;
+  final int usualReadingTimeSlotSessions;
+  final DateTime? mostActiveDay;
+  final int mostActiveDayPages;
+  final int mostActiveDayMinutes;
+}
+
+class _ActivityTotals {
+  int pages = 0;
+  int minutes = 0;
+
+  void add(int pagesRead, int minutesRead) {
+    pages += pagesRead;
+    minutes += minutesRead;
+  }
 }
 
 class _PersonalRanking {

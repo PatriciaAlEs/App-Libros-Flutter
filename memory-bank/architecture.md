@@ -42,7 +42,7 @@ reading_tracker/lib/
 - `books`: busqueda Open Library, repositorio, entidad `Book`, estado de libro y UI de listado/detalle/formulario.
 - `reading_sessions`: entidad `ReadingSession`, repositorio, calendario, detalle de dia y formulario de sesion.
 - `stats`: calculos, provider y pantalla.
-- `insights`: resumen de lectura con preferencias, ritmo, prediccion simple de fin de libro, forecast anual, rankings y destacados anuales.
+- `insights`: perfil lector calculado desde libros y sesiones, con preferencias, mejores lecturas y curiosidades.
 
 ## Persistencia
 
@@ -184,6 +184,19 @@ reading_tracker/lib/
 - Mejor racha: se reutiliza `StatisticsCalculator` para no duplicar la logica existente de rachas.
 - La UI de `/insights` mantiene cards simples y agrega secciones `Top Lecturas del Año` y `Ranking Personal`.
 - No se implemento dashboard premium.
+
+### Reading Insights Sprint 4
+
+- Decision: reorganizar `/insights` como perfil lector premium, no como segunda pantalla de estadisticas.
+- La UI elimina `Finish Prediction`, `Annual Forecast`, `Ranking Personal` y `Mejor racha`.
+- La UI queda organizada en `Tu perfil lector`, `Tus mejores lecturas` y `Curiosidades`.
+- `Tu perfil lector`: autor favorito y genero favorito por paginas acumuladas, mas libro con mas minutos acumulados durante el año actual.
+- `Tus mejores lecturas`: Top 3 libros completados del año actual ordenados por `rating` descendente y titulo como desempate.
+- `Curiosidades`: libro completado mas largo del año actual, mes con mas actividad, franja horaria habitual y dia mas activo.
+- Mes y dia mas activos se calculan desde `ReadingSession.pagesRead` y usan minutos como desempate/fallback.
+- La franja habitual usa `ReadingSession.createdAt` porque la fecha de sesion se normaliza a dia y no conserva hora de lectura real.
+- No se agregan tablas, migraciones, servicios externos ni dependencias.
+- Se conservan campos legacy del resumen para mantener compatibilidad de tests y calculos existentes, aunque la UI ya no los muestra.
 
 ### Seed data solo en debug
 

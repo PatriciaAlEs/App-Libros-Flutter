@@ -40,12 +40,12 @@ Estado: implementado con datos reales.
 ## Consultar insights
 
 1. Usuario abre Insights.
-2. La app muestra preferencias, ritmo de lectura, prediccion simple de fin de libro, forecast anual, Top Lecturas del Año y Ranking Personal.
+2. La app muestra perfil lector, mejores lecturas y curiosidades.
 3. Usuario ve estos insights cuando existen sesiones, libros en lectura o completados del ano con datos suficientes.
 
-Estado: Hito 4 Sprint 1, Sprint 2 y Sprint 3 implementados y validados.
+Estado: Hito 4 Sprint 1, Sprint 2 y Sprint 3 implementados y validados; Sprint 4 implementado y pendiente de validacion local.
 
 - Sprint 1: libro mas leido, autor mas leido y genero favorito.
 - Sprint 2: ritmo de lectura, prediccion de fin de libro y forecast anual.
 - Sprint 3: Top Lecturas del Año y Ranking Personal.
-- Sprint 4: Dashboard Insights Premium pendiente de implementacion.
+- Sprint 4: perfil lector premium con `Tu perfil lector`, `Tus mejores lecturas` y `Curiosidades`.
