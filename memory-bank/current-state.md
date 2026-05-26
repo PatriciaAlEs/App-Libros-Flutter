@@ -120,12 +120,14 @@ Estado actual implementado:
 
 - La app entra por una navegacion principal con `NavigationBar` Material 3.
 - Tabs principales: Inicio, Biblioteca, Progreso, Insights y Ajustes.
+- La navegacion principal vive exclusivamente en la barra inferior; Home no duplica accesos principales en el AppBar.
 - Inicio muestra la Home/dashboard actual.
 - Biblioteca abre la lista de libros existente.
 - Progreso abre un hub con accesos a Estadisticas, Reading Challenge, Activity Tracking/calendario y registro de sesion.
 - Insights abre directamente la pantalla Insights existente.
 - Ajustes existe como placeholder simple; no implementa perfil real ni preferencias persistidas.
 - Las rutas existentes se mantienen para navegacion interna y compatibilidad.
+- Home mantiene su dashboard, pero el resumen rapido usa cards mas compactas.
 - Biblioteca usa un icono de libros.
 - La vista general de Biblioteca muestra primero libros en estado `Leyendo`.
 - Despues se muestran el resto de estados.

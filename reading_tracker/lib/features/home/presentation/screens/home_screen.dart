@@ -15,16 +15,7 @@ import '../../../stats/presentation/providers/stats_provider.dart';
 import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({
-    super.key,
-    this.onOpenLibrary,
-    this.onOpenProgress,
-    this.onOpenInsights,
-  });
-
-  final VoidCallback? onOpenLibrary;
-  final VoidCallback? onOpenProgress;
-  final VoidCallback? onOpenInsights;
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,31 +32,7 @@ class HomeScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Inicio'),
-        actions: [
-          IconButton(
-            tooltip: 'Ver biblioteca',
-            icon: const Icon(Icons.auto_stories_outlined),
-            onPressed:
-                onOpenLibrary ?? (() => Navigator.pushNamed(context, '/books')),
-          ),
-          IconButton(
-            tooltip: 'Ver progreso',
-            icon: const Icon(Icons.bar_chart_outlined),
-            onPressed:
-                onOpenProgress ??
-                (() => Navigator.pushNamed(context, '/progress')),
-          ),
-          IconButton(
-            tooltip: 'Ver insights',
-            icon: const Icon(Icons.insights_outlined),
-            onPressed:
-                onOpenInsights ??
-                (() => Navigator.pushNamed(context, '/insights')),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Inicio')),
       body: booksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) =>
@@ -95,16 +62,10 @@ class HomeScreen extends ConsumerWidget {
                         title: 'Lectura actual',
                         actionLabel: currentBooks.isEmpty
                             ? 'Añadir libro'
-                            : 'Ver biblioteca',
+                            : null,
                         onAction: () {
                           if (currentBooks.isEmpty) {
                             _openAddBook(context);
-                          } else {
-                            if (onOpenLibrary != null) {
-                              onOpenLibrary!();
-                            } else {
-                              Navigator.pushNamed(context, '/books');
-                            }
                           }
                         },
                       ),
@@ -123,11 +84,11 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 12),
                       _AddBookCtaCard(onPressed: () => _openAddBook(context)),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 18),
                       const _SectionHeader(title: 'Resumen rapido'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       _QuickStatsGrid(data: dashboard),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 18),
                       _SectionHeader(
                         title: 'Actividad reciente',
                         actionLabel: 'Registrar',
@@ -825,14 +786,14 @@ class _QuickStatsGrid extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 640 ? 3 : 2;
+        final columns = constraints.maxWidth >= 360 ? 3 : 2;
         return GridView.count(
           crossAxisCount: columns,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: constraints.maxWidth >= 640 ? 2.5 : 1.35,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          childAspectRatio: constraints.maxWidth >= 640 ? 2.8 : 1.2,
           children: [
             _MetricCard(
               icon: Icons.emoji_events_outlined,
@@ -875,25 +836,27 @@ class _MetricCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: theme.colorScheme.primary),
+            Icon(icon, color: theme.colorScheme.primary, size: 18),
+            const SizedBox(height: 6),
             Text(
               value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.headlineSmall?.copyWith(
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
+            const SizedBox(height: 2),
             Text(
               label,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodySmall,
+              style: theme.textTheme.labelSmall,
             ),
           ],
         ),

@@ -54,3 +54,4 @@
 - Hito 5 Sprint 1 usa `NavigationBar` Material 3 como shell principal con Inicio, Biblioteca, Progreso, Insights y Ajustes.
 - `Progreso` es un hub de acceso a estadisticas, Reading Challenge y activity tracking; no duplica ni reemplaza la logica existente.
 - `Ajustes` empieza como placeholder simple hasta que exista una necesidad real de preferencias o perfil.
+- La navegacion principal debe vivir solo en la `NavigationBar`; evitar duplicar esos accesos en AppBars o CTAs de Home.

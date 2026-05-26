@@ -105,6 +105,9 @@
 - Progreso funciona como hub hacia Estadisticas, Reading Challenge, Activity Tracking/calendario y registro de sesion.
 - Ajustes se creo como placeholder simple, sin perfil real ni autenticacion.
 - Las rutas existentes se mantienen para navegacion interna.
+- Correcciones UX Hito 5 Sprint 1 aplicadas: Home sin accesos principales duplicados en AppBar.
+- Correcciones UX Hito 5 Sprint 1 aplicadas: eliminado `Ver biblioteca` de la seccion `Lectura actual`.
+- Correcciones UX Hito 5 Sprint 1 aplicadas: resumen rapido de Home compactado.
 
 ## Parcial / en seguimiento
 

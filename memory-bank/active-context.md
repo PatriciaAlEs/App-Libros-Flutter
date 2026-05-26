@@ -120,6 +120,9 @@ La navegacion principal ahora expone directamente:
 - Se agrego `SettingsScreen` como placeholder simple para Ajustes.
 - Las rutas existentes se mantienen: `/home`, `/books`, `/stats`, `/progress`, `/calendar`, `/insights`, `/settings` y flujos internos.
 - No se tocaron Drift, modelos de datos, autenticacion ni servicios externos.
+- Correccion UX de Sprint 1: la Home ya no duplica accesos principales en el AppBar.
+- Correccion UX de Sprint 1: se elimino el CTA `Ver biblioteca` de `Lectura actual`.
+- Correccion UX de Sprint 1: el resumen rapido de Home se compacto con cards mas densas.
 
 ## Archivos tocados recientemente
 

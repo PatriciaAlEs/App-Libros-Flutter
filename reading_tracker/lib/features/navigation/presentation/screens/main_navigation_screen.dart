@@ -22,11 +22,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          HomeScreen(
-            onOpenLibrary: () => _selectTab(1),
-            onOpenProgress: () => _selectTab(2),
-            onOpenInsights: () => _selectTab(3),
-          ),
+          const HomeScreen(),
           const BooksListScreen(),
           const ProgressScreen(),
           const InsightsScreen(),
