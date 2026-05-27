@@ -54,6 +54,16 @@ Estado: Hito 5 Sprint 1 implementado y pendiente de validacion local.
 
 Estado: Hito 5 Sprint 2 implementado y pendiente de validacion local.
 
+## Usar Home Premium
+
+1. Usuario abre Inicio.
+2. Ve su lectura actual como bloque principal con portada, progreso y CTA.
+3. Consulta racha, completados del ano, paginas leidas y objetivo lector.
+4. Revisa hasta 3 sesiones recientes o abre `Ver actividad`.
+5. Usa el FAB para anadir un libro.
+
+Estado: Hito 5 Sprint 3 implementado y pendiente de validacion local.
+
 ## Consultar insights
 
 1. Usuario abre Insights.

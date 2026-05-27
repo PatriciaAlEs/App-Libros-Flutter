@@ -4,15 +4,15 @@
 
 Hito 5: UX/UI Premium Redesign.
 
-Sprint 2 iniciado e implementado: Design System base con temas seleccionables, tokens visuales y componentes reutilizables.
+Sprint 2.5 iniciado e implementado: Branding & Visual Identity global para ReadPp.
 
-La Home ya funciona como dashboard principal y concentra:
+La Home ya funciona como pantalla editorial de biblioteca personal y concentra:
 
 - Lectura actual.
-- CTA integrado para anadir libro.
-- Resumen rapido.
+- Progreso lector.
+- Objetivo anual.
 - Actividad reciente.
-- Acciones rapidas de progreso.
+- FAB para anadir libro.
 
 Insights ya no funciona como segunda pantalla de estadisticas: la UI se organiza como perfil lector.
 
@@ -31,6 +31,10 @@ El sistema visual base ahora incluye:
 - Tokens de spacing, radios, elevaciones y sombras suaves.
 - Componentes base `MetricCard`, `InsightCard`, `ProgressCard`, `SectionHeader` y `EmptyStateCard`.
 - Persistencia local de preferencia de tema con `shared_preferences`.
+- Branding base de ReadPp con estructura de assets, constantes de marca y wordmark reutilizable.
+- Tipografia global preparada con Playfair Display para titulos e Inter para contenido.
+- Adaptador `AppIcons` para centralizar iconografia y facilitar una futura migracion a Lucide.
+- Motion tokens y widgets reutilizables para transiciones suaves.
 
 ## Estado reciente
 
@@ -137,6 +141,23 @@ El sistema visual base ahora incluye:
 - Se agregaron tokens reutilizables de spacing, radios, elevaciones y sombras.
 - Se agregaron componentes base de design system sin redisenar pantallas existentes.
 - `SettingsScreen` dejo de ser solo placeholder y ahora incluye selector de tema; sigue sin perfil real ni login.
+- Se implemento Hito 5 Sprint 3 - Home Premium Redesign.
+- La Home ahora muestra header `READPP •`, subtitulo `Tu biblioteca personal` y saludo contextual.
+- La lectura actual se muestra como hero card con portada protagonista, titulo, autor, porcentaje, paginas y barra de progreso.
+- Si no hay libro en lectura, la Home muestra un empty state elegante o sugerencias de pendientes.
+- Las metricas rapidas se redujeron a racha actual, libros completados este ano y paginas leidas.
+- El objetivo lector anual se muestra como card independiente usando datos de `StatisticsSummary`.
+- La actividad reciente muestra maximo 3 sesiones y agrega accion secundaria `Ver actividad`.
+- El bloque grande de anadir libro se elimino y se reemplazo por FAB.
+- Se implemento Hito 5 Sprint 2.5 - Branding & Visual Identity.
+- Se creo estructura de assets para logo principal, icono app y variantes futuras.
+- Se agrego `AppBrand` y `BrandWordmark` con fallback textual.
+- `ThemeData` global ahora usa Playfair Display para display/headline/title e Inter para body/label.
+- Se agrego `AppTypography` como contrato tipografico.
+- Se agrego `AppIcons` como adaptador de iconografia moderna sobre Material Icons, preparando migracion futura a Lucide.
+- Se agrego `AppMotion`, `AppFadeSlideTransition` y `AppPressable` para motion reutilizable.
+- Se refinaron sombras, elevaciones, spacing y jerarquia de color del Design System.
+- No se redisenaron Biblioteca, Estadisticas, Insights ni Detalle Libro.
 
 ## Archivos tocados recientemente
 
@@ -173,13 +194,24 @@ El sistema visual base ahora incluye:
 - `reading_tracker/lib/core/theme/app_theme.dart`
 - `reading_tracker/lib/core/theme/app_theme_controller.dart`
 - `reading_tracker/lib/core/theme/app_theme_tokens.dart`
+- `reading_tracker/lib/core/theme/app_typography.dart`
+- `reading_tracker/lib/core/branding/app_brand.dart`
+- `reading_tracker/lib/core/branding/branding.dart`
+- `reading_tracker/lib/core/branding/widgets/brand_wordmark.dart`
 - `reading_tracker/lib/core/design_system/design_system.dart`
+- `reading_tracker/lib/core/design_system/icons/app_icons.dart`
+- `reading_tracker/lib/core/design_system/motion/app_motion.dart`
+- `reading_tracker/lib/core/design_system/motion/app_pressable.dart`
 - `reading_tracker/lib/core/design_system/components/metric_card.dart`
 - `reading_tracker/lib/core/design_system/components/insight_card.dart`
 - `reading_tracker/lib/core/design_system/components/progress_card.dart`
 - `reading_tracker/lib/core/design_system/components/section_header.dart`
 - `reading_tracker/lib/core/design_system/components/empty_state_card.dart`
 - `reading_tracker/lib/features/settings/presentation/screens/settings_screen.dart`
+- `reading_tracker/lib/features/home/presentation/screens/home_screen.dart`
+- `reading_tracker/lib/features/navigation/presentation/screens/main_navigation_screen.dart`
+- `reading_tracker/assets/branding/README.md`
+- `reading_tracker/assets/fonts/README.md`
 - `reading_tracker/pubspec.yaml`
 - `reading_tracker/lib/features/reading_sessions/presentation/screens/session_form_screen.dart`
 - `reading_tracker/lib/features/reading_sessions/presentation/screens/day_detail_screen.dart`
@@ -198,8 +230,8 @@ Estado confirmado para Hito 4 Sprint 3:
 
 ## Pendientes reales
 
-1. Ejecutar `flutter pub get` antes de validar Sprint 2, por la nueva dependencia `shared_preferences`.
-2. Validar Hito 5 Sprint 1/Sprint 2 desde la terminal del usuario cuando corresponda.
+1. Ejecutar `flutter pub get` antes de validar Sprint 2/Sprint 2.5/Sprint 3, por la nueva dependencia `shared_preferences` y nuevos assets declarados.
+2. Validar Hito 5 Sprint 1/Sprint 2/Sprint 2.5/Sprint 3 desde la terminal del usuario cuando corresponda.
 3. Definir siguiente sprint visual/UI cuando el usuario lo pida.
 3. Mas adelante investigar Open Library para mejorar resultados en espanol.
 4. Dejar el sprint visual/UI para despues: paleta, estilo, referencias y design system.

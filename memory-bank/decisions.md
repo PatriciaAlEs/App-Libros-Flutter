@@ -64,3 +64,23 @@
 - Los componentes base del Design System viven en `core/design_system` y no reemplazan todavia las pantallas existentes.
 - Los tokens visuales viven en `core/theme/app_theme_tokens.dart`.
 - El sprint no redisenia pantallas completas; solo prepara la base reutilizable.
+
+## Branding & Visual Identity Hito 5 Sprint 2.5
+
+- La marca de producto se centraliza como ReadPp.
+- El wordmark textual usa `READPP` con punto final como fallback hasta tener logo definitivo.
+- Los assets de branding viven en `assets/branding` y se declaran en `pubspec.yaml`.
+- La tipografia objetivo es Playfair Display para titulos e Inter para contenido.
+- Las fuentes definitivas no se descargan desde Codex; se deja `assets/fonts` preparado y el tema referencia las familias por contrato.
+- La iconografia se abstrae con `AppIcons`; por ahora usa Material Icons redondeados para no anadir dependencias, y queda preparada para Lucide.
+- Motion se define como tokens reutilizables, no como animaciones ad hoc en pantallas.
+- Burgundy y Forest se mantienen como paletas oficiales; no se introduce un tercer tema.
+
+## Home Premium Redesign Hito 5 Sprint 3
+
+- El redisenio visual se limita a Home; Biblioteca, Estadisticas, Insights y Detalle Libro quedan sin redisenar.
+- Home debe sentirse como biblioteca personal moderna, no como dashboard administrativo.
+- La lectura actual es el bloque principal con portada protagonista y CTA para continuar o registrar avance.
+- Anadir libro se mueve a un FAB para quitar el bloque grande del flujo principal.
+- El objetivo anual se muestra como card independiente reutilizando `StatisticsSummary`; la edicion sigue viviendo en Estadisticas.
+- La actividad reciente muestra maximo 3 sesiones y enlaza a calendario con `Ver actividad`.

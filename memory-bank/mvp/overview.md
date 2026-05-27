@@ -13,6 +13,8 @@ Crear una app sencilla para registrar libros y sesiones de lectura, visualizar h
 - Insights: perfil lector, mejores lecturas y curiosidades.
 - Navegacion principal: Inicio, Biblioteca, Progreso, Insights y Ajustes.
 - Design System: temas Burgundy/Forest, tokens visuales y componentes base reutilizables.
+- Branding: identidad ReadPp, tipografia Playfair/Inter, iconografia centralizada y motion base.
+- Home Premium: biblioteca personal moderna centrada en lectura actual, objetivo y actividad reciente.
 
 ## Criterios de calidad
 

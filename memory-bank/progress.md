@@ -116,6 +116,26 @@
 - Tokens de spacing, radios, elevaciones y sombras suaves agregados.
 - Componentes reutilizables creados: `MetricCard`, `InsightCard`, `ProgressCard`, `SectionHeader` y `EmptyStateCard`.
 - No se redisenaron Home, Biblioteca, Estadisticas ni Insights en Sprint 2.
+- Hito 5 Sprint 2.5 implementado: Branding & Visual Identity.
+- Estructura de assets creada para logos, app icon, variantes futuras y fuentes.
+- `AppBrand` y `BrandWordmark` agregados para integrar logo definitivo facilmente.
+- `AppTypography` agregado con Playfair Display para titulos e Inter para contenido.
+- `ThemeData` global actualizado con tipografia, jerarquia de color, sombras y elevaciones refinadas.
+- `AppIcons` agregado como adaptador de iconografia moderna sin anadir dependencia nueva.
+- Navegacion principal y Home migran a `AppIcons`.
+- `AppMotion`, `AppFadeSlideTransition` y `AppPressable` agregados como base de motion reutilizable.
+- Cambios de tema animados desde `MaterialApp`.
+- No se redisenaron Biblioteca, Estadisticas, Insights ni Detalle Libro en Sprint 2.5.
+- Hito 5 Sprint 3 implementado: Home Premium Redesign.
+- Home redisenada como biblioteca personal moderna usando el Design System existente.
+- Header editorial agregado con `READPP •`, `Tu biblioteca personal` y saludo contextual.
+- Hero de lectura actual agregado con portada grande, progreso, paginas y CTA.
+- Estado vacio de lectura actual agregado con CTA para anadir lectura o sugerencias pendientes.
+- Metricas rapidas compactas ajustadas a racha actual, completados del ano y paginas leidas.
+- Objetivo lector anual agregado como card independiente.
+- Actividad reciente compactada a maximo 3 sesiones con accion `Ver actividad`.
+- Bloque grande de anadir libro eliminado; anadir libro queda en FAB.
+- No se redisenaron Biblioteca, Estadisticas, Insights ni Detalle Libro.
 
 ## Parcial / en seguimiento
 
@@ -124,16 +144,18 @@
 - Validacion local de Sprint 4 pendiente en terminal del usuario.
 - Validacion local de Hito 5 Sprint 1 pendiente en terminal del usuario.
 - Validacion local de Hito 5 Sprint 2 pendiente en terminal del usuario.
+- Validacion local de Hito 5 Sprint 2.5 pendiente en terminal del usuario.
+- Validacion local de Hito 5 Sprint 3 pendiente en terminal del usuario.
 
 ## Pendiente inmediato
 
 - Ejecutar `flutter pub get` para incorporar `shared_preferences`.
-- Validar Hito 5 Sprint 1 y Sprint 2 cuando el usuario lo decida.
+- Validar Hito 5 Sprint 1, Sprint 2, Sprint 2.5 y Sprint 3 cuando el usuario lo decida.
 - Definir el siguiente bloque funcional cuando el usuario lo pida.
 
 ## Pendiente futuro
 
 - Definir siguiente iteracion de Stats o Insights sin introducir complejidad visual prematura.
 - Investigar Open Library para mejorar resultados en espanol.
-- Redisenar pantallas principales usando el Design System ya creado.
+- Redisenar Biblioteca, Estadisticas, Insights o Detalle Libro en sprints separados.
 - Ampliar tests de flujos criticos si el alcance del siguiente sprint lo requiere.

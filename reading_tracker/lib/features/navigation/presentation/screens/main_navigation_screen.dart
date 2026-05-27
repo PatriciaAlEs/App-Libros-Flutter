@@ -20,6 +20,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(
         index: _selectedIndex,
         children: [
@@ -57,53 +58,53 @@ class _MainBottomNavigation extends StatelessWidget {
 
     return SafeArea(
       top: false,
-      child: Container(
-        height: 78,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          boxShadow: AppShadows.soft(theme.colorScheme.primary),
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Row(
-              children: [
-                _NavItem(
-                  icon: AppIcons.home,
-                  label: 'Inicio',
-                  isSelected: selectedIndex == 0,
-                  onTap: () => onSelect(0),
-                ),
-                _NavItem(
-                  icon: AppIcons.library,
-                  label: 'Biblioteca',
-                  isSelected: selectedIndex == 1,
-                  onTap: () => onSelect(1),
-                ),
-                const SizedBox(width: 62),
-                _NavItem(
-                  icon: AppIcons.chart,
-                  label: 'Progreso',
-                  isSelected: selectedIndex == 2,
-                  onTap: () => onSelect(2),
-                ),
-                _NavItem(
-                  icon: AppIcons.insights,
-                  label: 'Insights',
-                  isSelected: selectedIndex == 3,
-                  onTap: () => onSelect(3),
-                ),
-                _NavItem(
-                  icon: AppIcons.settings,
-                  label: 'Ajustes',
-                  isSelected: selectedIndex == 4,
-                  onTap: () => onSelect(4),
-                ),
-              ],
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 0, 18, 14),
+        child: Container(
+          height: 74,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.86),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
             ),
-            const _NavLogo(),
-          ],
+            boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+          ),
+          child: Row(
+            children: [
+              _NavItem(
+                icon: AppIcons.home,
+                label: 'Inicio',
+                isSelected: selectedIndex == 0,
+                onTap: () => onSelect(0),
+              ),
+              _NavItem(
+                icon: AppIcons.libraryNav,
+                label: 'Biblioteca',
+                isSelected: selectedIndex == 1,
+                onTap: () => onSelect(1),
+              ),
+              _NavItem(
+                icon: AppIcons.progressNav,
+                label: 'Progreso',
+                isSelected: selectedIndex == 2,
+                onTap: () => onSelect(2),
+              ),
+              _NavItem(
+                icon: AppIcons.insightsNav,
+                label: 'Ideas',
+                isSelected: selectedIndex == 3,
+                onTap: () => onSelect(3),
+              ),
+              _NavItem(
+                icon: AppIcons.profile,
+                label: 'Perfil',
+                isSelected: selectedIndex == 4,
+                onTap: () => onSelect(4),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -131,24 +132,30 @@ class _NavItem extends StatelessWidget {
         : theme.colorScheme.onSurfaceVariant;
 
     return Expanded(
-      child: InkWell(
-        borderRadius: AppRadii.card,
+      child: InkResponse(
+        radius: 28,
         onTap: onTap,
         child: AnimatedContainer(
           duration: AppMotion.fast,
           curve: AppMotion.standard,
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? theme.colorScheme.primaryContainer
-                : Colors.transparent,
-            borderRadius: AppRadii.card,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 5),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (isSelected)
+                Container(
+                  width: 4,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 4),
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                )
+              else
+                const SizedBox(height: 8),
               Icon(icon, color: color, size: 20),
-              const SizedBox(height: 3),
+              const SizedBox(height: 4),
               FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
@@ -159,34 +166,6 @@ class _NavItem extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NavLogo extends StatelessWidget {
-  const _NavLogo();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: 54,
-      height: 54,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primary,
-        shape: BoxShape.circle,
-        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
-        border: Border.all(color: theme.colorScheme.surface, width: 4),
-      ),
-      child: Text(
-        'RP',
-        style: theme.textTheme.labelLarge?.copyWith(
-          color: theme.colorScheme.onPrimary,
-          fontWeight: FontWeight.w900,
         ),
       ),
     );

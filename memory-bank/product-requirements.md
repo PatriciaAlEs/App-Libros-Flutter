@@ -85,6 +85,30 @@ Una persona lectora puede tener varios libros pendientes, en curso o completados
 - Componentes base creados: `MetricCard`, `InsightCard`, `ProgressCard`, `SectionHeader` y `EmptyStateCard`.
 - No redisenia todavia Home, Biblioteca, Estadisticas ni Insights.
 
+### Branding & Visual Identity
+
+- Hito 5 Sprint 2.5 implementado.
+- Branding base de ReadPp preparado con estructura de assets para logo principal, app icon y variantes futuras.
+- Wordmark reutilizable con fallback textual hasta tener logo definitivo.
+- Tipografia global: Playfair Display para titulos e Inter para contenido.
+- Burgundy y Forest consolidados como paletas oficiales.
+- Iconografia centralizada mediante `AppIcons`, lista para una futura migracion a Lucide o equivalente.
+- Motion tokens y widgets reutilizables para cards, FAB, cambios de tema y transiciones basicas.
+- No redisenia Biblioteca, Estadisticas, Insights ni Detalle Libro.
+
+### Home Premium
+
+- Hito 5 Sprint 3 implementado.
+- Home redisenada como biblioteca personal moderna.
+- Header con `READPP •`, `Tu biblioteca personal` y saludo contextual.
+- Hero card de lectura actual con portada grande, titulo, autor, porcentaje, pagina actual/total y barra de progreso.
+- Empty state elegante cuando no hay libro en lectura.
+- Metricas compactas: racha actual, libros completados este ano y paginas leidas.
+- Objetivo lector anual en card independiente.
+- Actividad reciente compacta con maximo 3 sesiones y accion `Ver actividad`.
+- Anadir libro se accede desde FAB.
+- No redisenia Biblioteca, Estadisticas, Insights ni Detalle Libro.
+
 ## Fuera del MVP actual
 
 - Backend.
@@ -132,3 +156,5 @@ Relaciones:
 - Insights muestra perfil lector, mejores lecturas y curiosidades cuando hay datos suficientes.
 - Las secciones principales son accesibles desde la navegacion inferior.
 - El usuario puede seleccionar y conservar localmente el tema visual.
+- La identidad visual global queda preparada para redisenos futuros.
+- Home prioriza lectura actual, progreso lector, objetivo anual y actividad reciente.

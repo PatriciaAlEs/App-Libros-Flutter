@@ -9,6 +9,7 @@ La app usa una arquitectura Flutter simple por features. No hay backend, autenti
 ```text
 reading_tracker/lib/
   core/
+    branding/
     database/
     design_system/
     theme/
@@ -35,6 +36,7 @@ reading_tracker/lib/
 ## Core
 
 - `core/database`: Drift, tablas, DAOs, conexion por plataforma y seed data.
+- `core/branding`: constantes de marca, rutas de assets y widgets de wordmark.
 - `core/theme`: tema Material compartido, tokens visuales y controlador de tema.
 - `core/design_system`: componentes visuales reutilizables.
 - `core/utils`: utilidades de fecha e IDs.
@@ -141,6 +143,19 @@ reading_tracker/lib/
 - `core/theme/app_theme_tokens.dart` define spacing, radios, elevaciones y sombras suaves reutilizables.
 - `core/design_system` expone `MetricCard`, `InsightCard`, `ProgressCard`, `SectionHeader` y `EmptyStateCard`.
 - `SettingsScreen` incluye selector de tema y mantiene fuera de alcance login, perfil real y servicios externos.
+
+### Branding & Visual Identity Hito 5 Sprint 2.5
+
+- Decision: definir identidad visual global antes de continuar redisenando pantallas.
+- `assets/branding` reserva estructura para logo principal, app icon y variantes futuras.
+- `assets/fonts` reserva los archivos de Playfair Display e Inter; no se versionan fuentes definitivas aun.
+- `AppBrand` centraliza nombre, wordmark, tagline y rutas previstas de assets.
+- `BrandWordmark` permite usar asset de logo cuando exista y fallback textual mientras tanto.
+- `AppTypography` centraliza Playfair Display para titulos e Inter para contenido.
+- `ThemeData` global aplica la tipografia y conserva Burgundy/Forest como paletas oficiales.
+- `AppIcons` centraliza iconografia usando Material Icons redondeados como puente hacia una futura migracion a Lucide o equivalente.
+- `AppMotion`, `AppFadeSlideTransition` y `AppPressable` preparan motion reutilizable para cards, FAB, cambios de tema y transiciones basicas.
+- La navegacion principal y Home ya consumen `AppIcons`; no se redisenan Biblioteca, Estadisticas, Insights ni Detalle Libro.
 
 ### Reading sessions como base de Hito 3
 

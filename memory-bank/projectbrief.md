@@ -20,6 +20,8 @@ El proyecto ya contiene una app funcional en `reading_tracker/` con:
 - Reading Insights Sprint 4 implementado: perfil lector premium con mejores lecturas y curiosidades.
 - Hito 5 Sprint 1 implementado: navegacion principal con tabs Inicio, Biblioteca, Progreso, Insights y Ajustes.
 - Hito 5 Sprint 2 implementado: Design System base con temas Burgundy/Forest, tokens visuales y componentes reutilizables.
+- Hito 5 Sprint 2.5 implementado: Branding & Visual Identity para ReadPp.
+- Hito 5 Sprint 3 implementado: Home Premium Redesign como biblioteca personal moderna.
 
 ## Principios de documentacion
 

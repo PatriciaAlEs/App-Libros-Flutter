@@ -65,6 +65,19 @@ Crear una app sencilla y mantenible para registrar libros y sesiones de lectura,
   - Tokens visuales de spacing, radios, elevaciones y sombras suaves.
   - Componentes base reutilizables: `MetricCard`, `InsightCard`, `ProgressCard`, `SectionHeader` y `EmptyStateCard`.
   - No redisenia todavia pantallas completas.
+- Branding & Visual Identity:
+  - Hito 5 Sprint 2.5 implementado.
+  - Identidad ReadPp centralizada.
+  - Estructura de assets para logo, app icon, variantes y fuentes.
+  - Tipografia objetivo Playfair Display e Inter aplicada desde el tema global.
+  - Iconografia centralizada con `AppIcons`.
+  - Motion tokens reutilizables preparados.
+- Home Premium:
+  - Hito 5 Sprint 3 implementado.
+  - Home prioriza lectura actual, progreso lector, objetivo anual y actividad reciente.
+  - Lectura actual se presenta como hero card con portada protagonista.
+  - Anadir libro se accede desde FAB.
+  - No redisenia Biblioteca, Estadisticas, Insights ni Detalle Libro.
 
 ## 7. Funcionalidades fuera del MVP
 
@@ -199,6 +212,7 @@ Relaciones:
 - Insights aparece como seccion implementada con Sprint 1, Sprint 2, Sprint 3 y Sprint 4: perfil lector, mejores lecturas y curiosidades.
 - Navegacion principal muestra Inicio, Biblioteca, Progreso, Insights y Ajustes como secciones de primer nivel.
 - Ajustes permite seleccionar y conservar localmente el tema visual.
+- Home muestra una experiencia de biblioteca personal moderna sin duplicar navegacion principal.
 
 ## 12. Backlog priorizado
 

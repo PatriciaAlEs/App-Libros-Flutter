@@ -20,6 +20,8 @@
 - Insights: perfil lector, mejores lecturas y curiosidades a partir de datos reales.
 - Navegacion principal: tabs Inicio, Biblioteca, Progreso, Insights y Ajustes.
 - Design System: temas Burgundy/Forest, tokens visuales y componentes reutilizables.
+- Branding: identidad ReadPp, tipografia Playfair/Inter, iconografia centralizada y motion base.
+- Home Premium: lectura actual protagonista, metricas compactas, objetivo anual y actividad reciente.
 
 ## Fuera de alcance por ahora
 

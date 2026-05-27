@@ -4,30 +4,32 @@
 
 `reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario, estadisticas basicas e insights de lectura.
 
-La Home ya funciona como dashboard principal. Actualmente ofrece:
+La Home ya funciona como biblioteca personal moderna. Actualmente ofrece:
 
-- Card/CTA "Anadir nuevo libro".
-- Seccion "Lectura actual" con todos los libros en estado `Leyendo`.
-- Registro rapido de avance desde cada lectura actual.
-- Resumen rapido de lectura.
-- Actividad reciente del dia actual.
+- Header editorial `READPP •` con `Tu biblioteca personal` y saludo contextual.
+- Hero de lectura actual con portada protagonista para el libro en estado `Leyendo` mas reciente.
+- Registro rapido de avance desde el hero de lectura actual.
+- Metricas compactas de racha actual, completados del ano y paginas leidas.
+- Objetivo lector anual en card independiente.
+- Actividad reciente compacta.
+- FAB para anadir libro.
 - Sugerencias de pendientes cuando no hay lecturas activas.
 
 ## UX Home
 
 Estado actual implementado:
 
-- Si existen varios libros en estado `Leyendo`, Home muestra una card por libro.
+- Si existen varios libros en estado `Leyendo`, Home prioriza como hero el actualizado/iniciado mas recientemente.
 - Si no hay libros en estado `Leyendo`, Home muestra sugerencias de libros pendientes.
 - Las sugerencias de pendientes priorizan libros mas antiguos usando la fecha disponible de alta/creacion.
-- La card de lectura actual muestra progreso cuando hay `currentPage` y `totalPages`.
-- Si falta `totalPages`, se muestra una accion clara: "Anadir total de paginas".
+- El hero de lectura actual muestra portada, titulo, autor, porcentaje, pagina actual/total y barra de progreso.
+- Si falta `totalPages`, se mantiene CTA para registrar avance y completar datos.
 - El registro rapido desde Home usa un dialogo centrado, no bottom sheet.
 - El dialogo mantiene campos de pagina actual, paginas leidas y minutos.
 - El dialogo permite guardar cambios o ir al detalle completo del libro.
 - El contenido del dialogo es scrollable para evitar overflow en movil.
-- La card "Anadir nuevo libro" es la entrada principal para anadir libros desde Home.
-- El FAB/boton redundante de anadir libro fue eliminado.
+- El bloque grande "Anadir nuevo libro" fue eliminado.
+- El FAB es la entrada principal para anadir libros desde Home.
 
 ## Actividad reciente
 
@@ -36,10 +38,11 @@ Estado actual implementado:
 - El registro rapido desde Home crea una `ReadingSession` cuando `pagesRead > 0` o `minutes > 0`.
 - Se reutiliza el repositorio/provider existente de sesiones.
 - Tras guardar, se refresca el provider usado por la actividad reciente.
-- Home muestra solo actividad del dia actual.
+- Home muestra actividad reciente de los ultimos 30 dias.
 - Las sesiones se ordenan por `createdAt` descendente.
-- Si hay varias sesiones hoy, aparecen dentro de un contenedor con altura maxima y scroll interno.
-- Empty state actual: "Aun no hay actividad hoy. Registra una sesion para ver tu ritmo de lectura."
+- Se muestran como maximo 3 sesiones para mantener densidad compacta.
+- La accion secundaria `Ver actividad` abre el calendario.
+- Empty state actual: "Cuando registres una sesion, aparecera aqui."
 
 ## Hito 3 - Reading Sessions & Activity Tracking
 
@@ -191,6 +194,10 @@ Estado confirmado por el usuario:
 - Hito 5 Sprint 1 esta pendiente de validacion local por el usuario.
 - Hito 5 Sprint 2 - Design System esta implementado y pendiente de validacion local por el usuario.
 - Sprint 2 agrega temas Burgundy/Forest, tokens visuales y componentes reutilizables sin redisenar Home, Biblioteca, Estadisticas ni Insights.
+- Hito 5 Sprint 2.5 - Branding & Visual Identity esta implementado y pendiente de validacion local por el usuario.
+- Sprint 2.5 agrega estructura de branding, contrato de marca, tipografia Playfair/Inter, adaptador de iconos y motion reutilizable.
+- Hito 5 Sprint 3 - Home Premium Redesign esta implementado y pendiente de validacion local por el usuario.
+- Sprint 3 redisenia solo Home como biblioteca personal moderna: header READPP, hero de lectura actual, metricas compactas, objetivo lector y actividad reciente.
 
 ## Estadisticas MVP
 
@@ -217,6 +224,6 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Ejecutar `flutter pub get` antes de validar Sprint 2 por la nueva dependencia `shared_preferences`.
-2. Validar Hito 5 Sprint 1 y Sprint 2 cuando el usuario lo decida.
+1. Ejecutar `flutter pub get` antes de validar Sprint 2/Sprint 2.5/Sprint 3 por la dependencia `shared_preferences` y los assets declarados.
+2. Validar Hito 5 Sprint 1, Sprint 2, Sprint 2.5 y Sprint 3 cuando el usuario lo decida.
 2. Continuar con el siguiente sprint visual/UI que priorice el usuario.
