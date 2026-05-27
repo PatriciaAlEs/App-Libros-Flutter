@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'app_theme_tokens.dart';
 import 'app_typography.dart';
@@ -82,7 +83,7 @@ class AppTheme {
 
     return ThemeData(
       colorScheme: colorScheme,
-      fontFamily: AppTypography.contentFontFamily,
+      fontFamily: GoogleFonts.inter().fontFamily,
       fontFamilyFallback: AppTypography.contentFallback,
       scaffoldBackgroundColor: theme.background,
       textTheme: textTheme,
@@ -146,68 +147,52 @@ class AppTheme {
 
   static TextTheme _textTheme(ColorScheme colorScheme) {
     return TextTheme(
-      displaySmall: TextStyle(
+      displaySmall: GoogleFonts.playfairDisplay(
         color: colorScheme.onSurface,
-        fontFamily: AppTypography.displayFontFamily,
-        fontFamilyFallback: AppTypography.displayFallback,
-        fontSize: 32,
-        fontWeight: FontWeight.w700,
+        fontSize: 34,
+        fontWeight: FontWeight.w800,
         height: 1.14,
       ),
-      headlineSmall: TextStyle(
+      headlineSmall: GoogleFonts.playfairDisplay(
         color: colorScheme.onSurface,
-        fontFamily: AppTypography.displayFontFamily,
-        fontFamilyFallback: AppTypography.displayFallback,
-        fontSize: 24,
-        fontWeight: FontWeight.w700,
+        fontSize: 26,
+        fontWeight: FontWeight.w800,
         height: 1.2,
       ),
-      titleLarge: TextStyle(
+      titleLarge: GoogleFonts.playfairDisplay(
         color: colorScheme.onSurface,
-        fontFamily: AppTypography.displayFontFamily,
-        fontFamilyFallback: AppTypography.displayFallback,
-        fontSize: 20,
+        fontSize: 21,
         fontWeight: FontWeight.w700,
         height: 1.25,
       ),
-      titleMedium: TextStyle(
+      titleMedium: GoogleFonts.playfairDisplay(
         color: colorScheme.onSurface,
-        fontFamily: AppTypography.displayFontFamily,
-        fontFamilyFallback: AppTypography.displayFallback,
-        fontSize: 16,
+        fontSize: 17,
         fontWeight: FontWeight.w700,
         height: 1.28,
       ),
-      bodyMedium: TextStyle(
+      bodyMedium: GoogleFonts.inter(
         color: colorScheme.onSurface,
-        fontFamily: AppTypography.contentFontFamily,
-        fontFamilyFallback: AppTypography.contentFallback,
         fontSize: 14,
         fontWeight: FontWeight.w400,
         height: 1.45,
       ),
-      bodySmall: TextStyle(
+      bodySmall: GoogleFonts.inter(
         color: colorScheme.onSurfaceVariant,
-        fontFamily: AppTypography.contentFontFamily,
-        fontFamilyFallback: AppTypography.contentFallback,
         fontSize: 12,
         fontWeight: FontWeight.w400,
         height: 1.35,
       ),
-      labelLarge: TextStyle(
+      labelLarge: GoogleFonts.inter(
         color: colorScheme.onSurface,
-        fontFamily: AppTypography.contentFontFamily,
-        fontFamilyFallback: AppTypography.contentFallback,
         fontSize: 14,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w500,
         height: 1.2,
       ),
-      labelSmall: TextStyle(
+      labelSmall: GoogleFonts.inter(
         color: colorScheme.onSurfaceVariant,
-        fontFamily: AppTypography.contentFontFamily,
-        fontFamilyFallback: AppTypography.contentFallback,
         fontSize: 11,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w500,
         height: 1.2,
       ),
     );

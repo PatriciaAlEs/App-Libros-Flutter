@@ -262,7 +262,7 @@ class _HomeHeader extends StatelessWidget {
                 fontFamily: AppTypography.displayFontFamily,
                 fontFamilyFallback: AppTypography.displayFallback,
                 fontSize: 18,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -275,7 +275,7 @@ class _HomeHeader extends StatelessWidget {
                   '${AppBrand.name}.',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.bold,
                     letterSpacing: 0,
                   ),
                 ),
@@ -442,6 +442,8 @@ class _CurrentReadingHero extends StatelessWidget {
     final primary = theme.colorScheme.primary;
     final dark = Color.lerp(primary, Colors.black, 0.34)!;
     final onDark = theme.colorScheme.onPrimary;
+    final accent = theme.colorScheme.secondary;
+    final genre = currentBook.genre?.trim();
 
     return Container(
       decoration: BoxDecoration(
@@ -473,38 +475,38 @@ class _CurrentReadingHero extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'CURRENTLY READING',
+                        'LECTURA ACTUAL',
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: onDark.withValues(alpha: 0.68),
+                          color: accent.withValues(alpha: 0.92),
                           letterSpacing: 3,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.sm,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.04),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.22),
+                    if (genre != null && genre.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.sm,
+                        ),
+                        decoration: BoxDecoration(
+                          color: accent.withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: accent.withValues(alpha: 0.44),
+                          ),
+                        ),
+                        child: Text(
+                          genre.toUpperCase(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: accent.withValues(alpha: 0.98),
+                            letterSpacing: 1.8,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                      child: Text(
-                        currentBook.genre?.isNotEmpty == true
-                            ? currentBook.genre!.toUpperCase()
-                            : 'CHAPTER',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: onDark.withValues(alpha: 0.88),
-                          letterSpacing: 2,
-                        ),
-                      ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.xl),
@@ -542,7 +544,7 @@ class _CurrentReadingHero extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: onDark.withValues(alpha: 0.82),
+                              color: accent.withValues(alpha: 0.94),
                               fontStyle: FontStyle.italic,
                             ),
                           ),
@@ -554,19 +556,24 @@ class _CurrentReadingHero extends StatelessWidget {
                               '$progressPercent',
                               style: theme.textTheme.displaySmall?.copyWith(
                                 color: onDark,
-                                fontSize: 32,
-                                fontWeight: FontWeight.w800,
+                                fontFamily: AppTypography.contentFontFamily,
+                                fontFamilyFallback:
+                                    AppTypography.contentFallback,
+                                fontSize: isNarrow ? 42 : 48,
+                                fontWeight: FontWeight.w600,
+                                height: 0.96,
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(
-                                left: 2,
-                                bottom: 5,
+                                left: 4,
+                                bottom: 7,
                               ),
                               child: Text(
                                 '%',
                                 style: theme.textTheme.labelLarge?.copyWith(
-                                  color: onDark.withValues(alpha: 0.86),
+                                  color: accent.withValues(alpha: 0.96),
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
@@ -591,13 +598,11 @@ class _CurrentReadingHero extends StatelessWidget {
                           borderRadius: BorderRadius.circular(999),
                           child: LinearProgressIndicator(
                             value: progress,
-                            minHeight: 4,
+                            minHeight: 6,
                             backgroundColor: Colors.white.withValues(
-                              alpha: 0.13,
+                              alpha: 0.12,
                             ),
-                            color: theme.colorScheme.secondary.withValues(
-                              alpha: 0.92,
-                            ),
+                            color: accent.withValues(alpha: 0.96),
                           ),
                         ),
                       ],
@@ -718,6 +723,7 @@ class _CurrentReadingMiniCard extends StatelessWidget {
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontFamily: AppTypography.displayFontFamily,
                           fontFamilyFallback: AppTypography.displayFallback,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       if (book.author?.isNotEmpty == true)
@@ -949,10 +955,10 @@ class _CompactMetricCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.titleLarge?.copyWith(
                 color: foregroundColor,
-                fontFamily: AppTypography.displayFontFamily,
-                fontFamilyFallback: AppTypography.displayFallback,
+                fontFamily: AppTypography.contentFontFamily,
+                fontFamilyFallback: AppTypography.contentFallback,
                 fontSize: 24,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
@@ -1056,7 +1062,7 @@ class _AnnualGoalCard extends StatelessWidget {
                     '${(safeProgress * 100).round()}%',
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -1070,8 +1076,10 @@ class _AnnualGoalCard extends StatelessWidget {
                   '${summary.completedThisYear}',
                   style: theme.textTheme.displaySmall?.copyWith(
                     color: theme.colorScheme.primary,
+                    fontFamily: AppTypography.contentFontFamily,
+                    fontFamilyFallback: AppTypography.contentFallback,
                     fontSize: 36,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 Padding(
@@ -1393,7 +1401,7 @@ class _ActivityTile extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.titleMedium?.copyWith(
           fontSize: 16,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
         ),
       ),
       subtitle: Text(

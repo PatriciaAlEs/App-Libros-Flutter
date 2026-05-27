@@ -33,6 +33,7 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   flutter_lucide: ^1.11.0
+  google_fonts: ^8.1.0
 
   flutter_riverpod: ^2.5.1
 
