@@ -536,10 +536,7 @@ class _PremiumProgressCard extends StatelessWidget {
 }
 
 class _QuickActions extends StatelessWidget {
-  const _QuickActions({
-    required this.hasNotes,
-    required this.onEditDates,
-  });
+  const _QuickActions({required this.hasNotes, required this.onEditDates});
 
   final bool hasNotes;
   final VoidCallback onEditDates;
@@ -767,8 +764,7 @@ class _ReadingTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visible = [...sessions]
-      ..sort((a, b) => b.date.compareTo(a.date));
+    final visible = [...sessions]..sort((a, b) => b.date.compareTo(a.date));
     final recent = visible.take(4).toList();
     final theme = Theme.of(context);
 
