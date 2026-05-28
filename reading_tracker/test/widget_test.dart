@@ -33,8 +33,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Biblioteca'), findsOneWidget);
-    expect(find.text('Tu biblioteca empieza aqui'), findsOneWidget);
+    expect(find.text('Tu Biblioteca'), findsOneWidget);
+    expect(find.text('Tu biblioteca empieza aquí'), findsOneWidget);
   });
 
   testWidgets('book form saves the selected initial status', (tester) async {

@@ -52,6 +52,7 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
                   ? _readingBooksFirst(filteredBooks)
                   : filteredBooks;
               final featuredBook = _featuredReadingBook(books);
+              final collectionCount = _countForStatus(books);
 
               return CustomScrollView(
                 slivers: [
@@ -60,12 +61,11 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
                       AppSpacing.lg,
                       AppSpacing.md,
                       AppSpacing.lg,
-                      128,
+                      0,
                     ),
                     sliver: SliverList.list(
                       children: [
                         _LibraryHeader(
-                          totalBooks: books.length,
                           query: _query,
                           onQueryChanged: (value) {
                             setState(() => _query = value);
@@ -86,21 +86,20 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
                           },
                         ),
                         const SizedBox(height: AppSpacing.xl),
-                        _CollectionHeader(count: visibleBooks.length),
-                        const SizedBox(height: AppSpacing.lg),
+                        _CollectionHeader(count: collectionCount),
+                        const SizedBox(height: AppSpacing.md),
                       ],
                     ),
                   ),
                   if (visibleBooks.isEmpty)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.lg,
-                          0,
-                          AppSpacing.lg,
-                          112,
-                        ),
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        0,
+                        AppSpacing.lg,
+                        112,
+                      ),
+                      sliver: SliverToBoxAdapter(
                         child: _BooksEmptyState(
                           hasBooks: books.isNotEmpty,
                           hasSearch: _query.trim().isNotEmpty,
@@ -114,16 +113,16 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
                         AppSpacing.lg,
                         0,
                         AppSpacing.lg,
-                        112,
+                        136,
                       ),
                       sliver: SliverGrid.builder(
                         itemCount: visibleBooks.length,
                         gridDelegate:
                             const SliverGridDelegateWithMaxCrossAxisExtent(
                               maxCrossAxisExtent: 190,
-                              mainAxisSpacing: 24,
+                              mainAxisSpacing: 18,
                               crossAxisSpacing: 18,
-                              childAspectRatio: 0.54,
+                              childAspectRatio: 0.58,
                             ),
                         itemBuilder: (context, index) {
                           final book = visibleBooks[index];
@@ -182,6 +181,12 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
     return [...readingBooks, ...otherBooks];
   }
 
+  int _countForStatus(List<Book> books) {
+    final status = _selectedStatus;
+    if (status == null) return books.length;
+    return books.where((book) => book.status == status).length;
+  }
+
   Future<void> _openBook(Book book) async {
     final deleted = await Navigator.pushNamed(
       context,
@@ -208,13 +213,8 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
 }
 
 class _LibraryHeader extends StatelessWidget {
-  const _LibraryHeader({
-    required this.totalBooks,
-    required this.query,
-    required this.onQueryChanged,
-  });
+  const _LibraryHeader({required this.query, required this.onQueryChanged});
 
-  final int totalBooks;
   final String query;
   final ValueChanged<String> onQueryChanged;
 
@@ -227,53 +227,73 @@ class _LibraryHeader extends StatelessWidget {
       children: [
         Row(
           children: [
-            Container(
-              width: 48,
-              height: 48,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: theme.colorScheme.secondary.withValues(alpha: 0.68),
-                boxShadow: AppShadows.soft(theme.colorScheme.secondary),
-              ),
-              child: Text(
-                'dP',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontFamily: AppTypography.displayFontFamily,
-                  fontFamilyFallback: AppTypography.displayFallback,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppBrand.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w800,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(999),
+                onTap: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/',
+                    (route) => false,
+                  );
+                },
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: theme.colorScheme.secondary.withValues(
+                          alpha: 0.68,
+                        ),
+                        boxShadow: AppShadows.soft(theme.colorScheme.secondary),
+                      ),
+                      child: Text(
+                        'dP',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontFamily: AppTypography.displayFontFamily,
+                          fontFamilyFallback: AppTypography.displayFallback,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    '$totalBooks libros en tu coleccion',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.70),
-                      letterSpacing: 1.6,
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppBrand.name,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            '${_greeting()}, Daniela',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.70,
+                              ),
+                              letterSpacing: 1.6,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
         Text(
-          'Biblioteca',
+          'Tu Biblioteca',
           style: theme.textTheme.displaySmall?.copyWith(
             color: theme.colorScheme.onSurface,
             fontWeight: FontWeight.w800,
@@ -281,7 +301,7 @@ class _LibraryHeader extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Tu coleccion privada, organizada para volver a entrar en cada historia.',
+          'Tu colección lectora, siempre a mano.',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -290,6 +310,13 @@ class _LibraryHeader extends StatelessWidget {
         _SearchField(query: query, onChanged: onQueryChanged),
       ],
     );
+  }
+
+  String _greeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Buenos días';
+    if (hour < 20) return 'Buenas tardes';
+    return 'Buenas noches';
   }
 }
 
@@ -576,7 +603,7 @@ class _EditorialFilterBar extends StatelessWidget {
       case BookStatus.paused:
         return 'Pausados';
       case BookStatus.abandoned:
-        return 'Abandonados';
+        return 'Aband.';
     }
   }
 }
@@ -608,7 +635,7 @@ class _FilterSegment extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
@@ -619,6 +646,9 @@ class _FilterSegment extends StatelessWidget {
           ),
           child: Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.fade,
+            softWrap: false,
             style: theme.textTheme.labelSmall?.copyWith(
               color: color,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
@@ -644,7 +674,7 @@ class _CollectionHeader extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            'Coleccion',
+            'Colección',
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w800,
             ),
@@ -783,15 +813,15 @@ class _BooksEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final title = hasSearch
-        ? 'Nada en esta estanteria'
+        ? 'Esta estantería está tranquila'
         : hasBooks
-        ? 'Esta estanteria esta tranquila'
-        : 'Tu biblioteca empieza aqui';
+        ? 'Esta estantería está tranquila'
+        : 'Tu biblioteca empieza aquí';
     final message = hasSearch
-        ? 'Prueba con otro titulo, autor o genero.'
+        ? 'Cambia el filtro o añade una nueva lectura.'
         : hasBooks
-        ? 'Cambia el filtro para volver a ver tu coleccion.'
-        : 'Anade tu primer libro y empieza a construir una coleccion propia.';
+        ? 'Cambia el filtro o añade una nueva lectura.'
+        : 'Añade tu primer libro y empieza a construir una colección propia.';
 
     return Center(
       child: Container(

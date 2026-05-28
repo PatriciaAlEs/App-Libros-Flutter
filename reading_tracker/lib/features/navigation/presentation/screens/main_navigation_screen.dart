@@ -90,7 +90,7 @@ class _MainBottomNavigation extends StatelessWidget {
               ),
               _NavItem(
                 icon: AppIcons.insightsNav,
-                label: 'Ideas',
+                label: 'Insights',
                 isSelected: selectedIndex == 3,
                 onTap: () => onSelect(3),
               ),
@@ -126,7 +126,7 @@ class _NavItem extends StatelessWidget {
     final theme = Theme.of(context);
     final color = isSelected
         ? theme.colorScheme.primary
-        : theme.colorScheme.onSurfaceVariant;
+        : theme.colorScheme.secondary.withValues(alpha: 0.78);
 
     return Expanded(
       child: InkResponse(
