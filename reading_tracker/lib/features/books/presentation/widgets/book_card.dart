@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/enums/book_status.dart';
 
@@ -25,7 +26,14 @@ class BookCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: ListTile(
         leading: _BookCover(url: book.coverUrl),
-        title: Text(book.title),
+        title: Text(
+          book.title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontFamily: AppTypography.contentFontFamily,
+            fontFamilyFallback: AppTypography.contentFallback,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         subtitle: subtitle.isEmpty ? null : Text(subtitle),
         trailing: _StatusChip(status: book.status),
         onTap: onTap,

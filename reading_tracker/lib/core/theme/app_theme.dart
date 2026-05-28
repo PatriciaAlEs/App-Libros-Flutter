@@ -83,7 +83,7 @@ class AppTheme {
 
     return ThemeData(
       colorScheme: colorScheme,
-      fontFamily: GoogleFonts.inter().fontFamily,
+      fontFamily: GoogleFonts.roboto().fontFamily,
       fontFamilyFallback: AppTypography.contentFallback,
       scaffoldBackgroundColor: theme.background,
       textTheme: textTheme,
@@ -147,49 +147,49 @@ class AppTheme {
 
   static TextTheme _textTheme(ColorScheme colorScheme) {
     return TextTheme(
-      displaySmall: GoogleFonts.playfairDisplay(
+      displaySmall: GoogleFonts.dmSerifDisplay(
         color: colorScheme.onSurface,
         fontSize: 34,
         fontWeight: FontWeight.w800,
         height: 1.14,
       ),
-      headlineSmall: GoogleFonts.playfairDisplay(
+      headlineSmall: GoogleFonts.dmSerifDisplay(
         color: colorScheme.onSurface,
         fontSize: 26,
         fontWeight: FontWeight.w800,
         height: 1.2,
       ),
-      titleLarge: GoogleFonts.playfairDisplay(
+      titleLarge: GoogleFonts.dmSerifDisplay(
         color: colorScheme.onSurface,
         fontSize: 21,
         fontWeight: FontWeight.w700,
         height: 1.25,
       ),
-      titleMedium: GoogleFonts.playfairDisplay(
+      titleMedium: GoogleFonts.dmSerifDisplay(
         color: colorScheme.onSurface,
         fontSize: 17,
         fontWeight: FontWeight.w700,
         height: 1.28,
       ),
-      bodyMedium: GoogleFonts.inter(
+      bodyMedium: GoogleFonts.roboto(
         color: colorScheme.onSurface,
         fontSize: 14,
         fontWeight: FontWeight.w400,
         height: 1.45,
       ),
-      bodySmall: GoogleFonts.inter(
+      bodySmall: GoogleFonts.roboto(
         color: colorScheme.onSurfaceVariant,
         fontSize: 12,
         fontWeight: FontWeight.w400,
         height: 1.35,
       ),
-      labelLarge: GoogleFonts.inter(
+      labelLarge: GoogleFonts.roboto(
         color: colorScheme.onSurface,
         fontSize: 14,
         fontWeight: FontWeight.w500,
         height: 1.2,
       ),
-      labelSmall: GoogleFonts.inter(
+      labelSmall: GoogleFonts.roboto(
         color: colorScheme.onSurfaceVariant,
         fontSize: 11,
         fontWeight: FontWeight.w500,

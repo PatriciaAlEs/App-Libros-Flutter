@@ -1,8 +1,8 @@
 class AppTypography {
   const AppTypography._();
 
-  static const displayFontFamily = 'Playfair Display';
-  static const contentFontFamily = 'Inter';
+  static const displayFontFamily = 'DM Serif Display';
+  static const contentFontFamily = 'Roboto';
 
   static const displayFallback = <String>[
     'Georgia',

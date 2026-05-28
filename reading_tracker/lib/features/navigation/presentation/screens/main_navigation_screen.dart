@@ -61,15 +61,12 @@ class _MainBottomNavigation extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(18, 0, 18, 14),
         child: Container(
-          height: 74,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          height: 82,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withValues(alpha: 0.86),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.08),
-            ),
-            boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(0),
+            boxShadow: AppShadows.soft(theme.colorScheme.primary),
           ),
           child: Row(
             children: [
@@ -146,15 +143,15 @@ class _NavItem extends StatelessWidget {
                 Container(
                   width: 4,
                   height: 4,
-                  margin: const EdgeInsets.only(bottom: 4),
+                  margin: const EdgeInsets.only(bottom: 5),
                   decoration: BoxDecoration(
                     color: color,
                     shape: BoxShape.circle,
                   ),
                 )
               else
-                const SizedBox(height: 8),
-              Icon(icon, color: color, size: 20),
+                const SizedBox(height: 9),
+              Icon(icon, color: color, size: 23),
               const SizedBox(height: 4),
               FittedBox(
                 fit: BoxFit.scaleDown,

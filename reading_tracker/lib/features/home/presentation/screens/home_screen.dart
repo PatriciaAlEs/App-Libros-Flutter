@@ -47,7 +47,7 @@ class HomeScreen extends ConsumerWidget {
               end: Alignment.bottomCenter,
               colors: [
                 theme.scaffoldBackgroundColor,
-                theme.colorScheme.primaryContainer.withValues(alpha: 0.28),
+                theme.scaffoldBackgroundColor,
                 theme.scaffoldBackgroundColor,
               ],
               stops: const [0, 0.46, 1],
@@ -87,7 +87,7 @@ class HomeScreen extends ConsumerWidget {
                       sliver: SliverList.list(
                         children: [
                           _HomeHeader(greeting: _contextualGreeting(now)),
-                          const SizedBox(height: AppSpacing.md),
+                          const SizedBox(height: AppSpacing.lg),
                           _CurrentReadingCards(
                             books: currentBooks,
                             pendingBooks: pendingBooks,
@@ -101,16 +101,16 @@ class HomeScreen extends ConsumerWidget {
                             onStartReading: (book) =>
                                 _startReading(context, ref, book),
                           ),
-                          const SizedBox(height: AppSpacing.xl),
+                          const SizedBox(height: AppSpacing.xxl),
                           _QuickMetrics(summary: summary),
-                          const SizedBox(height: AppSpacing.lg),
-                          _AnnualGoalCard(summary: summary),
                           const SizedBox(height: AppSpacing.xl),
+                          _AnnualGoalCard(summary: summary),
+                          const SizedBox(height: AppSpacing.xxl),
                           _JournalHeader(
                             onSeeAll: () =>
                                 Navigator.pushNamed(context, '/calendar'),
                           ),
-                          const SizedBox(height: AppSpacing.sm),
+                          const SizedBox(height: AppSpacing.md),
                           _RecentActivityList(
                             sessions: recentSessions,
                             booksById: booksById,
@@ -246,51 +246,69 @@ class _HomeHeader extends StatelessWidget {
       padding: const EdgeInsets.only(top: AppSpacing.xs),
       child: Row(
         children: [
-          Container(
-            width: 52,
-            height: 52,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: theme.colorScheme.secondary.withValues(alpha: 0.72),
-              boxShadow: AppShadows.soft(theme.colorScheme.secondary),
-            ),
-            child: Text(
-              'dP',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontFamily: AppTypography.displayFontFamily,
-                fontFamilyFallback: AppTypography.displayFallback,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${AppBrand.name}.',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(999),
+              onTap: () => Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/',
+                (route) => false,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: theme.colorScheme.secondary.withValues(
+                        alpha: 0.72,
+                      ),
+                      boxShadow: AppShadows.soft(theme.colorScheme.secondary),
+                    ),
+                    child: Text(
+                      'dP',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontFamily: AppTypography.displayFontFamily,
+                        fontFamilyFallback: AppTypography.displayFallback,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  '$greeting, Daniela',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.78),
-                    letterSpacing: 2,
-                    fontWeight: FontWeight.w500,
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${AppBrand.name}.',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          '$greeting, Daniela',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.78,
+                            ),
+                            letterSpacing: 2,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           _HeaderActionButton(
@@ -298,11 +316,37 @@ class _HomeHeader extends StatelessWidget {
             onTap: () => Navigator.pushNamed(context, '/books'),
           ),
           const SizedBox(width: AppSpacing.sm),
-          _HeaderActionButton(
-            icon: AppIcons.bookmark,
-            onTap: () => Navigator.pushNamed(context, '/book/add'),
-          ),
+          const _ProfilePlaceholder(),
         ],
+      ),
+    );
+  }
+}
+
+class _ProfilePlaceholder extends StatelessWidget {
+  const _ProfilePlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: 44,
+      height: 44,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: theme.colorScheme.surface.withValues(alpha: 0.68),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.10),
+        ),
+      ),
+      child: Text(
+        'D',
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -367,7 +411,7 @@ class _JournalHeader extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Capitulos recientes',
+                'Actividad reciente',
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
@@ -455,9 +499,9 @@ class _CurrentReadingHero extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: dark.withValues(alpha: 0.24),
-            blurRadius: 32,
-            offset: const Offset(0, 18),
+            color: dark.withValues(alpha: 0.20),
+            blurRadius: 36,
+            offset: const Offset(0, 20),
           ),
         ],
       ),
@@ -467,7 +511,7 @@ class _CurrentReadingHero extends StatelessWidget {
           borderRadius: BorderRadius.circular(28),
           onTap: onOpenProgress,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+            padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -509,14 +553,14 @@ class _CurrentReadingHero extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: 26),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final isNarrow = constraints.maxWidth < 340;
                     final cover = _BookCover(
                       url: currentBook.coverUrl,
-                      width: isNarrow ? 106 : 136,
-                      height: isNarrow ? 158 : 202,
+                      width: isNarrow ? 112 : 132,
+                      height: isNarrow ? 168 : 198,
                       radius: 16,
                     );
 
@@ -532,12 +576,12 @@ class _CurrentReadingHero extends StatelessWidget {
                             color: onDark,
                             fontFamily: AppTypography.displayFontFamily,
                             fontFamilyFallback: AppTypography.displayFallback,
-                            fontSize: isNarrow ? 25 : 30,
+                            fontSize: isNarrow ? 26 : 31,
                             fontWeight: FontWeight.w800,
-                            height: 1.06,
+                            height: 1.08,
                           ),
                         ),
-                        const SizedBox(height: AppSpacing.md),
+                        const SizedBox(height: AppSpacing.sm),
                         if (currentBook.author?.isNotEmpty == true)
                           Text(
                             currentBook.author!,
@@ -548,7 +592,7 @@ class _CurrentReadingHero extends StatelessWidget {
                               fontStyle: FontStyle.italic,
                             ),
                           ),
-                        const SizedBox(height: AppSpacing.xxl),
+                        const SizedBox(height: 30),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
@@ -561,7 +605,7 @@ class _CurrentReadingHero extends StatelessWidget {
                                     AppTypography.contentFallback,
                                 fontSize: isNarrow ? 42 : 48,
                                 fontWeight: FontWeight.w600,
-                                height: 0.96,
+                                height: 0.92,
                               ),
                             ),
                             Padding(
@@ -598,7 +642,7 @@ class _CurrentReadingHero extends StatelessWidget {
                           borderRadius: BorderRadius.circular(999),
                           child: LinearProgressIndicator(
                             value: progress,
-                            minHeight: 6,
+                            minHeight: 5,
                             backgroundColor: Colors.white.withValues(
                               alpha: 0.12,
                             ),
@@ -623,13 +667,13 @@ class _CurrentReadingHero extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         cover,
-                        const SizedBox(width: AppSpacing.xl),
+                        const SizedBox(width: 22),
                         Expanded(child: details),
                       ],
                     );
                   },
                 ),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: 26),
                 FilledButton.icon(
                   onPressed: onOpenProgress,
                   icon: const Icon(AppIcons.book),
@@ -641,7 +685,7 @@ class _CurrentReadingHero extends StatelessWidget {
                   style: FilledButton.styleFrom(
                     backgroundColor: theme.colorScheme.surface,
                     foregroundColor: theme.colorScheme.primary,
-                    minimumSize: const Size.fromHeight(50),
+                    minimumSize: const Size.fromHeight(52),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
@@ -721,9 +765,9 @@ class _CurrentReadingMiniCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          fontFamily: AppTypography.displayFontFamily,
-                          fontFamilyFallback: AppTypography.displayFallback,
-                          fontWeight: FontWeight.w700,
+                          fontFamily: AppTypography.contentFontFamily,
+                          fontFamilyFallback: AppTypography.contentFallback,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       if (book.author?.isNotEmpty == true)
@@ -850,38 +894,38 @@ class _QuickMetrics extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Row(
-      children: [
-        Expanded(
-          child: _CompactMetricCard(
-            icon: AppIcons.fire,
+        children: [
+          Expanded(
+            child: _CompactMetricCard(
+              icon: AppIcons.fire,
             value: '${summary.currentStreakDays}',
             label: 'Racha',
             footnote: 'dias',
-            backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.70),
+            backgroundColor: theme.colorScheme.surface,
             foregroundColor: theme.colorScheme.onSurface,
             iconColor: theme.colorScheme.primary,
           ),
         ),
-        const SizedBox(width: AppSpacing.sm),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: _CompactMetricCard(
             icon: AppIcons.book,
             value: '${summary.completedThisYear}',
             label: 'Libros',
             footnote: 'este ano',
-            backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.70),
+            backgroundColor: theme.colorScheme.surface,
             foregroundColor: theme.colorScheme.onSurface,
             iconColor: theme.colorScheme.primary,
           ),
         ),
-        const SizedBox(width: AppSpacing.sm),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: _CompactMetricCard(
             icon: AppIcons.pages,
             value: _compactNumber(summary.totalPagesRead),
             label: 'Paginas',
             footnote: 'totales',
-            backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.70),
+            backgroundColor: theme.colorScheme.surface,
             foregroundColor: theme.colorScheme.onSurface,
             iconColor: theme.colorScheme.primary,
           ),
@@ -925,30 +969,36 @@ class _CompactMetricCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(26),
         border: Border.all(
           color: theme.colorScheme.primary.withValues(alpha: 0.08),
         ),
-        boxShadow: AppShadows.soft(theme.colorScheme.primary),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.lg,
+          horizontal: AppSpacing.lg,
+          vertical: 18,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 34,
-              height: 34,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 color: iconColor.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: iconColor, size: 19),
+              child: Icon(icon, color: iconColor, size: 22),
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: 18),
             Text(
               value,
               maxLines: 1,
@@ -957,18 +1007,19 @@ class _CompactMetricCard extends StatelessWidget {
                 color: foregroundColor,
                 fontFamily: AppTypography.contentFontFamily,
                 fontFamilyFallback: AppTypography.contentFallback,
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
+                fontSize: 25,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: AppSpacing.xs),
+            const SizedBox(height: 3),
             Text(
               label.toUpperCase(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.labelSmall?.copyWith(
-                color: foregroundColor.withValues(alpha: 0.72),
-                letterSpacing: 1.4,
+                color: foregroundColor.withValues(alpha: 0.84),
+                letterSpacing: 1.2,
+                fontWeight: FontWeight.w700,
               ),
             ),
             Text(
@@ -994,11 +1045,12 @@ class _AnnualGoalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final year = DateTime.now().year;
     final goal = summary.annualReadingGoal;
     final progress = summary.annualGoalProgress ?? 0;
     final safeProgress = progress.clamp(0.0, 1.0).toDouble();
     final subtitle = goal == null
-        ? 'Define un objetivo anual desde Progreso.'
+        ? 'Configura tu reto lector desde Progreso.'
         : (summary.booksRemainingForAnnualGoal != null &&
               summary.booksRemainingForAnnualGoal! > 0)
         ? '${summary.booksRemainingForAnnualGoal} mas para alcanzar la estanteria'
@@ -1008,15 +1060,21 @@ class _AnnualGoalCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.68),
-        borderRadius: BorderRadius.circular(24),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(26),
         border: Border.all(
           color: theme.colorScheme.primary.withValues(alpha: 0.08),
         ),
-        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.09),
+            blurRadius: 28,
+            offset: const Offset(0, 14),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(22, 20, 22, 20),
+        padding: const EdgeInsets.fromLTRB(24, 22, 24, 22),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1028,18 +1086,18 @@ class _AnnualGoalCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '2026 READING GOAL',
+                        '$year READING GOAL',
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.primary.withValues(
                             alpha: 0.78,
                           ),
-                          letterSpacing: 3,
+                          letterSpacing: 2.6,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        'Un ano entre libros',
+                        'Reto de lectura $year',
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                         ),
@@ -1068,7 +1126,7 @@ class _AnnualGoalCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.xxl),
+            const SizedBox(height: 28),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -1096,7 +1154,7 @@ class _AnnualGoalCard extends StatelessWidget {
                 Icon(
                   AppIcons.star,
                   color: theme.colorScheme.secondary,
-                  size: 28,
+                  size: 30,
                 ),
               ],
             ),
@@ -1108,12 +1166,12 @@ class _AnnualGoalCard extends StatelessWidget {
                 fontStyle: FontStyle.italic,
               ),
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: 18),
             ClipRRect(
               borderRadius: BorderRadius.circular(999),
               child: LinearProgressIndicator(
                 value: safeProgress,
-                minHeight: 5,
+                minHeight: 6,
                 backgroundColor: theme.colorScheme.primaryContainer.withValues(
                   alpha: 0.42,
                 ),
@@ -1344,15 +1402,21 @@ class _RecentActivityList extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.70),
-        borderRadius: BorderRadius.circular(24),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(26),
         border: Border.all(
           color: theme.colorScheme.primary.withValues(alpha: 0.08),
         ),
-        boxShadow: AppShadows.soft(theme.colorScheme.primary),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
         child: Column(
           children: [
             for (var index = 0; index < visibleSessions.length; index++) ...[
@@ -1363,7 +1427,7 @@ class _RecentActivityList extends StatelessWidget {
               if (index < visibleSessions.length - 1)
                 Divider(
                   height: 1,
-                  indent: 78,
+                  indent: 82,
                   color: theme.colorScheme.primary.withValues(alpha: 0.08),
                 ),
             ],
@@ -1387,21 +1451,23 @@ class _ActivityTile extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
+        vertical: AppSpacing.md,
       ),
       leading: _BookCover(
         url: book?.coverUrl,
-        width: 46,
-        height: 62,
-        radius: 10,
+        width: 50,
+        height: 68,
+        radius: 11,
       ),
       title: Text(
         book?.title ?? 'Libro no encontrado',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.titleMedium?.copyWith(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
+          fontFamily: AppTypography.contentFontFamily,
+          fontFamilyFallback: AppTypography.contentFallback,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
         ),
       ),
       subtitle: Text(

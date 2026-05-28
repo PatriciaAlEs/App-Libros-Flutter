@@ -682,7 +682,9 @@ class _BookShelfCard extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
+                  fontFamily: AppTypography.contentFontFamily,
+                  fontFamilyFallback: AppTypography.contentFallback,
+                  fontWeight: FontWeight.w600,
                   height: 1.1,
                 ),
               ),
