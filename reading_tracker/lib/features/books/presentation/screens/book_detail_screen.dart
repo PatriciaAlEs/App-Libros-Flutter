@@ -325,24 +325,39 @@ class _DetailTopBar extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        _CircleAction(icon: Icons.delete_outline_rounded, onTap: onDelete),
+        _CircleAction(
+          icon: Icons.delete_outline_rounded,
+          onTap: onDelete,
+          destructive: true,
+        ),
       ],
     );
   }
 }
 
 class _CircleAction extends StatelessWidget {
-  const _CircleAction({required this.icon, required this.onTap});
+  const _CircleAction({
+    required this.icon,
+    required this.onTap,
+    this.destructive = false,
+  });
 
   final IconData icon;
   final VoidCallback onTap;
+  final bool destructive;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final color = destructive
+        ? theme.colorScheme.error.withValues(alpha: 0.70)
+        : theme.colorScheme.primary;
+
     return Material(
-      color: theme.colorScheme.surface.withValues(alpha: 0.72),
+      color: theme.colorScheme.surface.withValues(
+        alpha: destructive ? 0.44 : 0.72,
+      ),
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
@@ -354,10 +369,10 @@ class _CircleAction extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.10),
+              color: color.withValues(alpha: destructive ? 0.12 : 0.10),
             ),
           ),
-          child: Icon(icon, color: theme.colorScheme.primary, size: 21),
+          child: Icon(icon, color: color, size: destructive ? 19 : 21),
         ),
       ),
     );
@@ -376,6 +391,7 @@ class _BookHero extends StatelessWidget {
     final dark = Color.lerp(primary, Colors.black, 0.34)!;
     final accent = theme.colorScheme.secondary;
     final progress = _bookProgress(book);
+    final percent = (progress * 100).round();
 
     return Container(
       decoration: BoxDecoration(
@@ -394,18 +410,32 @@ class _BookHero extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 28, 24, 26),
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 26),
         child: Column(
           children: [
-            Text(
-              book.status.label.toUpperCase(),
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: accent.withValues(alpha: 0.95),
-                letterSpacing: 3,
+            Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: accent.withValues(alpha: 0.50)),
+                  color: Colors.white.withValues(alpha: 0.04),
+                ),
+                child: Text(
+                  book.status.label,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: accent.withValues(alpha: 0.96),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: AppSpacing.lg),
-            _Cover(url: book.coverUrl, width: 150, height: 226, radius: 20),
+            const SizedBox(height: AppSpacing.md),
+            _Cover(url: book.coverUrl, width: 164, height: 246, radius: 22),
             const SizedBox(height: AppSpacing.xl),
             Text(
               book.title,
@@ -432,6 +462,32 @@ class _BookHero extends StatelessWidget {
               ),
             ],
             const SizedBox(height: AppSpacing.xl),
+            Row(
+              children: [
+                Text(
+                  '$percent%',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    _pageProgress(book),
+                    textAlign: TextAlign.right,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onPrimary.withValues(
+                        alpha: 0.74,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
             ClipRRect(
               borderRadius: BorderRadius.circular(999),
               child: LinearProgressIndicator(
@@ -459,6 +515,7 @@ class _PremiumProgressCard extends StatelessWidget {
     final theme = Theme.of(context);
     final progress = _bookProgress(book);
     final percent = (progress * 100).round();
+    final remaining = _remainingPagesText(book);
 
     return _EditorialSurface(
       child: Column(
@@ -498,14 +555,33 @@ class _PremiumProgressCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.lg),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 7),
-                  child: Text(
-                    _pageProgress(book),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.82),
-                    ),
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _pageProgress(book),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.86,
+                          ),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (remaining != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          remaining,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ),
@@ -528,6 +604,12 @@ class _PremiumProgressCard extends StatelessWidget {
             onPressed: onEditPages,
             icon: const Icon(AppIcons.edit),
             label: const Text('Actualizar progreso'),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
           ),
         ],
       ),
@@ -549,7 +631,8 @@ class _QuickActions extends StatelessWidget {
           child: _QuickAction(
             icon: AppIcons.bookmark,
             label: 'Notas',
-            enabled: hasNotes,
+            helper: hasNotes ? 'Guardadas' : 'Próximamente',
+            enabled: false,
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
@@ -557,6 +640,7 @@ class _QuickActions extends StatelessWidget {
           child: _QuickAction(
             icon: AppIcons.bookmark,
             label: 'Bookmarks',
+            helper: 'Próximamente',
             enabled: false,
           ),
         ),
@@ -565,6 +649,7 @@ class _QuickActions extends StatelessWidget {
           child: _QuickAction(
             icon: AppIcons.star,
             label: 'Highlights',
+            helper: 'Próximamente',
             enabled: false,
           ),
         ),
@@ -572,7 +657,8 @@ class _QuickActions extends StatelessWidget {
         Expanded(
           child: _QuickAction(
             icon: AppIcons.time,
-            label: 'Timeline',
+            label: 'Fechas',
+            helper: 'Editar',
             onTap: onEditDates,
           ),
         ),
@@ -585,12 +671,14 @@ class _QuickAction extends StatelessWidget {
   const _QuickAction({
     required this.icon,
     required this.label,
+    this.helper,
     this.onTap,
     this.enabled = true,
   });
 
   final IconData icon;
   final String label;
+  final String? helper;
   final VoidCallback? onTap;
   final bool enabled;
 
@@ -602,7 +690,7 @@ class _QuickAction extends StatelessWidget {
         : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.48);
 
     return Material(
-      color: theme.colorScheme.surface.withValues(alpha: 0.66),
+      color: theme.colorScheme.surface.withValues(alpha: enabled ? 0.66 : 0.44),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
@@ -620,7 +708,7 @@ class _QuickAction extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, color: foreground, size: 21),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.xs),
               FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
@@ -630,6 +718,19 @@ class _QuickAction extends StatelessWidget {
                   ),
                 ),
               ),
+              if (helper != null) ...[
+                const SizedBox(height: 2),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    helper!,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: foreground.withValues(alpha: 0.72),
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -649,13 +750,13 @@ class _EditorialInfoGrid extends StatelessWidget {
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,
       children: [
-        _InfoPill(label: 'Genero', value: _clean(book.genre)),
+        _InfoPill(label: 'Género', value: _clean(book.genre)),
         _InfoPill(
-          label: 'Paginas',
+          label: 'Páginas',
           value: book.totalPages == null ? 'Sin dato' : '${book.totalPages}',
         ),
         _InfoPill(
-          label: 'Publicacion',
+          label: 'Publicación',
           value: book.firstPublishYear == null
               ? 'Sin dato'
               : '${book.firstPublishYear}',
@@ -694,7 +795,7 @@ class _InfoPill extends StatelessWidget {
 
     return Container(
       width: (MediaQuery.sizeOf(context).width - 48) / 2,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.fromLTRB(16, 15, 16, 16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.68),
         borderRadius: BorderRadius.circular(20),
@@ -749,8 +850,17 @@ class _SynopsisSection extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
+          const SizedBox(height: AppSpacing.sm),
+          Container(
+            width: 44,
+            height: 3,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.secondary,
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
           const SizedBox(height: AppSpacing.md),
-          Text(text, style: theme.textTheme.bodyMedium),
+          Text(text, style: theme.textTheme.bodyMedium?.copyWith(height: 1.48)),
         ],
       ),
     );
@@ -773,7 +883,7 @@ class _ReadingTimeline extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Timeline de lectura',
+            'Sesiones recientes',
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w800,
             ),
@@ -813,27 +923,46 @@ class _TimelineRow extends StatelessWidget {
     ].join(' · ');
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.secondary,
-            shape: BoxShape.circle,
-          ),
+        Column(
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.secondary,
+                shape: BoxShape.circle,
+              ),
+            ),
+            Container(
+              width: 1,
+              height: 28,
+              margin: const EdgeInsets.only(top: 4),
+              color: theme.colorScheme.primary.withValues(alpha: 0.10),
+            ),
+          ],
         ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
-          child: Text(
-            details.isEmpty ? 'Sesion registrada' : details,
-            style: theme.textTheme.bodyMedium,
-          ),
-        ),
-        Text(
-          _humanDate(session.date).toUpperCase(),
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.primary.withValues(alpha: 0.72),
-            letterSpacing: 1.4,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                details.isEmpty ? 'Sesion registrada' : details,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                _humanDate(session.date),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.72),
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -1273,7 +1402,26 @@ String _pageProgress(Book book) {
   return '${book.currentPage} / ${book.totalPages} p.';
 }
 
+String? _remainingPagesText(Book book) {
+  final currentPage = book.currentPage;
+  final totalPages = book.totalPages;
+  if (currentPage == null || totalPages == null || totalPages <= 0) {
+    return null;
+  }
+  final remaining = (totalPages - currentPage).clamp(0, totalPages);
+  if (remaining == 0) return 'Lectura completa';
+  return '$remaining páginas restantes';
+}
+
 String _humanDate(DateTime date) {
+  final today = DateTime.now();
+  final currentDay = DateTime(today.year, today.month, today.day);
+  final sessionDay = DateTime(date.year, date.month, date.day);
+  final difference = currentDay.difference(sessionDay).inDays;
+  if (difference == 0) return 'Hoy';
+  if (difference == 1) return 'Ayer';
+  if (difference > 1 && difference < 7) return 'Hace $difference días';
+
   const months = [
     'ene',
     'feb',
