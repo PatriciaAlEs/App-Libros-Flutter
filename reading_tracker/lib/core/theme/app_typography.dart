@@ -1,7 +1,7 @@
 class AppTypography {
   const AppTypography._();
 
-  static const displayFontFamily = 'DM Serif Display';
+  static const displayFontFamily = 'Roboto';
   static const contentFontFamily = 'Roboto';
 
   static const displayFallback = <String>[

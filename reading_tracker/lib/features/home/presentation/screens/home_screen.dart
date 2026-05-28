@@ -894,10 +894,10 @@ class _QuickMetrics extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Row(
-        children: [
-          Expanded(
-            child: _CompactMetricCard(
-              icon: AppIcons.fire,
+      children: [
+        Expanded(
+          child: _CompactMetricCard(
+            icon: AppIcons.fire,
             value: '${summary.currentStreakDays}',
             label: 'Racha',
             footnote: 'dias',
@@ -1467,7 +1467,7 @@ class _ActivityTile extends StatelessWidget {
           fontFamily: AppTypography.contentFontFamily,
           fontFamilyFallback: AppTypography.contentFallback,
           fontSize: 15,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
         ),
       ),
       subtitle: Text(
@@ -1476,6 +1476,7 @@ class _ActivityTile extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.bodySmall?.copyWith(
           color: theme.colorScheme.primary.withValues(alpha: 0.78),
+          fontWeight: FontWeight.w400,
         ),
       ),
       trailing: Text(
@@ -1483,8 +1484,8 @@ class _ActivityTile extends StatelessWidget {
         textAlign: TextAlign.right,
         style: theme.textTheme.labelSmall?.copyWith(
           color: theme.colorScheme.primary.withValues(alpha: 0.82),
-          letterSpacing: 2,
-          fontWeight: FontWeight.w600,
+          letterSpacing: 1.6,
+          fontWeight: FontWeight.w700,
         ),
       ),
       onTap: book == null

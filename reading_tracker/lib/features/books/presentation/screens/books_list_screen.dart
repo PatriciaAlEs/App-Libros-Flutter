@@ -26,6 +26,8 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: _PremiumFab(onTap: _openAddBook),
       body: SafeArea(
         child: DecoratedBox(
           decoration: BoxDecoration(
@@ -34,7 +36,7 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
               end: Alignment.bottomCenter,
               colors: [
                 theme.scaffoldBackgroundColor,
-                theme.colorScheme.primaryContainer.withValues(alpha: 0.22),
+                theme.colorScheme.primaryContainer.withValues(alpha: 0.14),
                 theme.scaffoldBackgroundColor,
               ],
               stops: const [0, 0.44, 1],
@@ -58,7 +60,7 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
                       AppSpacing.lg,
                       AppSpacing.md,
                       AppSpacing.lg,
-                      112,
+                      128,
                     ),
                     sliver: SliverList.list(
                       children: [
@@ -68,15 +70,14 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
                           onQueryChanged: (value) {
                             setState(() => _query = value);
                           },
-                          onAddBook: _openAddBook,
                         ),
-                        const SizedBox(height: AppSpacing.xl),
+                        const SizedBox(height: AppSpacing.xxl),
                         if (featuredBook != null) ...[
                           _FeaturedReadingCard(
                             book: featuredBook,
                             onTap: () => _openBook(featuredBook),
                           ),
-                          const SizedBox(height: AppSpacing.xl),
+                          const SizedBox(height: AppSpacing.xxl),
                         ],
                         _EditorialFilterBar(
                           selectedStatus: _selectedStatus,
@@ -84,9 +85,9 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
                             setState(() => _selectedStatus = status);
                           },
                         ),
-                        const SizedBox(height: AppSpacing.lg),
+                        const SizedBox(height: AppSpacing.xl),
                         _CollectionHeader(count: visibleBooks.length),
-                        const SizedBox(height: AppSpacing.md),
+                        const SizedBox(height: AppSpacing.lg),
                       ],
                     ),
                   ),
@@ -120,9 +121,9 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
                         gridDelegate:
                             const SliverGridDelegateWithMaxCrossAxisExtent(
                               maxCrossAxisExtent: 190,
-                              mainAxisSpacing: 20,
-                              crossAxisSpacing: 16,
-                              childAspectRatio: 0.58,
+                              mainAxisSpacing: 24,
+                              crossAxisSpacing: 18,
+                              childAspectRatio: 0.54,
                             ),
                         itemBuilder: (context, index) {
                           final book = visibleBooks[index];
@@ -211,13 +212,11 @@ class _LibraryHeader extends StatelessWidget {
     required this.totalBooks,
     required this.query,
     required this.onQueryChanged,
-    required this.onAddBook,
   });
 
   final int totalBooks;
   final String query;
   final ValueChanged<String> onQueryChanged;
-  final VoidCallback onAddBook;
 
   @override
   Widget build(BuildContext context) {
@@ -270,7 +269,6 @@ class _LibraryHeader extends StatelessWidget {
                 ],
               ),
             ),
-            _RoundIconButton(icon: AppIcons.add, onTap: onAddBook),
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -295,34 +293,35 @@ class _LibraryHeader extends StatelessWidget {
   }
 }
 
-class _RoundIconButton extends StatelessWidget {
-  const _RoundIconButton({required this.icon, required this.onTap});
+class _PremiumFab extends StatelessWidget {
+  const _PremiumFab({required this.onTap});
 
-  final IconData icon;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Material(
-      color: theme.colorScheme.surface.withValues(alpha: 0.72),
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: Container(
-          width: 44,
-          height: 44,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.10),
-            ),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.24),
+            blurRadius: 26,
+            offset: const Offset(0, 12),
           ),
-          child: Icon(icon, color: theme.colorScheme.primary, size: 22),
-        ),
+        ],
+      ),
+      child: FloatingActionButton.extended(
+        elevation: 0,
+        highlightElevation: 0,
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        onPressed: onTap,
+        icon: const Icon(AppIcons.add, size: 20),
+        label: const Text('Anadir'),
       ),
     );
   }
@@ -340,12 +339,18 @@ class _SearchField extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.70),
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
           color: theme.colorScheme.primary.withValues(alpha: 0.08),
         ),
-        boxShadow: AppShadows.soft(theme.colorScheme.primary),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.07),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: TextFormField(
         initialValue: query,
@@ -391,26 +396,27 @@ class _FeaturedReadingCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [primary, dark],
         ),
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: dark.withValues(alpha: 0.22),
-            blurRadius: 30,
-            offset: const Offset(0, 16),
+            color: dark.withValues(alpha: 0.20),
+            blurRadius: 34,
+            offset: const Offset(0, 18),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(30),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(22),
+            padding: const EdgeInsets.fromLTRB(24, 26, 24, 24),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _BookCover(url: book.coverUrl, width: 104, height: 154),
-                const SizedBox(width: AppSpacing.lg),
+                _BookCover(url: book.coverUrl, width: 116, height: 174),
+                const SizedBox(width: AppSpacing.xl),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -422,7 +428,7 @@ class _FeaturedReadingCard extends StatelessWidget {
                           letterSpacing: 2.8,
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.md),
+                      const SizedBox(height: AppSpacing.lg),
                       Text(
                         book.title,
                         maxLines: 3,
@@ -445,7 +451,7 @@ class _FeaturedReadingCard extends StatelessWidget {
                           ),
                         ),
                       ],
-                      const SizedBox(height: AppSpacing.lg),
+                      const SizedBox(height: 22),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -486,6 +492,21 @@ class _FeaturedReadingCard extends StatelessWidget {
                           color: accent.withValues(alpha: 0.96),
                         ),
                       ),
+                      const SizedBox(height: AppSpacing.lg),
+                      FilledButton.icon(
+                        onPressed: onTap,
+                        icon: const Icon(AppIcons.book, size: 18),
+                        label: const Text('Ver lectura'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: theme.colorScheme.surface,
+                          foregroundColor: theme.colorScheme.primary,
+                          elevation: 0,
+                          minimumSize: const Size.fromHeight(42),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -515,20 +536,31 @@ class _EditorialFilterBar extends StatelessWidget {
         (label: _filterLabel(status), status: status),
     ];
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          for (var index = 0; index < options.length; index++) ...[
-            _FilterSegment(
-              label: options[index].label,
-              selected: selectedStatus == options[index].status,
-              onTap: () => onChanged(options[index].status),
-            ),
-            if (index < options.length - 1)
-              const SizedBox(width: AppSpacing.sm),
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.xs),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+        ),
+        boxShadow: AppShadows.soft(Theme.of(context).colorScheme.primary),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (var index = 0; index < options.length; index++) ...[
+              _FilterSegment(
+                label: options[index].label,
+                selected: selectedStatus == options[index].status,
+                onTap: () => onChanged(options[index].status),
+              ),
+              if (index < options.length - 1)
+                const SizedBox(width: AppSpacing.xs),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -570,29 +602,26 @@ class _FilterSegment extends StatelessWidget {
     return Material(
       color: selected
           ? theme.colorScheme.primaryContainer.withValues(alpha: 0.50)
-          : theme.colorScheme.surface.withValues(alpha: 0.58),
+          : Colors.transparent,
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
         borderRadius: BorderRadius.circular(999),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.sm,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
               color: selected
                   ? theme.colorScheme.secondary.withValues(alpha: 0.36)
-                  : theme.colorScheme.primary.withValues(alpha: 0.08),
+                  : Colors.transparent,
             ),
           ),
           child: Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
               color: color,
-              fontWeight: FontWeight.w500,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
             ),
           ),
         ),
@@ -652,14 +681,20 @@ class _BookShelfCard extends StatelessWidget {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withValues(alpha: 0.66),
-            borderRadius: BorderRadius.circular(22),
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: theme.colorScheme.primary.withValues(alpha: 0.08),
             ),
-            boxShadow: AppShadows.soft(theme.colorScheme.primary),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.primary.withValues(alpha: 0.07),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
           ),
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -684,8 +719,9 @@ class _BookShelfCard extends StatelessWidget {
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontFamily: AppTypography.contentFontFamily,
                   fontFamilyFallback: AppTypography.contentFallback,
-                  fontWeight: FontWeight.w600,
-                  height: 1.1,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  height: 1.12,
                 ),
               ),
               if (book.author?.isNotEmpty == true) ...[
@@ -694,77 +730,38 @@ class _BookShelfCard extends StatelessWidget {
                   book.author!,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall,
+                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 12),
                 ),
               ],
-              const SizedBox(height: AppSpacing.sm),
-              Row(
-                children: [
-                  Expanded(child: _StatusPill(status: book.status)),
-                  if (showProgress) ...[
+              if (showProgress) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 4,
+                          backgroundColor: theme.colorScheme.primaryContainer
+                              .withValues(alpha: 0.38),
+                          color: theme.colorScheme.secondary,
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: AppSpacing.sm),
                     Text(
                       '${(progress * 100).round()}%',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
-                ],
-              ),
-              if (showProgress) ...[
-                const SizedBox(height: AppSpacing.sm),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 4,
-                    backgroundColor: theme.colorScheme.primaryContainer
-                        .withValues(alpha: 0.44),
-                    color: theme.colorScheme.secondary,
-                  ),
                 ),
               ],
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusPill extends StatelessWidget {
-  const _StatusPill({required this.status});
-
-  final BookStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final selected = status == BookStatus.reading;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: selected
-            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.42)
-            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.54),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        status.label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        textAlign: TextAlign.center,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: selected
-              ? theme.colorScheme.primary
-              : theme.colorScheme.onSurfaceVariant,
-          fontSize: 10,
         ),
       ),
     );

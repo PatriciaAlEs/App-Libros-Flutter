@@ -147,25 +147,25 @@ class AppTheme {
 
   static TextTheme _textTheme(ColorScheme colorScheme) {
     return TextTheme(
-      displaySmall: GoogleFonts.dmSerifDisplay(
+      displaySmall: GoogleFonts.roboto(
         color: colorScheme.onSurface,
         fontSize: 34,
         fontWeight: FontWeight.w800,
         height: 1.14,
       ),
-      headlineSmall: GoogleFonts.dmSerifDisplay(
+      headlineSmall: GoogleFonts.roboto(
         color: colorScheme.onSurface,
         fontSize: 26,
         fontWeight: FontWeight.w800,
         height: 1.2,
       ),
-      titleLarge: GoogleFonts.dmSerifDisplay(
+      titleLarge: GoogleFonts.roboto(
         color: colorScheme.onSurface,
         fontSize: 21,
         fontWeight: FontWeight.w700,
         height: 1.25,
       ),
-      titleMedium: GoogleFonts.dmSerifDisplay(
+      titleMedium: GoogleFonts.roboto(
         color: colorScheme.onSurface,
         fontSize: 17,
         fontWeight: FontWeight.w700,
@@ -173,26 +173,26 @@ class AppTheme {
       ),
       bodyMedium: GoogleFonts.roboto(
         color: colorScheme.onSurface,
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: FontWeight.w400,
-        height: 1.45,
+        height: 1.42,
       ),
       bodySmall: GoogleFonts.roboto(
         color: colorScheme.onSurfaceVariant,
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: FontWeight.w400,
-        height: 1.35,
+        height: 1.34,
       ),
       labelLarge: GoogleFonts.roboto(
         color: colorScheme.onSurface,
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
+        fontSize: 15,
+        fontWeight: FontWeight.w700,
         height: 1.2,
       ),
       labelSmall: GoogleFonts.roboto(
         color: colorScheme.onSurfaceVariant,
-        fontSize: 11,
-        fontWeight: FontWeight.w500,
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
         height: 1.2,
       ),
     );
