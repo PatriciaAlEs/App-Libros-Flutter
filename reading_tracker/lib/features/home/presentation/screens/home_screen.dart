@@ -54,9 +54,8 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
           child: booksAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) =>
-                const Center(child: Text('No se pudo cargar el inicio.')),
+            loading: () => const _HomeLoadingState(),
+            error: (error, _) => const _HomeErrorState(),
             data: (books) {
               final summary =
                   summaryAsync.valueOrNull ?? const StatisticsSummary.empty();
@@ -230,6 +229,99 @@ class HomeScreen extends ConsumerWidget {
     if (now.hour < 12) return 'Buenos dias';
     if (now.hour < 20) return 'Buenas tardes';
     return 'Buenas noches';
+  }
+}
+
+class _HomeLoadingState extends StatelessWidget {
+  const _HomeLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        112,
+      ),
+      children: [
+        Container(
+          height: 64,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.58),
+            borderRadius: BorderRadius.circular(24),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Container(
+          height: 302,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(32),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        for (var index = 0; index < 3; index++) ...[
+          Container(
+            height: 96,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.66),
+              borderRadius: BorderRadius.circular(24),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
+      ],
+    );
+  }
+}
+
+class _HomeErrorState extends StatelessWidget {
+  const _HomeErrorState();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(26, 28, 26, 26),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.76),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+            ),
+            boxShadow: AppShadows.soft(theme.colorScheme.primary),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(AppIcons.home, color: theme.colorScheme.primary, size: 36),
+              const SizedBox(height: 16),
+              Text(
+                'No pudimos preparar tu inicio',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Tus lecturas siguen guardadas. Inténtalo de nuevo en unos segundos.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -837,9 +929,9 @@ class _EmptyCurrentReadingCard extends StatelessWidget {
     if (visibleBooks.isEmpty) {
       return EmptyStateCard(
         icon: AppIcons.library,
-        title: 'Tu proxima lectura te espera',
-        message: 'Anade un libro para empezar a construir tu biblioteca.',
-        actionLabel: 'Anadir lectura',
+        title: 'Tu próxima lectura te espera',
+        message: 'Añade un libro para empezar a construir tu biblioteca.',
+        actionLabel: 'Añadir lectura',
         onAction: onAddBook,
       );
     }
@@ -1393,8 +1485,8 @@ class _RecentActivityList extends StatelessWidget {
     if (visibleSessions.isEmpty) {
       return EmptyStateCard(
         icon: AppIcons.time,
-        title: 'Sin actividad reciente',
-        message: 'Cuando registres una sesion, aparecera aqui.',
+        title: 'Tu diario lector está tranquilo',
+        message: 'Cuando registres páginas o minutos, aparecerán aquí.',
       );
     }
 

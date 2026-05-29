@@ -41,9 +41,8 @@ class ProgressScreen extends ConsumerWidget {
             ),
           ),
           child: summaryAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) =>
-                const Center(child: Text('No se pudo cargar tu progreso.')),
+            loading: () => const _ProgressLoadingState(),
+            error: (error, _) => const _ProgressErrorState(),
             data: (summary) {
               final activeBook = _activeReadingBook(books);
               final sessions = sessionsAsync.valueOrNull ?? const [];
@@ -179,6 +178,99 @@ class _ProgressHeader extends StatelessWidget {
     if (hour < 12) return 'Buenos días';
     if (hour < 20) return 'Buenas tardes';
     return 'Buenas noches';
+  }
+}
+
+class _ProgressLoadingState extends StatelessWidget {
+  const _ProgressLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        128,
+      ),
+      children: [
+        Container(
+          height: 104,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.62),
+            borderRadius: BorderRadius.circular(26),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+        Container(
+          height: 210,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(32),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        for (var index = 0; index < 3; index++) ...[
+          Container(
+            height: 130,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.66),
+              borderRadius: BorderRadius.circular(28),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+        ],
+      ],
+    );
+  }
+}
+
+class _ProgressErrorState extends StatelessWidget {
+  const _ProgressErrorState();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(26, 28, 26, 26),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.76),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+            ),
+            boxShadow: AppShadows.soft(theme.colorScheme.primary),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(AppIcons.chart, color: theme.colorScheme.primary, size: 36),
+              const SizedBox(height: 16),
+              Text(
+                'No pudimos cargar tu progreso',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Tus datos siguen guardados. Vuelve a intentarlo en unos segundos.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

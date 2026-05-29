@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design_system/design_system.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
@@ -136,8 +137,8 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
         ],
       ),
       body: booksAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        loading: () => const _SessionFormLoadingState(),
+        error: (error, _) => const _SessionFormErrorState(),
         data: (books) {
           final selectableBooks = _selectableBooks(books);
 
@@ -305,11 +306,98 @@ class _NoReadingBooksMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(26, 28, 26, 26),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.76),
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+            ),
+            boxShadow: AppShadows.soft(theme.colorScheme.primary),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 70,
+                height: 70,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.colorScheme.secondary.withValues(alpha: 0.24),
+                ),
+                child: Icon(AppIcons.book, color: theme.colorScheme.primary),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'No hay lecturas activas',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Marca un libro como “Leyendo” para registrar páginas, minutos y notas.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 18),
+              FilledButton.icon(
+                onPressed: () => Navigator.pushNamed(context, '/books'),
+                icon: const Icon(AppIcons.library),
+                label: const Text('Ir a Biblioteca'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SessionFormLoadingState extends StatelessWidget {
+  const _SessionFormLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        for (var index = 0; index < 5; index++) ...[
+          Container(
+            height: index == 0 ? 58 : 68,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.62),
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ],
+    );
+  }
+}
+
+class _SessionFormErrorState extends StatelessWidget {
+  const _SessionFormErrorState();
+
+  @override
+  Widget build(BuildContext context) {
     return const Center(
       child: Padding(
         padding: EdgeInsets.all(24),
         child: Text(
-          'No hay libros en lectura. Marca un libro como "leyendo" antes de añadir tiempo de lectura.',
+          'No pudimos preparar el formulario de lectura. Inténtalo de nuevo en unos segundos.',
           textAlign: TextAlign.center,
         ),
       ),

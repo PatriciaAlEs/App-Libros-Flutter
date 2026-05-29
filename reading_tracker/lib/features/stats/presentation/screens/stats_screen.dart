@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design_system/design_system.dart';
 import '../providers/statistics_summary_provider.dart';
 import '../widgets/stat_card.dart';
 
@@ -14,7 +15,7 @@ class StatsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Estadisticas')),
       body: summaryAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const _StatsLoadingState(),
         error: (error, _) => _StatsErrorState(
           onRetry: () => ref.invalidate(statisticsSummaryProvider),
         ),
@@ -484,35 +485,48 @@ class _StatsEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.insights_outlined,
-              size: 48,
-              color: Theme.of(context).colorScheme.primary,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(26, 28, 26, 26),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.76),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Todavia no hay datos de lectura',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Anade tu primer libro para empezar a calcular tus estadisticas.',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            FilledButton.icon(
-              onPressed: () => Navigator.pushNamed(context, '/book/add'),
-              icon: const Icon(Icons.add),
-              label: const Text('Anadir libro'),
-            ),
-          ],
+            boxShadow: AppShadows.soft(theme.colorScheme.primary),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _StateIcon(icon: AppIcons.chart),
+              const SizedBox(height: 16),
+              Text(
+                'Tus estadísticas están por estrenarse',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Añade tu primer libro y registra lectura para ver ritmo, rachas y progreso.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 20),
+              FilledButton.icon(
+                onPressed: () => Navigator.pushNamed(context, '/book/add'),
+                icon: const Icon(AppIcons.add),
+                label: const Text('Añadir primer libro'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -526,37 +540,102 @@ class _StatsErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Theme.of(context).colorScheme.error,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(26, 28, 26, 26),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.76),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: theme.colorScheme.error.withValues(alpha: 0.12),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'No pudimos cargar tus estadisticas',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Intentalo de nuevo en unos segundos.',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Reintentar'),
-            ),
-          ],
+            boxShadow: AppShadows.soft(theme.colorScheme.primary),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _StateIcon(icon: Icons.error_outline, isError: true),
+              const SizedBox(height: 16),
+              Text(
+                'No pudimos preparar tus estadísticas',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Revisa la conexión de datos local e inténtalo otra vez.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 20),
+              OutlinedButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Reintentar'),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _StatsLoadingState extends StatelessWidget {
+  const _StatsLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        for (var index = 0; index < 5; index++) ...[
+          Container(
+            height: index == 0 ? 132 : 92,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.06),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ],
+    );
+  }
+}
+
+class _StateIcon extends StatelessWidget {
+  const _StateIcon({required this.icon, this.isError = false});
+
+  final IconData icon;
+  final bool isError;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = isError ? theme.colorScheme.error : theme.colorScheme.primary;
+
+    return Container(
+      width: 72,
+      height: 72,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color.withValues(alpha: 0.12),
+      ),
+      child: Icon(icon, size: 34, color: color),
     );
   }
 }

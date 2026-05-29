@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design_system/design_system.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../domain/entities/reading_session.dart';
 import '../models/reading_day_activity.dart';
@@ -60,8 +61,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         ],
       ),
       body: sessionsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        loading: () => const _CalendarLoadingState(),
+        error: (error, _) => const _CalendarErrorState(),
         data: (sessions) {
           final sessionsByDay = _groupSessionsByDay(sessions);
           final activitiesByDay = ReadingDayActivity.fromSessions(sessions);
@@ -445,12 +446,96 @@ class _WeekEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(AppIcons.calendar, color: theme.colorScheme.primary),
+          const SizedBox(height: 10),
+          Text(
+            'Semana sin sesiones',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Registra una lectura para encender el calendario.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CalendarLoadingState extends StatelessWidget {
+  const _CalendarLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      child: Center(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Container(
+            height: 78,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.70),
+              borderRadius: BorderRadius.circular(22),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            height: 120,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.56),
+              borderRadius: BorderRadius.circular(22),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface.withValues(alpha: 0.44),
+                borderRadius: BorderRadius.circular(22),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CalendarErrorState extends StatelessWidget {
+  const _CalendarErrorState();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
         child: Text(
-          'No hay sesiones esta semana.',
-          style: Theme.of(context).textTheme.bodyMedium,
+          'No pudimos cargar tu calendario lector. Inténtalo de nuevo en unos segundos.',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyMedium,
         ),
       ),
     );

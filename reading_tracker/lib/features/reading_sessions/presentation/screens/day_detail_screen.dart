@@ -34,8 +34,8 @@ class DayDetailScreen extends ConsumerWidget {
         ],
       ),
       body: sessionsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        loading: () => const _DayLoadingState(),
+        error: (error, _) => const _DayErrorState(),
         data: (sessions) {
           final booksById = booksAsync.maybeWhen(
             data: (books) => {for (final book in books) book.id: book},
@@ -168,6 +168,56 @@ class _EmptyState extends StatelessWidget {
         child: Text(
           'No hay ratos de lectura este día. Añade tiempo de lectura para registrar actividad.',
           style: Theme.of(context).textTheme.bodyMedium,
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+class _DayLoadingState extends StatelessWidget {
+  const _DayLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Container(
+          height: 76,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.72),
+            borderRadius: BorderRadius.circular(18),
+          ),
+        ),
+        const SizedBox(height: 12),
+        for (var index = 0; index < 3; index++) ...[
+          Container(
+            height: 88,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.58),
+              borderRadius: BorderRadius.circular(18),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+      ],
+    );
+  }
+}
+
+class _DayErrorState extends StatelessWidget {
+  const _DayErrorState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(24),
+        child: Text(
+          'No pudimos cargar las sesiones de este día. Vuelve a intentarlo en unos segundos.',
           textAlign: TextAlign.center,
         ),
       ),

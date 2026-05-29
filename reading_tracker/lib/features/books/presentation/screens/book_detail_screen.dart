@@ -23,9 +23,13 @@ class BookDetailScreen extends ConsumerWidget {
     final booksAsync = ref.watch(booksProvider);
 
     return booksAsync.when(
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (error, _) => Scaffold(body: Center(child: Text('Error: $error'))),
+      loading: () => const Scaffold(body: _BookDetailLoadingState()),
+      error: (error, _) => const Scaffold(
+        body: _BookDetailUnavailableState(
+          title: 'No pudimos abrir este libro',
+          message: 'Vuelve a intentarlo en unos segundos.',
+        ),
+      ),
       data: (books) {
         Book? book;
         for (final candidate in books) {
@@ -37,7 +41,10 @@ class BookDetailScreen extends ConsumerWidget {
 
         if (book == null) {
           return const Scaffold(
-            body: Center(child: Text('Libro no encontrado.')),
+            body: _BookDetailUnavailableState(
+              title: 'Libro no encontrado',
+              message: 'Puede que haya sido eliminado o ya no esté disponible.',
+            ),
           );
         }
 
@@ -331,6 +338,109 @@ class _DetailTopBar extends StatelessWidget {
           destructive: true,
         ),
       ],
+    );
+  }
+}
+
+class _BookDetailLoadingState extends StatelessWidget {
+  const _BookDetailLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 112),
+        children: [
+          Container(
+            height: 42,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.58),
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            height: 470,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(32),
+            ),
+          ),
+          const SizedBox(height: 20),
+          for (var index = 0; index < 3; index++) ...[
+            Container(
+              height: 118,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface.withValues(alpha: 0.66),
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _BookDetailUnavailableState extends StatelessWidget {
+  const _BookDetailUnavailableState({
+    required this.title,
+    required this.message,
+  });
+
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SafeArea(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(26, 28, 26, 26),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.76),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.08),
+              ),
+              boxShadow: AppShadows.soft(theme.colorScheme.primary),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(AppIcons.book, color: theme.colorScheme.primary, size: 36),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 20),
+                OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Volver'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -753,24 +863,26 @@ class _EditorialInfoGrid extends StatelessWidget {
         _InfoPill(label: 'Género', value: _clean(book.genre)),
         _InfoPill(
           label: 'Páginas',
-          value: book.totalPages == null ? 'Sin dato' : '${book.totalPages}',
+          value: book.totalPages == null
+              ? 'Por completar'
+              : '${book.totalPages}',
         ),
         _InfoPill(
           label: 'Publicación',
           value: book.firstPublishYear == null
-              ? 'Sin dato'
+              ? 'Por completar'
               : '${book.firstPublishYear}',
         ),
         _InfoPill(
           label: 'Rating',
-          value: book.rating == null ? 'Sin valorar' : _stars(book.rating!),
+          value: book.rating == null ? 'Pendiente' : _stars(book.rating!),
         ),
       ],
     );
   }
 
   String _clean(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Sin dato';
+    if (value == null || value.trim().isEmpty) return 'Por completar';
     return value.trim();
   }
 
@@ -836,7 +948,7 @@ class _SynopsisSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final notes = book.notes?.trim();
     final text = notes == null || notes.isEmpty
-        ? 'Aun no hay notas para este libro. Cuando registres impresiones, viviran aqui como parte de tu diario lector.'
+        ? 'Aún no hay notas para este libro. Cuando registres impresiones, vivirán aquí como parte de tu diario lector.'
         : notes;
     final theme = Theme.of(context);
 
@@ -891,7 +1003,7 @@ class _ReadingTimeline extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           if (recent.isEmpty)
             Text(
-              'Las sesiones recientes apareceran aqui cuando registres lectura.',
+              'Las sesiones recientes aparecerán aquí cuando registres lectura.',
               style: theme.textTheme.bodyMedium,
             )
           else
