@@ -33,7 +33,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Tu Biblioteca'), findsOneWidget);
+    expect(find.text('Mi Biblioteca'), findsOneWidget);
     expect(find.text('Tu biblioteca empieza aquí'), findsOneWidget);
   });
 
