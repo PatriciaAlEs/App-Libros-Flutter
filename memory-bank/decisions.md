@@ -84,3 +84,21 @@
 - Anadir libro se mueve a un FAB para quitar el bloque grande del flujo principal.
 - El objetivo anual se muestra como card independiente reutilizando `StatisticsSummary`; la edicion sigue viviendo en Estadisticas.
 - La actividad reciente muestra maximo 3 sesiones y enlaza a calendario con `Ver actividad`.
+
+## Premium Redesign Hito 5 Sprints 4-8
+
+- Los redisenios visuales deben tocar solo la pantalla indicada por sprint, salvo navegacion principal cuando el requisito pida label/icon color.
+- No tocar Drift, repositorios, modelos ni logica de negocio durante sprints de refinamiento visual.
+- Mantener datos reales existentes: `Book`, `ReadingSession`, `StatisticsSummary`, `booksProvider`, `statisticsSummaryProvider` y providers de sesiones.
+- La marca `dP + ReadPp` en headers editoriales debe ser pulsable y navegar a Home (`/`).
+- Bottom navigation debe mantener `Insights` como label y usar un color muted/accent para iconos no seleccionados.
+- Biblioteca debe sentirse como coleccion privada: portadas primero, metadata secundaria reducida, filtros compactos, empty states editoriales.
+- Book Detail debe sentirse como ficha editorial premium: portada protagonista, progreso claro, informacion editorial en pills, sesiones como timeline.
+- Acciones sin funcionalidad real no deben parecer activas; marcarlas como `Proximamente`, secundarias o desactivadas.
+- Acciones destructivas como eliminar libro deben quedar accesibles pero visualmente secundarias.
+- Progreso debe funcionar como dashboard editorial premium, no como menu de accesos.
+- Progreso reutiliza `statisticsSummaryProvider` para racha, objetivo anual, paginas y completados; no crea nuevos calculos de dominio.
+- La actividad reciente en Progreso puede consumir `readingSessionsForRangeProvider` para mostrar sesiones reales, sin inventar datos.
+- El CTA de reto lector puede llevar a `/stats`, donde ya vive la edicion/configuracion del objetivo anual.
+- El usuario prefiere ejecutar validaciones localmente; no correr `dart format`, `flutter analyze` ni `flutter test` si el pedido lo prohibe.
+- La tipografia fue iterada por peticiones de usuario; antes de cerrar Hito 5 conviene revisar la decision final de fuentes y actualizar `AppTypography`/Memory Bank si cambia.

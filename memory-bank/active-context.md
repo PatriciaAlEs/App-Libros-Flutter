@@ -4,7 +4,7 @@
 
 Hito 5: UX/UI Premium Redesign.
 
-Sprint 2.5 iniciado e implementado: Branding & Visual Identity global para ReadPp.
+Sprint 8 implementado: Progress Premium Redesign.
 
 La Home ya funciona como pantalla editorial de biblioteca personal y concentra:
 
@@ -13,6 +13,32 @@ La Home ya funciona como pantalla editorial de biblioteca personal y concentra:
 - Objetivo anual.
 - Actividad reciente.
 - FAB para anadir libro.
+
+Biblioteca ya fue redisenada como coleccion editorial premium:
+
+- Header ReadPp coherente con Home.
+- Marca `dP + ReadPp` navegable a Home.
+- Featured Reading cuando hay libro en lectura.
+- Filtros compactos por estado.
+- Grid visual centrado en portadas.
+- Empty states editoriales.
+
+Book Detail ya fue redisenada y refinada como ficha editorial premium:
+
+- Hero inmersiva con portada protagonista.
+- Badge de estado.
+- Progreso premium con paginas restantes.
+- Informacion editorial en pills.
+- Sesiones recientes estilo timeline.
+- Acciones no funcionales marcadas como proximamente o secundarias.
+
+Progreso ya no es una lista de accesos:
+
+- Header editorial `Tu Progreso`.
+- Card protagonista con racha, completados del ano, paginas y lectura activa.
+- Card de reto lector anual usando `StatisticsSummary`.
+- Actividad lectora con accesos a calendario/registro y sesiones recientes reales.
+- Accesos rapidos premium a Estadisticas, Calendario y Registrar sesion.
 
 Insights ya no funciona como segunda pantalla de estadisticas: la UI se organiza como perfil lector.
 
@@ -35,6 +61,8 @@ El sistema visual base ahora incluye:
 - Tipografia global preparada con Playfair Display para titulos e Inter para contenido.
 - Adaptador `AppIcons` para centralizar iconografia y facilitar una futura migracion a Lucide.
 - Motion tokens y widgets reutilizables para transiciones suaves.
+- Iconografia de Home/Bottom Navigation/metricas/acciones migrada hacia `AppIcons` con Lucide donde ya esta disponible.
+- Tipografia del proyecto fue iterada varias veces; el estado actual del codigo usa Roboto globalmente, aunque las referencias de diseno siguen hablando de estilo editorial.
 
 ## Estado reciente
 
@@ -158,6 +186,23 @@ El sistema visual base ahora incluye:
 - Se agrego `AppMotion`, `AppFadeSlideTransition` y `AppPressable` para motion reutilizable.
 - Se refinaron sombras, elevaciones, spacing y jerarquia de color del Design System.
 - No se redisenaron Biblioteca, Estadisticas, Insights ni Detalle Libro.
+- Se implemento Hito 5 Sprint 4 - Biblioteca Premium Redesign.
+- Biblioteca paso de lista tecnica a pantalla editorial centrada en portadas.
+- Se agrego header editorial, featured reading, filtros compactos, grid visual y empty states premium.
+- Se aplicaron correcciones UX en Biblioteca: conteo junto a `Coleccion`, marca navegable a Home, filtros sin overflow y empty states sin scroll excesivo.
+- Se corrigio el test `shows the books screen` para esperar `Tu Biblioteca`.
+- Se implemento Hito 5 Sprint 5 - Book Detail Premium Redesign.
+- Book Detail paso de pantalla administrativa a ficha editorial premium con hero, progreso, informacion editorial, sinopsis, estado lector y sesiones recientes.
+- Se implemento Hito 5 Sprint 5.1 - Home Visual Refinement.
+- Home recibio refinamiento de spacing, hero, metricas, goal card, actividad reciente y bottom navigation.
+- Se aplicaron ajustes posteriores de fuente y peso para mejorar legibilidad movil.
+- Se implemento Hito 5 Sprint 6 - Biblioteca Visual Refinement.
+- Se corrigio el espaciado del grid de Biblioteca para evitar huecos grandes entre `Coleccion` y las cards y para que la bottom nav no corte libros.
+- Se implemento Hito 5 Sprint 7 - Book Detail Visual Refinement.
+- Book Detail recibio refinamiento de hero, progress card, acciones rapidas, informacion editorial, sinopsis y timeline.
+- Se implemento Hito 5 Sprint 8 - Progress Premium Redesign.
+- ProgressScreen consume `statisticsSummaryProvider`, `booksProvider` y `readingSessionsForRangeProvider` para mostrar datos reales sin crear nuevos calculos de dominio.
+- ProgressScreen mantiene navegacion existente a `/stats`, `/calendar` y `/session/add`.
 
 ## Archivos tocados recientemente
 
@@ -210,6 +255,7 @@ El sistema visual base ahora incluye:
 - `reading_tracker/lib/features/settings/presentation/screens/settings_screen.dart`
 - `reading_tracker/lib/features/home/presentation/screens/home_screen.dart`
 - `reading_tracker/lib/features/navigation/presentation/screens/main_navigation_screen.dart`
+- `reading_tracker/lib/features/progress/presentation/screens/progress_screen.dart`
 - `reading_tracker/assets/branding/README.md`
 - `reading_tracker/assets/fonts/README.md`
 - `reading_tracker/pubspec.yaml`
@@ -233,8 +279,8 @@ Estado confirmado para Hito 4 Sprint 3:
 1. Ejecutar `flutter pub get` antes de validar Sprint 2/Sprint 2.5/Sprint 3, por la nueva dependencia `shared_preferences` y nuevos assets declarados.
 2. Validar Hito 5 Sprint 1/Sprint 2/Sprint 2.5/Sprint 3 desde la terminal del usuario cuando corresponda.
 3. Definir siguiente sprint visual/UI cuando el usuario lo pida.
-3. Mas adelante investigar Open Library para mejorar resultados en espanol.
-4. Dejar el sprint visual/UI para despues: paleta, estilo, referencias y design system.
+4. Mas adelante investigar Open Library para mejorar resultados en espanol.
+5. Revisar consistencia tipografica final antes de cerrar Hito 5, porque hubo varios cambios de fuente solicitados durante el refinamiento.
 
 ## Riesgos / notas
 

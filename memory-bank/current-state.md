@@ -121,23 +121,56 @@ Estado actual implementado:
 
 Estado actual implementado:
 
-- La app entra por una navegacion principal con `NavigationBar` Material 3.
+- La app entra por una navegacion principal inferior personalizada/editorial.
 - Tabs principales: Inicio, Biblioteca, Progreso, Insights y Ajustes.
 - La navegacion principal vive exclusivamente en la barra inferior; Home no duplica accesos principales en el AppBar.
 - Inicio muestra la Home/dashboard actual.
-- Biblioteca abre la lista de libros existente.
-- Progreso abre un hub con accesos a Estadisticas, Reading Challenge, Activity Tracking/calendario y registro de sesion.
+- Biblioteca abre una pantalla editorial premium centrada en portadas.
+- Progreso abre un dashboard editorial premium de avance lector.
 - Insights abre directamente la pantalla Insights existente.
 - Ajustes incluye selector de tema Burgundy/Forest con preferencia persistida localmente; no implementa perfil real ni login.
 - Las rutas existentes se mantienen para navegacion interna y compatibilidad.
-- Home mantiene su dashboard, pero el resumen rapido usa cards mas compactas.
+- Home mantiene su dashboard editorial, con metricas rapidas horizontales y actividad reciente como reading journal.
 - Biblioteca usa un icono de libros.
-- La vista general de Biblioteca muestra primero libros en estado `Leyendo`.
-- Despues se muestran el resto de estados.
-- Se mantienen filtros/tabs existentes y la opcion de ver todos.
-- Cada card muestra estado visual del libro.
+- La vista general de Biblioteca muestra featured reading arriba si hay libro en estado `Leyendo`.
+- El grid prioriza portadas y reduce metadata tecnica.
+- Se mantienen filtros por estado con segmented control compacto: Todos, Pendientes, Leyendo, Completados, Pausados y Aband.
+- El conteo de libros aparece junto a `Coleccion` y refleja el filtro activo.
+- La marca `dP + ReadPp` en Biblioteca navega a Home.
+- Cada card prioriza portada, titulo, autor y progreso opcional.
 - Los libros en lectura muestran progreso si tienen `currentPage` y `totalPages`.
 - Los libros completados muestran rating si estan valorados.
+- Los empty states de Biblioteca son editoriales y no generan scroll excesivo.
+- La bottom nav mantiene `Insights` como label y usa rosa/accent muted en iconos no seleccionados.
+
+## Progreso
+
+Estado actual implementado:
+
+- `ProgressScreen` ya no es una lista simple de accesos.
+- Header editorial con marca `dP + ReadPp`, saludo contextual, titulo `Tu Progreso` y subtitulo humano.
+- La marca navega a Home (`/`).
+- Card protagonista Burgundy/Forest con racha actual, libros completados este ano, paginas leidas y lectura activa real si existe.
+- Card de reto lector anual usando `StatisticsSummary`: objetivo, completados, porcentaje y barra visual.
+- CTA del reto lleva a `/stats`, donde ya existe la configuracion/edicion del objetivo anual.
+- Card de actividad lectora con accesos a calendario y registrar sesion.
+- Actividad lectora muestra sesiones recientes reales desde `readingSessionsForRangeProvider`; no inventa datos.
+- Accesos rapidos a Estadisticas, Calendario y Registrar sesion se muestran como cards premium con icono, titulo y descripcion.
+- No se tocaron Drift, repositorios, modelos ni logica de negocio para este redisenio.
+
+## Book Detail
+
+Estado actual implementado:
+
+- Book Detail funciona como ficha editorial premium, no como formulario CRUD.
+- Hero superior inmersiva con portada protagonista, fondo Burgundy/Forest, titulo, autor, badge de estado y progreso.
+- Progress card muestra porcentaje, pagina actual/total, paginas restantes cuando aplica y CTA `Actualizar progreso`.
+- Acciones rapidas que no tienen funcionalidad real se muestran como `Proximamente` o secundarias.
+- La accion de fechas conserva la funcionalidad existente de editar fechas de lectura.
+- Informacion editorial se muestra en pills/cards: genero, paginas, publicacion y rating.
+- Sinopsis/notas tienen spacing editorial y mejor jerarquia visual.
+- Sesiones recientes se muestran como timeline con fechas humanas.
+- Eliminar libro queda accesible pero visualmente secundario.
 
 ## Reading Insights
 
@@ -198,6 +231,12 @@ Estado confirmado por el usuario:
 - Sprint 2.5 agrega estructura de branding, contrato de marca, tipografia Playfair/Inter, adaptador de iconos y motion reutilizable.
 - Hito 5 Sprint 3 - Home Premium Redesign esta implementado y pendiente de validacion local por el usuario.
 - Sprint 3 redisenia solo Home como biblioteca personal moderna: header READPP, hero de lectura actual, metricas compactas, objetivo lector y actividad reciente.
+- Hito 5 Sprint 4 - Biblioteca Premium Redesign esta implementado y pendiente de validacion local por el usuario.
+- Hito 5 Sprint 5 - Book Detail Premium Redesign esta implementado y pendiente de validacion local por el usuario.
+- Hito 5 Sprint 5.1 - Home Visual Refinement esta implementado y pendiente de validacion local por el usuario.
+- Hito 5 Sprint 6 - Biblioteca Visual Refinement esta implementado y pendiente de validacion local por el usuario.
+- Hito 5 Sprint 7 - Book Detail Visual Refinement esta implementado y pendiente de validacion local por el usuario.
+- Hito 5 Sprint 8 - Progress Premium Redesign esta implementado y pendiente de validacion local por el usuario.
 
 ## Estadisticas MVP
 
@@ -226,4 +265,5 @@ Estado actual implementado:
 
 1. Ejecutar `flutter pub get` antes de validar Sprint 2/Sprint 2.5/Sprint 3 por la dependencia `shared_preferences` y los assets declarados.
 2. Validar Hito 5 Sprint 1, Sprint 2, Sprint 2.5 y Sprint 3 cuando el usuario lo decida.
-2. Continuar con el siguiente sprint visual/UI que priorice el usuario.
+3. Validar sprints visuales posteriores de Hito 5 cuando el usuario lo decida.
+4. Continuar con el siguiente sprint visual/UI que priorice el usuario.

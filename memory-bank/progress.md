@@ -136,6 +136,30 @@
 - Actividad reciente compactada a maximo 3 sesiones con accion `Ver actividad`.
 - Bloque grande de anadir libro eliminado; anadir libro queda en FAB.
 - No se redisenaron Biblioteca, Estadisticas, Insights ni Detalle Libro.
+- Hito 5 Sprint 4 implementado: Biblioteca Premium Redesign.
+- Biblioteca redisenada como coleccion privada/editorial centrada en portadas.
+- Header de Biblioteca alineado con Home, marca `dP + ReadPp` navegable a Home y titulo `Tu Biblioteca`.
+- Featured Reading agregado arriba cuando existe libro en lectura.
+- Grid visual de libros agregado con portadas protagonistas y metadata reducida.
+- Filtros por estado refinados como segmented control compacto.
+- Empty states editoriales agregados.
+- Correcciones UX posteriores: conteo junto a `Coleccion`, filtros sin overflow, empty state sin scroll enorme y grid sin huecos excesivos.
+- Test `shows the books screen` actualizado para el nuevo copy de Biblioteca.
+- Hito 5 Sprint 5 implementado: Book Detail Premium Redesign.
+- Book Detail redisenada como ficha editorial premium con hero inmersiva, portada protagonista, progreso visual, informacion editorial, sinopsis y sesiones recientes.
+- Hito 5 Sprint 5.1 implementado: Home Visual Refinement.
+- Home refinada visualmente: hero, metricas, goal card, actividad reciente, bottom navigation, spacing y sombras.
+- Se aplicaron iteraciones tipograficas solicitadas por el usuario; el codigo actual usa Roboto globalmente tras cambios posteriores.
+- Hito 5 Sprint 6 implementado: Biblioteca Visual Refinement.
+- Biblioteca refinada en Featured Reading, grid de portadas, filtros, FAB, spacing global y composicion premium.
+- Se corrigio el corte de libros por bottom nav y el hueco entre `Coleccion` y el grid.
+- Hito 5 Sprint 7 implementado: Book Detail Visual Refinement.
+- Book Detail refinada: hero menos saturada, progress card con paginas restantes, quick actions no funcionales como `Proximamente`, pills editoriales, sinopsis con mejor jerarquia y timeline de sesiones.
+- Hito 5 Sprint 8 implementado: Progress Premium Redesign.
+- Progreso paso de hub/lista de accesos a dashboard editorial premium.
+- `ProgressScreen` muestra header editorial, card protagonista, reto lector anual, actividad lectora y accesos rapidos premium.
+- `ProgressScreen` reutiliza datos existentes de `statisticsSummaryProvider`, `booksProvider` y `readingSessionsForRangeProvider`.
+- No se tocaron Drift, repositorios, modelos ni logica de negocio en Sprint 8.
 
 ## Parcial / en seguimiento
 
@@ -146,16 +170,22 @@
 - Validacion local de Hito 5 Sprint 2 pendiente en terminal del usuario.
 - Validacion local de Hito 5 Sprint 2.5 pendiente en terminal del usuario.
 - Validacion local de Hito 5 Sprint 3 pendiente en terminal del usuario.
+- Validacion local de Hito 5 Sprint 4 pendiente en terminal del usuario.
+- Validacion local de Hito 5 Sprint 5 pendiente en terminal del usuario.
+- Validacion local de Hito 5 Sprint 5.1 pendiente en terminal del usuario.
+- Validacion local de Hito 5 Sprint 6 pendiente en terminal del usuario.
+- Validacion local de Hito 5 Sprint 7 pendiente en terminal del usuario.
+- Validacion local de Hito 5 Sprint 8 pendiente en terminal del usuario.
 
 ## Pendiente inmediato
 
 - Ejecutar `flutter pub get` para incorporar `shared_preferences`.
-- Validar Hito 5 Sprint 1, Sprint 2, Sprint 2.5 y Sprint 3 cuando el usuario lo decida.
+- Validar Hito 5 Sprint 1 a Sprint 8 cuando el usuario lo decida.
 - Definir el siguiente bloque funcional cuando el usuario lo pida.
 
 ## Pendiente futuro
 
-- Definir siguiente iteracion de Stats o Insights sin introducir complejidad visual prematura.
+- Definir siguiente iteracion de Stats, Insights o Ajustes sin introducir complejidad visual prematura.
 - Investigar Open Library para mejorar resultados en espanol.
-- Redisenar Biblioteca, Estadisticas, Insights o Detalle Libro en sprints separados.
+- Revisar consistencia tipografica y visual global antes de cerrar Hito 5.
 - Ampliar tests de flujos criticos si el alcance del siguiente sprint lo requiere.
