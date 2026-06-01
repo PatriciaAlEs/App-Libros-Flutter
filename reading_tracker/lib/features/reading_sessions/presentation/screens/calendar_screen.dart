@@ -39,8 +39,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final booksById = ref.watch(booksByIdProvider);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Calendario'),
+        title: const Text('Diario lector'),
         actions: [
           SegmentedButton<CalendarMode>(
             showSelectedIcon: false,
@@ -54,8 +55,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             },
           ),
           IconButton(
-            tooltip: 'Nueva sesion',
-            icon: const Icon(Icons.add),
+            tooltip: 'Nueva sesión',
+            icon: const Icon(Icons.add_rounded),
             onPressed: () => Navigator.pushNamed(context, '/session/add'),
           ),
         ],
@@ -186,23 +187,50 @@ class _CalendarHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
       child: Row(
         children: [
-          IconButton(
-            onPressed: onPrevious,
-            icon: const Icon(Icons.chevron_left),
-          ),
+          _RoundNavButton(icon: Icons.chevron_left, onTap: onPrevious),
           Expanded(
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
-          IconButton(onPressed: onNext, icon: const Icon(Icons.chevron_right)),
+          _RoundNavButton(icon: Icons.chevron_right, onTap: onNext),
         ],
+      ),
+    );
+  }
+}
+
+class _RoundNavButton extends StatelessWidget {
+  const _RoundNavButton({required this.icon, required this.onTap});
+
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.colorScheme.surface.withValues(alpha: 0.72),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: SizedBox(
+          width: 42,
+          height: 42,
+          child: Icon(icon, color: theme.colorScheme.primary),
+        ),
       ),
     );
   }
@@ -219,47 +247,67 @@ class _ActivitySummaryCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-      child: Card(
-        elevation: 0,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface.withValues(alpha: 0.78),
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(
+            color: theme.colorScheme.primary.withValues(alpha: 0.08),
+          ),
+          boxShadow: AppShadows.soft(theme.colorScheme.primary),
+        ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
                 ),
               ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 16,
-                runSpacing: 8,
+              const SizedBox(height: 14),
+              Row(
                 children: [
-                  _SummaryMetric(
-                    label: 'Paginas',
-                    value: '${summary.pagesRead}',
+                  Expanded(
+                    child: _SummaryMetric(
+                      icon: AppIcons.pages,
+                      label: 'Páginas',
+                      value: '${summary.pagesRead}',
+                    ),
                   ),
-                  _SummaryMetric(label: 'Minutos', value: '${summary.minutes}'),
-                  _SummaryMetric(
-                    label: 'Dias activos',
-                    value: '${summary.activeDays}',
+                  Expanded(
+                    child: _SummaryMetric(
+                      icon: AppIcons.time,
+                      label: 'Minutos',
+                      value: '${summary.minutes}',
+                    ),
+                  ),
+                  Expanded(
+                    child: _SummaryMetric(
+                      icon: AppIcons.calendar,
+                      label: 'Días',
+                      value: '${summary.activeDays}',
+                    ),
                   ),
                 ],
               ),
             ],
           ),
-        ),
       ),
     );
   }
 }
 
 class _SummaryMetric extends StatelessWidget {
-  const _SummaryMetric({required this.label, required this.value});
+  const _SummaryMetric({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
+  final IconData icon;
   final String label;
   final String value;
 
@@ -267,21 +315,24 @@ class _SummaryMetric extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return SizedBox(
-      width: 92,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: theme.textTheme.bodySmall),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: theme.colorScheme.primary, size: 18),
+        const SizedBox(height: 6),
+        Text(
+          value,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w800,
           ),
-        ],
-      ),
+        ),
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.primary.withValues(alpha: 0.70),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -562,46 +613,57 @@ class _WeekDaySection extends StatelessWidget {
     final totalMinutes = activity?.minutes ?? 0;
     final intensity = activity?.intensity ?? ReadingActivityIntensity.none;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      color: _activityColor(context, intensity),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: () =>
-            Navigator.pushNamed(context, '/calendar/day', arguments: day),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      _dayTitle(day),
-                      style: Theme.of(context).textTheme.titleSmall,
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: _activityColor(context, intensity).withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(
+            alpha: intensity == ReadingActivityIntensity.none ? 0.06 : 0.14,
+          ),
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: () =>
+              Navigator.pushNamed(context, '/calendar/day', arguments: day),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _dayTitle(day),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                     ),
-                  ),
-                  if (totalPages > 0 || totalMinutes > 0)
-                    Text(
-                      _activityValue(totalPages, totalMinutes),
-                      style: Theme.of(context).textTheme.labelLarge,
+                    if (totalPages > 0 || totalMinutes > 0)
+                      _ActivityBadge(
+                        label: _activityValue(totalPages, totalMinutes),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                if (sessions.isEmpty)
+                  Text('Sin sesiones', style: theme.textTheme.bodySmall)
+                else
+                  for (final session in sessions)
+                    _WeekSessionRow(
+                      session: session,
+                      book: booksById[session.bookId],
                     ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              if (sessions.isEmpty)
-                Text(
-                  'Sin sesiones',
-                  style: Theme.of(context).textTheme.bodySmall,
-                )
-              else
-                for (final session in sessions)
-                  _WeekSessionRow(
-                    session: session,
-                    book: booksById[session.bookId],
-                  ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -620,13 +682,39 @@ class _WeekDaySection extends StatelessWidget {
     const weekdays = [
       'Lunes',
       'Martes',
-      'Miercoles',
+      'Miércoles',
       'Jueves',
       'Viernes',
-      'Sabado',
+      'Sábado',
       'Domingo',
     ];
     return '${weekdays[date.weekday - 1]} ${date.day}/${date.month}';
+  }
+}
+
+class _ActivityBadge extends StatelessWidget {
+  const _ActivityBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondary.withValues(alpha: 0.24),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
   }
 }
 
@@ -722,21 +810,33 @@ class _CalendarDayCell extends StatelessWidget {
     final totalMinutes = activity?.minutes ?? 0;
     final isToday = _isToday(day);
 
+    final theme = Theme.of(context);
+    final hasActivity = totalPages > 0 || totalMinutes > 0;
+
     return InkWell(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(compact ? 14 : 18),
       onTap: () =>
           Navigator.pushNamed(context, '/calendar/day', arguments: day),
-      child: Container(
-        padding: EdgeInsets.all(compact ? 4 : 6),
+      child: AnimatedContainer(
+        duration: AppMotion.fast,
+        curve: AppMotion.standard,
+        padding: EdgeInsets.all(compact ? 5 : 7),
         decoration: BoxDecoration(
-          color: _activityColor(context, intensity),
+          color: _activityColor(context, intensity).withValues(
+            alpha: hasActivity ? 0.92 : 0.58,
+          ),
           border: Border.all(
             color: isToday
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).dividerColor,
-            width: isToday ? 2 : 1,
+                ? theme.colorScheme.primary
+                : theme.colorScheme.primary.withValues(
+                    alpha: hasActivity ? 0.16 : 0.06,
+                  ),
+            width: isToday ? 1.6 : 1,
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(compact ? 14 : 18),
+          boxShadow: hasActivity && !compact
+              ? AppShadows.editorial(theme.colorScheme.primary)
+              : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -747,9 +847,11 @@ class _CalendarDayCell extends StatelessWidget {
                 '${day.day}',
                 maxLines: 1,
                 style: TextStyle(
-                  color: isMuted ? Theme.of(context).disabledColor : null,
+                  color: isMuted
+                      ? theme.colorScheme.onSurface.withValues(alpha: 0.34)
+                      : theme.colorScheme.onSurface,
                   fontSize: compact ? 12 : null,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ),
@@ -767,13 +869,26 @@ class _CalendarDayCell extends StatelessWidget {
                   ),
                   const Spacer(),
                   if (totalPages > 0 || totalMinutes > 0)
-                    Text(
-                      _activityLabel(totalPages, totalMinutes),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontSize: compact ? 10 : null,
-                        fontWeight: FontWeight.w700,
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: compact ? 5 : 7,
+                        vertical: compact ? 2 : 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface.withValues(
+                          alpha: 0.72,
+                        ),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        _activityLabel(totalPages, totalMinutes),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontSize: compact ? 9 : null,
+                          fontWeight: FontWeight.w900,
+                          color: theme.colorScheme.primary,
+                        ),
                       ),
                     ),
                 ],
