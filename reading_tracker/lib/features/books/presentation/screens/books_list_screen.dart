@@ -69,6 +69,7 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
                         _LibraryHeader(
                           stats: libraryStats,
                           query: _query,
+                          onAddBook: _openAddBook,
                           onQueryChanged: (value) {
                             setState(() => _query = value);
                           },
@@ -212,7 +213,7 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
     if (!mounted) return;
     if (status is BookStatus) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Libro anadido como ${status.label}')),
+        SnackBar(content: Text('Libro añadido como ${status.label}')),
       );
     }
   }
@@ -222,11 +223,13 @@ class _LibraryHeader extends StatelessWidget {
   const _LibraryHeader({
     required this.stats,
     required this.query,
+    required this.onAddBook,
     required this.onQueryChanged,
   });
 
   final _LibraryStats stats;
   final String query;
+  final VoidCallback onAddBook;
   final ValueChanged<String> onQueryChanged;
 
   @override
@@ -303,12 +306,24 @@ class _LibraryHeader extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
-        Text(
-          'Mi Biblioteca',
-          style: theme.textTheme.displaySmall?.copyWith(
-            color: theme.colorScheme.onSurface,
-            fontWeight: FontWeight.w800,
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                'Tu Biblioteca',
+                style: theme.textTheme.displaySmall?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            FilledButton.tonalIcon(
+              onPressed: onAddBook,
+              icon: const Icon(AppIcons.add, size: 18),
+              label: const Text('Añadir'),
+            ),
+          ],
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
