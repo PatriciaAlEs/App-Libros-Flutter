@@ -237,6 +237,15 @@ Estado confirmado por el usuario:
 - Hito 5 Sprint 6 - Biblioteca Visual Refinement esta implementado y pendiente de validacion local por el usuario.
 - Hito 5 Sprint 7 - Book Detail Visual Refinement esta implementado y pendiente de validacion local por el usuario.
 - Hito 5 Sprint 8 - Progress Premium Redesign esta implementado y pendiente de validacion local por el usuario.
+- Hito 5 Sprint 9 - Library Premium Redesign esta implementado; Biblioteca conserva foco en libros, portadas, busqueda, filtros y anadir libros.
+- Hito 5 Sprint 10 - Empty States & UX Polish esta implementado.
+- Hito 5 Sprint 11 - Reading Sessions Premium esta implementado; calendario, detalle de dia y formulario de sesiones quedaron alineados al estilo premium.
+- Hito 5 Sprint 11A/11B - UX Review Corrections estan implementados.
+- Estado UX actual: Biblioteca no debe mostrar cards estadisticas superiores; conserva solo total textual de libros, busqueda, filtros, grid, boton `Anadir` y FAB.
+- Estado UX actual: Perfil es pantalla de ajustes/preferencias, no dashboard. No muestra metricas lectoras, reto lector ni estadisticas globales; conserva selector de tema y seccion `Proximamente`.
+- Estado UX actual: Insights es pantalla principal de descubrimientos/curiosidades con hero, panel de insight principal, metricas destacadas y cards editoriales.
+- Estado UX actual: Add Book es pantalla premium para incorporar libros con buscador Open Library protagonista y formulario agrupado visualmente.
+- Separacion conceptual actual: Home resumen general; Biblioteca coleccion; Progress seguimiento; Stats metricas; Insights descubrimientos; Perfil preferencias.
 
 ## Estadisticas MVP
 

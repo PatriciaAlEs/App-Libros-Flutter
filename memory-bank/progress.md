@@ -160,6 +160,18 @@
 - `ProgressScreen` muestra header editorial, card protagonista, reto lector anual, actividad lectora y accesos rapidos premium.
 - `ProgressScreen` reutiliza datos existentes de `statisticsSummaryProvider`, `booksProvider` y `readingSessionsForRangeProvider`.
 - No se tocaron Drift, repositorios, modelos ni logica de negocio en Sprint 8.
+- Hito 5 Sprint 9 implementado: Library Premium Redesign.
+- Biblioteca se refino como coleccion premium con portadas, busqueda, filtros, grid visual, CTA de anadir y FAB.
+- Correccion Sprint 11B: Biblioteca queda enfocada solo en libros; se eliminaron cards estadisticas superiores y no muestra paginas/sesiones/rachas/objetivos en header.
+- Hito 5 Sprint 10 implementado: Empty States & UX Polish transversal.
+- Hito 5 Sprint 11 implementado: Reading Sessions Premium.
+- Reading Sessions refinado: calendario mas visual, cards de actividad diaria, Day Detail como diario lector, sesiones con jerarquia y formulario agrupado.
+- Hito 5 Sprint 11A/11B implementado: UX Review Corrections + Add Book, Profile e Insights refinements.
+- Add Book refinado como pantalla premium con hero, buscador Open Library, resultados visuales, seleccion destacada, secciones y CTA principal.
+- Insights refinado como seccion principal premium con header ReadPp, hero, metricas destacadas, panel de descubrimiento principal y cards editoriales.
+- Perfil corregido para ser pantalla de ajustes/preferencias: mantiene selector de tema y `Proximamente`; no muestra metricas lectoras, reto lector ni estadisticas globales.
+- Home mantiene accion superior de anadir/buscar libro y no duplica acceso superior a Perfil.
+- Se mantiene padding inferior amplio en Insights y Perfil para evitar contenido oculto bajo bottom navigation.
 
 ## Parcial / en seguimiento
 
@@ -175,12 +187,12 @@
 - Validacion local de Hito 5 Sprint 5.1 pendiente en terminal del usuario.
 - Validacion local de Hito 5 Sprint 6 pendiente en terminal del usuario.
 - Validacion local de Hito 5 Sprint 7 pendiente en terminal del usuario.
-- Validacion local de Hito 5 Sprint 8 pendiente en terminal del usuario.
+- Validacion local de Hito 5 Sprint 8 y sprints posteriores pendiente en terminal del usuario.
 
 ## Pendiente inmediato
 
 - Ejecutar `flutter pub get` para incorporar `shared_preferences`.
-- Validar Hito 5 Sprint 1 a Sprint 8 cuando el usuario lo decida.
+- Validar Hito 5 Sprint 1 a Sprint 11B cuando el usuario lo decida.
 - Definir el siguiente bloque funcional cuando el usuario lo pida.
 
 ## Pendiente futuro

@@ -102,3 +102,15 @@
 - El CTA de reto lector puede llevar a `/stats`, donde ya vive la edicion/configuracion del objetivo anual.
 - El usuario prefiere ejecutar validaciones localmente; no correr `dart format`, `flutter analyze` ni `flutter test` si el pedido lo prohibe.
 - La tipografia fue iterada por peticiones de usuario; antes de cerrar Hito 5 conviene revisar la decision final de fuentes y actualizar `AppTypography`/Memory Bank si cambia.
+
+## UX Review Hito 5 Sprints 9-11B
+
+- Separacion conceptual aprobada: Home = resumen general; Biblioteca = coleccion de libros; Progress = seguimiento; Stats = metricas; Insights = descubrimientos/curiosidades; Perfil = usuario, ajustes y preferencias.
+- Biblioteca debe mantener foco exclusivo en libros: buscar, filtrar, consultar y anadir. Puede mostrar total textual de libros, pero no cards superiores de paginas, sesiones, rachas, objetivos o metricas globales.
+- Biblioteca conserva acceso rapido para anadir libros desde el header (`+ / Anadir`) y desde FAB.
+- Home puede tener accion superior para anadir/buscar libro; no debe duplicar acceso superior a Perfil porque Perfil ya vive en bottom nav.
+- Add Book debe sentirse parte del producto premium: hero, buscador Open Library protagonista, resultados visuales, seleccion clara, formulario agrupado y CTA principal.
+- Insights debe sentirse como pantalla principal premium, no secundaria: header de marca, hero, insight principal, metricas destacadas, secciones y cards editoriales.
+- Perfil debe tratarse como ajustes/preferencias, no dashboard: mantener selector de tema y seccion `Proximamente`; no mostrar metricas lectoras, reto lector ni estadisticas globales.
+- Pantallas principales con contenido scrolleable deben reservar padding inferior suficiente para que bottom navigation no oculte cards o CTAs.
+- Tipografia actual indicada por el usuario: Roboto global.

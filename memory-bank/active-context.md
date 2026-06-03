@@ -203,6 +203,18 @@ El sistema visual base ahora incluye:
 - Se implemento Hito 5 Sprint 8 - Progress Premium Redesign.
 - ProgressScreen consume `statisticsSummaryProvider`, `booksProvider` y `readingSessionsForRangeProvider` para mostrar datos reales sin crear nuevos calculos de dominio.
 - ProgressScreen mantiene navegacion existente a `/stats`, `/calendar` y `/session/add`.
+- Se implemento Hito 5 Sprint 9 - Library Premium Redesign y refinamientos posteriores.
+- Biblioteca quedo enfocada exclusivamente en coleccion de libros: buscar, filtrar, consultar y anadir.
+- En Biblioteca se mantiene boton `+ / Anadir` en header y FAB; se eliminaron las cards estadisticas superiores para no mezclar responsabilidades con Stats/Progress/Insights.
+- Se implemento Hito 5 Sprint 10 - Empty States & UX Polish.
+- Se implemento Hito 5 Sprint 11 - Reading Sessions Premium: calendario, day detail y formulario de sesiones recibieron tratamiento premium sin cambiar modelos/repositorios.
+- Se implementaron correcciones UX Sprint 11/11A/11B.
+- Home mantiene accion superior para anadir/buscar libro y elimina acceso superior redundante a Perfil; Perfil se accede desde bottom nav.
+- Add Book fue refinada como pantalla premium con hero, buscador Open Library protagonista, resultados visuales, seleccion destacada, secciones de estado/fechas/paginas y CTA principal.
+- Insights fue refinada como pantalla principal premium con header de marca, hero, metricas destacadas, panel de descubrimiento principal, secciones editoriales y padding inferior seguro.
+- Perfil fue corregido para funcionar como pantalla de ajustes y preferencias, no como dashboard: mantiene header/hero de preferencias, selector de tema y bloque `Proximamente`; no muestra metricas lectoras, reto anual ni estadisticas globales.
+- Modelo conceptual actual: Home = resumen general; Biblioteca = coleccion; Progress = seguimiento; Stats = metricas; Insights = descubrimientos/curiosidades; Perfil = usuario, ajustes y preferencias.
+- Tipografia actual indicada por el usuario: Roboto global.
 
 ## Archivos tocados recientemente
 
