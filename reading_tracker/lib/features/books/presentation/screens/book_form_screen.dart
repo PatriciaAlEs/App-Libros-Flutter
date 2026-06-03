@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/design_system/design_system.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../data/datasources/book_api_datasource.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/entities/book_search_result.dart';
@@ -281,11 +283,16 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('Añadir lectura')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 112),
         children: [
+          const _AddBookHero(),
+          const SizedBox(height: AppSpacing.lg),
           _SearchField(
             controller: _searchController,
             isSearching: _isSearching,
@@ -294,39 +301,48 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
           ),
           const SizedBox(height: 16),
           if (_error != null) ...[
-            Text(
-              _error!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
+            _InlineError(message: _error!),
             const SizedBox(height: 16),
           ],
           if (_selectedBook != null) ...[
             _SelectedBookCard(book: _selectedBook!),
             const SizedBox(height: 16),
           ],
-          _InitialStatusSelector(
-            selectedStatus: _selectedStatus,
-            onChanged: _changeStatus,
+          _FormSection(
+            title: 'Cómo entra en tu biblioteca',
+            icon: AppIcons.bookmark,
+            child: _InitialStatusSelector(
+              selectedStatus: _selectedStatus,
+              onChanged: _changeStatus,
+            ),
           ),
           const SizedBox(height: 16),
           if (_selectedStatus != BookStatus.pending) ...[
-            _InitialDatesFields(
-              startedAt: _startedAt,
-              finishedAt: _finishedAt,
-              showFinishedAt: _selectedStatus == BookStatus.completed,
-              onStartedAtTap: _pickStartedAt,
-              onFinishedAtTap: _pickFinishedAt,
-              onClearStartedAt: () => setState(() {
-                _startedAt = null;
-                _finishedAt = null;
-              }),
-              onClearFinishedAt: () => setState(() => _finishedAt = null),
+            _FormSection(
+              title: 'Fechas de lectura',
+              icon: AppIcons.calendar,
+              child: _InitialDatesFields(
+                startedAt: _startedAt,
+                finishedAt: _finishedAt,
+                showFinishedAt: _selectedStatus == BookStatus.completed,
+                onStartedAtTap: _pickStartedAt,
+                onFinishedAtTap: _pickFinishedAt,
+                onClearStartedAt: () => setState(() {
+                  _startedAt = null;
+                  _finishedAt = null;
+                }),
+                onClearFinishedAt: () => setState(() => _finishedAt = null),
+              ),
             ),
             const SizedBox(height: 16),
           ],
-          _TotalPagesField(
-            controller: _totalPagesController,
-            onChanged: (_) => _totalPagesAutoFilled = false,
+          _FormSection(
+            title: 'Datos del libro',
+            icon: AppIcons.pages,
+            child: _TotalPagesField(
+              controller: _totalPagesController,
+              onChanged: (_) => _totalPagesAutoFilled = false,
+            ),
           ),
           const SizedBox(height: 16),
           _ResultsList(
@@ -350,6 +366,163 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   }
 }
 
+class _AddBookHero extends StatelessWidget {
+  const _AddBookHero();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            theme.colorScheme.primary,
+            Color.lerp(theme.colorScheme.primary, Colors.black, 0.24)!,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: AppShadows.soft(theme.colorScheme.primary),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 58,
+            height: 58,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+            ),
+            child: const Icon(AppIcons.library, color: Colors.white, size: 27),
+          ),
+          const SizedBox(width: AppSpacing.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Nueva lectura',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontFamily: AppTypography.contentFontFamily,
+                    fontFamilyFallback: AppTypography.contentFallback,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Busca el libro, elige cómo quieres guardarlo y déjalo listo en tu biblioteca.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.78),
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FormSection extends StatelessWidget {
+  const _FormSection({
+    required this.title,
+    required this.icon,
+    required this.child,
+  });
+
+  final String title;
+  final IconData icon;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        ),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.secondary.withValues(alpha: 0.22),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 18, color: theme.colorScheme.primary),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _InlineError extends StatelessWidget {
+  const _InlineError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.errorContainer.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline_rounded, color: theme.colorScheme.error),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onErrorContainer,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SearchField extends StatelessWidget {
   const _SearchField({
     required this.controller,
@@ -365,36 +538,74 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: TextField(
-            controller: controller,
-            autofocus: true,
-            textInputAction: TextInputAction.search,
-            decoration: const InputDecoration(
-              labelText: 'Busca por título, autor o ISBN',
-              hintText: 'Ej. La sombra del viento',
-              border: OutlineInputBorder(),
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        ),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Buscar en Open Library',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w900,
             ),
-            onChanged: onChanged,
-            onSubmitted: (_) => onSubmitted(),
           ),
-        ),
-        const SizedBox(width: 8),
-        FilledButton.icon(
-          onPressed: isSearching ? null : onSubmitted,
-          icon: isSearching
-              ? const SizedBox(
-                  height: 18,
-                  width: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.search_rounded),
-          label: const Text('Buscar'),
-        ),
-      ],
+          const SizedBox(height: 4),
+          Text(
+            'Encuentra portadas y datos para añadir el libro más rápido.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  autofocus: true,
+                  textInputAction: TextInputAction.search,
+                  decoration: const InputDecoration(
+                    labelText: 'Título, autor o ISBN',
+                    hintText: 'Ej. La sombra del viento',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(AppIcons.search),
+                  ),
+                  onChanged: onChanged,
+                  onSubmitted: (_) => onSubmitted(),
+                ),
+              ),
+              const SizedBox(width: 8),
+              FilledButton(
+                onPressed: isSearching ? null : onSubmitted,
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(52, 56),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: isSearching
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.search_rounded),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -420,21 +631,23 @@ class _ResultsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     if (isSearching) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 16),
-        child: Text('Buscando tu libro...', textAlign: TextAlign.center),
+      return _SearchFeedbackCard(
+        icon: AppIcons.search,
+        title: 'Buscando tu libro',
+        message: 'Estamos revisando resultados y portadas disponibles.',
+        isLoading: true,
       );
     }
 
     if (results.isEmpty) {
       if (!hasSearched) return const SizedBox.shrink();
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 16),
-        child: Text(
-          'No se encontraron libros. Prueba con otro titulo, autor o ISBN.',
-          textAlign: TextAlign.center,
-        ),
+      return const _SearchFeedbackCard(
+        icon: AppIcons.book,
+        title: 'No encontramos ese libro',
+        message: 'Prueba con otro título, autor o ISBN más específico.',
       );
     }
 
@@ -444,28 +657,23 @@ class _ResultsList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Resultados de Open Library',
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
+        Text('Resultados', style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w900,
+        )),
         const SizedBox(height: 4),
         Text(
-          'Algunos resultados pueden aparecer en otros idiomas.',
-          style: Theme.of(context).textTheme.bodySmall,
+          'Elige el resultado que mejor encaje con tu edición.',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         for (final book in visibleResults)
-          Card(
-            child: ListTile(
-              leading: _Cover(url: book.coverUrl),
-              title: Text(book.title),
-              subtitle: Text(_subtitleFor(book)),
-              trailing: identical(book, selectedBook)
-                  ? const Icon(Icons.check_circle)
-                  : null,
-              selected: identical(book, selectedBook),
-              onTap: () => onSelected(book),
-            ),
+          _BookResultTile(
+            book: book,
+            isSelected: identical(book, selectedBook),
+            subtitle: _subtitleFor(book),
+            onTap: () => onSelected(book),
           ),
         if (hasMoreResults) ...[
           const SizedBox(height: 8),
@@ -490,7 +698,150 @@ class _ResultsList extends StatelessWidget {
       if (book.publisher != null) book.publisher,
       if (book.firstPublishYear != null) '${book.firstPublishYear}',
       if (book.numberOfPages != null) '${book.numberOfPages} páginas',
-    ].whereType<String>().join(' - ');
+    ].whereType<String>().join(' · ');
+  }
+}
+
+class _SearchFeedbackCard extends StatelessWidget {
+  const _SearchFeedbackCard({
+    required this.icon,
+    required this.title,
+    required this.message,
+    this.isLoading = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final String message;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Column(
+        children: [
+          if (isLoading)
+            const SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else
+            Icon(icon, color: theme.colorScheme.primary, size: 30),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BookResultTile extends StatelessWidget {
+  const _BookResultTile({
+    required this.book,
+    required this.subtitle,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final BookSearchResult book;
+  final String subtitle;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: isSelected
+            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.58)
+            : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(22),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: isSelected
+                    ? theme.colorScheme.primary.withValues(alpha: 0.34)
+                    : theme.colorScheme.primary.withValues(alpha: 0.07),
+              ),
+            ),
+            child: Row(
+              children: [
+                _Cover(url: book.coverUrl, width: 54, height: 78),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        book.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      if (subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 5),
+                        Text(
+                          subtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Icon(
+                  isSelected
+                      ? Icons.check_circle_rounded
+                      : Icons.radio_button_unchecked_rounded,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.primary.withValues(alpha: 0.30),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -548,29 +899,33 @@ class _InitialDatesFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       children: [
         ListTile(
-          contentPadding: EdgeInsets.zero,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 4),
           title: const Text('Fecha de inicio'),
           subtitle: Text(_format(startedAt)),
           trailing: IconButton(
             tooltip: 'Quitar fecha de inicio',
-            icon: const Icon(Icons.close),
+            icon: const Icon(Icons.close_rounded),
             onPressed: startedAt == null ? null : onClearStartedAt,
           ),
+          leading: Icon(AppIcons.calendar, color: theme.colorScheme.primary),
           onTap: onStartedAtTap,
         ),
         if (showFinishedAt)
           ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Fecha de finalizacion'),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+            title: const Text('Fecha de finalización'),
             subtitle: Text(_format(finishedAt)),
             trailing: IconButton(
               tooltip: 'Quitar fecha de fin',
-              icon: const Icon(Icons.close),
+              icon: const Icon(Icons.close_rounded),
               onPressed: finishedAt == null ? null : onClearFinishedAt,
             ),
+            leading: Icon(AppIcons.star, color: theme.colorScheme.primary),
             onTap: onFinishedAtTap,
           ),
       ],
@@ -606,26 +961,48 @@ class _SelectedBookCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.primary),
-        borderRadius: BorderRadius.circular(8),
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.44),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.16),
+        ),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
         children: [
-          _Cover(url: book.coverUrl),
-          const SizedBox(width: 12),
+          _Cover(url: book.coverUrl, width: 62, height: 90),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  book.title,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  'Seleccionado',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.4,
+                  ),
                 ),
-                if (book.author != null) Text(book.author!),
-                if (book.publisher != null) Text(book.publisher!),
+                const SizedBox(height: 6),
+                Text(
+                  book.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                if (book.author != null)
+                  Text(
+                    book.author!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 if (book.numberOfPages != null)
                   Text('${book.numberOfPages} páginas'),
               ],
@@ -638,18 +1015,20 @@ class _SelectedBookCard extends StatelessWidget {
 }
 
 class _Cover extends StatelessWidget {
-  const _Cover({required this.url});
+  const _Cover({required this.url, this.width = 48, this.height = 72});
 
   final String? url;
+  final double width;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
     if (url == null) {
       return Container(
-        width: 48,
-        height: 72,
+        width: width,
+        height: height,
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        child: const Icon(Icons.menu_book),
+        child: const Icon(AppIcons.book),
       );
     }
 
@@ -657,14 +1036,14 @@ class _Cover extends StatelessWidget {
       borderRadius: BorderRadius.circular(4),
       child: Image.network(
         url!,
-        width: 48,
-        height: 72,
+        width: width,
+        height: height,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => Container(
-          width: 48,
-          height: 72,
+          width: width,
+          height: height,
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: const Icon(Icons.menu_book),
+          child: const Icon(AppIcons.book),
         ),
       ),
     );
@@ -687,6 +1066,12 @@ class _SaveButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: FilledButton(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size.fromHeight(54),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+        ),
         onPressed: enabled && !isSaving ? onPressed : null,
         child: isSaving
             ? const SizedBox(

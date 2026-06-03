@@ -422,33 +422,8 @@ class _HomeHeader extends StatelessWidget {
             tooltip: 'Añadir o buscar libro',
             onTap: () => Navigator.pushNamed(context, '/book/add'),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          const _ProfilePlaceholder(),
         ],
       ),
-    );
-  }
-}
-
-class _ProfilePlaceholder extends StatelessWidget {
-  const _ProfilePlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: 44,
-      height: 44,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: theme.colorScheme.surface.withValues(alpha: 0.68),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.10),
-        ),
-      ),
-      child: Icon(AppIcons.profile, color: theme.colorScheme.primary, size: 21),
     );
   }
 }
@@ -1223,106 +1198,105 @@ class _AnnualGoalCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '$year READING GOAL',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.primary.withValues(
-                            alpha: 0.78,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '$year READING GOAL',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.78,
+                              ),
+                              letterSpacing: 2.6,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                          letterSpacing: 2.6,
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            'Reto de lectura $year',
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer.withValues(
+                          alpha: 0.55,
+                        ),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '${(safeProgress * 100).round()}%',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 28),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${summary.completedThisYear}',
+                      style: theme.textTheme.displaySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontFamily: AppTypography.contentFontFamily,
+                        fontFamilyFallback: AppTypography.contentFallback,
+                        fontSize: 36,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6, left: 4),
+                      child: Text(
+                        goal == null ? 'libros' : '/ $goal',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        'Reto de lectura $year',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.sm,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withValues(
-                      alpha: 0.55,
                     ),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    '${(safeProgress * 100).round()}%',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w600,
+                    const Spacer(),
+                    Icon(
+                      AppIcons.star,
+                      color: theme.colorScheme.secondary,
+                      size: 30,
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 28),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
+                const SizedBox(height: AppSpacing.xs),
                 Text(
-                  '${summary.completedThisYear}',
-                  style: theme.textTheme.displaySmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontFamily: AppTypography.contentFontFamily,
-                    fontFamilyFallback: AppTypography.contentFallback,
-                    fontSize: 36,
-                    fontWeight: FontWeight.w600,
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.82),
+                    fontStyle: FontStyle.italic,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 6, left: 4),
-                  child: Text(
-                    goal == null ? 'libros' : '/ $goal',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
+                const SizedBox(height: 18),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: LinearProgressIndicator(
+                    value: safeProgress,
+                    minHeight: 6,
+                    backgroundColor: theme.colorScheme.primaryContainer
+                        .withValues(alpha: 0.42),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.74),
                   ),
                 ),
-                const Spacer(),
-                Icon(
-                  AppIcons.star,
-                  color: theme.colorScheme.secondary,
-                  size: 30,
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              subtitle,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.primary.withValues(alpha: 0.82),
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-            const SizedBox(height: 18),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(
-                value: safeProgress,
-                minHeight: 6,
-                backgroundColor: theme.colorScheme.primaryContainer.withValues(
-                  alpha: 0.42,
-                ),
-                color: theme.colorScheme.primary.withValues(alpha: 0.74),
-              ),
-            ),
               ],
             ),
           ),
