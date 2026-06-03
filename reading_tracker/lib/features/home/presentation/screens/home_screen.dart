@@ -101,9 +101,23 @@ class HomeScreen extends ConsumerWidget {
                                 _startReading(context, ref, book),
                           ),
                           const SizedBox(height: AppSpacing.xxl),
-                          _QuickMetrics(summary: summary),
+                          _QuickMetrics(
+                            summary: summary,
+                            onOpenCalendar: () =>
+                                Navigator.pushNamed(context, '/calendar'),
+                            onOpenLibrary: () =>
+                                Navigator.pushNamed(context, '/books'),
+                            onOpenProgress: () =>
+                                Navigator.pushNamed(context, '/progress'),
+                          ),
                           const SizedBox(height: AppSpacing.xl),
-                          _AnnualGoalCard(summary: summary),
+                          _AnnualGoalCard(
+                            summary: summary,
+                            onTap: () => Navigator.pushNamed(
+                              context,
+                              '/progress',
+                            ),
+                          ),
                           const SizedBox(height: AppSpacing.xxl),
                           _JournalHeader(
                             onSeeAll: () =>
@@ -226,7 +240,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   String _contextualGreeting(DateTime now) {
-    if (now.hour < 12) return 'Buenos dias';
+    if (now.hour < 12) return 'Buenos días';
     if (now.hour < 20) return 'Buenas tardes';
     return 'Buenas noches';
   }
@@ -404,8 +418,9 @@ class _HomeHeader extends StatelessWidget {
             ),
           ),
           _HeaderActionButton(
-            icon: AppIcons.search,
-            onTap: () => Navigator.pushNamed(context, '/books'),
+            icon: AppIcons.add,
+            tooltip: 'Añadir o buscar libro',
+            onTap: () => Navigator.pushNamed(context, '/book/add'),
           ),
           const SizedBox(width: AppSpacing.sm),
           const _ProfilePlaceholder(),
@@ -433,44 +448,46 @@ class _ProfilePlaceholder extends StatelessWidget {
           color: theme.colorScheme.primary.withValues(alpha: 0.10),
         ),
       ),
-      child: Text(
-        'D',
-        style: theme.textTheme.labelLarge?.copyWith(
-          color: theme.colorScheme.primary,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+      child: Icon(AppIcons.profile, color: theme.colorScheme.primary, size: 21),
     );
   }
 }
 
 class _HeaderActionButton extends StatelessWidget {
-  const _HeaderActionButton({required this.icon, required this.onTap});
+  const _HeaderActionButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
 
   final IconData icon;
+  final String tooltip;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Material(
-      color: theme.colorScheme.surface.withValues(alpha: 0.68),
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: Container(
-          width: 44,
-          height: 44,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.10),
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: theme.colorScheme.surface.withValues(alpha: 0.68),
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: Container(
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.10),
+              ),
             ),
+            child: Icon(icon, color: theme.colorScheme.primary, size: 22),
           ),
-          child: Icon(icon, color: theme.colorScheme.primary, size: 22),
         ),
       ),
     );
@@ -947,7 +964,7 @@ class _EmptyCurrentReadingCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SectionHeader(title: 'Elige tu proxima lectura'),
+            SectionHeader(title: 'Elige tu próxima lectura'),
             const SizedBox(height: AppSpacing.sm),
             for (final book in visibleBooks)
               ListTile(
@@ -977,9 +994,17 @@ class _EmptyCurrentReadingCard extends StatelessWidget {
 }
 
 class _QuickMetrics extends StatelessWidget {
-  const _QuickMetrics({required this.summary});
+  const _QuickMetrics({
+    required this.summary,
+    required this.onOpenCalendar,
+    required this.onOpenLibrary,
+    required this.onOpenProgress,
+  });
 
   final StatisticsSummary summary;
+  final VoidCallback onOpenCalendar;
+  final VoidCallback onOpenLibrary;
+  final VoidCallback onOpenProgress;
 
   @override
   Widget build(BuildContext context) {
@@ -992,10 +1017,11 @@ class _QuickMetrics extends StatelessWidget {
             icon: AppIcons.fire,
             value: '${summary.currentStreakDays}',
             label: 'Racha',
-            footnote: 'dias',
+            footnote: 'días',
             backgroundColor: theme.colorScheme.surface,
             foregroundColor: theme.colorScheme.onSurface,
             iconColor: theme.colorScheme.primary,
+            onTap: onOpenCalendar,
           ),
         ),
         const SizedBox(width: AppSpacing.md),
@@ -1004,10 +1030,11 @@ class _QuickMetrics extends StatelessWidget {
             icon: AppIcons.book,
             value: '${summary.completedThisYear}',
             label: 'Libros',
-            footnote: 'este ano',
+            footnote: 'este año',
             backgroundColor: theme.colorScheme.surface,
             foregroundColor: theme.colorScheme.onSurface,
             iconColor: theme.colorScheme.primary,
+            onTap: onOpenLibrary,
           ),
         ),
         const SizedBox(width: AppSpacing.md),
@@ -1015,11 +1042,12 @@ class _QuickMetrics extends StatelessWidget {
           child: _CompactMetricCard(
             icon: AppIcons.pages,
             value: _compactNumber(summary.totalPagesRead),
-            label: 'Paginas',
+            label: 'Páginas',
             footnote: 'totales',
             backgroundColor: theme.colorScheme.surface,
             foregroundColor: theme.colorScheme.onSurface,
             iconColor: theme.colorScheme.primary,
+            onTap: onOpenProgress,
           ),
         ),
       ],
@@ -1044,6 +1072,7 @@ class _CompactMetricCard extends StatelessWidget {
     required this.backgroundColor,
     required this.foregroundColor,
     required this.iconColor,
+    required this.onTap,
   });
 
   final IconData icon;
@@ -1053,77 +1082,95 @@ class _CompactMetricCard extends StatelessWidget {
   final Color backgroundColor;
   final Color foregroundColor;
   final Color iconColor;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: backgroundColor,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: 18,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: iconColor, size: 22),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: 18,
             ),
-            const SizedBox(height: 18),
-            Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: foregroundColor,
-                fontFamily: AppTypography.contentFontFamily,
-                fontFamilyFallback: AppTypography.contentFallback,
-                fontSize: 25,
-                fontWeight: FontWeight.w700,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: iconColor.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, color: iconColor, size: 22),
+                    ),
+                    const Spacer(),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 18,
+                      color: foregroundColor.withValues(alpha: 0.34),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: foregroundColor,
+                    fontFamily: AppTypography.contentFontFamily,
+                    fontFamilyFallback: AppTypography.contentFallback,
+                    fontSize: 25,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  label.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: foregroundColor.withValues(alpha: 0.84),
+                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  footnote,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 3),
-            Text(
-              label.toUpperCase(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: foregroundColor.withValues(alpha: 0.84),
-                letterSpacing: 1.2,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            Text(
-              footnote,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 11,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -1131,9 +1178,10 @@ class _CompactMetricCard extends StatelessWidget {
 }
 
 class _AnnualGoalCard extends StatelessWidget {
-  const _AnnualGoalCard({required this.summary});
+  const _AnnualGoalCard({required this.summary, required this.onTap});
 
   final StatisticsSummary summary;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1145,31 +1193,36 @@ class _AnnualGoalCard extends StatelessWidget {
         ? 'Configura tu reto lector desde Progreso.'
         : (summary.booksRemainingForAnnualGoal != null &&
               summary.booksRemainingForAnnualGoal! > 0)
-        ? '${summary.booksRemainingForAnnualGoal} mas para alcanzar la estanteria'
+        ? '${summary.booksRemainingForAnnualGoal} más para alcanzar la estantería'
         : 'Objetivo anual alcanzado';
 
     final theme = Theme.of(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.09),
-            blurRadius: 28,
-            offset: const Offset(0, 14),
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.primary.withValues(alpha: 0.09),
+                blurRadius: 28,
+                offset: const Offset(0, 14),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 22, 24, 22),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 22, 24, 22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1270,7 +1323,9 @@ class _AnnualGoalCard extends StatelessWidget {
                 color: theme.colorScheme.primary.withValues(alpha: 0.74),
               ),
             ),
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -1416,7 +1471,7 @@ class _QuickReadingDialogState extends State<_QuickReadingDialog> {
               TextField(
                 controller: _pagesReadController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Paginas leidas'),
+                decoration: const InputDecoration(labelText: 'Páginas leídas'),
               ),
               const SizedBox(height: AppSpacing.md),
               TextField(

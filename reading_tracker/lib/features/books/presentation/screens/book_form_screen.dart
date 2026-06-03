@@ -282,7 +282,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Añadir libro')),
+      appBar: AppBar(title: const Text('Añadir lectura')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -371,9 +371,11 @@ class _SearchField extends StatelessWidget {
         Expanded(
           child: TextField(
             controller: controller,
+            autofocus: true,
             textInputAction: TextInputAction.search,
             decoration: const InputDecoration(
-              labelText: 'Título, autor o ISBN',
+              labelText: 'Busca por título, autor o ISBN',
+              hintText: 'Ej. La sombra del viento',
               border: OutlineInputBorder(),
             ),
             onChanged: onChanged,
@@ -389,7 +391,7 @@ class _SearchField extends StatelessWidget {
                   width: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.search),
+              : const Icon(Icons.search_rounded),
           label: const Text('Buscar'),
         ),
       ],
@@ -473,7 +475,7 @@ class _ResultsList extends StatelessWidget {
               onPressed: onShowMore,
               icon: const Icon(Icons.expand_more),
               label: Text(
-                'Ver mas resultados (${results.length - visibleResults.length})',
+                'Ver más resultados (${results.length - visibleResults.length})',
               ),
             ),
           ),
