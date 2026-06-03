@@ -31,6 +31,8 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: AppSpacing.lg),
             _ProfileMetrics(summary: summary),
             const SizedBox(height: AppSpacing.lg),
+            _ProfileGoalCard(summary: summary),
+            const SizedBox(height: AppSpacing.lg),
             _ThemePreferenceCard(
               selectedTheme: selectedTheme,
               onChanged: controller.setTheme,
@@ -311,6 +313,83 @@ class _ProfileMetricCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileGoalCard extends StatelessWidget {
+  const _ProfileGoalCard({required this.summary});
+
+  final StatisticsSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final year = DateTime.now().year;
+    final goal = summary.annualReadingGoal;
+    final progress = (summary.annualGoalProgress ?? 0).clamp(0.0, 1.0);
+    final title = goal == null
+        ? 'Reto lector sin configurar'
+        : 'Reto lector $year';
+    final subtitle = goal == null
+        ? 'Configúralo desde Progreso para seguir tu año lector.'
+        : '${summary.completedThisYear} de $goal libros completados';
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        ),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(AppIcons.star, color: theme.colorScheme.primary),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              Text(
+                '${(progress * 100).round()}%',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            subtitle,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: progress.toDouble(),
+              minHeight: 6,
+              backgroundColor: theme.colorScheme.primaryContainer.withValues(
+                alpha: 0.42,
+              ),
+              color: theme.colorScheme.primary.withValues(alpha: 0.78),
             ),
           ),
         ],

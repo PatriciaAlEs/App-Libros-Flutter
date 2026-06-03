@@ -36,6 +36,8 @@ class InsightsScreen extends ConsumerWidget {
                 _InsightsHero(summary: summary),
                 const SizedBox(height: AppSpacing.lg),
                 _InsightMetrics(summary: summary),
+                const SizedBox(height: AppSpacing.lg),
+                _PrimaryInsightPanel(summary: summary),
                 const SizedBox(height: AppSpacing.xxl),
                 _SectionTitle(
                   eyebrow: 'LECTURA PERSONAL',
@@ -331,6 +333,120 @@ class _InsightMetrics extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PrimaryInsightPanel extends StatelessWidget {
+  const _PrimaryInsightPanel({required this.summary});
+
+  final ReadingInsightsSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final insight = _primaryInsight();
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        ),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.secondary.withValues(alpha: 0.24),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(insight.icon, color: theme.colorScheme.primary),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  insight.label,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.4,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  insight.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  insight.subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  ({IconData icon, String label, String title, String subtitle})
+  _primaryInsight() {
+    if (summary.hasFinishPrediction) {
+      return (
+        icon: AppIcons.calendar,
+        label: 'PRÓXIMO HITO',
+        title: summary.finishPredictionBookTitle!,
+        subtitle:
+            '${summary.finishPredictionRemainingPages} páginas restantes · ${summary.finishPredictionDaysRemaining} días estimados',
+      );
+    }
+
+    if (summary.topRatedBookTitle != null) {
+      return (
+        icon: AppIcons.star,
+        label: 'MEJOR LECTURA',
+        title: summary.topRatedBookTitle!,
+        subtitle: summary.topRatedBookRating == null
+            ? 'Una de tus lecturas destacadas'
+            : '${summary.topRatedBookRating!.toStringAsFixed(1)} / 5 de valoración',
+      );
+    }
+
+    if (summary.longestBookTitle != null) {
+      return (
+        icon: AppIcons.book,
+        label: 'LECTURA MÁS EXTENSA',
+        title: summary.longestBookTitle!,
+        subtitle: summary.longestBookPages == null
+            ? 'Tu libro completado más largo'
+            : '${summary.longestBookPages} páginas',
+      );
+    }
+
+    return (
+      icon: AppIcons.insightsNav,
+      label: 'DESCUBRIMIENTO',
+      title: summary.favoriteGenre ?? summary.mostReadAuthor ?? 'Tu mapa lector',
+      subtitle: 'Tus sesiones empiezan a revelar patrones personales.',
     );
   }
 }

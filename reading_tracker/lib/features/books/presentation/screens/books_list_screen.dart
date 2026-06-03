@@ -327,7 +327,7 @@ class _LibraryHeader extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          '${stats.totalBooks} libros · ${_compactNumber(stats.totalPages)} páginas',
+          '${stats.totalBooks} libros en tu colección',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -389,30 +389,33 @@ class _LibraryStatsStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      mainAxisSpacing: AppSpacing.sm,
+      crossAxisSpacing: AppSpacing.sm,
+      childAspectRatio: 2.15,
       children: [
-        Expanded(
-          child: _LibraryStatPill(
-            icon: AppIcons.book,
-            value: '${stats.readingBooks}',
-            label: 'Leyendo',
-          ),
+        _LibraryStatPill(
+          icon: AppIcons.library,
+          value: '${stats.totalBooks}',
+          label: 'Total',
         ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: _LibraryStatPill(
-            icon: AppIcons.pages,
-            value: _compactNumber(stats.totalPages),
-            label: 'Páginas',
-          ),
+        _LibraryStatPill(
+          icon: AppIcons.book,
+          value: '${stats.readingBooks}',
+          label: 'Leyendo',
         ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: _LibraryStatPill(
-            icon: AppIcons.star,
-            value: '${stats.completedBooks}',
-            label: 'Terminados',
-          ),
+        _LibraryStatPill(
+          icon: AppIcons.bookmark,
+          value: '${stats.pendingBooks}',
+          label: 'Pendientes',
+        ),
+        _LibraryStatPill(
+          icon: AppIcons.star,
+          value: '${stats.completedBooks}',
+          label: 'Terminados',
         ),
       ],
     );
@@ -1189,14 +1192,12 @@ String _compactNumber(int value) {
 class _LibraryStats {
   const _LibraryStats({
     required this.totalBooks,
-    required this.totalPages,
     required this.readingBooks,
     required this.pendingBooks,
     required this.completedBooks,
   });
 
   final int totalBooks;
-  final int totalPages;
   final int readingBooks;
   final int pendingBooks;
   final int completedBooks;
@@ -1204,10 +1205,6 @@ class _LibraryStats {
   factory _LibraryStats.fromBooks(List<Book> books) {
     return _LibraryStats(
       totalBooks: books.length,
-      totalPages: books.fold<int>(
-        0,
-        (sum, book) => sum + (book.totalPages ?? 0),
-      ),
       readingBooks: books
           .where((book) => book.status == BookStatus.reading)
           .length,
