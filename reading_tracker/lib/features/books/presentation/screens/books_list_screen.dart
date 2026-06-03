@@ -333,8 +333,6 @@ class _LibraryHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        _LibraryStatsStrip(stats: stats),
-        const SizedBox(height: AppSpacing.lg),
         _SearchField(query: query, onChanged: onQueryChanged),
       ],
     );
@@ -377,100 +375,6 @@ class _PremiumFab extends StatelessWidget {
         onPressed: onTap,
         icon: const Icon(AppIcons.add, size: 20),
         label: const Text('Añadir libro'),
-      ),
-    );
-  }
-}
-
-class _LibraryStatsStrip extends StatelessWidget {
-  const _LibraryStatsStrip({required this.stats});
-
-  final _LibraryStats stats;
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      mainAxisSpacing: AppSpacing.sm,
-      crossAxisSpacing: AppSpacing.sm,
-      childAspectRatio: 2.15,
-      children: [
-        _LibraryStatPill(
-          icon: AppIcons.library,
-          value: '${stats.totalBooks}',
-          label: 'Total',
-        ),
-        _LibraryStatPill(
-          icon: AppIcons.book,
-          value: '${stats.readingBooks}',
-          label: 'Leyendo',
-        ),
-        _LibraryStatPill(
-          icon: AppIcons.bookmark,
-          value: '${stats.pendingBooks}',
-          label: 'Pendientes',
-        ),
-        _LibraryStatPill(
-          icon: AppIcons.star,
-          value: '${stats.completedBooks}',
-          label: 'Terminados',
-        ),
-      ],
-    );
-  }
-}
-
-class _LibraryStatPill extends StatelessWidget {
-  const _LibraryStatPill({
-    required this.icon,
-    required this.value,
-    required this.label,
-  });
-
-  final IconData icon;
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.76),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
-        ),
-        boxShadow: AppShadows.soft(theme.colorScheme.primary),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: theme.colorScheme.primary, size: 18),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.primary.withValues(alpha: 0.70),
-            ),
-          ),
-        ],
       ),
     );
   }

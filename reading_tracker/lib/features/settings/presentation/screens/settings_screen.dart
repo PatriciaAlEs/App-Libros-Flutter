@@ -6,8 +6,6 @@ import '../../../../core/design_system/design_system.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_theme_controller.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../stats/domain/entities/statistics_summary.dart';
-import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -16,9 +14,6 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedTheme = ref.watch(appThemeControllerProvider);
     final controller = ref.read(appThemeControllerProvider.notifier);
-    final summary =
-        ref.watch(statisticsSummaryProvider).valueOrNull ??
-        const StatisticsSummary.empty();
 
     return Scaffold(
       body: SafeArea(
@@ -27,11 +22,7 @@ class SettingsScreen extends ConsumerWidget {
           children: [
             const _ProfileBrandHeader(),
             const SizedBox(height: AppSpacing.xl),
-            _ProfileHero(summary: summary),
-            const SizedBox(height: AppSpacing.lg),
-            _ProfileMetrics(summary: summary),
-            const SizedBox(height: AppSpacing.lg),
-            _ProfileGoalCard(summary: summary),
+            const _ProfileHero(),
             const SizedBox(height: AppSpacing.lg),
             _ThemePreferenceCard(
               selectedTheme: selectedTheme,
@@ -118,17 +109,11 @@ class _ProfileBrandHeader extends StatelessWidget {
 }
 
 class _ProfileHero extends StatelessWidget {
-  const _ProfileHero({required this.summary});
-
-  final StatisticsSummary summary;
+  const _ProfileHero();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final goal = summary.annualReadingGoal;
-    final goalText = goal == null
-        ? 'Reto lector pendiente'
-        : '${summary.completedThisYear}/$goal libros este año';
 
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 26, 24, 24),
@@ -171,15 +156,16 @@ class _ProfileHero extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  goalText,
+                  'Preferencias, estilo visual y detalles personales de ReadPp.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: Colors.white.withValues(alpha: 0.78),
+                    height: 1.35,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
-                _ProfileHeroPill(
-                  icon: AppIcons.fire,
-                  label: '${summary.currentStreakDays} días de racha',
+                const _ProfileHeroPill(
+                  icon: Icons.tune_rounded,
+                  label: 'Ajustes y preferencias',
                 ),
               ],
             ),
@@ -214,182 +200,6 @@ class _ProfileHeroPill extends StatelessWidget {
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProfileMetrics extends StatelessWidget {
-  const _ProfileMetrics({required this.summary});
-
-  final StatisticsSummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      mainAxisSpacing: AppSpacing.md,
-      crossAxisSpacing: AppSpacing.md,
-      childAspectRatio: 1.35,
-      children: [
-        _ProfileMetricCard(
-          icon: AppIcons.library,
-          value: '${summary.totalBooks}',
-          label: 'Libros registrados',
-        ),
-        _ProfileMetricCard(
-          icon: AppIcons.pages,
-          value: _compactNumber(summary.totalPagesRead),
-          label: 'Páginas leídas',
-        ),
-        _ProfileMetricCard(
-          icon: AppIcons.book,
-          value: '${summary.currentlyReadingCount}',
-          label: 'Lecturas activas',
-        ),
-        _ProfileMetricCard(
-          icon: AppIcons.fire,
-          value: '${summary.currentStreakDays}',
-          label: 'Días de racha',
-        ),
-      ],
-    );
-  }
-
-  String _compactNumber(int value) {
-    if (value >= 1000) {
-      final compact = value / 1000;
-      return '${compact.toStringAsFixed(compact >= 10 ? 0 : 1)}k';
-    }
-    return '$value';
-  }
-}
-
-class _ProfileMetricCard extends StatelessWidget {
-  const _ProfileMetricCard({
-    required this.icon,
-    required this.value,
-    required this.label,
-  });
-
-  final IconData icon;
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
-        ),
-        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: theme.colorScheme.primary, size: 24),
-          const Spacer(),
-          Text(
-            value,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProfileGoalCard extends StatelessWidget {
-  const _ProfileGoalCard({required this.summary});
-
-  final StatisticsSummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final year = DateTime.now().year;
-    final goal = summary.annualReadingGoal;
-    final progress = (summary.annualGoalProgress ?? 0).clamp(0.0, 1.0);
-    final title = goal == null
-        ? 'Reto lector sin configurar'
-        : 'Reto lector $year';
-    final subtitle = goal == null
-        ? 'Configúralo desde Progreso para seguir tu año lector.'
-        : '${summary.completedThisYear} de $goal libros completados';
-
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
-        ),
-        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(AppIcons.star, color: theme.colorScheme.primary),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Text(
-                  title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-              Text(
-                '${(progress * 100).round()}%',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            subtitle,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: progress.toDouble(),
-              minHeight: 6,
-              backgroundColor: theme.colorScheme.primaryContainer.withValues(
-                alpha: 0.42,
-              ),
-              color: theme.colorScheme.primary.withValues(alpha: 0.78),
             ),
           ),
         ],
