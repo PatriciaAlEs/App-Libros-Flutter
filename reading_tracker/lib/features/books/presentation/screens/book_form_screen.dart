@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/design_system/design_system.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../data/datasources/book_api_datasource.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/entities/book_search_result.dart';
@@ -409,9 +408,7 @@ class _AddBookHero extends StatelessWidget {
                   'Nueva lectura',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     color: Colors.white,
-                    fontFamily: AppTypography.contentFontFamily,
-                    fontFamilyFallback: AppTypography.contentFallback,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
@@ -476,7 +473,7 @@ class _FormSection extends StatelessWidget {
                 child: Text(
                   title,
                   style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
@@ -554,14 +551,14 @@ class _SearchField extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Buscar en Open Library',
+            'Busca tu próximo libro',
             style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            'Encuentra portadas y datos para añadir el libro más rápido.',
+            'Encuentra portadas y datos para guardarlo en tu biblioteca.',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -576,7 +573,7 @@ class _SearchField extends StatelessWidget {
                   autofocus: true,
                   textInputAction: TextInputAction.search,
                   decoration: const InputDecoration(
-                    labelText: 'Título, autor o ISBN',
+                    labelText: 'Libro, autor o ISBN',
                     hintText: 'Ej. La sombra del viento',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(AppIcons.search),
@@ -658,7 +655,7 @@ class _ResultsList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Resultados', style: theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w800,
         )),
         const SizedBox(height: 4),
         Text(
@@ -743,7 +740,7 @@ class _SearchFeedbackCard extends StatelessWidget {
             title,
             textAlign: TextAlign.center,
             style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
@@ -810,7 +807,7 @@ class _BookResultTile extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       if (subtitle.isNotEmpty) ...[
@@ -994,7 +991,7 @@ class _SelectedBookCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 if (book.author != null)

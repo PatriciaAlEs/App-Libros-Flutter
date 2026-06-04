@@ -241,7 +241,7 @@ class _InsightsHero extends StatelessWidget {
             'Insights',
             style: theme.textTheme.displaySmall?.copyWith(
               color: Colors.white,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -274,7 +274,7 @@ class _InsightsHero extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleLarge?.copyWith(
                           color: Colors.white,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -378,7 +378,7 @@ class _PrimaryInsightPanel extends StatelessWidget {
                   insight.label,
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                     letterSpacing: 1.4,
                   ),
                 ),
@@ -388,7 +388,7 @@ class _PrimaryInsightPanel extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -484,7 +484,7 @@ class _MetricPill extends StatelessWidget {
           Text(
             value,
             style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w800,
             ),
           ),
           Text(
@@ -526,7 +526,7 @@ class _SectionTitle extends StatelessWidget {
         Text(
           title,
           style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ],
@@ -607,7 +607,7 @@ class _InsightCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
@@ -654,7 +654,7 @@ class _RatedBooksCard extends StatelessWidget {
               Text(
                 'Top 3 del año',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ],
@@ -702,7 +702,7 @@ class _RatedBookRow extends StatelessWidget {
             '$position',
             style: theme.textTheme.labelMedium?.copyWith(
               color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),
@@ -722,7 +722,7 @@ class _RatedBookRow extends StatelessWidget {
           '${book.rating.toStringAsFixed(book.rating % 1 == 0 ? 1 : 2)} / 5',
           style: theme.textTheme.labelMedium?.copyWith(
             color: theme.colorScheme.primary,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ],
@@ -760,7 +760,7 @@ class _InsightsEmptyState extends StatelessWidget {
                 'Tus patrones aparecerán aquí',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -851,7 +851,7 @@ class _InsightsErrorState extends StatelessWidget {
                 'No pudimos cargar tus insights',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),

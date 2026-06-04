@@ -408,7 +408,7 @@ class _SearchField extends StatelessWidget {
         onChanged: onChanged,
         style: theme.textTheme.bodyMedium,
         decoration: InputDecoration(
-          hintText: 'Busca por título, autora o género',
+          hintText: 'Busca un libro, autora o género',
           hintStyle: theme.textTheme.bodySmall,
           prefixIcon: Icon(AppIcons.search, color: theme.colorScheme.primary),
           border: InputBorder.none,

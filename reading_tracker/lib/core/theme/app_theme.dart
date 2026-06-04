@@ -147,16 +147,16 @@ class AppTheme {
 
   static TextTheme _textTheme(ColorScheme colorScheme) {
     return TextTheme(
-      displaySmall: GoogleFonts.roboto(
+      displaySmall: GoogleFonts.spaceGrotesk(
         color: colorScheme.onSurface,
         fontSize: 34,
-        fontWeight: FontWeight.w800,
+        fontWeight: FontWeight.w700,
         height: 1.14,
       ),
-      headlineSmall: GoogleFonts.roboto(
+      headlineSmall: GoogleFonts.spaceGrotesk(
         color: colorScheme.onSurface,
         fontSize: 26,
-        fontWeight: FontWeight.w800,
+        fontWeight: FontWeight.w700,
         height: 1.2,
       ),
       titleLarge: GoogleFonts.roboto(

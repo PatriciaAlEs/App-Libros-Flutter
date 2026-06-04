@@ -16,6 +16,7 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
+  final List<int> _tabVersions = List.filled(5, 0);
 
   @override
   Widget build(BuildContext context) {
@@ -24,11 +25,26 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          const HomeScreen(),
-          const BooksListScreen(),
-          const ProgressScreen(),
-          const InsightsScreen(),
-          const SettingsScreen(),
+          KeyedSubtree(
+            key: ValueKey('home-${_tabVersions[0]}'),
+            child: const HomeScreen(),
+          ),
+          KeyedSubtree(
+            key: ValueKey('books-${_tabVersions[1]}'),
+            child: const BooksListScreen(),
+          ),
+          KeyedSubtree(
+            key: ValueKey('progress-${_tabVersions[2]}'),
+            child: const ProgressScreen(),
+          ),
+          KeyedSubtree(
+            key: ValueKey('insights-${_tabVersions[3]}'),
+            child: const InsightsScreen(),
+          ),
+          KeyedSubtree(
+            key: ValueKey('profile-${_tabVersions[4]}'),
+            child: const SettingsScreen(),
+          ),
         ],
       ),
       bottomNavigationBar: _MainBottomNavigation(
@@ -39,7 +55,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _selectTab(int index) {
-    setState(() => _selectedIndex = index);
+    setState(() {
+      _selectedIndex = index;
+      _tabVersions[index]++;
+    });
   }
 }
 

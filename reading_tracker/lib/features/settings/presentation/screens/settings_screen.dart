@@ -76,7 +76,7 @@ class _ProfileHero extends StatelessWidget {
                   'Perfil y preferencias',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     color: Colors.white,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
@@ -165,7 +165,7 @@ class _ThemePreferenceCard extends StatelessWidget {
               Text(
                 'Estilo visual',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ],
