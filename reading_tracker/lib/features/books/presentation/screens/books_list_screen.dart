@@ -26,8 +26,6 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: _PremiumFab(onTap: _openAddBook),
       body: SafeArea(
         child: DecoratedBox(
           decoration: BoxDecoration(
@@ -303,27 +301,20 @@ class _LibraryHeader extends StatelessWidget {
                 ),
               ),
             ),
+            _HeaderActionButton(
+              icon: AppIcons.add,
+              tooltip: 'Añadir o buscar libro',
+              onTap: onAddBook,
+            ),
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Text(
-                'Tu Biblioteca',
-                style: theme.textTheme.displaySmall?.copyWith(
-                  color: theme.colorScheme.onSurface,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            FilledButton.tonalIcon(
-              onPressed: onAddBook,
-              icon: const Icon(AppIcons.add, size: 18),
-              label: const Text('Añadir'),
-            ),
-          ],
+        Text(
+          'Tu Biblioteca',
+          style: theme.textTheme.displaySmall?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w800,
+          ),
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
@@ -346,35 +337,42 @@ class _LibraryHeader extends StatelessWidget {
   }
 }
 
-class _PremiumFab extends StatelessWidget {
-  const _PremiumFab({required this.onTap});
+class _HeaderActionButton extends StatelessWidget {
+  const _HeaderActionButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
 
+  final IconData icon;
+  final String tooltip;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.24),
-            blurRadius: 26,
-            offset: const Offset(0, 12),
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: theme.colorScheme.surface.withValues(alpha: 0.68),
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: Container(
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.10),
+              ),
+            ),
+            child: Icon(icon, color: theme.colorScheme.primary, size: 22),
           ),
-        ],
-      ),
-      child: FloatingActionButton.extended(
-        elevation: 0,
-        highlightElevation: 0,
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-        onPressed: onTap,
-        icon: const Icon(AppIcons.add, size: 20),
-        label: const Text('Añadir libro'),
+        ),
       ),
     );
   }
