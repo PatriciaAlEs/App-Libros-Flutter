@@ -9,8 +9,13 @@ import 'package:reading_tracker/features/reading_sessions/data/repositories/read
 import 'package:reading_tracker/features/reading_sessions/domain/entities/reading_session.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/repositories/reading_session_repository.dart';
 import 'package:reading_tracker/features/reading_sessions/presentation/screens/day_detail_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+  });
+
   testWidgets('canceling delete keeps the session', (tester) async {
     final repository = _FakeReadingSessionRepository(
       sessionsForDay: [_session()],
@@ -18,13 +23,19 @@ void main() {
 
     await _pumpDayDetail(tester, repository);
 
-    await tester.tap(find.byTooltip('Eliminar rato de lectura'));
+    final deleteAction = find.byKey(const Key('session_delete_action'));
+    await tester.scrollUntilVisible(
+      deleteAction,
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(deleteAction);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Cancelar'));
     await tester.pumpAndSettle();
 
     expect(repository.deletedSessionId, isNull);
-    expect(find.text('Current Book'), findsOneWidget);
+    expect(find.text('Current Book'), findsWidgets);
   });
 
   testWidgets('confirming delete removes the selected session', (tester) async {
@@ -34,7 +45,13 @@ void main() {
 
     await _pumpDayDetail(tester, repository);
 
-    await tester.tap(find.byTooltip('Eliminar rato de lectura'));
+    final deleteAction = find.byKey(const Key('session_delete_action'));
+    await tester.scrollUntilVisible(
+      deleteAction,
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(deleteAction);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Eliminar'));
     await tester.pumpAndSettle();

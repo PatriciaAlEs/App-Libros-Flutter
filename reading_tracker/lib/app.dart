@@ -10,6 +10,8 @@ import 'features/books/presentation/screens/books_list_screen.dart';
 import 'features/home/presentation/screens/home_screen.dart';
 import 'features/insights/presentation/screens/insights_screen.dart';
 import 'features/navigation/presentation/screens/main_navigation_screen.dart';
+import 'features/onboarding/presentation/providers/onboarding_controller.dart';
+import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/progress/presentation/screens/progress_screen.dart';
 import 'features/reading_sessions/presentation/screens/calendar_screen.dart';
 import 'features/reading_sessions/presentation/screens/day_detail_screen.dart';
@@ -31,7 +33,15 @@ class App extends ConsumerWidget {
       theme: AppTheme.light(selectedTheme),
       themeAnimationDuration: AppMotion.slow,
       themeAnimationCurve: AppMotion.emphasized,
-      initialRoute: '/',
+      home: ref
+          .watch(onboardingControllerProvider)
+          .when(
+            loading: () => const _AppBootstrapScreen(),
+            error: (error, stackTrace) => const OnboardingScreen(),
+            data: (isCompleted) => isCompleted
+                ? const MainNavigationScreen()
+                : const OnboardingScreen(),
+          ),
       onGenerateRoute: _onGenerateRoute,
     );
   }
@@ -99,4 +109,27 @@ class App extends ConsumerWidget {
     builder: (_) =>
         const Scaffold(body: Center(child: Text('Page not found.'))),
   );
+}
+
+class _AppBootstrapScreen extends StatelessWidget {
+  const _AppBootstrapScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Center(
+        child: SizedBox(
+          width: 36,
+          height: 36,
+          child: CircularProgressIndicator(
+            strokeWidth: 3,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+      ),
+    );
+  }
 }

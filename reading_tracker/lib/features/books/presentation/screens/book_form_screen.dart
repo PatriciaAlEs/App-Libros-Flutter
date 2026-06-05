@@ -584,6 +584,7 @@ class _SearchField extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               FilledButton(
+                key: const Key('book_search_button'),
                 onPressed: isSearching ? null : onSubmitted,
                 style: FilledButton.styleFrom(
                   minimumSize: const Size(52, 56),
@@ -654,9 +655,12 @@ class _ResultsList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Resultados', style: theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w800,
-        )),
+        Text(
+          'Resultados',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         const SizedBox(height: 4),
         Text(
           'Elige el resultado que mejor encaje con tu edición.',
@@ -667,6 +671,7 @@ class _ResultsList extends StatelessWidget {
         const SizedBox(height: 12),
         for (final book in visibleResults)
           _BookResultTile(
+            key: ValueKey('book_result_${book.title}'),
             book: book,
             isSelected: identical(book, selectedBook),
             subtitle: _subtitleFor(book),
@@ -759,6 +764,7 @@ class _SearchFeedbackCard extends StatelessWidget {
 
 class _BookResultTile extends StatelessWidget {
   const _BookResultTile({
+    super.key,
     required this.book,
     required this.subtitle,
     required this.isSelected,
@@ -900,30 +906,36 @@ class _InitialDatesFields extends StatelessWidget {
 
     return Column(
       children: [
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-          title: const Text('Fecha de inicio'),
-          subtitle: Text(_format(startedAt)),
-          trailing: IconButton(
-            tooltip: 'Quitar fecha de inicio',
-            icon: const Icon(Icons.close_rounded),
-            onPressed: startedAt == null ? null : onClearStartedAt,
+        Material(
+          color: Colors.transparent,
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+            title: const Text('Fecha de inicio'),
+            subtitle: Text(_format(startedAt)),
+            trailing: IconButton(
+              tooltip: 'Quitar fecha de inicio',
+              icon: const Icon(Icons.close_rounded),
+              onPressed: startedAt == null ? null : onClearStartedAt,
+            ),
+            leading: Icon(AppIcons.calendar, color: theme.colorScheme.primary),
+            onTap: onStartedAtTap,
           ),
-          leading: Icon(AppIcons.calendar, color: theme.colorScheme.primary),
-          onTap: onStartedAtTap,
         ),
         if (showFinishedAt)
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-            title: const Text('Fecha de finalización'),
-            subtitle: Text(_format(finishedAt)),
-            trailing: IconButton(
-              tooltip: 'Quitar fecha de fin',
-              icon: const Icon(Icons.close_rounded),
-              onPressed: finishedAt == null ? null : onClearFinishedAt,
+          Material(
+            color: Colors.transparent,
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              title: const Text('Fecha de finalización'),
+              subtitle: Text(_format(finishedAt)),
+              trailing: IconButton(
+                tooltip: 'Quitar fecha de fin',
+                icon: const Icon(Icons.close_rounded),
+                onPressed: finishedAt == null ? null : onClearFinishedAt,
+              ),
+              leading: Icon(AppIcons.star, color: theme.colorScheme.primary),
+              onTap: onFinishedAtTap,
             ),
-            leading: Icon(AppIcons.star, color: theme.colorScheme.primary),
-            onTap: onFinishedAtTap,
           ),
       ],
     );

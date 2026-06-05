@@ -113,10 +113,8 @@ class HomeScreen extends ConsumerWidget {
                           const SizedBox(height: AppSpacing.xl),
                           _AnnualGoalCard(
                             summary: summary,
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              '/progress',
-                            ),
+                            onTap: () =>
+                                Navigator.pushNamed(context, '/progress'),
                           ),
                           const SizedBox(height: AppSpacing.xxl),
                           _JournalHeader(
@@ -921,9 +919,9 @@ class _EmptyCurrentReadingCard extends StatelessWidget {
     if (visibleBooks.isEmpty) {
       return EmptyStateCard(
         icon: AppIcons.library,
-        title: 'Tu próxima lectura te espera',
-        message: 'Añade un libro para empezar a construir tu biblioteca.',
-        actionLabel: 'Añadir lectura',
+        title: 'Tu primer libro empieza aquí',
+        message: 'Añade una lectura para construir tu biblioteca personal.',
+        actionLabel: 'Añadir primer libro',
         onAction: onAddBook,
       );
     }

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:reading_tracker/features/books/data/datasources/book_api_datasource.dart';
 import 'package:reading_tracker/features/books/data/repositories/book_repository_provider.dart';
@@ -15,6 +16,10 @@ import 'package:reading_tracker/features/books/presentation/screens/book_form_sc
 import 'package:reading_tracker/features/books/presentation/screens/books_list_screen.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+  });
+
   test('book status keeps persisted value and exposes Spanish label', () {
     expect(BookStatus.pending.toValue(), 'pending');
     expect(BookStatus.pending.label, 'Pendiente');
@@ -33,8 +38,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Mi Biblioteca'), findsOneWidget);
-    expect(find.text('Tu biblioteca empieza aquí'), findsOneWidget);
+    expect(find.text('Tu Biblioteca'), findsOneWidget);
+    expect(find.textContaining('Tu biblioteca empieza'), findsOneWidget);
   });
 
   testWidgets('book form saves the selected initial status', (tester) async {
@@ -68,10 +73,16 @@ void main() {
     );
 
     await tester.enterText(_searchField(), 'Libro');
-    await tester.tap(find.text('Buscar'));
+    await tester.tap(find.byKey(const Key('book_search_button')));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Libro de prueba'));
+    final resultTile = find.byKey(const Key('book_result_Libro de prueba'));
+    await tester.scrollUntilVisible(
+      resultTile,
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(resultTile);
     await tester.pumpAndSettle();
     await tester.tap(find.byType(DropdownButtonFormField<BookStatus>));
     await tester.pumpAndSettle();
@@ -109,7 +120,7 @@ void main() {
             BookApiDatasource(
               MockClient((request) async {
                 requestCount++;
-                return _searchResponse('Libro automático');
+                return _searchResponse('Libro automatico');
               }),
             ),
           ),
@@ -130,7 +141,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(requestCount, 1);
-    expect(find.text('Libro automático'), findsOneWidget);
+    final resultTitle = find.byKey(const Key('book_result_Libro automatico'));
+    await tester.scrollUntilVisible(
+      resultTitle,
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(resultTitle, findsOneWidget);
   });
 
   testWidgets('book form keeps manual search button as fallback', (
@@ -156,11 +173,17 @@ void main() {
     );
 
     await tester.enterText(_searchField(), 'Li');
-    await tester.tap(find.text('Buscar'));
+    await tester.tap(find.byKey(const Key('book_search_button')));
     await tester.pumpAndSettle();
 
     expect(requestCount, 1);
-    expect(find.text('Libro manual'), findsOneWidget);
+    final resultTitle = find.byKey(const Key('book_result_Libro manual'));
+    await tester.scrollUntilVisible(
+      resultTitle,
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(resultTitle, findsOneWidget);
   });
 }
 

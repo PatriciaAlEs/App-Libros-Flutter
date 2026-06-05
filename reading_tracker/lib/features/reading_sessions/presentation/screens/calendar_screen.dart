@@ -258,43 +258,43 @@ class _ActivitySummaryCard extends StatelessWidget {
           ),
           boxShadow: AppShadows.soft(theme.colorScheme.primary),
         ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: _SummaryMetric(
+                    icon: AppIcons.pages,
+                    label: 'Páginas',
+                    value: '${summary.pagesRead}',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: _SummaryMetric(
-                      icon: AppIcons.pages,
-                      label: 'Páginas',
-                      value: '${summary.pagesRead}',
-                    ),
+                Expanded(
+                  child: _SummaryMetric(
+                    icon: AppIcons.time,
+                    label: 'Minutos',
+                    value: '${summary.minutes}',
                   ),
-                  Expanded(
-                    child: _SummaryMetric(
-                      icon: AppIcons.time,
-                      label: 'Minutos',
-                      value: '${summary.minutes}',
-                    ),
+                ),
+                Expanded(
+                  child: _SummaryMetric(
+                    icon: AppIcons.calendar,
+                    label: 'Días',
+                    value: '${summary.activeDays}',
                   ),
-                  Expanded(
-                    child: _SummaryMetric(
-                      icon: AppIcons.calendar,
-                      label: 'Días',
-                      value: '${summary.activeDays}',
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -822,9 +822,10 @@ class _CalendarDayCell extends StatelessWidget {
         curve: AppMotion.standard,
         padding: EdgeInsets.all(compact ? 5 : 7),
         decoration: BoxDecoration(
-          color: _activityColor(context, intensity).withValues(
-            alpha: hasActivity ? 0.92 : 0.58,
-          ),
+          color: _activityColor(
+            context,
+            intensity,
+          ).withValues(alpha: hasActivity ? 0.92 : 0.58),
           border: Border.all(
             color: isToday
                 ? theme.colorScheme.primary

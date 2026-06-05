@@ -1083,14 +1083,6 @@ String _pageProgress(Book book) {
   return '${book.currentPage} / ${book.totalPages} p.';
 }
 
-String _compactNumber(int value) {
-  if (value >= 1000) {
-    final compact = value / 1000;
-    return '${compact.toStringAsFixed(compact >= 10 ? 0 : 1)}k';
-  }
-  return '$value';
-}
-
 class _LibraryStats {
   const _LibraryStats({
     required this.totalBooks,

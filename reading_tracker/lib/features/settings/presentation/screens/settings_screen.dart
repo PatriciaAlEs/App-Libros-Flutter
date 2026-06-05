@@ -181,10 +181,8 @@ class _ThemePreferenceCard extends StatelessWidget {
           SegmentedButton<ReadingTrackerTheme>(
             segments: ReadingTrackerTheme.values
                 .map(
-                  (theme) => ButtonSegment(
-                    value: theme,
-                    label: Text(theme.label),
-                  ),
+                  (theme) =>
+                      ButtonSegment(value: theme, label: Text(theme.label)),
                 )
                 .toList(),
             selected: {selectedTheme},

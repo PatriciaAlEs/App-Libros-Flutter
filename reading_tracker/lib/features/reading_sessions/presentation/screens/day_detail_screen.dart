@@ -235,9 +235,15 @@ class _DayEditorialHeader extends StatelessWidget {
           const SizedBox(height: 18),
           Row(
             children: [
-              Expanded(child: _DayMetric(value: '$totalPages', label: 'páginas')),
-              Expanded(child: _DayMetric(value: '$totalMinutes', label: 'minutos')),
-              Expanded(child: _DayMetric(value: '$sessionCount', label: 'sesiones')),
+              Expanded(
+                child: _DayMetric(value: '$totalPages', label: 'páginas'),
+              ),
+              Expanded(
+                child: _DayMetric(value: '$totalMinutes', label: 'minutos'),
+              ),
+              Expanded(
+                child: _DayMetric(value: '$sessionCount', label: 'sesiones'),
+              ),
             ],
           ),
           if (focusBook != null) ...[
@@ -558,11 +564,13 @@ class _SessionTile extends StatelessWidget {
               Column(
                 children: [
                   IconButton(
+                    key: const Key('session_edit_action'),
                     tooltip: 'Editar sesión',
                     icon: const Icon(Icons.edit_outlined),
                     onPressed: onEdit,
                   ),
                   IconButton(
+                    key: const Key('session_delete_action'),
                     tooltip: 'Eliminar sesión',
                     icon: const Icon(Icons.delete_outline),
                     onPressed: onDelete,

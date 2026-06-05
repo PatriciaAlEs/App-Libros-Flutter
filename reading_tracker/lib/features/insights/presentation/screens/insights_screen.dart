@@ -143,11 +143,8 @@ class _InsightsHeader extends StatelessWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(999),
-      onTap: () => Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/',
-        (route) => false,
-      ),
+      onTap: () =>
+          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false),
       child: Row(
         children: [
           Container(
@@ -213,7 +210,8 @@ class _InsightsHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final headline = summary.favoriteGenre ?? summary.mostReadAuthor ?? 'Tu ritmo';
+    final headline =
+        summary.favoriteGenre ?? summary.mostReadAuthor ?? 'Tu ritmo';
     final caption = summary.favoriteGenre != null
         ? '${summary.favoriteGenrePages} páginas en tu género más leído'
         : summary.mostReadAuthor != null
@@ -445,7 +443,8 @@ class _PrimaryInsightPanel extends StatelessWidget {
     return (
       icon: AppIcons.insightsNav,
       label: 'DESCUBRIMIENTO',
-      title: summary.favoriteGenre ?? summary.mostReadAuthor ?? 'Tu mapa lector',
+      title:
+          summary.favoriteGenre ?? summary.mostReadAuthor ?? 'Tu mapa lector',
       subtitle: 'Tus sesiones empiezan a revelar patrones personales.',
     );
   }
@@ -754,7 +753,11 @@ class _InsightsEmptyState extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Icon(AppIcons.insightsNav, size: 42, color: theme.colorScheme.primary),
+              Icon(
+                AppIcons.insightsNav,
+                size: 42,
+                color: theme.colorScheme.primary,
+              ),
               const SizedBox(height: AppSpacing.md),
               Text(
                 'Tus patrones aparecerán aquí',
@@ -770,6 +773,12 @@ class _InsightsEmptyState extends StatelessWidget {
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              FilledButton.icon(
+                onPressed: () => Navigator.pushNamed(context, '/book/add'),
+                icon: const Icon(AppIcons.add),
+                label: const Text('Añadir primer libro'),
               ),
             ],
           ),
@@ -845,7 +854,11 @@ class _InsightsErrorState extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Icon(Icons.error_outline_rounded, size: 42, color: theme.colorScheme.error),
+              Icon(
+                Icons.error_outline_rounded,
+                size: 42,
+                color: theme.colorScheme.error,
+              ),
               const SizedBox(height: AppSpacing.md),
               Text(
                 'No pudimos cargar tus insights',

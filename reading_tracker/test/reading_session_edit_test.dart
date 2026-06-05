@@ -10,8 +10,13 @@ import 'package:reading_tracker/features/reading_sessions/domain/entities/readin
 import 'package:reading_tracker/features/reading_sessions/domain/repositories/reading_session_repository.dart';
 import 'package:reading_tracker/features/reading_sessions/presentation/screens/day_detail_screen.dart';
 import 'package:reading_tracker/features/reading_sessions/presentation/screens/session_form_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+  });
+
   testWidgets('session form creates a session with a past initial date', (
     tester,
   ) async {
@@ -37,9 +42,18 @@ void main() {
 
     expect(find.text('18/5/2026'), findsOneWidget);
 
-    await tester.enterText(find.byType(TextFormField).at(0), '12');
-    await tester.enterText(find.byType(TextFormField).at(1), '30');
-    await tester.tap(find.text('Guardar tiempo de lectura'));
+    await tester.enterText(find.byKey(const Key('session_pages_field')), '12');
+    await tester.enterText(
+      find.byKey(const Key('session_minutes_field')),
+      '30',
+    );
+    final saveButton = find.byKey(const Key('session_save_button'));
+    await tester.scrollUntilVisible(
+      saveButton,
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(saveButton);
     await tester.pumpAndSettle();
 
     final added = sessionRepository.addedSession;
@@ -80,13 +94,36 @@ void main() {
     await tester.tap(find.text('Open form'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Editar rato de lectura'), findsOneWidget);
+    expect(find.text('Editar sesión'), findsOneWidget);
     expect(find.text('Current Book'), findsOneWidget);
-    expect(find.text('Original note'), findsOneWidget);
+    final noteInput = find.byKey(const Key('session_note_field'));
+    await tester.scrollUntilVisible(
+      noteInput,
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    final noteField = tester.widget<TextFormField>(noteInput);
+    expect(noteField.controller?.text, 'Original note');
 
-    await tester.enterText(find.byType(TextFormField).at(1), '45');
-    await tester.enterText(find.byType(TextFormField).at(2), 'Updated note');
-    await tester.tap(find.text('Guardar cambios'));
+    final minutesInput = find.byKey(const Key('session_minutes_field'));
+    await tester.scrollUntilVisible(
+      minutesInput,
+      -220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.enterText(minutesInput, '45');
+    await tester.scrollUntilVisible(
+      noteInput,
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.enterText(noteInput, 'Updated note');
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('session_save_button')),
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const Key('session_save_button')));
     await tester.pumpAndSettle();
 
     final updated = sessionRepository.updatedSession;
@@ -141,7 +178,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byTooltip('Editar rato de lectura'));
+    final editAction = find.byKey(const Key('session_edit_action'));
+    await tester.scrollUntilVisible(
+      editAction,
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(editAction);
     await tester.pumpAndSettle();
 
     expect(editArguments, same(session));

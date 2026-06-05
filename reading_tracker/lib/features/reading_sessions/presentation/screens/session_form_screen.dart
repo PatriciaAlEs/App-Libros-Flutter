@@ -126,9 +126,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
-          _isEditing ? 'Editar sesión' : 'Registrar lectura',
-        ),
+        title: Text(_isEditing ? 'Editar sesión' : 'Registrar lectura'),
         actions: [
           IconButton(
             tooltip: 'Guardar',
@@ -195,6 +193,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
                   child: Column(
                     children: [
                       TextFormField(
+                        key: const Key('session_pages_field'),
                         controller: _pagesReadController,
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
@@ -206,6 +205,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
                       ),
                       const SizedBox(height: 14),
                       TextFormField(
+                        key: const Key('session_minutes_field'),
                         controller: _minutesController,
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
@@ -223,6 +223,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
                   title: 'Nota',
                   icon: AppIcons.edit,
                   child: TextFormField(
+                    key: const Key('session_note_field'),
                     controller: _noteController,
                     minLines: 3,
                     maxLines: 5,
@@ -235,6 +236,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
                 ),
                 const SizedBox(height: 24),
                 FilledButton(
+                  key: const Key('session_save_button'),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(54),
                     shape: RoundedRectangleBorder(
