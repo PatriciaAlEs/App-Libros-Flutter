@@ -351,12 +351,16 @@ class _HomeHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final cleanName = readerName?.trim();
     final hasName = cleanName != null && cleanName.isNotEmpty;
+    final displayName = hasName ? cleanName! : 'Lectora';
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xs),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
+          Row(
+            children: [
+              Expanded(
             child: InkWell(
               borderRadius: BorderRadius.circular(999),
               onTap: () => Navigator.pushNamedAndRemoveUntil(
@@ -366,38 +370,23 @@ class _HomeHeader extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const _HomeBrandLogo(),
-                  const SizedBox(width: AppSpacing.md),
+                  const _HomeBrandSymbol(),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          greeting,
+                          AppBrand.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.primary.withValues(
-                              alpha: 0.78,
-                            ),
-                            letterSpacing: 1.8,
-                            fontWeight: FontWeight.w700,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: theme.colorScheme.onSurface,
+                            letterSpacing: 0,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
-                        if (hasName) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            cleanName!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.w800,
-                              height: 1.05,
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                   ),
@@ -410,36 +399,59 @@ class _HomeHeader extends StatelessWidget {
             tooltip: 'Añadir o buscar libro',
             onTap: () => Navigator.pushNamed(context, '/book/add'),
           ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            '¡Hola, $displayName! 👋',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w900,
+              height: 1.08,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            '¿Qué lectura te acompaña hoy?',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _HomeBrandLogo extends StatelessWidget {
-  const _HomeBrandLogo();
+class _HomeBrandSymbol extends StatelessWidget {
+  const _HomeBrandSymbol();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return SizedBox(
-      width: 144,
-      height: 56,
-      child: Image.asset(
-        AppBrand.logoTransparentAsset,
-        alignment: Alignment.centerLeft,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            AppBrand.name,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0,
-            ),
-          ),
+    return Container(
+      width: 34,
+      height: 34,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: theme.colorScheme.surface.withValues(alpha: 0.74),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.14),
+        ),
+      ),
+      child: Text(
+        'RP',
+        style: theme.textTheme.titleSmall?.copyWith(
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.w900,
+          height: 1,
         ),
       ),
     );
