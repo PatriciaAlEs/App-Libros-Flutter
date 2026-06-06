@@ -85,7 +85,10 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       sliver: SliverList.list(
                         children: [
-                          _HomeHeader(greeting: _contextualGreeting(now)),
+                          _HomeHeader(
+                            greeting: _contextualGreeting(now),
+                            readerName: null,
+                          ),
                           const SizedBox(height: AppSpacing.lg),
                           _CurrentReadingCards(
                             books: currentBooks,
@@ -338,13 +341,16 @@ class _HomeErrorState extends StatelessWidget {
 }
 
 class _HomeHeader extends StatelessWidget {
-  const _HomeHeader({required this.greeting});
+  const _HomeHeader({required this.greeting, required this.readerName});
 
   final String greeting;
+  final String? readerName;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cleanName = readerName?.trim();
+    final hasName = cleanName != null && cleanName.isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xs),
@@ -360,54 +366,38 @@ class _HomeHeader extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: theme.colorScheme.secondary.withValues(
-                        alpha: 0.72,
-                      ),
-                      boxShadow: AppShadows.soft(theme.colorScheme.secondary),
-                    ),
-                    child: Text(
-                      'dP',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontFamily: AppTypography.displayFontFamily,
-                        fontFamilyFallback: AppTypography.displayFallback,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                  const _HomeBrandLogo(),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          '${AppBrand.name}.',
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          '$greeting, Daniela',
+                          greeting,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.primary.withValues(
                               alpha: 0.78,
                             ),
-                            letterSpacing: 2,
-                            fontWeight: FontWeight.w500,
+                            letterSpacing: 1.8,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
+                        if (hasName) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            cleanName!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w800,
+                              height: 1.05,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -421,6 +411,36 @@ class _HomeHeader extends StatelessWidget {
             onTap: () => Navigator.pushNamed(context, '/book/add'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HomeBrandLogo extends StatelessWidget {
+  const _HomeBrandLogo();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      width: 144,
+      height: 56,
+      child: Image.asset(
+        AppBrand.logoTransparentAsset,
+        alignment: Alignment.centerLeft,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            AppBrand.name,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
+            ),
+          ),
+        ),
       ),
     );
   }

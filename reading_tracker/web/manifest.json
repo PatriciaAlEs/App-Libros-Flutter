@@ -1,11 +1,11 @@
 {
-    "name": "reading_tracker",
-    "short_name": "reading_tracker",
+    "name": "ReadPp",
+    "short_name": "ReadPp",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#6E1F35",
+    "theme_color": "#6E1F35",
+    "description": "ReadPp, tu biblioteca lectora personal.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

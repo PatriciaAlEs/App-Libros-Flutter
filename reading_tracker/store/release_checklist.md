@@ -6,6 +6,9 @@
 - [x] Android app name set to `ReadPp`.
 - [x] Android applicationId set to `com.readpp.app`.
 - [x] Native splash background aligned with Burgundy branding.
+- [x] Official ReadPp logo source files added under `assets/branding`.
+- [ ] Export isolated `RP` monogram source for final app icon.
+- [ ] Replace default Flutter launcher icons with final isolated `RP` artwork.
 - [x] Release candidate passes `flutter analyze`.
 - [x] Release candidate passes `flutter test` with 34/34 tests.
 - [ ] Configure release signing keystore.
@@ -37,7 +40,13 @@
 - [x] Screenshot guide prepared.
 - [x] Privacy policy draft prepared.
 - [ ] Final Play Store screenshots exported.
+- [ ] Final isolated `RP` app icon source artwork available.
+- [ ] Android legacy launcher icons generated from isolated `RP` source artwork.
+- [ ] iOS AppIcon set generated from isolated `RP` source artwork.
+- [ ] Web app icons generated from isolated `RP` source artwork.
+- [ ] Android adaptive icon foreground/background generated from isolated `RP` source artwork.
 - [ ] Final app icon reviewed on device.
+- [ ] Final native splash mark exported at platform-ready sizes.
 - [ ] Feature graphic prepared if required.
 
 ## Policy
