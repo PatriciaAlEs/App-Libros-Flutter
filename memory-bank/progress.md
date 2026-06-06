@@ -183,8 +183,21 @@
 - Insights mejora su empty state con CTA para anadir el primer libro.
 - No se introdujo backend, login, sincronizacion ni cambios de arquitectura.
 - Validacion Sprint 12 confirmada por el usuario: `flutter analyze` OK y `flutter test` OK (34/34 tests).
+- Hito 5 Sprint 13 implementado: Release Candidate & Store Readiness.
+- Se completo auditoria visual general de Home, Biblioteca, Book Detail, Progress, Stats, Insights, Perfil/Ajustes, Onboarding y Add Book.
+- Se completo auditoria de tipografia: Space Grotesk reservado a titulos principales/heroes/onboarding/empty states y Roboto para el resto.
+- Se completo auditoria de navegacion: bottom navigation, scroll restoration, modales, CTA principales y flujo onboarding a app.
+- Se completo revision basica de accesibilidad: tamanos de toque, legibilidad, contraste y tooltips/labels donde procedia.
+- Se completo revision de store readiness: nombre visible, version, splash/icono existente y assets declarados.
+- Se completo limpieza de codigo muerto, helpers sin uso, comentarios obsoletos e imports no usados detectados.
+- Validacion Sprint 13 confirmada: `flutter analyze` OK y `flutter test` OK.
+- Estado del proyecto: ReadPp v1.0 RC Complete.
 
 ## Parcial / en seguimiento
+
+- Estado vigente Sprint 13: ReadPp v1.0 RC Complete.
+- Estado vigente Sprint 13: Ready for Store Preparation.
+- Las notas pendientes de validacion de sprints anteriores quedan como historial superado por la validacion vigente de Sprint 13.
 
 - Actualizacion Sprint 12: ReadPp se considera feature-complete para v1, pendiente de release readiness.
 - Actualizacion Sprint 12: la revision final de textos y consistencia visual queda para Sprint 13 Release Candidate.
@@ -205,6 +218,9 @@
 
 ## Pendiente inmediato
 
+- Estado vigente Sprint 13: preparar Store Preparation para publicar ReadPp v1.0.
+- Pendientes reales: assets finales de Play Store, firma de release, AAB firmado, politica de privacidad publica y ficha de tienda completa.
+
 - Hito 5 Sprint 13 - Release Candidate & Store Readiness.
 - Revision final de UX, accesibilidad, navegacion, empty states y copy.
 - Revision de app icon y splash screen.
@@ -215,6 +231,8 @@
 - Definir el siguiente bloque funcional cuando el usuario lo pida.
 
 ## Pendiente futuro
+
+- Estado vigente Sprint 13: el desarrollo funcional de v1 queda cerrado; futuras mejoras quedan para post-v1.
 
 - Definir siguiente iteracion de Stats, Insights o Ajustes sin introducir complejidad visual prematura.
 - Investigar Open Library para mejorar resultados en espanol.

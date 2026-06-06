@@ -4,9 +4,24 @@
 
 Hito 5: UX/UI Premium Redesign.
 
-Sprint 12 completado: Onboarding + First Run Experience.
+Sprint 13 completado: Release Candidate & Store Readiness.
 
-ReadPp esta feature-complete para v1 a nivel de producto base. El siguiente bloque recomendado es Hito 5 Sprint 13 - Release Candidate & Store Readiness.
+ReadPp v1.0 RC esta completo. Estado actual: listo para Store Preparation.
+
+Validacion vigente:
+
+- `flutter analyze` OK.
+- `flutter test` OK.
+
+Trabajo mas reciente completado:
+
+- Auditoria visual completa.
+- Auditoria de navegacion.
+- Auditoria tipografica.
+- Revision basica de accesibilidad.
+- Revision de store readiness.
+- Limpieza de codigo.
+- Estabilizacion de Release Candidate.
 
 La Home ya funciona como pantalla editorial de biblioteca personal y concentra:
 
@@ -228,6 +243,14 @@ El sistema visual base ahora incluye:
 - Home e Insights mejoraron sus empty states para guiar al usuario hacia anadir el primer libro.
 - No se introdujo autenticacion, backend, sincronizacion ni cambios de arquitectura.
 - Validacion Sprint 12 confirmada por el usuario: `flutter analyze` OK y `flutter test` OK (34/34 tests).
+- Se completo Hito 5 Sprint 13 - Release Candidate & Store Readiness.
+- Se realizo auditoria visual general de pantallas principales.
+- Se realizo auditoria de navegacion, tipografia y accesibilidad basica.
+- Se reviso branding basico y preparacion para distribucion.
+- Se hizo limpieza de codigo muerto/comentarios obsoletos detectados.
+- ReadPp v1.0 queda como Release Candidate completo.
+- Estado actual: Ready for Store Preparation.
+- Validacion Sprint 13 confirmada: `flutter analyze` OK y `flutter test` OK.
 
 ## Archivos tocados recientemente
 
@@ -297,17 +320,17 @@ El sistema visual base ahora incluye:
 
 El usuario ejecuta las validaciones en su terminal de VS Code. No ejecutarlas desde Codex salvo que lo pida explicitamente.
 
-Estado confirmado para Hito 5 Sprint 12:
+Estado confirmado para Hito 5 Sprint 13:
 
 - `flutter analyze` OK.
-- `flutter test` OK (34/34 tests).
+- `flutter test` OK.
 
 ## Pendientes reales
 
-1. Hito 5 Sprint 13 - Release Candidate & Store Readiness.
-2. Revision final de UX, accesibilidad, navegacion, empty states y copy.
-3. Preparar icono de app, splash screen, screenshots y assets de Play Store.
-4. Revisar privacidad, versionado y preparacion de release.
+1. Store Preparation para publicar ReadPp v1.0.
+2. Preparar y revisar assets finales de Play Store: icono final, screenshots, feature graphic si aplica.
+3. Configurar firma de release y generar AAB firmado.
+4. Publicar/hostear politica de privacidad y completar ficha de Play Store.
 5. Mas adelante investigar Open Library para mejorar resultados en espanol.
 
 ## Riesgos / notas

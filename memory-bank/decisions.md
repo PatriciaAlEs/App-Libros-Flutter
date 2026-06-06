@@ -128,3 +128,14 @@
 - Mantener Burgundy y Forest en onboarding.
 - Mantener estrategia tipografica actual: Roboto para UI/body y Space Grotesk para titulos principales/display.
 - ReadPp queda feature-complete para v1 tras Sprint 12; el siguiente foco es Sprint 13 - Release Candidate & Store Readiness.
+
+## Release Candidate Hito 5 Sprint 13
+
+- ReadPp v1.0 RC queda completo tras Sprint 13.
+- Estado actual: Ready for Store Preparation.
+- Sprint 13 no introduce nuevas funcionalidades de producto.
+- No se introduce backend, login, registro ni sincronizacion.
+- No se modifican arquitectura ni modelos de datos.
+- La validacion vigente es `flutter analyze` OK y `flutter test` OK.
+- El trabajo de cierre incluye auditoria visual, navegacion, tipografia, accesibilidad basica, store readiness, limpieza de codigo y estabilizacion.
+- La publicacion requiere pasos externos de tienda: assets finales, firma release, AAB firmado, politica de privacidad publicada y ficha Play Store completa.

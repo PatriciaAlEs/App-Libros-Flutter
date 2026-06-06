@@ -4,7 +4,22 @@
 
 `reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario, estadisticas basicas e insights de lectura.
 
-Estado tras Hito 5 Sprint 12: ReadPp ya es feature-complete para v1 en funcionalidad principal y primera experiencia de usuario. Queda pendiente el Sprint 13 de Release Candidate & Store Readiness antes de publicacion.
+Estado tras Hito 5 Sprint 13: ReadPp v1.0 RC esta completo y listo para Store Preparation.
+
+Validacion vigente:
+
+- `flutter analyze` OK.
+- `flutter test` OK.
+
+Sprint 13 completo:
+
+- Auditoria visual general.
+- Auditoria de navegacion.
+- Auditoria tipografica.
+- Revision basica de accesibilidad.
+- Revision de store readiness.
+- Limpieza de codigo.
+- Estabilizacion de Release Candidate.
 
 La Home ya funciona como biblioteca personal moderna. Actualmente ofrece:
 
@@ -272,6 +287,8 @@ Estado confirmado por el usuario:
 - Separacion conceptual actual: Home resumen general; Biblioteca coleccion; Progress seguimiento; Stats metricas; Insights descubrimientos; Perfil preferencias.
 - Hito 5 Sprint 12 - Onboarding + First Run Experience completado y validado.
 - Estado actual: ReadPp es feature-complete para v1; quedan tareas de release readiness.
+- Hito 5 Sprint 13 - Release Candidate & Store Readiness completado y validado.
+- Estado actual: ReadPp v1.0 RC Complete; Ready for Store Preparation.
 
 ## Estadisticas MVP
 
@@ -298,7 +315,7 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Hito 5 Sprint 13 - Release Candidate & Store Readiness.
-2. Revision final de UX, accesibilidad, navegacion, empty states y copy.
-3. Revision de app icon, splash screen y assets de tienda.
-4. Preparacion de screenshots, Play Store assets, privacidad, versionado y release.
+1. Store Preparation para publicar ReadPp v1.0.
+2. Preparar assets finales de Play Store: icono final, capturas, feature graphic si aplica.
+3. Configurar firma de release y generar AAB firmado.
+4. Publicar/hostear politica de privacidad y completar ficha de Play Store.
