@@ -28,7 +28,7 @@ class App extends ConsumerWidget {
     final selectedTheme = ref.watch(appThemeControllerProvider);
 
     return MaterialApp(
-      title: 'Reading Tracker',
+      title: 'ReadPp',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(selectedTheme),
       themeAnimationDuration: AppMotion.slow,
@@ -107,7 +107,7 @@ class App extends ConsumerWidget {
 
   Route<dynamic> _notFoundRoute() => MaterialPageRoute(
     builder: (_) =>
-        const Scaffold(body: Center(child: Text('Page not found.'))),
+        const Scaffold(body: Center(child: Text('Pantalla no encontrada.'))),
   );
 }
 
