@@ -351,7 +351,7 @@ class _HomeHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final cleanName = readerName?.trim();
     final hasName = cleanName != null && cleanName.isNotEmpty;
-    final displayName = hasName ? cleanName! : 'Lectora';
+    final displayName = hasName ? cleanName : 'Lectora';
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xs),
@@ -361,44 +361,44 @@ class _HomeHeader extends StatelessWidget {
           Row(
             children: [
               Expanded(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(999),
-              onTap: () => Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/',
-                (route) => false,
-              ),
-              child: Row(
-                children: [
-                  const _HomeBrandSymbol(),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          AppBrand.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: theme.colorScheme.onSurface,
-                            letterSpacing: 0,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ],
-                    ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(999),
+                  onTap: () => Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/',
+                    (route) => false,
                   ),
-                ],
+                  child: Row(
+                    children: [
+                      const _HomeBrandSymbol(),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              AppBrand.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: theme.colorScheme.onSurface,
+                                letterSpacing: 0,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-          _HeaderActionButton(
-            icon: AppIcons.add,
-            tooltip: 'Añadir o buscar libro',
-            onTap: () => Navigator.pushNamed(context, '/book/add'),
-          ),
+              _HeaderActionButton(
+                icon: AppIcons.add,
+                tooltip: 'Añadir o buscar libro',
+                onTap: () => Navigator.pushNamed(context, '/book/add'),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
