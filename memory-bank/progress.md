@@ -192,11 +192,27 @@
 - Se completo limpieza de codigo muerto, helpers sin uso, comentarios obsoletos e imports no usados detectados.
 - Validacion Sprint 13 confirmada: `flutter analyze` OK y `flutter test` OK.
 - Estado del proyecto: ReadPp v1.0 RC Complete.
+- Branding Final completado.
+- Nombre publico oficial estandarizado como ReadPp.
+- Branding Web actualizado.
+- Branding iOS actualizado.
+- Branding Android verificado.
+- Splash basico Burgundy alineado con marca.
+- Assets oficiales de marca agregados y centralizados bajo `assets/branding`.
+- Logo oficial integrado en assets del proyecto.
+- Iconos placeholder de Flutter reemplazados.
+- Iconos Android generados desde assets oficiales.
+- Iconos iOS generados desde assets oficiales.
+- Iconos Web/PWA generados desde assets oficiales.
+- Documentacion interna de branding creada/actualizada.
+- Primeras piezas de preparacion de publicacion iniciadas: onboarding marketing slides, publicacion LinkedIn y store preparation.
+- Estado del proyecto: ReadPp v1.0 Release Candidate Ready; Publication Preparation In Progress.
 
 ## Parcial / en seguimiento
 
-- Estado vigente Sprint 13: ReadPp v1.0 RC Complete.
-- Estado vigente Sprint 13: Ready for Store Preparation.
+- Estado vigente tras Branding Final: ReadPp v1.0 RC Complete.
+- Estado vigente tras Branding Final: Release Candidate Ready.
+- Estado vigente tras Branding Final: Publication Preparation In Progress.
 - Las notas pendientes de validacion de sprints anteriores quedan como historial superado por la validacion vigente de Sprint 13.
 
 - Actualizacion Sprint 12: ReadPp se considera feature-complete para v1, pendiente de release readiness.
@@ -218,13 +234,10 @@
 
 ## Pendiente inmediato
 
-- Estado vigente Sprint 13: preparar Store Preparation para publicar ReadPp v1.0.
-- Pendientes reales: assets finales de Play Store, firma de release, AAB firmado, politica de privacidad publica y ficha de tienda completa.
+- Estado vigente: continuar Publication Preparation para publicar ReadPp v1.0.
+- Pendientes reales: final splash branding pass, Android adaptive icon review, verificacion de icono en dispositivo real, Play Store screenshots, store listing copy, privacy policy publica, firma de release, AAB firmado y Play Store submission.
 
-- Hito 5 Sprint 13 - Release Candidate & Store Readiness.
-- Revision final de UX, accesibilidad, navegacion, empty states y copy.
-- Revision de app icon y splash screen.
-- Preparar store screenshots, Play Store assets, privacidad, versionado y release.
+- Revision final de assets de tienda, privacidad, versionado y release.
 
 - Ejecutar `flutter pub get` para incorporar `shared_preferences`.
 - Validar Hito 5 Sprint 1 a Sprint 11B cuando el usuario lo decida.

@@ -6,7 +6,11 @@ Hito 5: UX/UI Premium Redesign.
 
 Sprint 13 completado: Release Candidate & Store Readiness.
 
-ReadPp v1.0 RC esta completo. Estado actual: listo para Store Preparation.
+ReadPp v1.0 RC esta completo.
+
+Estado actual: Publication Preparation In Progress.
+
+ReadPp v1.0: Release Candidate Ready.
 
 Validacion vigente:
 
@@ -22,6 +26,31 @@ Trabajo mas reciente completado:
 - Revision de store readiness.
 - Limpieza de codigo.
 - Estabilizacion de Release Candidate.
+- Branding Final completado.
+- Integracion de iconos de app completada.
+- Preparacion inicial de publicacion iniciada.
+
+## Branding Final Completion
+
+- Nombre publico oficial: ReadPp.
+- Tema principal: Burgundy.
+- Tema secundario: Forest.
+- Tipografia de marca/titulos: Space Grotesk.
+- Tipografia UI/body: Roboto.
+- Logo oficial integrado en assets del proyecto.
+- Assets oficiales centralizados bajo `reading_tracker/assets/branding`.
+- Iconos placeholder de Flutter reemplazados.
+- Iconos Android generados.
+- Iconos iOS generados.
+- Iconos Web/PWA generados.
+- Splash basico Burgundy alineado con la marca.
+- Documentacion interna de branding actualizada.
+
+Estado de publicacion actual:
+
+- Release Candidate completado.
+- Branding Final completado.
+- Publication Preparation en curso.
 
 La Home ya funciona como pantalla editorial de biblioteca personal y concentra:
 
@@ -327,11 +356,15 @@ Estado confirmado para Hito 5 Sprint 13:
 
 ## Pendientes reales
 
-1. Store Preparation para publicar ReadPp v1.0.
-2. Preparar y revisar assets finales de Play Store: icono final, screenshots, feature graphic si aplica.
-3. Configurar firma de release y generar AAB firmado.
-4. Publicar/hostear politica de privacidad y completar ficha de Play Store.
-5. Mas adelante investigar Open Library para mejorar resultados en espanol.
+1. Final splash branding pass.
+2. Android adaptive icon review.
+3. Verificacion real de icono en dispositivo.
+4. Play Store screenshots.
+5. Store listing copy.
+6. Privacy policy publica.
+7. Configurar firma de release y generar AAB firmado.
+8. Play Store submission.
+9. Mas adelante investigar Open Library para mejorar resultados en espanol.
 
 ## Riesgos / notas
 

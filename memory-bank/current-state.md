@@ -4,7 +4,9 @@
 
 `reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario, estadisticas basicas e insights de lectura.
 
-Estado tras Hito 5 Sprint 13: ReadPp v1.0 RC esta completo y listo para Store Preparation.
+Estado tras Hito 5 Sprint 13 y Branding Final: ReadPp v1.0 RC esta completo.
+
+Estado actual: Release Candidate Ready; Publication Preparation In Progress.
 
 Validacion vigente:
 
@@ -20,6 +22,29 @@ Sprint 13 completo:
 - Revision de store readiness.
 - Limpieza de codigo.
 - Estabilizacion de Release Candidate.
+
+Branding Final completo:
+
+- Nombre publico oficial estandarizado como ReadPp.
+- Branding Web actualizado.
+- Branding iOS actualizado.
+- Branding Android verificado.
+- Splash basico Burgundy alineado con marca.
+- Assets oficiales agregados y centralizados bajo `assets/branding`.
+- Logo oficial integrado en assets del proyecto.
+- Iconos placeholder de Flutter reemplazados.
+- Iconos Android generados.
+- Iconos iOS generados.
+- Iconos Web/PWA generados.
+- Documentacion interna de branding creada/actualizada.
+
+Identidad visual vigente:
+
+- Tema principal: Burgundy.
+- Tema secundario: Forest.
+- Tipografia de marca/titulos principales: Space Grotesk.
+- Tipografia UI/body: Roboto.
+- Estilo: reading journal editorial premium.
 
 La Home ya funciona como biblioteca personal moderna. Actualmente ofrece:
 
@@ -315,7 +340,10 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Store Preparation para publicar ReadPp v1.0.
-2. Preparar assets finales de Play Store: icono final, capturas, feature graphic si aplica.
-3. Configurar firma de release y generar AAB firmado.
-4. Publicar/hostear politica de privacidad y completar ficha de Play Store.
+1. Continuar Publication Preparation para publicar ReadPp v1.0.
+2. Final splash branding pass.
+3. Revisar Android adaptive icon e icono real en dispositivo.
+4. Preparar Play Store screenshots y store listing copy.
+5. Publicar/hostear privacy policy.
+6. Configurar firma de release y generar AAB firmado.
+7. Play Store submission.

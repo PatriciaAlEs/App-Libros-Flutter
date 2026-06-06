@@ -139,3 +139,18 @@
 - La validacion vigente es `flutter analyze` OK y `flutter test` OK.
 - El trabajo de cierre incluye auditoria visual, navegacion, tipografia, accesibilidad basica, store readiness, limpieza de codigo y estabilizacion.
 - La publicacion requiere pasos externos de tienda: assets finales, firma release, AAB firmado, politica de privacidad publicada y ficha Play Store completa.
+
+## Branding Final y Publication Preparation
+
+- Nombre publico oficial del producto: ReadPp.
+- Tema principal oficial: Burgundy.
+- Tema secundario oficial: Forest.
+- Tipografia de marca y titulos principales: Space Grotesk.
+- Tipografia de UI, body, labels, botones y metricas: Roboto.
+- Los assets oficiales de marca se centralizan bajo `reading_tracker/assets/branding`.
+- El logo oficial queda integrado como asset del proyecto.
+- Los iconos de app reemplazan los placeholders de Flutter en Android, iOS y Web/PWA.
+- El splash basico Burgundy queda aceptado como base de marca para Release Candidate.
+- La preparacion de publicacion queda separada del desarrollo funcional: no introducir backend, login, registro, sync ni features nuevas para v1.
+- Antes de publicar quedan tareas externas: final splash branding pass, Android adaptive icon review, verificacion real de icono, screenshots, store listing copy, privacy policy publica, firma release, AAB firmado y Play Store submission.
+- Estado del proyecto tras Branding Final: ReadPp v1.0 Release Candidate Ready; Publication Preparation In Progress.
