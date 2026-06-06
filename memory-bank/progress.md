@@ -172,8 +172,22 @@
 - Perfil corregido para ser pantalla de ajustes/preferencias: mantiene selector de tema y `Proximamente`; no muestra metricas lectoras, reto lector ni estadisticas globales.
 - Home mantiene accion superior de anadir/buscar libro y no duplica acceso superior a Perfil.
 - Se mantiene padding inferior amplio en Insights y Perfil para evitar contenido oculto bajo bottom navigation.
+- Hito 5 Sprint 12 implementado: Onboarding + First Run Experience.
+- Onboarding de primera apertura creado con 3 pantallas: viaje lector, registro de lecturas y perfil lector.
+- El flujo incluye `Omitir`, `Siguiente`, `Empezar` e indicador visual de progreso.
+- Persistencia local del onboarding completado mediante `SharedPreferences`.
+- Flag de persistencia: `onboarding_completed`.
+- El onboarding se muestra solo una vez; usuarios recurrentes entran directamente a la app.
+- Tras onboarding, el usuario entra al flujo normal de ReadPp.
+- Home mejora su empty state para guiar hacia anadir el primer libro.
+- Insights mejora su empty state con CTA para anadir el primer libro.
+- No se introdujo backend, login, sincronizacion ni cambios de arquitectura.
+- Validacion Sprint 12 confirmada por el usuario: `flutter analyze` OK y `flutter test` OK (34/34 tests).
 
 ## Parcial / en seguimiento
+
+- Actualizacion Sprint 12: ReadPp se considera feature-complete para v1, pendiente de release readiness.
+- Actualizacion Sprint 12: la revision final de textos y consistencia visual queda para Sprint 13 Release Candidate.
 
 - Revisión de textos y consistencia visual fina pendiente para el sprint visual/UI.
 - Open Library puede mejorar resultados en espanol, pero queda para una fase posterior.
@@ -190,6 +204,11 @@
 - Validacion local de Hito 5 Sprint 8 y sprints posteriores pendiente en terminal del usuario.
 
 ## Pendiente inmediato
+
+- Hito 5 Sprint 13 - Release Candidate & Store Readiness.
+- Revision final de UX, accesibilidad, navegacion, empty states y copy.
+- Revision de app icon y splash screen.
+- Preparar store screenshots, Play Store assets, privacidad, versionado y release.
 
 - Ejecutar `flutter pub get` para incorporar `shared_preferences`.
 - Validar Hito 5 Sprint 1 a Sprint 11B cuando el usuario lo decida.

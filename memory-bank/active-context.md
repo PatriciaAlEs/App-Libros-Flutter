@@ -4,7 +4,9 @@
 
 Hito 5: UX/UI Premium Redesign.
 
-Sprint 8 implementado: Progress Premium Redesign.
+Sprint 12 completado: Onboarding + First Run Experience.
+
+ReadPp esta feature-complete para v1 a nivel de producto base. El siguiente bloque recomendado es Hito 5 Sprint 13 - Release Candidate & Store Readiness.
 
 La Home ya funciona como pantalla editorial de biblioteca personal y concentra:
 
@@ -63,6 +65,7 @@ El sistema visual base ahora incluye:
 - Motion tokens y widgets reutilizables para transiciones suaves.
 - Iconografia de Home/Bottom Navigation/metricas/acciones migrada hacia `AppIcons` con Lucide donde ya esta disponible.
 - Tipografia del proyecto fue iterada varias veces; el estado actual del codigo usa Roboto globalmente, aunque las referencias de diseno siguen hablando de estilo editorial.
+- Tipografia actual de producto: Roboto para texto general y Space Grotesk para titulos principales/display cuando aplica.
 
 ## Estado reciente
 
@@ -215,6 +218,16 @@ El sistema visual base ahora incluye:
 - Perfil fue corregido para funcionar como pantalla de ajustes y preferencias, no como dashboard: mantiene header/hero de preferencias, selector de tema y bloque `Proximamente`; no muestra metricas lectoras, reto anual ni estadisticas globales.
 - Modelo conceptual actual: Home = resumen general; Biblioteca = coleccion; Progress = seguimiento; Stats = metricas; Insights = descubrimientos/curiosidades; Perfil = usuario, ajustes y preferencias.
 - Tipografia actual indicada por el usuario: Roboto global.
+- Se implemento Hito 5 Sprint 12 - Onboarding + First Run Experience.
+- La app ahora muestra onboarding solo en primera apertura.
+- El onboarding tiene 3 pantallas: viaje lector, registro de lecturas y perfil lector.
+- El flujo incluye acciones `Omitir`, `Siguiente`, `Empezar` e indicador visual de progreso.
+- El estado de finalizacion se persiste localmente con `SharedPreferences` usando la flag `onboarding_completed`.
+- Los usuarios recurrentes no ven onboarding automaticamente despues de completarlo u omitirlo.
+- Tras completar onboarding, el usuario entra en el flujo normal de la app.
+- Home e Insights mejoraron sus empty states para guiar al usuario hacia anadir el primer libro.
+- No se introdujo autenticacion, backend, sincronizacion ni cambios de arquitectura.
+- Validacion Sprint 12 confirmada por el usuario: `flutter analyze` OK y `flutter test` OK (34/34 tests).
 
 ## Archivos tocados recientemente
 
@@ -267,6 +280,8 @@ El sistema visual base ahora incluye:
 - `reading_tracker/lib/features/settings/presentation/screens/settings_screen.dart`
 - `reading_tracker/lib/features/home/presentation/screens/home_screen.dart`
 - `reading_tracker/lib/features/navigation/presentation/screens/main_navigation_screen.dart`
+- `reading_tracker/lib/features/onboarding/presentation/providers/onboarding_controller.dart`
+- `reading_tracker/lib/features/onboarding/presentation/screens/onboarding_screen.dart`
 - `reading_tracker/lib/features/progress/presentation/screens/progress_screen.dart`
 - `reading_tracker/assets/branding/README.md`
 - `reading_tracker/assets/fonts/README.md`
@@ -275,24 +290,25 @@ El sistema visual base ahora incluye:
 - `reading_tracker/lib/features/reading_sessions/presentation/screens/day_detail_screen.dart`
 - `reading_tracker/lib/features/reading_sessions/presentation/utils/session_completion_flow.dart`
 - `reading_tracker/test/reading_insights_summary_test.dart`
+- `reading_tracker/test/reading_session_delete_test.dart`
+- `reading_tracker/test/reading_session_edit_test.dart`
 
 ## Validaciones
 
 El usuario ejecuta las validaciones en su terminal de VS Code. No ejecutarlas desde Codex salvo que lo pida explicitamente.
 
-Estado confirmado para Hito 4 Sprint 3:
+Estado confirmado para Hito 5 Sprint 12:
 
-- `dart format` OK.
 - `flutter analyze` OK.
-- `flutter test` OK (33 tests).
+- `flutter test` OK (34/34 tests).
 
 ## Pendientes reales
 
-1. Ejecutar `flutter pub get` antes de validar Sprint 2/Sprint 2.5/Sprint 3, por la nueva dependencia `shared_preferences` y nuevos assets declarados.
-2. Validar Hito 5 Sprint 1/Sprint 2/Sprint 2.5/Sprint 3 desde la terminal del usuario cuando corresponda.
-3. Definir siguiente sprint visual/UI cuando el usuario lo pida.
-4. Mas adelante investigar Open Library para mejorar resultados en espanol.
-5. Revisar consistencia tipografica final antes de cerrar Hito 5, porque hubo varios cambios de fuente solicitados durante el refinamiento.
+1. Hito 5 Sprint 13 - Release Candidate & Store Readiness.
+2. Revision final de UX, accesibilidad, navegacion, empty states y copy.
+3. Preparar icono de app, splash screen, screenshots y assets de Play Store.
+4. Revisar privacidad, versionado y preparacion de release.
+5. Mas adelante investigar Open Library para mejorar resultados en espanol.
 
 ## Riesgos / notas
 

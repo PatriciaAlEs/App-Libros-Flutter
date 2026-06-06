@@ -114,3 +114,17 @@
 - Perfil debe tratarse como ajustes/preferencias, no dashboard: mantener selector de tema y seccion `Proximamente`; no mostrar metricas lectoras, reto lector ni estadisticas globales.
 - Pantallas principales con contenido scrolleable deben reservar padding inferior suficiente para que bottom navigation no oculte cards o CTAs.
 - Tipografia actual indicada por el usuario: Roboto global.
+
+## Onboarding Hito 5 Sprint 12
+
+- Onboarding se muestra solo en primera apertura.
+- El estado completado se persiste localmente con `SharedPreferences`.
+- La flag de persistencia es `onboarding_completed`.
+- Completar u omitir onboarding marca la experiencia como completada.
+- Usuarios recurrentes no ven onboarding automaticamente.
+- Tras onboarding, el usuario entra al flujo normal de la aplicacion.
+- El onboarding no introduce autenticacion, backend, sincronizacion ni nuevas arquitecturas.
+- Los empty states de primer uso deben guiar hacia anadir el primer libro cuando la pantalla aun no tiene datos.
+- Mantener Burgundy y Forest en onboarding.
+- Mantener estrategia tipografica actual: Roboto para UI/body y Space Grotesk para titulos principales/display.
+- ReadPp queda feature-complete para v1 tras Sprint 12; el siguiente foco es Sprint 13 - Release Candidate & Store Readiness.

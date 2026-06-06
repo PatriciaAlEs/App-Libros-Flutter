@@ -4,6 +4,8 @@
 
 `reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario, estadisticas basicas e insights de lectura.
 
+Estado tras Hito 5 Sprint 12: ReadPp ya es feature-complete para v1 en funcionalidad principal y primera experiencia de usuario. Queda pendiente el Sprint 13 de Release Candidate & Store Readiness antes de publicacion.
+
 La Home ya funciona como biblioteca personal moderna. Actualmente ofrece:
 
 - Header editorial `READPP •` con `Tu biblioteca personal` y saludo contextual.
@@ -14,6 +16,26 @@ La Home ya funciona como biblioteca personal moderna. Actualmente ofrece:
 - Actividad reciente compacta.
 - FAB para anadir libro.
 - Sugerencias de pendientes cuando no hay lecturas activas.
+- Empty state de primer uso orientado a anadir el primer libro.
+
+## Onboarding / First Run Experience
+
+Estado actual implementado:
+
+- Onboarding funcional de primera apertura.
+- El flujo tiene 3 pantallas:
+  - `Tu viaje lector, en un solo lugar`.
+  - `Registra tus lecturas`.
+  - `Descubre tu perfil lector`.
+- Incluye acciones `Omitir`, `Siguiente` y `Empezar`.
+- Incluye indicador visual de progreso.
+- El estado completado se persiste localmente con `SharedPreferences`.
+- La flag usada es `onboarding_completed`.
+- El onboarding se muestra solo si la flag no existe o esta en `false`.
+- Al completar u omitir, la app entra en el flujo normal.
+- Los usuarios recurrentes no ven onboarding automaticamente.
+- No se introdujo login, backend, sincronizacion ni nueva arquitectura.
+- El estilo visual mantiene Burgundy/Forest y la estrategia tipografica Roboto + Space Grotesk.
 
 ## UX Home
 
@@ -192,6 +214,7 @@ Estado actual implementado:
 - El genero favorito acumula paginas por `Book.genre`.
 - Si `Book.genre` esta vacio o no disponible, el insight de genero queda en fallback sin inventar campos.
 - La pantalla maneja loading, error y empty state.
+- El empty state actual guia hacia anadir el primer libro cuando no hay datos suficientes para generar insights.
 - Las mutaciones de libros y sesiones invalidan `readingInsightsSummaryProvider` cuando corresponde.
 - Hay tests focalizados para el calculo de insights.
 - Hito 4 Sprint 2 completado y validado.
@@ -220,9 +243,10 @@ Estado actual implementado:
 Estado confirmado por el usuario:
 
 - `flutter analyze` OK.
-- `flutter test` OK (33 tests).
+- `flutter test` OK (34/34 tests).
 - `dart format` OK.
 - El usuario ejecuta `dart format`, `flutter analyze` y `flutter test` desde VS Code.
+- Actualizacion Sprint 12: las validaciones vigentes son `flutter analyze` OK y `flutter test` OK (34/34 tests). Las notas historicas de sprints anteriores se conservan como historial.
 - Sprint 4 esta pendiente de validacion local por el usuario.
 - Hito 5 Sprint 1 esta pendiente de validacion local por el usuario.
 - Hito 5 Sprint 2 - Design System esta implementado y pendiente de validacion local por el usuario.
@@ -246,6 +270,8 @@ Estado confirmado por el usuario:
 - Estado UX actual: Insights es pantalla principal de descubrimientos/curiosidades con hero, panel de insight principal, metricas destacadas y cards editoriales.
 - Estado UX actual: Add Book es pantalla premium para incorporar libros con buscador Open Library protagonista y formulario agrupado visualmente.
 - Separacion conceptual actual: Home resumen general; Biblioteca coleccion; Progress seguimiento; Stats metricas; Insights descubrimientos; Perfil preferencias.
+- Hito 5 Sprint 12 - Onboarding + First Run Experience completado y validado.
+- Estado actual: ReadPp es feature-complete para v1; quedan tareas de release readiness.
 
 ## Estadisticas MVP
 
@@ -272,7 +298,7 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Ejecutar `flutter pub get` antes de validar Sprint 2/Sprint 2.5/Sprint 3 por la dependencia `shared_preferences` y los assets declarados.
-2. Validar Hito 5 Sprint 1, Sprint 2, Sprint 2.5 y Sprint 3 cuando el usuario lo decida.
-3. Validar sprints visuales posteriores de Hito 5 cuando el usuario lo decida.
-4. Continuar con el siguiente sprint visual/UI que priorice el usuario.
+1. Hito 5 Sprint 13 - Release Candidate & Store Readiness.
+2. Revision final de UX, accesibilidad, navegacion, empty states y copy.
+3. Revision de app icon, splash screen y assets de tienda.
+4. Preparacion de screenshots, Play Store assets, privacidad, versionado y release.
