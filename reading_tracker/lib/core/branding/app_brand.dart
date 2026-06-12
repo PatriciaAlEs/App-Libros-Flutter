@@ -7,6 +7,7 @@ class AppBrand {
   static const tagline = 'Tu biblioteca personal';
 
   static const logoAsset = 'assets/branding/logos/readpp_logo.png';
+  static const headerLogoAsset = 'img-logo/transparent-logo (1).png';
   static const logoTransparentAsset =
       'assets/branding/logos/readpp_logo_transparent.png';
   static const logoVectorAsset = 'assets/branding/logos/readpp_logo.svg';

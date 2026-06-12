@@ -39,16 +39,32 @@ class AppBrandHeader extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: theme.colorScheme.secondary.withValues(alpha: 0.68),
               boxShadow: AppShadows.soft(theme.colorScheme.secondary),
             ),
-            child: Text(
-              AppBrand.symbol,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontFamily: AppTypography.displayFontFamily,
-                fontFamilyFallback: AppTypography.displayFallback,
-                fontWeight: FontWeight.w800,
+            child: ClipOval(
+              child: Image.asset(
+                AppBrand.headerLogoAsset,
+                width: 48,
+                height: 48,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  width: 48,
+                  height: 48,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: theme.colorScheme.secondary.withValues(alpha: 0.68),
+                  ),
+                  child: Text(
+                    AppBrand.symbol,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontFamily: AppTypography.displayFontFamily,
+                      fontFamilyFallback: AppTypography.displayFallback,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
