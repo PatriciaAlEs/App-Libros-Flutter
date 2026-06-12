@@ -8,6 +8,8 @@ Sprint 13 completado: Release Candidate & Store Readiness.
 
 Sprint 14 implementado: Demo Polish.
 
+Sprint 15 completado: Stats Premium Redesign.
+
 ReadPp v1.0 RC esta completo.
 
 Estado actual: Publication Preparation In Progress.
@@ -21,6 +23,15 @@ Validacion vigente:
 
 Trabajo mas reciente completado:
 
+- Hito 5 Sprint 15 completed.
+- Statistics screen redesigned.
+- Editorial header added.
+- Hero metrics section added.
+- `MetricCard` adopted in Stats.
+- `SectionHeader` adopted in Stats.
+- Annual goal redesigned visually.
+- Duplicate metrics removed.
+- Visual consistency aligned with Home, Progress and Insights.
 - Demo Polish Sprint 14 aplicado con cambios minimos de alto impacto visual.
 - Correccion de barra de reto anual en Home: `annualGoalProgress` se normaliza de porcentaje `0-100` a valor visual `0-1`.
 - Nombre por defecto hardcodeado unificado de `Daniela` a `Lectora`.

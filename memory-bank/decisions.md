@@ -165,3 +165,14 @@
 - Home debe usar el mismo simbolo de marca que Biblioteca, Progreso, Insights y Onboarding.
 - Las correcciones de copy deben ser puntuales y verificadas; no hacer reescrituras masivas de contenido.
 - En pulidos de demo no tocar providers, Drift, repositorios, modelos ni logica de negocio.
+
+## Stats Premium Redesign Sprint 15
+
+- Hito 5 Sprint 15 completed.
+- Statistics screen redesigned for visual consistency with Home, Progress and Insights.
+- Stats debe usar header editorial en lugar de AppBar generica.
+- Stats puede reorganizar metricas en secciones visuales sin modificar providers, repositorios ni calculos.
+- `MetricCard` y `SectionHeader` son los componentes preferidos para Stats.
+- La card de objetivo anual puede redisenarse visualmente, manteniendo `saveAnnualReadingGoalProvider` y `statisticsSummaryProvider`.
+- Eliminar metricas duplicadas cuando muestren exactamente el mismo dato o concepto visible; en Sprint 15 se resolvio `Leyendo` / `Lecturas activas`.
+- Sprint 15 no introduce nuevas funcionalidades ni cambios de arquitectura.

@@ -214,6 +214,17 @@
 - Copy polish puntual aplicado: tildes en `páginas`, `Sesión registrada`, `DÍAS`, `día/días` y textos de Stats.
 - No se tocaron providers, arquitectura, modelos, persistencia ni logica de negocio en Sprint 14.
 - Validacion Sprint 14 pendiente en terminal del usuario: `dart format`, `flutter analyze` y `flutter test`.
+- Hito 5 Sprint 15 completed: Stats Premium Redesign.
+- Statistics screen redesigned.
+- Editorial header added.
+- Hero metrics section added.
+- `MetricCard` adopted.
+- `SectionHeader` adopted.
+- Annual goal redesigned.
+- Duplicate metrics removed.
+- Visual consistency aligned with Home, Progress and Insights.
+- Sprint 15 mantuvo la logica actual: no se modificaron providers, repositorios ni calculos.
+- Validacion Sprint 15 pendiente en terminal del usuario: `dart format`, `flutter analyze` y `flutter test`.
 
 ## Parcial / en seguimiento
 
@@ -221,6 +232,7 @@
 - Estado vigente tras Branding Final: Release Candidate Ready.
 - Estado vigente tras Branding Final: Publication Preparation In Progress.
 - Estado vigente tras Sprint 14: Demo Polish aplicado; pendiente validacion local por el usuario.
+- Estado vigente tras Sprint 15: Stats Premium Redesign aplicado; pendiente validacion local por el usuario.
 - Las notas pendientes de validacion de sprints anteriores quedan como historial superado por la validacion vigente de Sprint 13.
 
 - Actualizacion Sprint 12: ReadPp se considera feature-complete para v1, pendiente de release readiness.
@@ -244,6 +256,7 @@
 
 - Estado vigente: continuar Publication Preparation para publicar ReadPp v1.0.
 - Ejecutar validacion local de Sprint 14 en VS Code: `dart format`, `flutter analyze` y `flutter test`.
+- Ejecutar validacion local de Sprint 15 en VS Code: `dart format`, `flutter analyze` y `flutter test`.
 - Pendientes reales: final splash branding pass, Android adaptive icon review, verificacion de icono en dispositivo real, Play Store screenshots, store listing copy, privacy policy publica, firma de release, AAB firmado y Play Store submission.
 
 - Revision final de assets de tienda, privacidad, versionado y release.

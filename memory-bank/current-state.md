@@ -4,7 +4,7 @@
 
 `reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario, estadisticas basicas e insights de lectura.
 
-Estado tras Hito 5 Sprint 13, Branding Final y Sprint 14 Demo Polish: ReadPp v1.0 RC esta completo.
+Estado tras Hito 5 Sprint 13, Branding Final, Sprint 14 Demo Polish y Sprint 15 Stats Premium Redesign: ReadPp v1.0 RC esta completo.
 
 Estado actual: Release Candidate Ready; Publication Preparation In Progress.
 
@@ -47,6 +47,19 @@ Sprint 14 Demo Polish implementado:
 - Correcciones puntuales de copy/tildes aplicadas en textos visibles.
 - No se introdujo perfil real, persistencia nueva, providers nuevos, arquitectura nueva ni logica de negocio.
 - Validacion Sprint 14 pendiente: el usuario ejecuta `dart format`, `flutter analyze` y `flutter test` desde VS Code.
+
+Hito 5 Sprint 15 completed:
+
+- Statistics screen redesigned.
+- Editorial header added.
+- Hero metrics section added.
+- `MetricCard` adopted.
+- `SectionHeader` adopted.
+- Annual goal redesigned.
+- Duplicate metrics removed.
+- Visual consistency aligned with Home, Progress and Insights.
+- Sprint 15 mantuvo providers, repositorios y logica de calculo sin cambios.
+- Validacion Sprint 15 pendiente: el usuario ejecuta `dart format`, `flutter analyze` y `flutter test` desde VS Code.
 
 Identidad visual vigente:
 
@@ -349,6 +362,10 @@ Estado actual implementado:
 - El usuario puede definir o editar la meta anual desde un dialogo simple en `/stats`.
 - La seccion "Rachas" aparece en `/stats` con racha actual y mejor racha.
 - La seccion "Ritmo de lectura" aparece en `/stats` con paginas/minutos por semana y mes, promedios por dia activo, dias activos del mes y dia mas activo.
+- Sprint 15 redisenia visualmente `/stats` con header editorial, hero metrics, secciones `Lectura`, `Tiempo` y `Objetivo anual`.
+- `/stats` reutiliza `MetricCard`, `SectionHeader`, `AppSpacing`, `AppIcons` y `Theme.colorScheme`.
+- La card de objetivo anual en `/stats` queda alineada visualmente con Home, Progreso e Insights.
+- La metrica duplicada `Lecturas activas` se elimina de la UI de Stats para evitar repetir `Leyendo`.
 - Quedan preparados futuros bloques de sesiones avanzadas y graficas, sin implementarlos todavia.
 
 ## Siguiente paso recomendado
