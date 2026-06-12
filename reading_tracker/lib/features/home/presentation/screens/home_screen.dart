@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/preferences/reader_profile_controller.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -48,8 +47,8 @@ class HomeScreen extends ConsumerWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                theme.scaffoldBackgroundColor,
-                theme.colorScheme.primaryContainer.withValues(alpha: 0.16),
+                theme.colorScheme.secondaryContainer.withValues(alpha: 0.18),
+                theme.colorScheme.primaryContainer.withValues(alpha: 0.24),
                 theme.scaffoldBackgroundColor,
               ],
               stops: const [0, 0.40, 1],
@@ -398,6 +397,14 @@ class _HomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final greeting = readerProfile.homeGreeting(DateTime.now());
+    final commaIndex = greeting.indexOf(',');
+    final greetingLead = commaIndex == -1
+        ? greeting
+        : greeting.substring(0, commaIndex + 1);
+    final greetingName = commaIndex == -1
+        ? 'Lectora'
+        : greeting.substring(commaIndex + 1).trim();
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xs),
@@ -409,16 +416,28 @@ class _HomeHeader extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  AppBrandHeader(
-                    readerProfile: readerProfile,
-                    showGreeting: false,
-                    onTap: () => Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      '/',
-                      (route) => false,
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                          fontWeight: FontWeight.w500,
+                          height: 1.05,
+                        ),
+                        children: [
+                          TextSpan(text: '$greetingLead\n'),
+                          TextSpan(
+                            text: '$greetingName 👋',
+                            style: theme.textTheme.displaySmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w900,
+                              height: 1,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const Spacer(),
                   const SizedBox(width: AppSpacing.md),
                   _HeaderActionButton(
                     icon: AppIcons.profile,
@@ -427,54 +446,83 @@ class _HomeHeader extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                '${readerProfile.homeGreeting(DateTime.now())} 👋',
-                softWrap: true,
-                overflow: TextOverflow.visible,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: theme.colorScheme.onSurface,
-                  fontWeight: FontWeight.w900,
-                  height: 1.15,
-                ),
-              ),
               const SizedBox(height: AppSpacing.md),
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: () =>
-                          Navigator.pushNamed(context, '/book/add'),
-                      icon: const Icon(AppIcons.add, size: 18),
-                      label: const Text('Libro'),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(46),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                    ),
+                  _HomePillButton(
+                    icon: AppIcons.add,
+                    label: 'Libro',
+                    onTap: () => Navigator.pushNamed(context, '/book/add'),
                   ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () =>
-                          Navigator.pushNamed(context, '/calendar'),
-                      icon: const Icon(AppIcons.calendar, size: 18),
-                      label: const Text('Calendario'),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(46),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                    ),
+                  const SizedBox(width: AppSpacing.sm),
+                  _HomePillButton(
+                    icon: AppIcons.calendar,
+                    label: 'Calendario',
+                    onTap: () => Navigator.pushNamed(context, '/calendar'),
                   ),
                 ],
               ),
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _HomePillButton extends StatelessWidget {
+  const _HomePillButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.colorScheme.surface.withValues(alpha: 0.94),
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Container(
+          height: 44,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.10),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: theme.colorScheme.primary, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -823,22 +871,9 @@ class _CurrentReadingCards extends StatelessWidget {
     }
 
     final primaryBook = books.first;
-    final secondaryBooks = books.skip(1).take(2).toList();
-
-    return Column(
-      children: [
-        _CurrentReadingHero(
-          book: primaryBook,
-          onOpenProgress: () => onOpenProgress(primaryBook),
-        ),
-        for (final book in secondaryBooks) ...[
-          const SizedBox(height: AppSpacing.md),
-          _CurrentReadingMiniCard(
-            book: book,
-            onOpenProgress: () => onOpenProgress(book),
-          ),
-        ],
-      ],
+    return _CurrentReadingHero(
+      book: primaryBook,
+      onOpenProgress: () => onOpenProgress(primaryBook),
     );
   }
 }
@@ -883,7 +918,7 @@ class _CurrentReadingHero extends StatelessWidget {
           borderRadius: BorderRadius.circular(28),
           onTap: onOpenProgress,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -925,14 +960,14 @@ class _CurrentReadingHero extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 26),
+                const SizedBox(height: AppSpacing.md),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final isNarrow = constraints.maxWidth < 340;
                     final cover = _BookCover(
                       url: currentBook.coverUrl,
-                      width: isNarrow ? 112 : 132,
-                      height: isNarrow ? 168 : 198,
+                      width: isNarrow ? 102 : 118,
+                      height: isNarrow ? 154 : 176,
                       radius: 16,
                     );
 
@@ -942,13 +977,13 @@ class _CurrentReadingHero extends StatelessWidget {
                       children: [
                         Text(
                           currentBook.title,
-                          maxLines: 4,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.headlineSmall?.copyWith(
                             color: onDark,
                             fontFamily: AppTypography.displayFontFamily,
                             fontFamilyFallback: AppTypography.displayFallback,
-                            fontSize: isNarrow ? 26 : 31,
+                            fontSize: isNarrow ? 22 : 26,
                             fontWeight: FontWeight.w800,
                             height: 1.08,
                           ),
@@ -964,61 +999,39 @@ class _CurrentReadingHero extends StatelessWidget {
                               fontStyle: FontStyle.italic,
                             ),
                           ),
-                        const SizedBox(height: 30),
+                        const SizedBox(height: AppSpacing.xl),
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(
-                              '$progressPercent',
-                              style: theme.textTheme.displaySmall?.copyWith(
-                                color: onDark,
-                                fontFamily: AppTypography.contentFontFamily,
-                                fontFamilyFallback:
-                                    AppTypography.contentFallback,
-                                fontSize: isNarrow ? 42 : 48,
-                                fontWeight: FontWeight.w600,
-                                height: 0.92,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                left: 4,
-                                bottom: 7,
-                              ),
-                              child: Text(
-                                '%',
-                                style: theme.textTheme.labelLarge?.copyWith(
-                                  color: accent.withValues(alpha: 0.96),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.lg),
                             Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(bottom: 6),
-                                child: Text(
-                                  _pageProgressText(currentBook),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: onDark.withValues(alpha: 0.78),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(999),
+                                child: LinearProgressIndicator(
+                                  value: progress,
+                                  minHeight: 9,
+                                  backgroundColor: Colors.white.withValues(
+                                    alpha: 0.14,
                                   ),
+                                  color: accent.withValues(alpha: 0.98),
                                 ),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Text(
+                              '$progressPercent%',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: onDark,
+                                fontWeight: FontWeight.w900,
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: AppSpacing.sm),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(999),
-                          child: LinearProgressIndicator(
-                            value: progress,
-                            minHeight: 5,
-                            backgroundColor: Colors.white.withValues(
-                              alpha: 0.12,
-                            ),
-                            color: accent.withValues(alpha: 0.96),
+                        Text(
+                          _pageProgressText(currentBook),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: onDark.withValues(alpha: 0.78),
                           ),
                         ),
                       ],
@@ -1045,7 +1058,7 @@ class _CurrentReadingHero extends StatelessWidget {
                     );
                   },
                 ),
-                const SizedBox(height: 26),
+                const SizedBox(height: AppSpacing.md),
                 FilledButton.icon(
                   onPressed: onOpenProgress,
                   icon: const Icon(AppIcons.book),
@@ -1057,7 +1070,7 @@ class _CurrentReadingHero extends StatelessWidget {
                   style: FilledButton.styleFrom(
                     backgroundColor: theme.colorScheme.surface,
                     foregroundColor: theme.colorScheme.primary,
-                    minimumSize: const Size.fromHeight(52),
+                    minimumSize: const Size.fromHeight(42),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
@@ -1784,7 +1797,8 @@ class _QuickMetrics extends StatelessWidget {
             value: '${summary.currentStreakDays}',
             label: 'Racha',
             footnote: 'días',
-            backgroundColor: theme.colorScheme.surface,
+            backgroundColor:
+                theme.colorScheme.primaryContainer.withValues(alpha: 0.30),
             foregroundColor: theme.colorScheme.onSurface,
             iconColor: theme.colorScheme.primary,
             onTap: onOpenCalendar,
@@ -1797,7 +1811,8 @@ class _QuickMetrics extends StatelessWidget {
             value: '${summary.completedThisYear}',
             label: 'Libros',
             footnote: 'este año',
-            backgroundColor: theme.colorScheme.surface,
+            backgroundColor:
+                theme.colorScheme.primaryContainer.withValues(alpha: 0.30),
             foregroundColor: theme.colorScheme.onSurface,
             iconColor: theme.colorScheme.primary,
             onTap: onOpenLibrary,
@@ -1810,7 +1825,8 @@ class _QuickMetrics extends StatelessWidget {
             value: _compactNumber(summary.totalPagesRead),
             label: 'Páginas',
             footnote: 'totales',
-            backgroundColor: theme.colorScheme.surface,
+            backgroundColor:
+                theme.colorScheme.primaryContainer.withValues(alpha: 0.30),
             foregroundColor: theme.colorScheme.onSurface,
             iconColor: theme.colorScheme.primary,
             onTap: onOpenProgress,
@@ -1886,7 +1902,10 @@ class _CompactMetricCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(icon, color: iconColor, size: 22),
+                    if (label == 'Racha')
+                      Text('🔥', style: theme.textTheme.titleMedium)
+                    else
+                      Icon(icon, color: iconColor, size: 22),
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: Text(
@@ -1970,7 +1989,6 @@ class _AnnualGoalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final year = DateTime.now().year;
     final goal = summary.annualReadingGoal;
     final progress = summary.annualGoalProgress ?? 0;
     final safeProgress = (progress / 100).clamp(0.0, 1.0).toDouble();
@@ -1990,7 +2008,7 @@ class _AnnualGoalCard extends StatelessWidget {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withValues(alpha: 0.92),
+            color: theme.colorScheme.surface.withValues(alpha: 0.78),
             borderRadius: BorderRadius.circular(26),
             border: Border.all(
               color: theme.colorScheme.secondary.withValues(alpha: 0.22),
@@ -2020,48 +2038,39 @@ class _AnnualGoalCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '$year READING GOAL',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.primary.withValues(
-                                alpha: 0.78,
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.my_location_rounded,
+                                color: theme.colorScheme.primary,
+                                size: 26,
                               ),
-                              letterSpacing: 2.6,
-                              fontWeight: FontWeight.w500,
-                            ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Text(
+                                'Reto anual',
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: AppSpacing.sm),
                           Text(
-                            'Reto de lectura $year',
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w800,
+                            goal == null
+                                ? 'Define tu objetivo lector'
+                                : '${summary.completedThisYear} de $goal libros',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.sm,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer.withValues(
-                          alpha: 0.55,
-                        ),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        '${(safeProgress * 100).round()}%',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
                   ],
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: AppSpacing.lg),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -2154,8 +2163,8 @@ class _AnnualGoalIllustration extends StatelessWidget {
     final theme = Theme.of(context);
 
     return SizedBox(
-      width: 104,
-      height: 104,
+      width: 126,
+      height: 116,
       child: Image.asset(
         _asset,
         fit: BoxFit.contain,
