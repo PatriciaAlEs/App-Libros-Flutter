@@ -236,7 +236,6 @@ class HomeScreen extends ConsumerWidget {
     pendingBooks.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     return pendingBooks;
   }
-
 }
 
 class _HomeLoadingState extends StatelessWidget {
@@ -354,6 +353,7 @@ class _HomeHeader extends StatelessWidget {
               Expanded(
                 child: AppBrandHeader(
                   readerName: displayName,
+                  showGreeting: false,
                   onTap: () => Navigator.pushNamedAndRemoveUntil(
                     context,
                     '/',
@@ -362,9 +362,9 @@ class _HomeHeader extends StatelessWidget {
                 ),
               ),
               _HeaderActionButton(
-                icon: AppIcons.add,
-                tooltip: 'Añadir o buscar libro',
-                onTap: () => Navigator.pushNamed(context, '/book/add'),
+                icon: AppIcons.profile,
+                tooltip: 'Perfil',
+                onTap: () => Navigator.pushNamed(context, '/settings'),
               ),
             ],
           ),
@@ -379,7 +379,39 @@ class _HomeHeader extends StatelessWidget {
               height: 1.08,
             ),
           ),
-          const SizedBox(height: AppSpacing.xs),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, '/book/add'),
+                  icon: const Icon(AppIcons.add, size: 18),
+                  label: const Text('Libro'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(46),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, '/calendar'),
+                  icon: const Icon(AppIcons.calendar, size: 18),
+                  label: const Text('Calendario'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(46),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             '¿Qué estás leyendo?',
             maxLines: 1,

@@ -8,10 +8,12 @@ class AppBrandHeader extends StatelessWidget {
   const AppBrandHeader({
     super.key,
     this.readerName = 'Lectora',
+    this.showGreeting = true,
     this.onTap,
   });
 
   final String readerName;
+  final bool showGreeting;
   final VoidCallback? onTap;
 
   @override
@@ -56,14 +58,16 @@ class AppBrandHeader extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  '${_greeting()}, $displayName',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.70),
-                    letterSpacing: 1.6,
+                if (showGreeting) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '${_greeting()}, $displayName',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.70),
+                      letterSpacing: 1.6,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
