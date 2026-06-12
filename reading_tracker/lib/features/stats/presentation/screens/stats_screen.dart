@@ -124,7 +124,7 @@ class StatsScreen extends ConsumerWidget {
                   ),
                   StatCard(
                     icon: Icons.trending_up_outlined,
-                    title: 'Promedio por dia activo',
+                    title: 'Promedio por día activo',
                     value:
                         '${_formatAverage(summary.averagePagesPerActiveDay)} pag.',
                     subtitle:
@@ -132,12 +132,12 @@ class StatsScreen extends ConsumerWidget {
                   ),
                   StatCard(
                     icon: Icons.event_available_outlined,
-                    title: 'Dias activos este mes',
+                    title: 'Días activos este mes',
                     value: '${summary.activeDaysThisMonth}',
                   ),
                   StatCard(
                     icon: Icons.bolt_outlined,
-                    title: 'Dia mas activo',
+                    title: 'Día más activo',
                     value: _formatMostActiveDay(summary.mostActiveDayDate),
                     subtitle: _formatMostActiveDayActivity(
                       summary.mostActiveDayPages,
@@ -154,7 +154,7 @@ class StatsScreen extends ConsumerWidget {
                     icon: Icons.local_fire_department_outlined,
                     title: 'Racha actual',
                     value: '${summary.currentStreakDays}',
-                    subtitle: 'dias seguidos',
+                    subtitle: 'días seguidos',
                   ),
                   StatCard(
                     icon: Icons.emoji_events_outlined,

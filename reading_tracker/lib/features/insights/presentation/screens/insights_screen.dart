@@ -157,7 +157,7 @@ class _InsightsHeader extends StatelessWidget {
               boxShadow: AppShadows.soft(theme.colorScheme.secondary),
             ),
             child: Text(
-              'dP',
+              AppBrand.symbol,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.primary,
                 fontFamily: AppTypography.displayFontFamily,
@@ -180,7 +180,7 @@ class _InsightsHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  '${_greeting()}, Daniela',
+                  '${_greeting()}, Lectora',
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.colorScheme.primary.withValues(alpha: 0.70),
                     letterSpacing: 1.6,

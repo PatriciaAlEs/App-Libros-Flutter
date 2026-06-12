@@ -2,6 +2,7 @@ class AppBrand {
   const AppBrand._();
 
   static const name = 'ReadPp';
+  static const symbol = 'dP';
   static const wordmark = 'READPP';
   static const tagline = 'Tu biblioteca personal';
 

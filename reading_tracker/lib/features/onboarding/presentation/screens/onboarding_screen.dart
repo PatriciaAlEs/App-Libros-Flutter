@@ -133,7 +133,7 @@ class _BrandMark extends StatelessWidget {
             boxShadow: AppShadows.soft(theme.colorScheme.secondary),
           ),
           child: Text(
-            'dP',
+            AppBrand.symbol,
             style: theme.textTheme.titleMedium?.copyWith(
               color: theme.colorScheme.primary,
               fontFamily: AppTypography.displayFontFamily,

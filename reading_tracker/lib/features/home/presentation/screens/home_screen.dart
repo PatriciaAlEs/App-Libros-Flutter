@@ -447,9 +447,11 @@ class _HomeBrandSymbol extends StatelessWidget {
         ),
       ),
       child: Text(
-        'RP',
+        AppBrand.symbol,
         style: theme.textTheme.titleSmall?.copyWith(
           color: theme.colorScheme.primary,
+          fontFamily: AppTypography.displayFontFamily,
+          fontFamilyFallback: AppTypography.displayFallback,
           fontWeight: FontWeight.w900,
           height: 1,
         ),
@@ -1193,7 +1195,7 @@ class _AnnualGoalCard extends StatelessWidget {
     final year = DateTime.now().year;
     final goal = summary.annualReadingGoal;
     final progress = summary.annualGoalProgress ?? 0;
-    final safeProgress = progress.clamp(0.0, 1.0).toDouble();
+    final safeProgress = (progress / 100).clamp(0.0, 1.0).toDouble();
     final subtitle = goal == null
         ? 'Configura tu reto lector desde Progreso.'
         : (summary.booksRemainingForAnnualGoal != null &&
@@ -1488,7 +1490,7 @@ class _QuickReadingDialogState extends State<_QuickReadingDialog> {
                 controller: _totalPagesController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Total de paginas',
+                  labelText: 'Total de páginas',
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
@@ -1651,11 +1653,11 @@ class _ActivityTile extends StatelessWidget {
 
   String _activitySubtitle(ReadingSession session, Book? book) {
     final parts = <String>[
-      if (session.pagesRead > 0) '${session.pagesRead} paginas',
+      if (session.pagesRead > 0) '${session.pagesRead} páginas',
       if (session.minutes > 0) '${session.minutes} min',
       if (book?.author?.isNotEmpty == true) book!.author!,
     ];
-    return parts.isEmpty ? 'Sesion registrada' : parts.join(' · ');
+    return parts.isEmpty ? 'Sesión registrada' : parts.join(' · ');
   }
 
   String _relativeDate(DateTime date) {
@@ -1665,7 +1667,7 @@ class _ActivityTile extends StatelessWidget {
     final difference = today.difference(sessionDay).inDays;
     if (difference <= 0) return 'HOY';
     if (difference == 1) return 'AYER';
-    if (difference < 7) return 'HACE $difference DIAS';
+    if (difference < 7) return 'HACE $difference DÍAS';
     return _humanDate(date).toUpperCase();
   }
 

@@ -1030,7 +1030,7 @@ class _TimelineRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final details = [
-      if (session.pagesRead > 0) '${session.pagesRead} paginas',
+      if (session.pagesRead > 0) '${session.pagesRead} páginas',
       if (session.minutes > 0) '${session.minutes} min',
     ].join(' · ');
 
@@ -1061,7 +1061,7 @@ class _TimelineRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                details.isEmpty ? 'Sesion registrada' : details,
+                details.isEmpty ? 'Sesión registrada' : details,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -1263,7 +1263,7 @@ class _PagesEditSheetState extends State<_PagesEditSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Editar paginas',
+              'Editar páginas',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -1282,14 +1282,14 @@ class _PagesEditSheetState extends State<_PagesEditSheet> {
               controller: _totalPagesController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                labelText: 'Total de paginas',
+                labelText: 'Total de páginas',
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 20),
             FilledButton(
               onPressed: _save,
-              child: const Text('Guardar paginas'),
+              child: const Text('Guardar páginas'),
             ),
           ],
         ),
