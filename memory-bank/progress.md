@@ -207,12 +207,20 @@
 - Documentacion interna de branding creada/actualizada.
 - Primeras piezas de preparacion de publicacion iniciadas: onboarding marketing slides, publicacion LinkedIn y store preparation.
 - Estado del proyecto: ReadPp v1.0 Release Candidate Ready; Publication Preparation In Progress.
+- Sprint 14 - Demo Polish implementado.
+- Home corrige el progreso visual del reto anual: `annualGoalProgress` llega como porcentaje `0-100` y se convierte a `0-1` para la barra.
+- Nombre por defecto hardcodeado unificado: `Daniela` pasa a `Lectora`; no se implementa perfil ni persistencia.
+- Branding de headers unificado con `AppBrand.symbol = 'dP'`; Home deja de usar `RP`.
+- Copy polish puntual aplicado: tildes en `páginas`, `Sesión registrada`, `DÍAS`, `día/días` y textos de Stats.
+- No se tocaron providers, arquitectura, modelos, persistencia ni logica de negocio en Sprint 14.
+- Validacion Sprint 14 pendiente en terminal del usuario: `dart format`, `flutter analyze` y `flutter test`.
 
 ## Parcial / en seguimiento
 
 - Estado vigente tras Branding Final: ReadPp v1.0 RC Complete.
 - Estado vigente tras Branding Final: Release Candidate Ready.
 - Estado vigente tras Branding Final: Publication Preparation In Progress.
+- Estado vigente tras Sprint 14: Demo Polish aplicado; pendiente validacion local por el usuario.
 - Las notas pendientes de validacion de sprints anteriores quedan como historial superado por la validacion vigente de Sprint 13.
 
 - Actualizacion Sprint 12: ReadPp se considera feature-complete para v1, pendiente de release readiness.
@@ -235,6 +243,7 @@
 ## Pendiente inmediato
 
 - Estado vigente: continuar Publication Preparation para publicar ReadPp v1.0.
+- Ejecutar validacion local de Sprint 14 en VS Code: `dart format`, `flutter analyze` y `flutter test`.
 - Pendientes reales: final splash branding pass, Android adaptive icon review, verificacion de icono en dispositivo real, Play Store screenshots, store listing copy, privacy policy publica, firma de release, AAB firmado y Play Store submission.
 
 - Revision final de assets de tienda, privacidad, versionado y release.

@@ -6,6 +6,8 @@ Hito 5: UX/UI Premium Redesign.
 
 Sprint 13 completado: Release Candidate & Store Readiness.
 
+Sprint 14 implementado: Demo Polish.
+
 ReadPp v1.0 RC esta completo.
 
 Estado actual: Publication Preparation In Progress.
@@ -19,6 +21,12 @@ Validacion vigente:
 
 Trabajo mas reciente completado:
 
+- Demo Polish Sprint 14 aplicado con cambios minimos de alto impacto visual.
+- Correccion de barra de reto anual en Home: `annualGoalProgress` se normaliza de porcentaje `0-100` a valor visual `0-1`.
+- Nombre por defecto hardcodeado unificado de `Daniela` a `Lectora`.
+- Branding de headers unificado mediante `AppBrand.symbol = 'dP'`; Home deja de mostrar `RP`.
+- Correcciones puntuales de copy/tildes en textos visibles.
+- Validacion Sprint 14 pendiente en terminal del usuario: `dart format`, `flutter analyze` y `flutter test`.
 - Auditoria visual completa.
 - Auditoria de navegacion.
 - Auditoria tipografica.
@@ -104,6 +112,7 @@ El sistema visual base ahora incluye:
 - Componentes base `MetricCard`, `InsightCard`, `ProgressCard`, `SectionHeader` y `EmptyStateCard`.
 - Persistencia local de preferencia de tema con `shared_preferences`.
 - Branding base de ReadPp con estructura de assets, constantes de marca y wordmark reutilizable.
+- Simbolo de marca centralizado como `AppBrand.symbol = 'dP'`.
 - Tipografia global preparada con Playfair Display para titulos e Inter para contenido.
 - Adaptador `AppIcons` para centralizar iconografia y facilitar una futura migracion a Lucide.
 - Motion tokens y widgets reutilizables para transiciones suaves.

@@ -4,7 +4,7 @@
 
 `reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario, estadisticas basicas e insights de lectura.
 
-Estado tras Hito 5 Sprint 13 y Branding Final: ReadPp v1.0 RC esta completo.
+Estado tras Hito 5 Sprint 13, Branding Final y Sprint 14 Demo Polish: ReadPp v1.0 RC esta completo.
 
 Estado actual: Release Candidate Ready; Publication Preparation In Progress.
 
@@ -38,6 +38,16 @@ Branding Final completo:
 - Iconos Web/PWA generados.
 - Documentacion interna de branding creada/actualizada.
 
+Sprint 14 Demo Polish implementado:
+
+- Correccion visual de Home: la barra del reto anual convierte `annualGoalProgress` de porcentaje `0-100` a progreso visual `0-1`.
+- Nombre por defecto en headers unificado como `Lectora`.
+- Simbolo de marca centralizado como `AppBrand.symbol = 'dP'`.
+- Home reutiliza el mismo simbolo `dP` que Biblioteca, Progreso, Insights y Onboarding.
+- Correcciones puntuales de copy/tildes aplicadas en textos visibles.
+- No se introdujo perfil real, persistencia nueva, providers nuevos, arquitectura nueva ni logica de negocio.
+- Validacion Sprint 14 pendiente: el usuario ejecuta `dart format`, `flutter analyze` y `flutter test` desde VS Code.
+
 Identidad visual vigente:
 
 - Tema principal: Burgundy.
@@ -53,6 +63,7 @@ La Home ya funciona como biblioteca personal moderna. Actualmente ofrece:
 - Registro rapido de avance desde el hero de lectura actual.
 - Metricas compactas de racha actual, completados del ano y paginas leidas.
 - Objetivo lector anual en card independiente.
+- La barra del objetivo anual normaliza correctamente porcentajes `0-100` a valores `0-1`.
 - Actividad reciente compacta.
 - FAB para anadir libro.
 - Sugerencias de pendientes cuando no hay lecturas activas.
@@ -199,6 +210,7 @@ Estado actual implementado:
 - Se mantienen filtros por estado con segmented control compacto: Todos, Pendientes, Leyendo, Completados, Pausados y Aband.
 - El conteo de libros aparece junto a `Coleccion` y refleja el filtro activo.
 - La marca `dP + ReadPp` en Biblioteca navega a Home.
+- El simbolo de marca se obtiene desde `AppBrand.symbol`.
 - Cada card prioriza portada, titulo, autor y progreso opcional.
 - Los libros en lectura muestran progreso si tienen `currentPage` y `totalPages`.
 - Los libros completados muestran rating si estan valorados.
@@ -286,6 +298,7 @@ Estado confirmado por el usuario:
 - `flutter test` OK (34/34 tests).
 - `dart format` OK.
 - El usuario ejecuta `dart format`, `flutter analyze` y `flutter test` desde VS Code.
+- Sprint 14 Demo Polish esta implementado y pendiente de validacion local por el usuario.
 - Actualizacion Sprint 12: las validaciones vigentes son `flutter analyze` OK y `flutter test` OK (34/34 tests). Las notas historicas de sprints anteriores se conservan como historial.
 - Sprint 4 esta pendiente de validacion local por el usuario.
 - Hito 5 Sprint 1 esta pendiente de validacion local por el usuario.

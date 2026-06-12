@@ -154,3 +154,14 @@
 - La preparacion de publicacion queda separada del desarrollo funcional: no introducir backend, login, registro, sync ni features nuevas para v1.
 - Antes de publicar quedan tareas externas: final splash branding pass, Android adaptive icon review, verificacion real de icono, screenshots, store listing copy, privacy policy publica, firma release, AAB firmado y Play Store submission.
 - Estado del proyecto tras Branding Final: ReadPp v1.0 Release Candidate Ready; Publication Preparation In Progress.
+
+## Demo Polish Sprint 14
+
+- Sprint 14 debe mantenerse como pulido de demo/publicacion, no como redisenio ni refactor.
+- Antes de modificar se debe verificar que cada problema exista en codigo.
+- `annualGoalProgress` se trata como porcentaje `0-100`; cualquier indicador visual que espere `0-1` debe recibir el valor normalizado.
+- El nombre por defecto visible en headers es `Lectora`; no implementar perfil, usuario real ni persistencia hasta que se pida.
+- El simbolo de marca visible en headers principales se centraliza en `AppBrand.symbol` y actualmente es `dP`.
+- Home debe usar el mismo simbolo de marca que Biblioteca, Progreso, Insights y Onboarding.
+- Las correcciones de copy deben ser puntuales y verificadas; no hacer reescrituras masivas de contenido.
+- En pulidos de demo no tocar providers, Drift, repositorios, modelos ni logica de negocio.
