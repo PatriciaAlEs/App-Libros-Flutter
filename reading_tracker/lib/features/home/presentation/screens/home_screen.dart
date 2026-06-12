@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
+import '../../../../core/preferences/reader_profile_controller.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
@@ -22,6 +23,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final readerProfile = ref.watch(readerProfileControllerProvider);
     final booksAsync = ref.watch(booksProvider);
     final summaryAsync = ref.watch(statisticsSummaryProvider);
     final now = DateTime.now();
@@ -85,10 +87,32 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       sliver: SliverList.list(
                         children: [
-                          const _HomeHeader(readerName: null),
+                          _HomeHeader(
+                            greetingText: readerProfile.homeGreeting(now),
+                          ),
                           const SizedBox(height: AppSpacing.lg),
+                          if (currentBooks.length > 1) ...[
+                            _CurrentReadingSwitcher(
+                              books: _prioritizeCurrentBooks(
+                                currentBooks,
+                                readerProfile.currentReadingBookId,
+                              ),
+                              onChange: () => _showCurrentReadingPicker(
+                                context,
+                                ref,
+                                _prioritizeCurrentBooks(
+                                  currentBooks,
+                                  readerProfile.currentReadingBookId,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                          ],
                           _CurrentReadingCards(
-                            books: currentBooks,
+                            books: _prioritizeCurrentBooks(
+                              currentBooks,
+                              readerProfile.currentReadingBookId,
+                            ),
                             pendingBooks: pendingBooks,
                             onOpenProgress: (book) => _openQuickProgress(
                               context,
@@ -332,16 +356,13 @@ class _HomeErrorState extends StatelessWidget {
 }
 
 class _HomeHeader extends StatelessWidget {
-  const _HomeHeader({required this.readerName});
+  const _HomeHeader({required this.greetingText});
 
-  final String? readerName;
+  final String greetingText;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cleanName = readerName?.trim();
-    final hasName = cleanName != null && cleanName.isNotEmpty;
-    final displayName = hasName ? cleanName : 'Lectora';
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xs),
@@ -352,7 +373,6 @@ class _HomeHeader extends StatelessWidget {
             children: [
               Expanded(
                 child: AppBrandHeader(
-                  readerName: displayName,
                   showGreeting: false,
                   onTap: () => Navigator.pushNamedAndRemoveUntil(
                     context,
@@ -370,7 +390,7 @@ class _HomeHeader extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            '¡Hola, $displayName! 👋',
+            '$greetingText 👋',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.headlineSmall?.copyWith(
@@ -506,6 +526,239 @@ class _JournalHeader extends StatelessWidget {
       ],
     );
   }
+}
+
+class _CurrentReadingSwitcher extends StatelessWidget {
+  const _CurrentReadingSwitcher({required this.books, required this.onChange});
+
+  final List<Book> books;
+  final VoidCallback onChange;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            'Lectura actual',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs,
+          ),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.34),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            '1 / ${books.length}',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        TextButton(onPressed: onChange, child: const Text('Cambiar lectura')),
+      ],
+    );
+  }
+}
+
+void _showCurrentReadingPicker(
+  BuildContext context,
+  WidgetRef ref,
+  List<Book> books,
+) {
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (context) => _CurrentReadingPicker(books: books, ref: ref),
+  );
+}
+
+class _CurrentReadingPicker extends StatelessWidget {
+  const _CurrentReadingPicker({required this.books, required this.ref});
+
+  final List<Book> books;
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.lg,
+          AppSpacing.xl,
+        ),
+        shrinkWrap: true,
+        children: [
+          Text(
+            'Cambiar lectura',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Elige qué libro quieres destacar en la Home.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          for (final book in books) ...[
+            _CurrentReadingPickerTile(
+              book: book,
+              onSelected: () {
+                ref
+                    .read(readerProfileControllerProvider.notifier)
+                    .updateCurrentReadingBookId(book.id);
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CurrentReadingPickerTile extends StatelessWidget {
+  const _CurrentReadingPickerTile({
+    required this.book,
+    required this.onSelected,
+  });
+
+  final Book book;
+  final VoidCallback onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final progress = _bookProgress(book);
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        ),
+        boxShadow: AppShadows.soft(theme.colorScheme.primary),
+      ),
+      child: Row(
+        children: [
+          _MiniBookCover(book: book),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  book.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                if (book.author?.isNotEmpty == true) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    book.author!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.sm),
+                LinearProgressIndicator(value: progress),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          FilledButton(onPressed: onSelected, child: const Text('Elegir')),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniBookCover extends StatelessWidget {
+  const _MiniBookCover({required this.book});
+
+  final Book book;
+
+  @override
+  Widget build(BuildContext context) {
+    final coverUrl = book.coverUrl;
+    if (coverUrl == null || coverUrl.isEmpty) {
+      return Container(
+        width: 48,
+        height: 70,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Icon(AppIcons.book),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.network(
+        coverUrl,
+        width: 48,
+        height: 70,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: 48,
+          height: 70,
+          alignment: Alignment.center,
+          color: Theme.of(context).colorScheme.primaryContainer,
+          child: const Icon(AppIcons.book),
+        ),
+      ),
+    );
+  }
+}
+
+List<Book> _prioritizeCurrentBooks(List<Book> books, String? selectedBookId) {
+  final prioritized = [...books];
+  final selectedIndex = selectedBookId == null
+      ? -1
+      : prioritized.indexWhere((book) => book.id == selectedBookId);
+
+  if (selectedIndex > 0) {
+    final selected = prioritized.removeAt(selectedIndex);
+    prioritized.insert(0, selected);
+    return prioritized;
+  }
+  if (selectedIndex == 0) return prioritized;
+
+  prioritized.sort((a, b) => _bookProgress(b).compareTo(_bookProgress(a)));
+  return prioritized;
+}
+
+double _bookProgress(Book book) {
+  final totalPages = book.totalPages;
+  if (totalPages == null || totalPages <= 0) return 0;
+  return ((book.currentPage ?? 0) / totalPages).clamp(0.0, 1.0).toDouble();
 }
 
 class _CurrentReadingCards extends StatelessWidget {

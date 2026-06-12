@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
+import '../../../../core/preferences/reader_profile_controller.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_theme_controller.dart';
+import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -13,6 +15,11 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedTheme = ref.watch(appThemeControllerProvider);
     final controller = ref.read(appThemeControllerProvider.notifier);
+    final profile = ref.watch(readerProfileControllerProvider);
+    final annualGoal = ref
+        .watch(statisticsSummaryProvider)
+        .valueOrNull
+        ?.annualReadingGoal;
 
     return Scaffold(
       body: SafeArea(
@@ -30,6 +37,12 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.xl),
             const _ProfileHero(),
+            const SizedBox(height: AppSpacing.lg),
+            _ReaderProfileSection(
+              profile: profile,
+              selectedTheme: selectedTheme,
+              annualGoal: annualGoal,
+            ),
             const SizedBox(height: AppSpacing.lg),
             _ThemePreferenceCard(
               selectedTheme: selectedTheme,
@@ -161,6 +174,261 @@ class _ThemePreferenceCard extends StatelessWidget {
             if (option != ReadingTrackerTheme.values.last)
               const SizedBox(height: AppSpacing.md),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ReaderProfileSection extends ConsumerStatefulWidget {
+  const _ReaderProfileSection({
+    required this.profile,
+    required this.selectedTheme,
+    required this.annualGoal,
+  });
+
+  final ReaderProfile profile;
+  final ReadingTrackerTheme selectedTheme;
+  final int? annualGoal;
+
+  @override
+  ConsumerState<_ReaderProfileSection> createState() =>
+      _ReaderProfileSectionState();
+}
+
+class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _customGreetingController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.profile.name);
+    _customGreetingController = TextEditingController(
+      text: widget.profile.customGreeting,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _ReaderProfileSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.profile.name != _nameController.text) {
+      _nameController.text = widget.profile.name;
+    }
+    if (widget.profile.customGreeting != _customGreetingController.text) {
+      _customGreetingController.text = widget.profile.customGreeting;
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _customGreetingController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final controller = ref.read(readerProfileControllerProvider.notifier);
+    final profile = widget.profile;
+    final displayName = profile.displayName.isEmpty
+        ? 'Sin nombre'
+        : profile.displayName;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        ),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(AppIcons.profile, color: theme.colorScheme.primary),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                'Perfil lector',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            '¿Cómo quieres que te llamemos?',
+            style: theme.textTheme.labelLarge,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          TextField(
+            controller: _nameController,
+            textCapitalization: TextCapitalization.words,
+            decoration: InputDecoration(
+              labelText: 'Nombre',
+              hintText: 'Patricia',
+              prefixIcon: const Icon(AppIcons.profile),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.18),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: theme.colorScheme.primary,
+                  width: 1.4,
+                ),
+              ),
+            ),
+            onChanged: controller.updateName,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text('¿Cómo prefieres el saludo?', style: theme.textTheme.labelLarge),
+          const SizedBox(height: AppSpacing.sm),
+          for (final preference in ReaderGreetingPreference.values)
+            RadioListTile<ReaderGreetingPreference>(
+              value: preference,
+              groupValue: profile.greetingPreference,
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              title: Text(preference.label),
+              onChanged: (value) {
+                if (value != null) {
+                  controller.updateGreetingPreference(value);
+                }
+              },
+            ),
+          if (profile.greetingPreference ==
+              ReaderGreetingPreference.custom) ...[
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: _customGreetingController,
+              decoration: InputDecoration(
+                labelText: 'Mi propio saludo',
+                hintText: 'Ej. Lectora nocturna',
+                prefixIcon: const Icon(AppIcons.bookmark),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.18),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.primary,
+                    width: 1.4,
+                  ),
+                ),
+              ),
+              onChanged: controller.updateCustomGreeting,
+            ),
+          ],
+          const SizedBox(height: AppSpacing.lg),
+          _ProfileSummary(
+            displayName: displayName,
+            greeting: profile.fallbackGreeting,
+            themeName: widget.selectedTheme.label,
+            annualGoal: widget.annualGoal,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileSummary extends StatelessWidget {
+  const _ProfileSummary({
+    required this.displayName,
+    required this.greeting,
+    required this.themeName,
+    required this.annualGoal,
+  });
+
+  final String displayName;
+  final String greeting;
+  final String themeName;
+  final int? annualGoal;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppSpacing.md,
+      runSpacing: AppSpacing.md,
+      children: [
+        _ProfileSummaryItem(
+          icon: AppIcons.profile,
+          label: 'Nombre',
+          value: displayName,
+        ),
+        _ProfileSummaryItem(
+          icon: AppIcons.book,
+          label: 'Saludo',
+          value: greeting,
+        ),
+        _ProfileSummaryItem(
+          icon: Icons.palette_outlined,
+          label: 'Estilo visual',
+          value: themeName,
+        ),
+        _ProfileSummaryItem(
+          icon: AppIcons.flag,
+          label: 'Objetivo anual',
+          value: annualGoal == null ? 'Sin definir' : '$annualGoal libros',
+        ),
+      ],
+    );
+  }
+}
+
+class _ProfileSummaryItem extends StatelessWidget {
+  const _ProfileSummaryItem({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: 142,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.26),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: theme.colorScheme.primary, size: 20),
+          const SizedBox(height: AppSpacing.sm),
+          Text(label, style: theme.textTheme.labelSmall),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ],
       ),
     );
@@ -322,14 +590,62 @@ class _PreferencesAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: () => _showComingSoon(context),
-      icon: const Icon(Icons.auto_awesome_rounded),
-      label: const Text('Ajustes y preferencias'),
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size.fromHeight(52),
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.symmetric(horizontal: 18),
+    final theme = Theme.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: () => _showComingSoon(context),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+            ),
+            boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.colorScheme.secondary.withValues(alpha: 0.24),
+                ),
+                child: const Text('💅', style: TextStyle(fontSize: 24)),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Próximamente',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'Más personalización, estadísticas y novedades para lectoras. 💅',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: theme.colorScheme.primary,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -341,7 +657,7 @@ class _PreferencesAction extends StatelessWidget {
         icon: const Text('💅', style: TextStyle(fontSize: 34)),
         title: const Text('Próximamente'),
         content: const Text(
-          'Seguimos trabajando en nuevas funciones para lectoras.',
+          'Más personalización, estadísticas y novedades para lectoras. 💅',
         ),
         actions: [
           FilledButton(
