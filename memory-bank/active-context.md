@@ -10,6 +10,8 @@ Sprint 14 implementado: Demo Polish.
 
 Sprint 15 completado: Stats Premium Redesign.
 
+Sprint 17.x completado: Reader Profile, branding real y polish visual de headers/Home.
+
 ReadPp v1.0 RC esta completo.
 
 Estado actual: Publication Preparation In Progress.
@@ -32,6 +34,12 @@ Trabajo mas reciente completado:
 - Annual goal redesigned visually.
 - Duplicate metrics removed.
 - Visual consistency aligned with Home, Progress and Insights.
+- Sprint 16/17.x aplicado: perfil lector local, saludo dinamico, seleccion de lectura actual y branding real ReadPp.
+- `AppBrandHeader` queda como componente principal para logo real + saludo dinamico en pantallas principales.
+- Home, Biblioteca, Progreso, Estadisticas, Insights y Ajustes leen el perfil lector para saludar de forma consistente.
+- Home reutiliza el logo real ReadPp y mantiene acceso a Perfil, Libro y Calendario.
+- Home mejora profundidad visual con gradiente alineado a Progreso/Biblioteca, sombras suaves y bordes rosados sutiles en metricas/reto anual.
+- Biblioteca y Progreso ya no muestran los titulos grandes `Tu Biblioteca` / `Tu Progreso`; conservan header de marca y textos informativos.
 - Demo Polish Sprint 14 aplicado con cambios minimos de alto impacto visual.
 - Correccion de barra de reto anual en Home: `annualGoalProgress` se normaliza de porcentaje `0-100` a valor visual `0-1`.
 - Nombre por defecto hardcodeado unificado de `Daniela` a `Lectora`.
@@ -122,8 +130,10 @@ El sistema visual base ahora incluye:
 - Tokens de spacing, radios, elevaciones y sombras suaves.
 - Componentes base `MetricCard`, `InsightCard`, `ProgressCard`, `SectionHeader` y `EmptyStateCard`.
 - Persistencia local de preferencia de tema con `shared_preferences`.
+- Persistencia local de perfil lector con `shared_preferences`: nombre, saludo elegido, saludo personalizado y libro principal de lectura actual.
 - Branding base de ReadPp con estructura de assets, constantes de marca y wordmark reutilizable.
 - Simbolo de marca centralizado como `AppBrand.symbol = 'dP'`.
+- Logo real de ReadPp integrado en headers mediante `img-logo/transparent-logo (1).png`.
 - Tipografia global preparada con Playfair Display para titulos e Inter para contenido.
 - Adaptador `AppIcons` para centralizar iconografia y facilitar una futura migracion a Lucide.
 - Motion tokens y widgets reutilizables para transiciones suaves.
@@ -351,6 +361,14 @@ El sistema visual base ahora incluye:
 - `reading_tracker/lib/core/design_system/components/empty_state_card.dart`
 - `reading_tracker/lib/features/settings/presentation/screens/settings_screen.dart`
 - `reading_tracker/lib/features/home/presentation/screens/home_screen.dart`
+- `reading_tracker/lib/core/preferences/reader_profile_controller.dart`
+- `reading_tracker/lib/core/branding/widgets/app_brand_header.dart`
+- `reading_tracker/lib/core/branding/app_brand.dart`
+- `reading_tracker/lib/features/books/presentation/screens/books_list_screen.dart`
+- `reading_tracker/lib/features/progress/presentation/screens/progress_screen.dart`
+- `reading_tracker/lib/features/stats/presentation/screens/stats_screen.dart`
+- `reading_tracker/lib/features/insights/presentation/screens/insights_screen.dart`
+- `reading_tracker/pubspec.yaml`
 - `reading_tracker/lib/features/navigation/presentation/screens/main_navigation_screen.dart`
 - `reading_tracker/lib/features/onboarding/presentation/providers/onboarding_controller.dart`
 - `reading_tracker/lib/features/onboarding/presentation/screens/onboarding_screen.dart`

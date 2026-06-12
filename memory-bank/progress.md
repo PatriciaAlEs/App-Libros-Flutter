@@ -225,6 +225,26 @@
 - Visual consistency aligned with Home, Progress and Insights.
 - Sprint 15 mantuvo la logica actual: no se modificaron providers, repositorios ni calculos.
 - Validacion Sprint 15 pendiente en terminal del usuario: `dart format`, `flutter analyze` y `flutter test`.
+- Hito 5 Sprint 16/17.x implementado: UX polish, perfil lector local, lectura actual multiple y branding real.
+- Ajustes incluye seccion `Perfil lector` con nombre, saludo Lectora/Lector/Lectore/Personalizado, resumen visual y guardado explicito.
+- El saludo dinamico se persiste localmente y se reutiliza en Home, Biblioteca, Progreso, Estadisticas, Insights y Ajustes.
+- El saludo personalizado se usa como fallback cuando no hay nombre configurado.
+- Home soporta varios libros en estado `Leyendo`, permite elegir libro principal y persiste la seleccion localmente.
+- Si no hay seleccion manual de lectura actual, Home usa como fallback el libro en lectura con mayor progreso.
+- Home mantiene la seleccion manual mientras el libro siga en estado `Leyendo`.
+- El CTA de Home para multiples lecturas usa el copy `Cambiar libro`.
+- El objetivo anual fue retirado del resumen del perfil lector en Ajustes.
+- La card `Proximamente` de Ajustes conserva tratamiento premium y el modal ya no muestra emoji de unas.
+- El formulario de libro usa copy `Anadir libro`, campos con acentos visuales del tema y boton de guardado deshabilitado con identidad de marca.
+- Insights mejora empty state y CTA principal de primer libro.
+- Sprint 17.5 integro el logo real de ReadPp desde `img-logo/transparent-logo (1).png` sin anadir `flutter_svg`.
+- `pubspec.yaml` registra la carpeta `img-logo/` como assets.
+- `AppBrandHeader` centraliza el logo real y el saludo dinamico.
+- Home fue ajustada para alinear logo, Perfil y saludo como bloque limpio, manteniendo `AppBrandHeader` y sin truncar el saludo.
+- Header consistency audit: Biblioteca, Progreso, Estadisticas, Insights y Ajustes reutilizan `AppBrandHeader(readerProfile: ...)`.
+- Sprint 17.7 aplico profundidad visual en Home: gradiente de fondo alineado con Progreso/Biblioteca, sombras suaves y bordes rosados sutiles en metricas y reto anual.
+- Biblioteca y Progreso ya no muestran los titulos grandes `Tu Biblioteca` y `Tu Progreso`; conservan el header de marca y el texto informativo.
+- Validacion Sprint 16/17.x pendiente en terminal del usuario: `dart format .`, `flutter pub get`, `flutter analyze`, `flutter test` y `git status`.
 
 ## Parcial / en seguimiento
 
@@ -233,6 +253,7 @@
 - Estado vigente tras Branding Final: Publication Preparation In Progress.
 - Estado vigente tras Sprint 14: Demo Polish aplicado; pendiente validacion local por el usuario.
 - Estado vigente tras Sprint 15: Stats Premium Redesign aplicado; pendiente validacion local por el usuario.
+- Estado vigente tras Sprint 17.x: perfil lector local, logo real, headers consistentes y Home visual polish aplicados; pendiente validacion local por el usuario.
 - Las notas pendientes de validacion de sprints anteriores quedan como historial superado por la validacion vigente de Sprint 13.
 
 - Actualizacion Sprint 12: ReadPp se considera feature-complete para v1, pendiente de release readiness.
@@ -257,6 +278,7 @@
 - Estado vigente: continuar Publication Preparation para publicar ReadPp v1.0.
 - Ejecutar validacion local de Sprint 14 en VS Code: `dart format`, `flutter analyze` y `flutter test`.
 - Ejecutar validacion local de Sprint 15 en VS Code: `dart format`, `flutter analyze` y `flutter test`.
+- Ejecutar validacion local de Sprint 17.x en VS Code: `dart format .`, `flutter pub get`, `flutter analyze`, `flutter test` y `git status`.
 - Pendientes reales: final splash branding pass, Android adaptive icon review, verificacion de icono en dispositivo real, Play Store screenshots, store listing copy, privacy policy publica, firma de release, AAB firmado y Play Store submission.
 
 - Revision final de assets de tienda, privacidad, versionado y release.

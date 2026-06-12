@@ -6,6 +6,8 @@
 
 Estado tras Hito 5 Sprint 13, Branding Final, Sprint 14 Demo Polish y Sprint 15 Stats Premium Redesign: ReadPp v1.0 RC esta completo.
 
+Actualizacion Sprint 17.x: perfil lector local, branding real, headers consistentes y Home visual polish estan implementados.
+
 Estado actual: Release Candidate Ready; Publication Preparation In Progress.
 
 Validacion vigente:
@@ -61,6 +63,22 @@ Hito 5 Sprint 15 completed:
 - Sprint 15 mantuvo providers, repositorios y logica de calculo sin cambios.
 - Validacion Sprint 15 pendiente: el usuario ejecuta `dart format`, `flutter analyze` y `flutter test` desde VS Code.
 
+Sprint 16/17.x implementado:
+
+- Ajustes incluye perfil lector local con nombre, saludo Lectora/Lector/Lectore/Personalizado, saludo personalizado y resumen visual.
+- El perfil lector se guarda localmente con `SharedPreferences`, sin backend ni Supabase.
+- El saludo dinamico se aplica en Home, Biblioteca, Progreso, Estadisticas, Insights y Ajustes cuando usan header.
+- El saludo personalizado se usa como fallback si no hay nombre configurado.
+- Home permite elegir el libro principal cuando hay varios libros en estado `Leyendo`; la seleccion se guarda localmente.
+- Home usa fallback inicial por mayor progreso solo si no existe seleccion manual valida.
+- El logo real de ReadPp se integra desde `img-logo/transparent-logo (1).png` mediante `AppBrandHeader`.
+- `pubspec.yaml` registra `img-logo/` como carpeta de assets.
+- Home alinea el header como fila de logo/perfil y saludo debajo, manteniendo el saludo sin truncar.
+- Biblioteca y Progreso eliminan los titulos grandes `Tu Biblioteca` y `Tu Progreso`.
+- Home usa gradiente de fondo alineado al lenguaje visual de Progreso/Biblioteca.
+- Cards resumen y reto anual en Home tienen profundidad visual suave con bordes rosados y sombras burdeos ligeras.
+- No se modificaron providers de libros, repositorios, Supabase/backend ni navegacion inferior.
+
 Identidad visual vigente:
 
 - Tema principal: Burgundy.
@@ -105,6 +123,14 @@ Estado actual implementado:
 
 Estado actual implementado:
 
+- Home usa header con logo real ReadPp, acceso a Perfil y saludo dinamico del perfil lector.
+- Home mantiene CTAs superiores `Libro` y `Calendario`.
+- Si existen varios libros en estado `Leyendo`, Home permite elegir cual aparece como principal.
+- La seleccion de lectura principal se persiste localmente y no cambia sola mientras el libro siga en estado `Leyendo`.
+- Si no hay seleccion manual valida, Home usa como fallback el libro en lectura con mayor progreso.
+- El CTA para cambiar lectura usa el copy `Cambiar libro`.
+- El fondo de Home usa un gradiente suave alineado con Progreso/Biblioteca.
+- Las cards resumen y la card de reto anual tienen bordes rosados sutiles y sombras burdeos ligeras.
 - Si existen varios libros en estado `Leyendo`, Home prioriza como hero el actualizado/iniciado mas recientemente.
 - Si no hay libros en estado `Leyendo`, Home muestra sugerencias de libros pendientes.
 - Las sugerencias de pendientes priorizan libros mas antiguos usando la fecha disponible de alta/creacion.
@@ -235,6 +261,8 @@ Estado actual implementado:
 Estado actual implementado:
 
 - `ProgressScreen` ya no es una lista simple de accesos.
+- Progreso usa `AppBrandHeader` con logo real ReadPp y saludo dinamico del perfil lector.
+- El titulo grande `Tu Progreso` fue retirado; se conserva el texto descriptivo de seguimiento.
 - Header editorial con marca `dP + ReadPp`, saludo contextual, titulo `Tu Progreso` y subtitulo humano.
 - La marca navega a Home (`/`).
 - Card protagonista Burgundy/Forest con racha actual, libros completados este ano, paginas leidas y lectura activa real si existe.

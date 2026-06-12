@@ -176,3 +176,20 @@
 - La card de objetivo anual puede redisenarse visualmente, manteniendo `saveAnnualReadingGoalProvider` y `statisticsSummaryProvider`.
 - Eliminar metricas duplicadas cuando muestren exactamente el mismo dato o concepto visible; en Sprint 15 se resolvio `Leyendo` / `Lecturas activas`.
 - Sprint 15 no introduce nuevas funcionalidades ni cambios de arquitectura.
+
+## Reader Profile, Branding y Header Consistency Sprint 16/17.x
+
+- El perfil lector es local y se persiste con `SharedPreferences`; no usar backend, Supabase ni repositorios remotos para esta fase.
+- El perfil lector guarda nombre, saludo elegido, saludo personalizado y libro principal de lectura actual.
+- El saludo dinamico debe salir de `readerProfileControllerProvider` y reutilizarse en todos los headers principales.
+- Si hay nombre configurado, el saludo usa momento del dia: `Buenos dias`, `Buenas tardes` o `Buenas noches`.
+- Si no hay nombre, el saludo usa fallback Lectora/Lector/Lectore o el saludo personalizado.
+- La seleccion de libro principal en Home se guarda localmente y no debe cambiar sola mientras el libro siga en estado `Leyendo`.
+- Si no hay seleccion manual valida, Home puede usar como fallback el libro en lectura con mayor progreso.
+- `AppBrandHeader` es el componente unico para logo real ReadPp + saludo dinamico en pantallas principales.
+- El logo real preferido para headers es `img-logo/transparent-logo (1).png`; no anadir `flutter_svg` mientras el PNG sea suficiente.
+- Home puede mantener composicion propia para ubicar Perfil y CTAs, pero debe reutilizar `AppBrandHeader` para el logo y alinear saludo/logo sin truncar.
+- Biblioteca, Progreso, Estadisticas, Insights y Ajustes deben usar `AppBrandHeader(readerProfile: ...)` sin hardcodear `Hola, Lectora`.
+- Los titulos grandes redundantes de Biblioteca/Progreso pueden retirarse cuando el header de marca y el texto contextual ya aportan jerarquia suficiente.
+- Los cambios de Sprint 17.x son visuales/locales: no tocar providers de libros, repositorios, Supabase/backend ni navegacion inferior.
+- El usuario sigue ejecutando `dart format .`, `flutter pub get`, `flutter analyze`, `flutter test` y `git status` manualmente cuando corresponda.
