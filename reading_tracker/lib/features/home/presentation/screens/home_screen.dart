@@ -363,42 +363,50 @@ class _HomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final greeting = Text(
+      '$greetingText 👋',
+      softWrap: true,
+      style: theme.textTheme.titleLarge?.copyWith(
+        color: theme.colorScheme.onSurface,
+        fontWeight: FontWeight.w900,
+      ),
+    );
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xs),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 390;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: AppBrandHeader(
-                  showGreeting: false,
-                  onTap: () => Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    '/',
-                    (route) => false,
+              Row(
+                children: [
+                  SizedBox(
+                    width: compact ? 150 : 184,
+                    child: AppBrandHeader(
+                      showGreeting: false,
+                      onTap: () => Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/',
+                        (route) => false,
+                      ),
+                    ),
                   ),
-                ),
+                  const Spacer(),
+                  _HeaderActionButton(
+                    icon: AppIcons.profile,
+                    tooltip: 'Perfil',
+                    onTap: () => Navigator.pushNamed(context, '/settings'),
+                  ),
+                ],
               ),
-              _HeaderActionButton(
-                icon: AppIcons.profile,
-                tooltip: 'Perfil',
-                onTap: () => Navigator.pushNamed(context, '/settings'),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            '$greetingText 👋',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: theme.colorScheme.onSurface,
-              fontWeight: FontWeight.w900,
-              height: 1.08,
-            ),
-          ),
+              if (compact) ...[
+                const SizedBox(height: AppSpacing.sm),
+              ] else
+                const SizedBox(height: AppSpacing.md),
+              greeting,
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
@@ -431,7 +439,9 @@ class _HomeHeader extends StatelessWidget {
               ),
             ],
           ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
