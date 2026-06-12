@@ -247,6 +247,14 @@
 - Calendario / Book Journal pulido visualmente: fondo degradado rosa, resumen con emoji arriba y numero/texto debajo, celdas de dias con borde mas visible y selector Mes/Semana con estilo premium.
 - Busqueda Open Library en formulario de libro corrige error de keys duplicadas cuando llegan varios resultados con el mismo titulo.
 - Las keys de resultados de busqueda ahora combinan indice visible, titulo, autor y ano de publicacion para mantener widgets hermanos unicos.
+- Sprint 17.6 Onboarding Refresh implementado: sustituido branding manual por logo real y reemplazadas ilustraciones Flutter por imagenes de assets.
+- Onboarding conserva `PageView`, indicadores, `Omitir`, `Siguiente`, `Empezar` y la persistencia `onboarding_completed`.
+- Assets de onboarding renombrados con guion bajo y usados desde `assets/images/onboarding/slide_1.png`, `slide_2.png` y `slide_3.png`.
+- Sprint 17.7 Home Premium Polish implementado tomando como referencia una pantalla editorial premium de lectura.
+- Home ahora usa saludo editorial protagonista, perfil a la derecha y botones `Libro`/`Calendario` en pills blancos.
+- Hero de lectura actual compactado y equilibrado con portada protagonista, progreso y porcentaje junto a la barra.
+- Home suma `Resumen de hoy`, `Lecturas en curso` y mini calendario semanal sin tocar providers, repositorios ni navegacion.
+- Reto anual redisenado con mayor jerarquia visual y asset `assets/images/home/annual_goal_illustration.png`.
 - Validacion Sprint 16/17.x pendiente en terminal del usuario: `dart format .`, `flutter pub get`, `flutter analyze`, `flutter test` y `git status`.
 
 ## Parcial / en seguimiento
@@ -257,6 +265,7 @@
 - Estado vigente tras Sprint 14: Demo Polish aplicado; pendiente validacion local por el usuario.
 - Estado vigente tras Sprint 15: Stats Premium Redesign aplicado; pendiente validacion local por el usuario.
 - Estado vigente tras Sprint 17.x: perfil lector local, logo real, headers consistentes y Home visual polish aplicados; pendiente validacion local por el usuario.
+- Estado vigente tras Sprint 17.7: Home premium, onboarding refrescado y assets visuales nuevos aplicados; pendiente validacion local por el usuario.
 - Las notas pendientes de validacion de sprints anteriores quedan como historial superado por la validacion vigente de Sprint 13.
 
 - Actualizacion Sprint 12: ReadPp se considera feature-complete para v1, pendiente de release readiness.

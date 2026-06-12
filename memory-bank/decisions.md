@@ -203,3 +203,20 @@
 - El selector Mes/Semana conserva la logica existente y solo cambia estilo visual.
 - Los resultados de busqueda Open Library no deben usar solo el titulo como `Key`; Open Library puede devolver varias ediciones con el mismo titulo.
 - Las keys de resultados deben ser estables y unicas entre widgets hermanos, combinando indice visible y metadatos del resultado sin modificar la seleccion ni la busqueda.
+
+## Onboarding Refresh Sprint 17.6
+
+- Onboarding conserva `PageView`, indicadores, `Omitir`, `Siguiente`, `Empezar` y la flag `onboarding_completed`.
+- Usar PNGs desde `assets/images/onboarding/` para las ilustraciones, evitando dependencias nuevas.
+- El logo real de ReadPp reemplaza el branding manual antiguo en onboarding.
+- No tocar `onboarding_controller`, persistencia ni navegacion para refrescos visuales del first run.
+- Los assets de onboarding deben mantenerse con nombres sin espacios: `slide_1.png`, `slide_2.png` y `slide_3.png`.
+
+## Home Premium Polish Sprint 17.7
+
+- Home puede adoptar una composicion editorial propia si una referencia visual aprobada lo pide, manteniendo providers, repositorios y navegacion intactos.
+- La direccion visual aprobada para Home es Burgundy/soft pink, lectura editorial premium, botones pill, cards compactas y sombras suaves.
+- El saludo puede tener mas protagonismo que el logo en Home cuando la referencia priorice bienvenida editorial.
+- Resumenes, calendario semanal y lecturas en curso pueden calcularse en presentation desde datos ya cargados, sin crear providers ni modificar logica de negocio.
+- El reto anual de Home usa el asset `assets/images/home/annual_goal_illustration.png` como soporte visual decorativo.
+- El hero de lectura actual debe mantener portada, progreso, paginas, tiempo y accion de cambio sin eliminar informacion funcional.

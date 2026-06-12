@@ -42,6 +42,9 @@ Trabajo mas reciente completado:
 - Biblioteca y Progreso ya no muestran los titulos grandes `Tu Biblioteca` / `Tu Progreso`; conservan header de marca y textos informativos.
 - Calendario recibe polish visual: titulo `Book Journal`, fondo degradado rosa, resumen con emoji/numero/texto, bordes mas visibles en dias y selector Mes/Semana alineado al estilo ReadPp.
 - Formulario de libro corrige keys duplicadas en resultados Open Library usando indice y metadatos para evitar errores con titulos repetidos.
+- Sprint 17.6 Onboarding Refresh aplicado: onboarding usa logo real ReadPp y nuevas imagenes desde `assets/images/onboarding/slide_1.png`, `slide_2.png` y `slide_3.png`.
+- Sprint 17.7 Home Premium Polish aplicado: Home se alinea a la referencia editorial premium con saludo protagonista, botones pill, hero mas compacto, resumen de hoy, mini calendario semanal y lecturas en curso.
+- Reto anual de Home usa ilustracion editorial generada en `assets/images/home/annual_goal_illustration.png`.
 - Demo Polish Sprint 14 aplicado con cambios minimos de alto impacto visual.
 - Correccion de barra de reto anual en Home: `annualGoalProgress` se normaliza de porcentaje `0-100` a valor visual `0-1`.
 - Nombre por defecto hardcodeado unificado de `Daniela` a `Lectora`.
@@ -372,6 +375,12 @@ El sistema visual base ahora incluye:
 - `reading_tracker/lib/features/insights/presentation/screens/insights_screen.dart`
 - `reading_tracker/lib/features/reading_sessions/presentation/screens/calendar_screen.dart`
 - `reading_tracker/lib/features/books/presentation/screens/book_form_screen.dart`
+- `reading_tracker/lib/features/home/presentation/screens/home_screen.dart`
+- `reading_tracker/lib/features/onboarding/presentation/screens/onboarding_screen.dart`
+- `reading_tracker/assets/images/onboarding/slide_1.png`
+- `reading_tracker/assets/images/onboarding/slide_2.png`
+- `reading_tracker/assets/images/onboarding/slide_3.png`
+- `reading_tracker/assets/images/home/annual_goal_illustration.png`
 - `reading_tracker/pubspec.yaml`
 - `reading_tracker/lib/features/navigation/presentation/screens/main_navigation_screen.dart`
 - `reading_tracker/lib/features/onboarding/presentation/providers/onboarding_controller.dart`

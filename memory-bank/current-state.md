@@ -82,6 +82,10 @@ Sprint 16/17.x implementado:
 - Celdas de calendario y tarjetas semanales tienen bordes mas visibles para diferenciarse del fondo.
 - Selector Mes/Semana se alinea visualmente con botones premium de ReadPp.
 - Formulario de libro evita keys duplicadas en resultados Open Library cuando existen titulos repetidos.
+- Onboarding usa logo real ReadPp y nuevas imagenes desde `assets/images/onboarding/`.
+- Home Premium Polish toma referencia editorial premium: saludo grande, botones pill, hero compacto, resumen de hoy, lecturas en curso, mini calendario semanal y reto anual ilustrado.
+- Home adopta composicion editorial propia para esta referencia visual; otras pantallas principales mantienen `AppBrandHeader`.
+- Asset de reto anual: `assets/images/home/annual_goal_illustration.png`.
 - No se modificaron providers de libros, repositorios, Supabase/backend ni navegacion inferior.
 
 Identidad visual vigente:
@@ -111,11 +115,13 @@ Estado actual implementado:
 
 - Onboarding funcional de primera apertura.
 - El flujo tiene 3 pantallas:
-  - `Tu viaje lector, en un solo lugar`.
-  - `Registra tus lecturas`.
+  - `Tu biblioteca personal`.
+  - `Convierte la lectura en un habito`.
   - `Descubre tu perfil lector`.
 - Incluye acciones `Omitir`, `Siguiente` y `Empezar`.
 - Incluye indicador visual de progreso.
+- Usa logo real ReadPp en lugar del branding manual antiguo.
+- Las ilustraciones se cargan desde assets: `assets/images/onboarding/slide_1.png`, `slide_2.png` y `slide_3.png`.
 - El estado completado se persiste localmente con `SharedPreferences`.
 - La flag usada es `onboarding_completed`.
 - El onboarding se muestra solo si la flag no existe o esta en `false`.
@@ -130,6 +136,11 @@ Estado actual implementado:
 
 - Home usa header con logo real ReadPp, acceso a Perfil y saludo dinamico del perfil lector.
 - Home mantiene CTAs superiores `Libro` y `Calendario`.
+- Home actual se ajusta a una referencia editorial premium: saludo protagonista en dos lineas, perfil a la derecha y botones superiores en pills blancos.
+- Home incluye seccion `Resumen de hoy` con paginas leidas, tiempo de lectura y sesiones.
+- Home incluye mini calendario semanal que abre el calendario completo.
+- Home incluye `Lecturas en curso` cuando hay varios libros en estado `Leyendo`.
+- El reto anual de Home usa la ilustracion editorial `assets/images/home/annual_goal_illustration.png`.
 - Si existen varios libros en estado `Leyendo`, Home permite elegir cual aparece como principal.
 - La seleccion de lectura principal se persiste localmente y no cambia sola mientras el libro siga en estado `Leyendo`.
 - Si no hay seleccion manual valida, Home usa como fallback el libro en lectura con mayor progreso.
