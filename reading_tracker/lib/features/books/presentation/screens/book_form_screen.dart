@@ -286,7 +286,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(title: const Text('Añadir lectura')),
+      appBar: AppBar(title: const Text('Añadir libro')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 112),
         children: [
@@ -405,7 +405,7 @@ class _AddBookHero extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Nueva lectura',
+                  'Nuevo libro',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
@@ -572,11 +572,29 @@ class _SearchField extends StatelessWidget {
                   controller: controller,
                   autofocus: true,
                   textInputAction: TextInputAction.search,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Libro, autor o ISBN',
                     hintText: 'Ej. La sombra del viento',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(AppIcons.search),
+                    prefixIcon: const Icon(AppIcons.search),
+                    filled: true,
+                    fillColor: theme.colorScheme.primaryContainer.withValues(
+                      alpha: 0.18,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color: theme.colorScheme.primary.withValues(
+                          alpha: 0.18,
+                        ),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color: theme.colorScheme.primary,
+                        width: 1.4,
+                      ),
+                    ),
                   ),
                   onChanged: onChanged,
                   onSubmitted: (_) => onSubmitted(),
@@ -910,6 +928,15 @@ class _InitialDatesFields extends StatelessWidget {
           color: Colors.transparent,
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: theme.colorScheme.primary.withValues(alpha: 0.12),
+              ),
+            ),
+            tileColor: theme.colorScheme.primaryContainer.withValues(
+              alpha: 0.14,
+            ),
             title: const Text('Fecha de inicio'),
             subtitle: Text(_format(startedAt)),
             trailing: IconButton(
@@ -921,11 +948,21 @@ class _InitialDatesFields extends StatelessWidget {
             onTap: onStartedAtTap,
           ),
         ),
-        if (showFinishedAt)
+        if (showFinishedAt) ...[
+          const SizedBox(height: AppSpacing.sm),
           Material(
             color: Colors.transparent,
             child: ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                ),
+              ),
+              tileColor: theme.colorScheme.primaryContainer.withValues(
+                alpha: 0.14,
+              ),
               title: const Text('Fecha de finalización'),
               subtitle: Text(_format(finishedAt)),
               trailing: IconButton(
@@ -937,6 +974,7 @@ class _InitialDatesFields extends StatelessWidget {
               onTap: onFinishedAtTap,
             ),
           ),
+        ],
       ],
     );
   }
@@ -950,14 +988,27 @@ class _TotalPagesField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
       onChanged: onChanged,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         labelText: 'Total de páginas',
         hintText: 'Opcional',
-        border: OutlineInputBorder(),
+        filled: true,
+        fillColor: theme.colorScheme.primaryContainer.withValues(alpha: 0.18),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: theme.colorScheme.primary.withValues(alpha: 0.18),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.4),
+        ),
       ),
     );
   }
@@ -1072,23 +1123,49 @@ class _SaveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: FilledButton(
-        style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(54),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
+    final theme = Theme.of(context);
+    final canSubmit = enabled && !isSaving;
+
+    return MouseRegion(
+      cursor: canSubmit
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.forbidden,
+      child: SizedBox(
+        width: double.infinity,
+        child: FilledButton(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(54),
+            backgroundColor: theme.colorScheme.primary,
+            foregroundColor: theme.colorScheme.onPrimary,
+            disabledBackgroundColor: theme.colorScheme.primary.withValues(
+              alpha: 0.34,
+            ),
+            disabledForegroundColor: theme.colorScheme.onPrimary.withValues(
+              alpha: 0.74,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
           ),
+          onPressed: canSubmit ? onPressed : null,
+          child: isSaving
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!enabled) ...[
+                      const Icon(Icons.lock_outline_rounded, size: 18),
+                      const SizedBox(width: AppSpacing.sm),
+                    ],
+                    const Text('Guardar libro'),
+                  ],
+                ),
         ),
-        onPressed: enabled && !isSaving ? onPressed : null,
-        child: isSaving
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Text('Guardar libro'),
       ),
     );
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/branding/app_brand.dart';
+import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../books/domain/entities/book.dart';
@@ -85,10 +85,7 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       sliver: SliverList.list(
                         children: [
-                          _HomeHeader(
-                            greeting: _contextualGreeting(now),
-                            readerName: null,
-                          ),
+                          const _HomeHeader(readerName: null),
                           const SizedBox(height: AppSpacing.lg),
                           _CurrentReadingCards(
                             books: currentBooks,
@@ -240,11 +237,6 @@ class HomeScreen extends ConsumerWidget {
     return pendingBooks;
   }
 
-  String _contextualGreeting(DateTime now) {
-    if (now.hour < 12) return 'Buenos días';
-    if (now.hour < 20) return 'Buenas tardes';
-    return 'Buenas noches';
-  }
 }
 
 class _HomeLoadingState extends StatelessWidget {
@@ -341,9 +333,8 @@ class _HomeErrorState extends StatelessWidget {
 }
 
 class _HomeHeader extends StatelessWidget {
-  const _HomeHeader({required this.greeting, required this.readerName});
+  const _HomeHeader({required this.readerName});
 
-  final String greeting;
   final String? readerName;
 
   @override
@@ -361,36 +352,12 @@ class _HomeHeader extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(999),
+                child: AppBrandHeader(
+                  readerName: displayName,
                   onTap: () => Navigator.pushNamedAndRemoveUntil(
                     context,
                     '/',
                     (route) => false,
-                  ),
-                  child: Row(
-                    children: [
-                      const _HomeBrandSymbol(),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              AppBrand.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                color: theme.colorScheme.onSurface,
-                                letterSpacing: 0,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ),
@@ -414,7 +381,7 @@ class _HomeHeader extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            '¿Qué lectura te acompaña hoy?',
+            '¿Qué estás leyendo?',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -423,38 +390,6 @@ class _HomeHeader extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _HomeBrandSymbol extends StatelessWidget {
-  const _HomeBrandSymbol();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: 34,
-      height: 34,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: theme.colorScheme.surface.withValues(alpha: 0.74),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.14),
-        ),
-      ),
-      child: Text(
-        AppBrand.symbol,
-        style: theme.textTheme.titleSmall?.copyWith(
-          color: theme.colorScheme.primary,
-          fontFamily: AppTypography.displayFontFamily,
-          fontFamilyFallback: AppTypography.displayFallback,
-          fontWeight: FontWeight.w900,
-          height: 1,
-        ),
       ),
     );
   }

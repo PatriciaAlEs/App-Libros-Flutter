@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_theme_controller.dart';
@@ -16,8 +17,18 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 132),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            132,
+          ),
           children: [
+            AppBrandHeader(
+              onTap: () =>
+                  Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false),
+            ),
+            const SizedBox(height: AppSpacing.xl),
             const _ProfileHero(),
             const SizedBox(height: AppSpacing.lg),
             _ThemePreferenceCard(
@@ -25,7 +36,7 @@ class SettingsScreen extends ConsumerWidget {
               onChanged: controller.setTheme,
             ),
             const SizedBox(height: AppSpacing.lg),
-            const _ComingSoonCard(),
+            const _PreferencesAction(),
           ],
         ),
       ),
@@ -87,44 +98,7 @@ class _ProfileHero extends StatelessWidget {
                     height: 1.35,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                const _ProfileHeroPill(
-                  icon: Icons.tune_rounded,
-                  label: 'Ajustes y preferencias',
-                ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProfileHeroPill extends StatelessWidget {
-  const _ProfileHeroPill({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.13),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.white, size: 16),
-          const SizedBox(width: 7),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
             ),
           ),
         ],
@@ -178,15 +152,164 @@ class _ThemePreferenceCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          SegmentedButton<ReadingTrackerTheme>(
-            segments: ReadingTrackerTheme.values
-                .map(
-                  (theme) =>
-                      ButtonSegment(value: theme, label: Text(theme.label)),
-                )
-                .toList(),
-            selected: {selectedTheme},
-            onSelectionChanged: (selection) => onChanged(selection.first),
+          for (final option in ReadingTrackerTheme.values) ...[
+            _ThemePreviewOption(
+              option: option,
+              isSelected: option == selectedTheme,
+              onTap: () => onChanged(option),
+            ),
+            if (option != ReadingTrackerTheme.values.last)
+              const SizedBox(height: AppSpacing.md),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ThemePreviewOption extends StatelessWidget {
+  const _ThemePreviewOption({
+    required this.option,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final ReadingTrackerTheme option;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? option.accent.withValues(alpha: 0.18)
+                : theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.54,
+                  ),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: isSelected
+                  ? option.primary.withValues(alpha: 0.54)
+                  : theme.colorScheme.primary.withValues(alpha: 0.08),
+              width: isSelected ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              _ThemePreviewSwatch(option: option),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      option.label,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      option == ReadingTrackerTheme.burgundy
+                          ? 'Editorial cálido y protagonista.'
+                          : 'Calma visual para lectura pausada.',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                width: 26,
+                height: 26,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected ? option.primary : Colors.transparent,
+                  border: Border.all(
+                    color: isSelected
+                        ? option.primary
+                        : theme.colorScheme.outlineVariant,
+                  ),
+                ),
+                child: isSelected
+                    ? const Icon(
+                        Icons.check_rounded,
+                        size: 17,
+                        color: Colors.white,
+                      )
+                    : null,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ThemePreviewSwatch extends StatelessWidget {
+  const _ThemePreviewSwatch({required this.option});
+
+  final ReadingTrackerTheme option;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 62,
+      height: 48,
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: option.background,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: option.primary.withValues(alpha: 0.18)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: option.primary,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
+          const SizedBox(width: 5),
+          Expanded(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: option.accent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: option.surface,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: option.primary.withValues(alpha: 0.10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -194,33 +317,36 @@ class _ThemePreferenceCard extends StatelessWidget {
   }
 }
 
-class _ComingSoonCard extends StatelessWidget {
-  const _ComingSoonCard();
+class _PreferencesAction extends StatelessWidget {
+  const _PreferencesAction();
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.07),
-        ),
+    return OutlinedButton.icon(
+      onPressed: () => _showComingSoon(context),
+      icon: const Icon(Icons.auto_awesome_rounded),
+      label: const Text('Ajustes y preferencias'),
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(52),
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.symmetric(horizontal: 18),
       ),
-      child: Row(
-        children: [
-          Icon(AppIcons.bookmark, color: theme.colorScheme.primary),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Text(
-              'Preferencias personales y perfil editable llegarán en una próxima fase.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
+    );
+  }
+
+  void _showComingSoon(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Text('💅', style: TextStyle(fontSize: 34)),
+        title: const Text('Próximamente'),
+        content: const Text(
+          'Seguimos trabajando en nuevas funciones para lectoras.',
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Entendido'),
           ),
         ],
       ),

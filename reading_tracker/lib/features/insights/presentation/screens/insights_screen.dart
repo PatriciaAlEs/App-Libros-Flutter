@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/branding/app_brand.dart';
+import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/reading_insights_summary.dart';
 import '../providers/reading_insights_summary_provider.dart';
 
@@ -139,66 +138,10 @@ class _InsightsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(999),
+    return AppBrandHeader(
       onTap: () =>
           Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: theme.colorScheme.secondary.withValues(alpha: 0.68),
-              boxShadow: AppShadows.soft(theme.colorScheme.secondary),
-            ),
-            child: Text(
-              AppBrand.symbol,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontFamily: AppTypography.displayFontFamily,
-                fontFamilyFallback: AppTypography.displayFallback,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppBrand.name,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  '${_greeting()}, Lectora',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.70),
-                    letterSpacing: 1.6,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
-  }
-
-  String _greeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Buenos días';
-    if (hour < 20) return 'Buenas tardes';
-    return 'Buenas noches';
   }
 }
 
@@ -742,7 +685,7 @@ class _InsightsEmptyState extends StatelessWidget {
         const _InsightsHeader(),
         const SizedBox(height: AppSpacing.xl),
         Container(
-          padding: const EdgeInsets.fromLTRB(26, 28, 26, 26),
+          padding: const EdgeInsets.fromLTRB(26, 30, 26, 28),
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(28),
@@ -753,32 +696,58 @@ class _InsightsEmptyState extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Icon(
-                AppIcons.insightsNav,
-                size: 42,
-                color: theme.colorScheme.primary,
+              Container(
+                width: 74,
+                height: 74,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.colorScheme.secondary.withValues(alpha: 0.24),
+                ),
+                child: Icon(
+                  AppIcons.insightsNav,
+                  size: 36,
+                  color: theme.colorScheme.primary,
+                ),
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.lg),
               Text(
-                'Tus patrones aparecerán aquí',
+                '¡Añade tu primer libro!',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Registra sesiones y valoraciones para descubrir autores, ritmos y lecturas destacadas.',
+                'Aquí tendrás un resumen de tu actividad lectora.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Podrás ver tu ritmo de lectura, páginas leídas, libros completados y mucho más.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: AppSpacing.lg),
-              FilledButton.icon(
-                onPressed: () => Navigator.pushNamed(context, '/book/add'),
-                icon: const Icon(AppIcons.add),
-                label: const Text('Añadir primer libro'),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, '/book/add'),
+                  icon: const Icon(AppIcons.add),
+                  label: const Text('Añadir primer libro'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(54),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
