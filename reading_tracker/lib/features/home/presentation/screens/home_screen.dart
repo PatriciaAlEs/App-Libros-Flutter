@@ -87,9 +87,7 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       sliver: SliverList.list(
                         children: [
-                          _HomeHeader(
-                            readerProfile: readerProfile,
-                          ),
+                          _HomeHeader(readerProfile: readerProfile),
                           const SizedBox(height: AppSpacing.lg),
                           if (currentBooks.length > 1) ...[
                             _CurrentReadingSwitcher(
