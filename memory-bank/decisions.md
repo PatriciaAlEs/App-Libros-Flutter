@@ -193,3 +193,13 @@
 - Los titulos grandes redundantes de Biblioteca/Progreso pueden retirarse cuando el header de marca y el texto contextual ya aportan jerarquia suficiente.
 - Los cambios de Sprint 17.x son visuales/locales: no tocar providers de libros, repositorios, Supabase/backend ni navegacion inferior.
 - El usuario sigue ejecutando `dart format .`, `flutter pub get`, `flutter analyze`, `flutter test` y `git status` manualmente cuando corresponda.
+
+## Calendar y Search Polish Sprint 17.x
+
+- El calendario puede usar el titulo visible `Book Journal` aunque el resto de la app mantenga copy en espanol, por decision visual del usuario.
+- El calendario debe compartir el lenguaje de fondo degradado rosa con Home, Progreso y Biblioteca.
+- Las celdas del calendario necesitan borde visible para diferenciarse del fondo; evitar superficies sin contraste suficiente.
+- El resumen del calendario usa jerarquia compacta: emoji arriba, numero, label debajo.
+- El selector Mes/Semana conserva la logica existente y solo cambia estilo visual.
+- Los resultados de busqueda Open Library no deben usar solo el titulo como `Key`; Open Library puede devolver varias ediciones con el mismo titulo.
+- Las keys de resultados deben ser estables y unicas entre widgets hermanos, combinando indice visible y metadatos del resultado sin modificar la seleccion ni la busqueda.

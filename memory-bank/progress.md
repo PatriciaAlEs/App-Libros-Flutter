@@ -244,6 +244,9 @@
 - Header consistency audit: Biblioteca, Progreso, Estadisticas, Insights y Ajustes reutilizan `AppBrandHeader(readerProfile: ...)`.
 - Sprint 17.7 aplico profundidad visual en Home: gradiente de fondo alineado con Progreso/Biblioteca, sombras suaves y bordes rosados sutiles en metricas y reto anual.
 - Biblioteca y Progreso ya no muestran los titulos grandes `Tu Biblioteca` y `Tu Progreso`; conservan el header de marca y el texto informativo.
+- Calendario / Book Journal pulido visualmente: fondo degradado rosa, resumen con emoji arriba y numero/texto debajo, celdas de dias con borde mas visible y selector Mes/Semana con estilo premium.
+- Busqueda Open Library en formulario de libro corrige error de keys duplicadas cuando llegan varios resultados con el mismo titulo.
+- Las keys de resultados de busqueda ahora combinan indice visible, titulo, autor y ano de publicacion para mantener widgets hermanos unicos.
 - Validacion Sprint 16/17.x pendiente en terminal del usuario: `dart format .`, `flutter pub get`, `flutter analyze`, `flutter test` y `git status`.
 
 ## Parcial / en seguimiento

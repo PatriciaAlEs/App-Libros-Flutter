@@ -77,6 +77,11 @@ Sprint 16/17.x implementado:
 - Biblioteca y Progreso eliminan los titulos grandes `Tu Biblioteca` y `Tu Progreso`.
 - Home usa gradiente de fondo alineado al lenguaje visual de Progreso/Biblioteca.
 - Cards resumen y reto anual en Home tienen profundidad visual suave con bordes rosados y sombras burdeos ligeras.
+- Calendario queda rotulado como `Book Journal` y usa fondo degradado rosa alineado con Home/Progreso/Biblioteca.
+- Calendario muestra resumen con emoji arriba, numero y label debajo.
+- Celdas de calendario y tarjetas semanales tienen bordes mas visibles para diferenciarse del fondo.
+- Selector Mes/Semana se alinea visualmente con botones premium de ReadPp.
+- Formulario de libro evita keys duplicadas en resultados Open Library cuando existen titulos repetidos.
 - No se modificaron providers de libros, repositorios, Supabase/backend ni navegacion inferior.
 
 Identidad visual vigente:
@@ -189,6 +194,10 @@ Consolidacion minima implementada:
 - La actividad reciente, detalle de dia y calendario muestran paginas/minutos cuando existen.
 - El calendario muestra intensidad diaria por `ReadingSession` con niveles sin actividad, baja, media y alta.
 - El calendario muestra resumen del periodo visible con paginas leidas, minutos leidos y dias activos.
+- La pantalla de calendario usa el titulo visible `Book Journal`.
+- La pantalla de calendario usa fondo degradado suave y bordes reforzados en cada dia para mejorar legibilidad visual.
+- El resumen de calendario usa formato emoji, numero y texto.
+- El selector Mes/Semana mantiene la misma logica, con estilo visual premium.
 - Cuando una sesion nueva con paginas leidas hace que el progreso alcance `totalPages`, la app ofrece completar el libro y abrir valoracion/resena opcional, sin completar automaticamente.
 - Las rachas de lectura se calculan desde dias con al menos una `ReadingSession`, agrupando por fecha sin hora.
 - La racha actual cuenta hasta hoy si hay sesion hoy, o hasta ayer si ayer tuvo sesion y hoy aun no.
@@ -206,6 +215,7 @@ Estado actual implementado:
 - Al seleccionar un resultado de Open Library, `totalPages` se autorrellena si llega `number_of_pages` o `number_of_pages_median`.
 - El campo `totalPages` sigue siendo editable manualmente aunque venga de Open Library.
 - En alta de libros, la busqueda Open Library muestra estado de carga y limita resultados iniciales para mantener accesible el guardado.
+- En alta de libros, los resultados de Open Library usan keys unicas aunque varias ediciones compartan titulo.
 - En detalle se pueden editar paginas.
 - Desde Home se puede anadir `totalPages` cuando falta.
 - `Book` ya tenia campos compatibles para `totalPages`, `currentPage` y `rating`; no fue necesario cambiar el modelo.
