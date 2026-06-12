@@ -431,16 +431,6 @@ class _HomeHeader extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            '¿Qué estás leyendo?',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
         ],
       ),
     );
@@ -540,7 +530,17 @@ class _CurrentReadingSwitcher extends StatelessWidget {
 
     return Row(
       children: [
-        const Spacer(),
+        Expanded(
+          child: Text(
+            '¿Qué estás leyendo?',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
         Container(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,

@@ -308,19 +308,25 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
           const SizedBox(height: AppSpacing.lg),
           Text('¿Cómo prefieres el saludo?', style: theme.textTheme.labelLarge),
           const SizedBox(height: AppSpacing.sm),
-          for (final preference in ReaderGreetingPreference.values)
-            RadioListTile<ReaderGreetingPreference>(
-              value: preference,
-              groupValue: _draftGreetingPreference,
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              title: Text(preference.label),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _draftGreetingPreference = value);
-                }
-              },
+          RadioGroup<ReaderGreetingPreference>(
+            groupValue: _draftGreetingPreference,
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _draftGreetingPreference = value);
+              }
+            },
+            child: Column(
+              children: [
+                for (final preference in ReaderGreetingPreference.values)
+                  RadioListTile<ReaderGreetingPreference>(
+                    value: preference,
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(preference.label),
+                  ),
+              ],
             ),
+          ),
           if (_draftGreetingPreference == ReaderGreetingPreference.custom) ...[
             const SizedBox(height: AppSpacing.sm),
             TextField(
@@ -641,7 +647,10 @@ class _PreferencesAction extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: theme.colorScheme.secondary.withValues(alpha: 0.24),
                 ),
-                child: const Text('💅', style: TextStyle(fontSize: 24)),
+                child: Icon(
+                  Icons.auto_awesome_rounded,
+                  color: theme.colorScheme.primary,
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -656,7 +665,7 @@ class _PreferencesAction extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      'Más personalización, estadísticas y novedades para lectoras. 💅',
+                      'Más personalización, estadísticas y novedades para lectoras.',
                       style: theme.textTheme.bodySmall,
                     ),
                   ],

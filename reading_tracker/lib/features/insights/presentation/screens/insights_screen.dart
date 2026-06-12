@@ -75,12 +75,12 @@ class InsightsScreen extends ConsumerWidget {
                             : _formatPages(summary.favoriteGenrePages),
                       ),
                       _InsightCard(
-                        icon: AppIcons.time,
-                        title: 'Más tiempo dedicado',
-                        value: summary.mostTimeBookTitle ?? 'Sin datos',
-                        subtitle: summary.mostTimeBookMinutes == null
-                            ? 'Aún no hay sesiones este año'
-                            : _formatMinutes(summary.mostTimeBookMinutes!),
+                        icon: AppIcons.pages,
+                        title: 'Libro más largo',
+                        value: summary.longestBookTitle ?? 'Sin datos',
+                        subtitle: summary.longestBookPages == null
+                            ? 'Sin libros completados con páginas'
+                            : '${summary.longestBookPages} páginas',
                       ),
                     ],
                   ),
