@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../design_system/design_system.dart';
 import '../../preferences/reader_profile_controller.dart';
-import '../../theme/app_typography.dart';
 import '../app_brand.dart';
 
 class AppBrandHeader extends StatelessWidget {
@@ -19,53 +17,62 @@ class AppBrandHeader extends StatelessWidget {
   final bool showGreeting;
   final VoidCallback? onTap;
 
+  String get _greeting {
+    final trimmedName = readerName.trim();
+    if (trimmedName.isEmpty) {
+      return 'Hola, Lectora';
+    }
+    return 'Hola, $trimmedName';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cleanName = readerName.trim();
-    final displayName = cleanName.isEmpty ? 'Lectora' : cleanName;
-    final greeting = readerProfile == null
-        ? '${_greeting()}, $displayName'
-        : readerProfile!.homeGreeting(DateTime.now());
+    final colorScheme = theme.colorScheme;
+    final greetingText =
+        readerProfile?.homeGreeting(DateTime.now()) ?? _greeting;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 260;
-        final logo = _HeaderLogo(theme: theme, compact: compact);
-        final greetingText = Text(
-          showGreeting ? '$greeting 👋' : '',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.primary.withValues(alpha: 0.82),
-            fontWeight: FontWeight.w900,
-          ),
+        final compact = constraints.maxWidth < 280;
+        final logoWidth = compact ? 150.0 : 184.0;
+        final logoHeight = compact ? 56.0 : 68.0;
+
+        final logo = _HeaderLogo(
+          width: logoWidth,
+          height: logoHeight,
+          colorScheme: colorScheme,
         );
 
-        return InkWell(
-          borderRadius: BorderRadius.circular(999),
-          onTap: onTap,
-          child: compact
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    logo,
-                    if (showGreeting) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      greetingText,
-                    ],
-                  ],
-                )
-              : Row(
-                  children: [
-                    logo,
-                    if (showGreeting) ...[
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(child: greetingText),
-                    ] else
-                      const Spacer(),
-                  ],
-                ),
+        final headerLogo = onTap == null
+            ? logo
+            : InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(18),
+                child: logo,
+              );
+
+        if (!showGreeting) {
+          return Align(alignment: Alignment.centerLeft, child: headerLogo);
+        }
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            headerLogo,
+            const SizedBox(height: 8),
+            Text(
+              '$greetingText 👋',
+              softWrap: true,
+              overflow: TextOverflow.visible,
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w800,
+                height: 1.15,
+              ),
+            ),
+          ],
         );
       },
     );
@@ -73,59 +80,47 @@ class AppBrandHeader extends StatelessWidget {
 }
 
 class _HeaderLogo extends StatelessWidget {
-  const _HeaderLogo({required this.theme, required this.compact});
+  const _HeaderLogo({
+    required this.width,
+    required this.height,
+    required this.colorScheme,
+  });
 
-  final ThemeData theme;
-  final bool compact;
+  final double width;
+  final double height;
+  final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
-    final width = compact ? 142.0 : 168.0;
-    final height = compact ? 58.0 : 68.0;
-
-    return Container(
+    return SizedBox(
       width: width,
       height: height,
-      alignment: Alignment.centerLeft,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: AppShadows.soft(theme.colorScheme.secondary),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: Image.asset(
-          AppBrand.headerLogoAsset,
-          width: width,
-          height: height,
-          fit: BoxFit.contain,
-          alignment: Alignment.centerLeft,
-          errorBuilder: (context, error, stackTrace) => Container(
-            width: 58,
-            height: 58,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: theme.colorScheme.secondary.withValues(alpha: 0.68),
-            ),
-            child: Text(
-              AppBrand.symbol,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontFamily: AppTypography.displayFontFamily,
-                fontFamilyFallback: AppTypography.displayFallback,
-                fontWeight: FontWeight.w800,
+      child: Image.asset(
+        AppBrand.headerLogoAsset,
+        fit: BoxFit.contain,
+        alignment: Alignment.centerLeft,
+        errorBuilder: (context, error, stackTrace) {
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              width: height,
+              height: height,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                AppBrand.symbol,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
-}
-
-String _greeting() {
-  final hour = DateTime.now().hour;
-  if (hour < 12) return 'Buenos días';
-  if (hour < 20) return 'Buenas tardes';
-  return 'Buenas noches';
 }
