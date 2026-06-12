@@ -701,13 +701,15 @@ class _ResultsList extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        for (final book in visibleResults)
+        for (var index = 0; index < visibleResults.length; index++)
           _BookResultTile(
-            key: ValueKey('book_result_${book.title}'),
-            book: book,
-            isSelected: identical(book, selectedBook),
-            subtitle: _subtitleFor(book),
-            onTap: () => onSelected(book),
+            key: ValueKey(
+              'book_result_${index}_${visibleResults[index].title}_${visibleResults[index].author ?? ''}_${visibleResults[index].firstPublishYear ?? ''}',
+            ),
+            book: visibleResults[index],
+            isSelected: identical(visibleResults[index], selectedBook),
+            subtitle: _subtitleFor(visibleResults[index]),
+            onTap: () => onSelected(visibleResults[index]),
           ),
         if (hasMoreResults) ...[
           const SizedBox(height: 8),

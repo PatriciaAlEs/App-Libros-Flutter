@@ -41,10 +41,45 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Diario lector'),
+        title: const Text('Book Journal'),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
         actions: [
           SegmentedButton<CalendarMode>(
             showSelectedIcon: false,
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                final colorScheme = Theme.of(context).colorScheme;
+                if (states.contains(WidgetState.selected)) {
+                  return colorScheme.primary;
+                }
+                return colorScheme.surface.withValues(alpha: 0.72);
+              }),
+              foregroundColor: WidgetStateProperty.resolveWith((states) {
+                final colorScheme = Theme.of(context).colorScheme;
+                if (states.contains(WidgetState.selected)) {
+                  return colorScheme.onPrimary;
+                }
+                return colorScheme.primary;
+              }),
+              side: WidgetStatePropertyAll(
+                BorderSide(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.18),
+                ),
+              ),
+              shape: WidgetStatePropertyAll(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
+              textStyle: WidgetStatePropertyAll(
+                Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
             segments: const [
               ButtonSegment(value: CalendarMode.month, label: Text('Mes')),
               ButtonSegment(value: CalendarMode.week, label: Text('Semana')),
@@ -61,55 +96,71 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           ),
         ],
       ),
-      body: sessionsAsync.when(
-        loading: () => const _CalendarLoadingState(),
-        error: (error, _) => const _CalendarErrorState(),
-        data: (sessions) {
-          final sessionsByDay = _groupSessionsByDay(sessions);
-          final activitiesByDay = ReadingDayActivity.fromSessions(sessions);
-          final summary = ReadingActivitySummary.fromActivities(
-            activitiesByDay.values,
-          );
-          return Column(
-            children: [
-              _CalendarHeader(
-                title: _titleFor(_focusedDate, _mode),
-                onPrevious: () => setState(() {
-                  _focusedDate = _mode == CalendarMode.month
-                      ? DateTime(_focusedDate.year, _focusedDate.month - 1)
-                      : _focusedDate.subtract(const Duration(days: 7));
-                }),
-                onNext: () => setState(() {
-                  _focusedDate = _mode == CalendarMode.month
-                      ? DateTime(_focusedDate.year, _focusedDate.month + 1)
-                      : _focusedDate.add(const Duration(days: 7));
-                }),
-              ),
-              _ActivitySummaryCard(
-                title: _mode == CalendarMode.month
-                    ? 'Resumen mensual'
-                    : 'Resumen semanal',
-                summary: summary,
-              ),
-              const _ActivityLegend(),
-              Expanded(
-                child: _mode == CalendarMode.month
-                    ? _MonthCalendar(
-                        focusedDate: _focusedDate,
-                        sessionsByDay: sessionsByDay,
-                        activitiesByDay: activitiesByDay,
-                        booksById: booksById,
-                      )
-                    : _WeekCalendar(
-                        focusedDate: _focusedDate,
-                        sessionsByDay: sessionsByDay,
-                        activitiesByDay: activitiesByDay,
-                        booksById: booksById,
-                      ),
-              ),
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).scaffoldBackgroundColor,
+              Theme.of(
+                context,
+              ).colorScheme.primaryContainer.withValues(alpha: 0.16),
+              Theme.of(context).scaffoldBackgroundColor,
             ],
-          );
-        },
+            stops: const [0, 0.40, 1],
+          ),
+        ),
+        child: sessionsAsync.when(
+          loading: () => const _CalendarLoadingState(),
+          error: (error, _) => const _CalendarErrorState(),
+          data: (sessions) {
+            final sessionsByDay = _groupSessionsByDay(sessions);
+            final activitiesByDay = ReadingDayActivity.fromSessions(sessions);
+            final summary = ReadingActivitySummary.fromActivities(
+              activitiesByDay.values,
+            );
+            return Column(
+              children: [
+                _CalendarHeader(
+                  title: _titleFor(_focusedDate, _mode),
+                  onPrevious: () => setState(() {
+                    _focusedDate = _mode == CalendarMode.month
+                        ? DateTime(_focusedDate.year, _focusedDate.month - 1)
+                        : _focusedDate.subtract(const Duration(days: 7));
+                  }),
+                  onNext: () => setState(() {
+                    _focusedDate = _mode == CalendarMode.month
+                        ? DateTime(_focusedDate.year, _focusedDate.month + 1)
+                        : _focusedDate.add(const Duration(days: 7));
+                  }),
+                ),
+                _ActivitySummaryCard(
+                  title: _mode == CalendarMode.month
+                      ? 'Resumen mensual'
+                      : 'Resumen semanal',
+                  summary: summary,
+                ),
+                const _ActivityLegend(),
+                Expanded(
+                  child: _mode == CalendarMode.month
+                      ? _MonthCalendar(
+                          focusedDate: _focusedDate,
+                          sessionsByDay: sessionsByDay,
+                          activitiesByDay: activitiesByDay,
+                          booksById: booksById,
+                        )
+                      : _WeekCalendar(
+                          focusedDate: _focusedDate,
+                          sessionsByDay: sessionsByDay,
+                          activitiesByDay: activitiesByDay,
+                          booksById: booksById,
+                        ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -272,21 +323,21 @@ class _ActivitySummaryCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _SummaryMetric(
-                    icon: AppIcons.pages,
+                    emoji: '📄',
                     label: 'Páginas',
                     value: '${summary.pagesRead}',
                   ),
                 ),
                 Expanded(
                   child: _SummaryMetric(
-                    icon: AppIcons.time,
+                    emoji: '⏱',
                     label: 'Minutos',
                     value: '${summary.minutes}',
                   ),
                 ),
                 Expanded(
                   child: _SummaryMetric(
-                    icon: AppIcons.calendar,
+                    emoji: '📅',
                     label: 'Días',
                     value: '${summary.activeDays}',
                   ),
@@ -302,12 +353,12 @@ class _ActivitySummaryCard extends StatelessWidget {
 
 class _SummaryMetric extends StatelessWidget {
   const _SummaryMetric({
-    required this.icon,
+    required this.emoji,
     required this.label,
     required this.value,
   });
 
-  final IconData icon;
+  final String emoji;
   final String label;
   final String value;
 
@@ -316,20 +367,23 @@ class _SummaryMetric extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon, color: theme.colorScheme.primary, size: 18),
-        const SizedBox(height: 6),
+        Text(emoji, style: theme.textTheme.titleLarge),
+        const SizedBox(height: 8),
         Text(
           value,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w800,
           ),
         ),
+        const SizedBox(height: 2),
         Text(
           label,
+          textAlign: TextAlign.center,
           style: theme.textTheme.labelSmall?.copyWith(
             color: theme.colorScheme.primary.withValues(alpha: 0.70),
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],
@@ -622,8 +676,9 @@ class _WeekDaySection extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
           color: theme.colorScheme.primary.withValues(
-            alpha: intensity == ReadingActivityIntensity.none ? 0.06 : 0.14,
+            alpha: intensity == ReadingActivityIntensity.none ? 0.14 : 0.24,
           ),
+          width: 1.1,
         ),
       ),
       child: Material(
@@ -830,9 +885,9 @@ class _CalendarDayCell extends StatelessWidget {
             color: isToday
                 ? theme.colorScheme.primary
                 : theme.colorScheme.primary.withValues(
-                    alpha: hasActivity ? 0.16 : 0.06,
+                    alpha: hasActivity ? 0.24 : 0.16,
                   ),
-            width: isToday ? 1.6 : 1,
+            width: isToday ? 1.8 : 1.15,
           ),
           borderRadius: BorderRadius.circular(compact ? 14 : 18),
           boxShadow: hasActivity && !compact

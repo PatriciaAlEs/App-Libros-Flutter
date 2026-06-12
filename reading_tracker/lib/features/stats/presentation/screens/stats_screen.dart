@@ -251,15 +251,7 @@ class _StatsHeader extends StatelessWidget {
           onTap: () =>
               Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false),
         ),
-        const SizedBox(height: AppSpacing.xl),
-        Text(
-          'Estadísticas',
-          style: theme.textTheme.displaySmall?.copyWith(
-            color: theme.colorScheme.onSurface,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.lg),
         Text(
           'Una lectura clara de tu biblioteca, tus ritmos y tu reto anual.',
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -549,6 +541,7 @@ class _GoalMetric extends StatelessWidget {
 
     return Container(
       width: 132,
+      height: 92,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: theme.colorScheme.primaryContainer.withValues(alpha: 0.22),
@@ -566,6 +559,8 @@ class _GoalMetric extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
             ),
@@ -688,7 +683,7 @@ class _StatsCardGrid extends StatelessWidget {
           runSpacing: AppSpacing.md,
           children: [
             for (final child in children)
-              SizedBox(width: cardWidth, child: child),
+              SizedBox(width: cardWidth, height: 150, child: child),
           ],
         );
       },
