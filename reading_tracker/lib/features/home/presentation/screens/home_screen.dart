@@ -63,6 +63,7 @@ class HomeScreen extends ConsumerWidget {
                   summaryAsync.valueOrNull ?? const StatisticsSummary.empty();
               final recentSessions =
                   recentSessionsAsync.valueOrNull ?? const [];
+              final todaySessions = _todaySessions(recentSessions);
               final booksById = {for (final book in books) book.id: book};
               final currentBooks = _currentReadingBooks(books);
               final pendingBooks = _pendingBooks(books);
@@ -122,6 +123,24 @@ class HomeScreen extends ConsumerWidget {
                             onStartReading: (book) =>
                                 _startReading(context, ref, book),
                           ),
+                          if (currentBooks.length > 1) ...[
+                            const SizedBox(height: AppSpacing.lg),
+                            _CurrentReadingStrip(
+                              books: _prioritizeCurrentBooks(
+                                currentBooks,
+                                readerProfile.currentReadingBookId,
+                              ),
+                              selectedBookId:
+                                  readerProfile.currentReadingBookId,
+                              onSelect: (book) => ref
+                                  .read(
+                                    readerProfileControllerProvider.notifier,
+                                  )
+                                  .updateCurrentReadingBookId(book.id),
+                            ),
+                          ],
+                          const SizedBox(height: AppSpacing.xl),
+                          _TodaySummaryCard(sessions: todaySessions),
                           const SizedBox(height: AppSpacing.xxl),
                           _QuickMetrics(
                             summary: summary,
@@ -139,6 +158,12 @@ class HomeScreen extends ConsumerWidget {
                                 Navigator.pushNamed(context, '/progress'),
                           ),
                           const SizedBox(height: AppSpacing.xxl),
+                          _WeeklyCalendarPreview(
+                            sessions: recentSessions,
+                            onTap: () =>
+                                Navigator.pushNamed(context, '/calendar'),
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
                           _JournalHeader(
                             onSeeAll: () =>
                                 Navigator.pushNamed(context, '/calendar'),
@@ -257,6 +282,18 @@ class HomeScreen extends ConsumerWidget {
         .toList();
     pendingBooks.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     return pendingBooks;
+  }
+
+  List<ReadingSession> _todaySessions(List<ReadingSession> sessions) {
+    final now = DateTime.now();
+    return sessions
+        .where(
+          (session) =>
+              session.date.year == now.year &&
+              session.date.month == now.month &&
+              session.date.day == now.day,
+        )
+        .toList();
   }
 }
 
@@ -1228,6 +1265,500 @@ class _EmptyCurrentReadingCard extends StatelessWidget {
   }
 }
 
+class _CurrentReadingStrip extends StatelessWidget {
+  const _CurrentReadingStrip({
+    required this.books,
+    required this.selectedBookId,
+    required this.onSelect,
+  });
+
+  final List<Book> books;
+  final String? selectedBookId;
+  final ValueChanged<Book> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return _HomeSectionSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _HomeSectionTitle(title: 'Lecturas en curso'),
+          const SizedBox(height: AppSpacing.md),
+          SizedBox(
+            height: 112,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: books.length,
+              separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
+              itemBuilder: (context, index) {
+                final book = books[index];
+                return _CurrentReadingChip(
+                  book: book,
+                  isSelected:
+                      selectedBookId == null ? index == 0 : book.id == selectedBookId,
+                  onTap: () => onSelect(book),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CurrentReadingChip extends StatelessWidget {
+  const _CurrentReadingChip({
+    required this.book,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final Book book;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final progress = _bookProgress(book);
+    final primary = theme.colorScheme.primary;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onTap,
+        child: Container(
+          width: 252,
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isSelected
+                  ? [primary, Color.lerp(primary, Colors.black, 0.20)!]
+                  : [
+                      theme.colorScheme.surface.withValues(alpha: 0.92),
+                      theme.colorScheme.primaryContainer.withValues(alpha: 0.22),
+                    ],
+            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isSelected
+                  ? theme.colorScheme.secondary.withValues(alpha: 0.38)
+                  : theme.colorScheme.secondary.withValues(alpha: 0.18),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: primary.withValues(alpha: isSelected ? 0.16 : 0.07),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              _BookCover(
+                url: book.coverUrl,
+                width: 54,
+                height: 78,
+                radius: 12,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      book.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: isSelected
+                            ? theme.colorScheme.onPrimary
+                            : theme.colorScheme.onSurface,
+                        fontWeight: FontWeight.w900,
+                        height: 1.08,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      book.author ?? 'Autor desconocido',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: isSelected
+                            ? theme.colorScheme.onPrimary.withValues(alpha: 0.72)
+                            : theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '${(progress * 100).round()}%',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: isSelected
+                            ? theme.colorScheme.secondary
+                            : theme.colorScheme.primary,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TodaySummaryCard extends StatelessWidget {
+  const _TodaySummaryCard({required this.sessions});
+
+  final List<ReadingSession> sessions;
+
+  @override
+  Widget build(BuildContext context) {
+    final pages = sessions.fold<int>(
+      0,
+      (total, session) => total + session.pagesRead,
+    );
+    final minutes = sessions.fold<int>(
+      0,
+      (total, session) => total + session.minutes,
+    );
+
+    return _HomeSectionSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _HomeSectionTitle(title: 'Resumen de hoy'),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: _TodayMetric(
+                  icon: AppIcons.pages,
+                  label: 'Páginas leídas',
+                  value: '$pages',
+                  footnote: 'páginas',
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _TodayMetric(
+                  icon: AppIcons.time,
+                  label: 'Tiempo de lectura',
+                  value: '$minutes',
+                  footnote: 'minutos',
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _TodayMetric(
+                  icon: AppIcons.calendar,
+                  label: 'Sesiones',
+                  value: '${sessions.length}',
+                  footnote: 'sesiones',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TodayMetric extends StatelessWidget {
+  const _TodayMetric({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.footnote,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final String footnote;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      height: 118,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.84),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: theme.colorScheme.secondary.withValues(alpha: 0.18),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.07),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: theme.colorScheme.primary, size: 17),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.78),
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.primary,
+              fontFamily: AppTypography.contentFontFamily,
+              fontFamilyFallback: AppTypography.contentFallback,
+              fontWeight: FontWeight.w900,
+              height: 1,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            footnote,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeeklyCalendarPreview extends StatelessWidget {
+  const _WeeklyCalendarPreview({
+    required this.sessions,
+    required this.onTap,
+  });
+
+  final List<ReadingSession> sessions;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final start = today.subtract(Duration(days: today.weekday - 1));
+    final days = List.generate(7, (index) => start.add(Duration(days: index)));
+    final activityByDay = <DateTime, int>{};
+    for (final session in sessions) {
+      final key = DateTime(
+        session.date.year,
+        session.date.month,
+        session.date.day,
+      );
+      activityByDay[key] =
+          (activityByDay[key] ?? 0) + session.pagesRead + session.minutes;
+    }
+
+    return _HomeSectionSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Expanded(child: _HomeSectionTitle(title: 'Actividad reciente')),
+              TextButton(
+                onPressed: onTap,
+                child: const Text('Abrir calendario'),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(22),
+              onTap: onTap,
+              child: Row(
+                children: [
+                  for (final day in days)
+                    Expanded(
+                      child: _WeekDayPill(
+                        day: day,
+                        isToday: _isSameDay(day, today),
+                        activity: activityByDay[day] ?? 0,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+}
+
+class _WeekDayPill extends StatelessWidget {
+  const _WeekDayPill({
+    required this.day,
+    required this.isToday,
+    required this.activity,
+  });
+
+  final DateTime day;
+  final bool isToday;
+  final int activity;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final intensity = activity <= 0
+        ? 0.0
+        : activity < 30
+            ? 0.22
+            : activity < 90
+                ? 0.42
+                : 0.68;
+    final fill = isToday
+        ? theme.colorScheme.primary
+        : theme.colorScheme.secondary.withValues(alpha: intensity + 0.12);
+    final textColor = isToday
+        ? theme.colorScheme.onPrimary
+        : theme.colorScheme.primary;
+
+    return Container(
+      height: 72,
+      margin: const EdgeInsets.symmetric(horizontal: 3),
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: fill,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(
+            alpha: isToday ? 0.0 : 0.12,
+          ),
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            _weekdayLabel(day),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: textColor.withValues(alpha: isToday ? 0.82 : 0.74),
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            '${day.day}',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.w900,
+              height: 1,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: isToday
+                  ? theme.colorScheme.onPrimary
+                  : activity > 0
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.primary.withValues(alpha: 0.22),
+              shape: BoxShape.circle,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _weekdayLabel(DateTime day) {
+    const labels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+    return labels[day.weekday - 1];
+  }
+}
+
+class _HomeSectionSurface extends StatelessWidget {
+  const _HomeSectionSurface({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.58),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: theme.colorScheme.secondary.withValues(alpha: 0.16),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 14),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+class _HomeSectionTitle extends StatelessWidget {
+  const _HomeSectionTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Text(
+      title,
+      style: theme.textTheme.titleMedium?.copyWith(
+        color: theme.colorScheme.onSurface,
+        fontWeight: FontWeight.w900,
+      ),
+    );
+  }
+}
+
 class _QuickMetrics extends StatelessWidget {
   const _QuickMetrics({
     required this.summary,
@@ -1534,57 +2065,116 @@ class _AnnualGoalCard extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      '${summary.completedThisYear}',
-                      style: theme.textTheme.displaySmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontFamily: AppTypography.contentFontFamily,
-                        fontFamilyFallback: AppTypography.contentFallback,
-                        fontSize: 36,
-                        fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '${(safeProgress * 100).round()}%',
+                                style: theme.textTheme.displaySmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontFamily: AppTypography.contentFontFamily,
+                                  fontFamilyFallback:
+                                      AppTypography.contentFallback,
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.w900,
+                                  height: 0.95,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Flexible(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 5),
+                                  child: Text(
+                                    goal == null
+                                        ? '${summary.completedThisYear} libros'
+                                        : '${summary.completedThisYear} de $goal libros',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style:
+                                        theme.textTheme.titleMedium?.copyWith(
+                                      color: theme.colorScheme.primary,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            subtitle,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.82,
+                              ),
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(999),
+                            child: LinearProgressIndicator(
+                              value: safeProgress,
+                              minHeight: 7,
+                              backgroundColor: theme
+                                  .colorScheme.primaryContainer
+                                  .withValues(alpha: 0.42),
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.78,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 6, left: 4),
-                      child: Text(
-                        goal == null ? 'libros' : '/ $goal',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    Icon(
-                      AppIcons.star,
-                      color: theme.colorScheme.secondary,
-                      size: 30,
-                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    const _AnnualGoalIllustration(),
                   ],
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.82),
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: LinearProgressIndicator(
-                    value: safeProgress,
-                    minHeight: 6,
-                    backgroundColor: theme.colorScheme.primaryContainer
-                        .withValues(alpha: 0.42),
-                    color: theme.colorScheme.primary.withValues(alpha: 0.74),
-                  ),
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _AnnualGoalIllustration extends StatelessWidget {
+  const _AnnualGoalIllustration();
+
+  static const _asset = 'assets/images/home/annual_goal_illustration.png';
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      width: 104,
+      height: 104,
+      child: Image.asset(
+        _asset,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.secondary.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(
+                color: theme.colorScheme.secondary.withValues(alpha: 0.22),
+              ),
+            ),
+            child: Icon(
+              AppIcons.book,
+              color: theme.colorScheme.primary,
+              size: 34,
+            ),
+          );
+        },
       ),
     );
   }

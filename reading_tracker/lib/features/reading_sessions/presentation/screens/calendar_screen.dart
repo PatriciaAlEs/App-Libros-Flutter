@@ -70,14 +70,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 ),
               ),
               shape: WidgetStatePropertyAll(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
               ),
               textStyle: WidgetStatePropertyAll(
-                Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+                Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
               ),
             ),
             segments: const [

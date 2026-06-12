@@ -75,6 +75,8 @@ flutter:
 
   assets:
     - img-logo/
+    - assets/images/home/
+    - assets/images/onboarding/
     - assets/branding/
     - assets/branding/logos/
     - assets/branding/app_icon/

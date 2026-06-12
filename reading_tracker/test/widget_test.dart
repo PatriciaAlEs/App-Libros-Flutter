@@ -38,7 +38,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Tu Biblioteca'), findsOneWidget);
+    expect(find.textContaining('libros en tu colección'), findsOneWidget);
     expect(find.textContaining('Tu biblioteca empieza'), findsOneWidget);
   });
 
@@ -76,7 +76,9 @@ void main() {
     await tester.tap(find.byKey(const Key('book_search_button')));
     await tester.pumpAndSettle();
 
-    final resultTile = find.byKey(const Key('book_result_Libro de prueba'));
+    final resultTile = find.byKey(
+      const Key('book_result_0_Libro de prueba_Autora_2024'),
+    );
     await tester.scrollUntilVisible(
       resultTile,
       260,
@@ -141,7 +143,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(requestCount, 1);
-    final resultTitle = find.byKey(const Key('book_result_Libro automatico'));
+    final resultTitle = find.byKey(
+      const Key('book_result_0_Libro automatico_Autora_2024'),
+    );
     await tester.scrollUntilVisible(
       resultTitle,
       260,
@@ -177,7 +181,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(requestCount, 1);
-    final resultTitle = find.byKey(const Key('book_result_Libro manual'));
+    final resultTitle = find.byKey(
+      const Key('book_result_0_Libro manual_Autora_2024'),
+    );
     await tester.scrollUntilVisible(
       resultTitle,
       260,
