@@ -6,7 +6,6 @@ import '../../../../core/design_system/design_system.dart';
 import '../../../../core/preferences/reader_profile_controller.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_theme_controller.dart';
-import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -16,41 +15,56 @@ class SettingsScreen extends ConsumerWidget {
     final selectedTheme = ref.watch(appThemeControllerProvider);
     final controller = ref.read(appThemeControllerProvider.notifier);
     final profile = ref.watch(readerProfileControllerProvider);
-    final annualGoal = ref
-        .watch(statisticsSummaryProvider)
-        .valueOrNull
-        ?.annualReadingGoal;
-
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.md,
-            AppSpacing.lg,
-            132,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Theme.of(context).scaffoldBackgroundColor,
+                Theme.of(
+                  context,
+                ).colorScheme.primaryContainer.withValues(alpha: 0.16),
+                Theme.of(context).scaffoldBackgroundColor,
+              ],
+              stops: const [0, 0.42, 1],
+            ),
           ),
-          children: [
-            AppBrandHeader(
-              onTap: () =>
-                  Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              132,
             ),
-            const SizedBox(height: AppSpacing.xl),
-            const _ProfileHero(),
-            const SizedBox(height: AppSpacing.lg),
-            _ReaderProfileSection(
-              profile: profile,
-              selectedTheme: selectedTheme,
-              annualGoal: annualGoal,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            _ThemePreferenceCard(
-              selectedTheme: selectedTheme,
-              onChanged: controller.setTheme,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            const _PreferencesAction(),
-          ],
+            children: [
+              AppBrandHeader(
+                readerProfile: profile,
+                onTap: () => Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  (_) => false,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              const _ProfileHero(),
+              const SizedBox(height: AppSpacing.lg),
+              _ReaderProfileSection(
+                profile: profile,
+                selectedTheme: selectedTheme,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _ThemePreferenceCard(
+                selectedTheme: selectedTheme,
+                onChanged: controller.setTheme,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              const _PreferencesAction(),
+            ],
+          ),
         ),
       ),
     );
@@ -184,12 +198,10 @@ class _ReaderProfileSection extends ConsumerStatefulWidget {
   const _ReaderProfileSection({
     required this.profile,
     required this.selectedTheme,
-    required this.annualGoal,
   });
 
   final ReaderProfile profile;
   final ReadingTrackerTheme selectedTheme;
-  final int? annualGoal;
 
   @override
   ConsumerState<_ReaderProfileSection> createState() =>
@@ -199,6 +211,7 @@ class _ReaderProfileSection extends ConsumerStatefulWidget {
 class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
   late final TextEditingController _nameController;
   late final TextEditingController _customGreetingController;
+  late ReaderGreetingPreference _draftGreetingPreference;
 
   @override
   void initState() {
@@ -207,6 +220,7 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
     _customGreetingController = TextEditingController(
       text: widget.profile.customGreeting,
     );
+    _draftGreetingPreference = widget.profile.greetingPreference;
   }
 
   @override
@@ -217,6 +231,9 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
     }
     if (widget.profile.customGreeting != _customGreetingController.text) {
       _customGreetingController.text = widget.profile.customGreeting;
+    }
+    if (widget.profile.greetingPreference != _draftGreetingPreference) {
+      _draftGreetingPreference = widget.profile.greetingPreference;
     }
   }
 
@@ -230,7 +247,6 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final controller = ref.read(readerProfileControllerProvider.notifier);
     final profile = widget.profile;
     final displayName = profile.displayName.isEmpty
         ? 'Sin nombre'
@@ -288,7 +304,6 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
                 ),
               ),
             ),
-            onChanged: controller.updateName,
           ),
           const SizedBox(height: AppSpacing.lg),
           Text('¿Cómo prefieres el saludo?', style: theme.textTheme.labelLarge),
@@ -296,18 +311,17 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
           for (final preference in ReaderGreetingPreference.values)
             RadioListTile<ReaderGreetingPreference>(
               value: preference,
-              groupValue: profile.greetingPreference,
+              groupValue: _draftGreetingPreference,
               dense: true,
               contentPadding: EdgeInsets.zero,
               title: Text(preference.label),
               onChanged: (value) {
                 if (value != null) {
-                  controller.updateGreetingPreference(value);
+                  setState(() => _draftGreetingPreference = value);
                 }
               },
             ),
-          if (profile.greetingPreference ==
-              ReaderGreetingPreference.custom) ...[
+          if (_draftGreetingPreference == ReaderGreetingPreference.custom) ...[
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _customGreetingController,
@@ -329,18 +343,34 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
                   ),
                 ),
               ),
-              onChanged: controller.updateCustomGreeting,
             ),
           ],
+          const SizedBox(height: AppSpacing.lg),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FilledButton.icon(
+              onPressed: _saveProfile,
+              icon: const Icon(Icons.save_outlined),
+              label: const Text('Guardar perfil'),
+            ),
+          ),
           const SizedBox(height: AppSpacing.lg),
           _ProfileSummary(
             displayName: displayName,
             greeting: profile.fallbackGreeting,
             themeName: widget.selectedTheme.label,
-            annualGoal: widget.annualGoal,
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _saveProfile() async {
+    final controller = ref.read(readerProfileControllerProvider.notifier);
+    await controller.updateName(_nameController.text.trim());
+    await controller.updateGreetingPreference(_draftGreetingPreference);
+    await controller.updateCustomGreeting(
+      _customGreetingController.text.trim(),
     );
   }
 }
@@ -350,13 +380,11 @@ class _ProfileSummary extends StatelessWidget {
     required this.displayName,
     required this.greeting,
     required this.themeName,
-    required this.annualGoal,
   });
 
   final String displayName;
   final String greeting;
   final String themeName;
-  final int? annualGoal;
 
   @override
   Widget build(BuildContext context) {
@@ -378,11 +406,6 @@ class _ProfileSummary extends StatelessWidget {
           icon: Icons.palette_outlined,
           label: 'Estilo visual',
           value: themeName,
-        ),
-        _ProfileSummaryItem(
-          icon: AppIcons.flag,
-          label: 'Objetivo anual',
-          value: annualGoal == null ? 'Sin definir' : '$annualGoal libros',
         ),
       ],
     );
@@ -654,10 +677,9 @@ class _PreferencesAction extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        icon: const Text('💅', style: TextStyle(fontSize: 34)),
         title: const Text('Próximamente'),
         content: const Text(
-          'Más personalización, estadísticas y novedades para lectoras. 💅',
+          'Más personalización, estadísticas y novedades para lectoras.',
         ),
         actions: [
           FilledButton(

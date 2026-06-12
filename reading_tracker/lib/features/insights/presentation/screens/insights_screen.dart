@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
+import '../../../../core/preferences/reader_profile_controller.dart';
 import '../../domain/entities/reading_insights_summary.dart';
 import '../providers/reading_insights_summary_provider.dart';
 
@@ -12,121 +13,136 @@ class InsightsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final summaryAsync = ref.watch(readingInsightsSummaryProvider);
+    final readerProfile = ref.watch(readerProfileControllerProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: summaryAsync.when(
-          loading: () => const _InsightsLoadingState(),
-          error: (error, _) => _InsightsErrorState(
-            onRetry: () => ref.invalidate(readingInsightsSummaryProvider),
-          ),
-          data: (summary) {
-            if (!summary.hasAnyInsight) {
-              return const _InsightsEmptyState();
-            }
-
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 132),
-              children: [
-                const _InsightsHeader(),
-                const SizedBox(height: AppSpacing.xl),
-                _InsightsHero(summary: summary),
-                const SizedBox(height: AppSpacing.lg),
-                _InsightMetrics(summary: summary),
-                const SizedBox(height: AppSpacing.lg),
-                _PrimaryInsightPanel(summary: summary),
-                const SizedBox(height: AppSpacing.xxl),
-                _SectionTitle(
-                  eyebrow: 'LECTURA PERSONAL',
-                  title: 'Tu perfil lector',
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _InsightGrid(
-                  children: [
-                    _InsightCard(
-                      icon: AppIcons.profile,
-                      title: 'Autor favorito',
-                      value: summary.mostReadAuthor ?? 'Sin datos',
-                      subtitle: _formatPages(summary.mostReadAuthorPages),
-                    ),
-                    _InsightCard(
-                      icon: AppIcons.bookmark,
-                      title: 'Género favorito',
-                      value: summary.favoriteGenre ?? 'Sin datos',
-                      subtitle: summary.favoriteGenre == null
-                          ? 'Sin géneros registrados'
-                          : _formatPages(summary.favoriteGenrePages),
-                    ),
-                    _InsightCard(
-                      icon: AppIcons.time,
-                      title: 'Más tiempo dedicado',
-                      value: summary.mostTimeBookTitle ?? 'Sin datos',
-                      subtitle: summary.mostTimeBookMinutes == null
-                          ? 'Aún no hay sesiones este año'
-                          : _formatMinutes(summary.mostTimeBookMinutes!),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xxl),
-                _SectionTitle(
-                  eyebrow: 'MEJORES LECTURAS',
-                  title: 'Lecturas destacadas',
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _RatedBooksCard(books: summary.topRatedBooks),
-                const SizedBox(height: AppSpacing.xxl),
-                _SectionTitle(eyebrow: 'PATRONES', title: 'Curiosidades'),
-                const SizedBox(height: AppSpacing.md),
-                _InsightGrid(
-                  children: [
-                    _InsightCard(
-                      icon: AppIcons.book,
-                      title: 'Libro más largo',
-                      value: summary.longestBookTitle ?? 'Sin datos',
-                      subtitle: summary.longestBookPages == null
-                          ? 'Sin libros completados con páginas'
-                          : '${summary.longestBookPages} pag.',
-                    ),
-                    _InsightCard(
-                      icon: AppIcons.calendar,
-                      title: 'Mes con más lectura',
-                      value: summary.mostActiveMonth == null
-                          ? 'Sin datos'
-                          : _formatMonth(summary.mostActiveMonth!),
-                      subtitle: _formatActivity(
-                        pages: summary.mostActiveMonthPages,
-                        minutes: summary.mostActiveMonthMinutes,
-                      ),
-                    ),
-                    _InsightCard(
-                      icon: AppIcons.time,
-                      title: 'Franja habitual',
-                      value: summary.usualReadingTimeSlot ?? 'Sin datos',
-                      subtitle: summary.usualReadingTimeSlot == null
-                          ? 'Aún no hay sesiones registradas'
-                          : _formatCount(
-                              summary.usualReadingTimeSlotSessions,
-                              'sesión',
-                            ),
-                    ),
-                    _InsightCard(
-                      icon: AppIcons.fire,
-                      title: 'Día más activo',
-                      value: summary.mostActiveDay == null
-                          ? 'Sin datos'
-                          : _formatDate(summary.mostActiveDay!),
-                      subtitle: _formatActivity(
-                        pages: summary.mostActiveDayPages,
-                        minutes: summary.mostActiveDayMinutes,
-                      ),
-                    ),
-                  ],
-                ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                theme.scaffoldBackgroundColor,
+                theme.colorScheme.primaryContainer.withValues(alpha: 0.16),
+                theme.scaffoldBackgroundColor,
               ],
-            );
-          },
+              stops: const [0, 0.42, 1],
+            ),
+          ),
+          child: summaryAsync.when(
+            loading: () => const _InsightsLoadingState(),
+            error: (error, _) => _InsightsErrorState(
+              onRetry: () => ref.invalidate(readingInsightsSummaryProvider),
+            ),
+            data: (summary) {
+              if (!summary.hasAnyInsight) {
+                return const _InsightsEmptyState();
+              }
+
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 132),
+                children: [
+                  _InsightsHeader(readerProfile: readerProfile),
+                  const SizedBox(height: AppSpacing.xl),
+                  _InsightsHero(summary: summary),
+                  const SizedBox(height: AppSpacing.lg),
+                  _InsightMetrics(summary: summary),
+                  const SizedBox(height: AppSpacing.lg),
+                  _PrimaryInsightPanel(summary: summary),
+                  const SizedBox(height: AppSpacing.xxl),
+                  _SectionTitle(
+                    eyebrow: 'LECTURA PERSONAL',
+                    title: 'Tu perfil lector',
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _InsightGrid(
+                    children: [
+                      _InsightCard(
+                        icon: AppIcons.profile,
+                        title: 'Autor favorito',
+                        value: summary.mostReadAuthor ?? 'Sin datos',
+                        subtitle: _formatPages(summary.mostReadAuthorPages),
+                      ),
+                      _InsightCard(
+                        icon: AppIcons.bookmark,
+                        title: 'Género favorito',
+                        value: summary.favoriteGenre ?? 'Sin datos',
+                        subtitle: summary.favoriteGenre == null
+                            ? 'Sin géneros registrados'
+                            : _formatPages(summary.favoriteGenrePages),
+                      ),
+                      _InsightCard(
+                        icon: AppIcons.time,
+                        title: 'Más tiempo dedicado',
+                        value: summary.mostTimeBookTitle ?? 'Sin datos',
+                        subtitle: summary.mostTimeBookMinutes == null
+                            ? 'Aún no hay sesiones este año'
+                            : _formatMinutes(summary.mostTimeBookMinutes!),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xxl),
+                  _SectionTitle(
+                    eyebrow: 'MEJORES LECTURAS',
+                    title: 'Lecturas destacadas',
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _RatedBooksCard(books: summary.topRatedBooks),
+                  const SizedBox(height: AppSpacing.xxl),
+                  _SectionTitle(eyebrow: 'PATRONES', title: 'Curiosidades'),
+                  const SizedBox(height: AppSpacing.md),
+                  _InsightGrid(
+                    children: [
+                      _InsightCard(
+                        icon: AppIcons.book,
+                        title: 'Libro más largo',
+                        value: summary.longestBookTitle ?? 'Sin datos',
+                        subtitle: summary.longestBookPages == null
+                            ? 'Sin libros completados con páginas'
+                            : '${summary.longestBookPages} pag.',
+                      ),
+                      _InsightCard(
+                        icon: AppIcons.calendar,
+                        title: 'Mes con más lectura',
+                        value: summary.mostActiveMonth == null
+                            ? 'Sin datos'
+                            : _formatMonth(summary.mostActiveMonth!),
+                        subtitle: _formatActivity(
+                          pages: summary.mostActiveMonthPages,
+                          minutes: summary.mostActiveMonthMinutes,
+                        ),
+                      ),
+                      _InsightCard(
+                        icon: AppIcons.time,
+                        title: 'Franja habitual',
+                        value: summary.usualReadingTimeSlot ?? 'Sin datos',
+                        subtitle: summary.usualReadingTimeSlot == null
+                            ? 'Aún no hay sesiones registradas'
+                            : _formatCount(
+                                summary.usualReadingTimeSlotSessions,
+                                'sesión',
+                              ),
+                      ),
+                      _InsightCard(
+                        icon: AppIcons.fire,
+                        title: 'Día más activo',
+                        value: summary.mostActiveDay == null
+                            ? 'Sin datos'
+                            : _formatDate(summary.mostActiveDay!),
+                        subtitle: _formatActivity(
+                          pages: summary.mostActiveDayPages,
+                          minutes: summary.mostActiveDayMinutes,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -134,11 +150,14 @@ class InsightsScreen extends ConsumerWidget {
 }
 
 class _InsightsHeader extends StatelessWidget {
-  const _InsightsHeader();
+  const _InsightsHeader({required this.readerProfile});
+
+  final ReaderProfile readerProfile;
 
   @override
   Widget build(BuildContext context) {
     return AppBrandHeader(
+      readerProfile: readerProfile,
       onTap: () =>
           Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false),
     );
@@ -672,17 +691,18 @@ class _RatedBookRow extends StatelessWidget {
   }
 }
 
-class _InsightsEmptyState extends StatelessWidget {
+class _InsightsEmptyState extends ConsumerWidget {
   const _InsightsEmptyState();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final readerProfile = ref.watch(readerProfileControllerProvider);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 132),
       children: [
-        const _InsightsHeader(),
+        _InsightsHeader(readerProfile: readerProfile),
         const SizedBox(height: AppSpacing.xl),
         Container(
           padding: const EdgeInsets.fromLTRB(26, 30, 26, 28),
@@ -757,17 +777,18 @@ class _InsightsEmptyState extends StatelessWidget {
   }
 }
 
-class _InsightsLoadingState extends StatelessWidget {
+class _InsightsLoadingState extends ConsumerWidget {
   const _InsightsLoadingState();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final readerProfile = ref.watch(readerProfileControllerProvider);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 132),
       children: [
-        const _InsightsHeader(),
+        _InsightsHeader(readerProfile: readerProfile),
         const SizedBox(height: AppSpacing.xl),
         Container(
           height: 230,
@@ -798,19 +819,20 @@ class _InsightsLoadingState extends StatelessWidget {
   }
 }
 
-class _InsightsErrorState extends StatelessWidget {
+class _InsightsErrorState extends ConsumerWidget {
   const _InsightsErrorState({required this.onRetry});
 
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final readerProfile = ref.watch(readerProfileControllerProvider);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 132),
       children: [
-        const _InsightsHeader(),
+        _InsightsHeader(readerProfile: readerProfile),
         const SizedBox(height: AppSpacing.xl),
         Container(
           padding: const EdgeInsets.fromLTRB(26, 28, 26, 26),

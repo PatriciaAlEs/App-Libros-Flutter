@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
+import '../../../../core/preferences/reader_profile_controller.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/enums/book_status.dart';
@@ -22,6 +23,7 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final readerProfile = ref.watch(readerProfileControllerProvider);
     final booksAsync = ref.watch(booksProvider);
 
     return Scaffold(
@@ -67,6 +69,7 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
                         _LibraryHeader(
                           stats: libraryStats,
                           query: _query,
+                          readerProfile: readerProfile,
                           onAddBook: _openAddBook,
                           onQueryChanged: (value) {
                             setState(() => _query = value);
@@ -221,12 +224,14 @@ class _LibraryHeader extends StatelessWidget {
   const _LibraryHeader({
     required this.stats,
     required this.query,
+    required this.readerProfile,
     required this.onAddBook,
     required this.onQueryChanged,
   });
 
   final _LibraryStats stats;
   final String query;
+  final ReaderProfile readerProfile;
   final VoidCallback onAddBook;
   final ValueChanged<String> onQueryChanged;
 
@@ -241,6 +246,7 @@ class _LibraryHeader extends StatelessWidget {
           children: [
             Expanded(
               child: AppBrandHeader(
+                readerProfile: readerProfile,
                 onTap: () {
                   Navigator.pushNamedAndRemoveUntil(
                     context,

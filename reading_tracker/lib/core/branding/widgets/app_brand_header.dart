@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
+import '../../preferences/reader_profile_controller.dart';
 import '../../theme/app_typography.dart';
 import '../app_brand.dart';
 
@@ -8,11 +9,13 @@ class AppBrandHeader extends StatelessWidget {
   const AppBrandHeader({
     super.key,
     this.readerName = 'Lectora',
+    this.readerProfile,
     this.showGreeting = true,
     this.onTap,
   });
 
   final String readerName;
+  final ReaderProfile? readerProfile;
   final bool showGreeting;
   final VoidCallback? onTap;
 
@@ -21,6 +24,9 @@ class AppBrandHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final cleanName = readerName.trim();
     final displayName = cleanName.isEmpty ? 'Lectora' : cleanName;
+    final greeting = readerProfile == null
+        ? '${_greeting()}, $displayName'
+        : readerProfile!.homeGreeting(DateTime.now());
 
     return InkWell(
       borderRadius: BorderRadius.circular(999),
@@ -61,7 +67,7 @@ class AppBrandHeader extends StatelessWidget {
                 if (showGreeting) ...[
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    '${_greeting()}, $displayName',
+                    greeting,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.primary.withValues(alpha: 0.70),
                       letterSpacing: 1.6,

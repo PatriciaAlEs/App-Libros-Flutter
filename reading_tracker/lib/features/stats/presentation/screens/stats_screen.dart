@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
+import '../../../../core/preferences/reader_profile_controller.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/statistics_summary.dart';
 import '../providers/statistics_summary_provider.dart';
@@ -13,6 +14,7 @@ class StatsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final readerProfile = ref.watch(readerProfileControllerProvider);
     final summaryAsync = ref.watch(statisticsSummaryProvider);
 
     return Scaffold(
@@ -49,7 +51,7 @@ class StatsScreen extends ConsumerWidget {
                   128,
                 ),
                 children: [
-                  const _StatsHeader(),
+                  _StatsHeader(readerProfile: readerProfile),
                   const SizedBox(height: AppSpacing.xxl),
                   _StatsHero(summary: summary),
                   const SizedBox(height: AppSpacing.xl),
@@ -233,7 +235,9 @@ class StatsScreen extends ConsumerWidget {
 }
 
 class _StatsHeader extends StatelessWidget {
-  const _StatsHeader();
+  const _StatsHeader({required this.readerProfile});
+
+  final ReaderProfile readerProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -243,6 +247,7 @@ class _StatsHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppBrandHeader(
+          readerProfile: readerProfile,
           onTap: () =>
               Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false),
         ),

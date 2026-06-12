@@ -106,7 +106,7 @@ class HomeScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: AppSpacing.md),
+                            const SizedBox(height: AppSpacing.sm),
                           ],
                           _CurrentReadingCards(
                             books: _prioritizeCurrentBooks(
@@ -540,14 +540,7 @@ class _CurrentReadingSwitcher extends StatelessWidget {
 
     return Row(
       children: [
-        Expanded(
-          child: Text(
-            'Lectura actual',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
+        const Spacer(),
         Container(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
@@ -566,7 +559,7 @@ class _CurrentReadingSwitcher extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
-        TextButton(onPressed: onChange, child: const Text('Cambiar lectura')),
+        TextButton(onPressed: onChange, child: const Text('Cambiar libro')),
       ],
     );
   }
@@ -605,7 +598,7 @@ class _CurrentReadingPicker extends StatelessWidget {
         shrinkWrap: true,
         children: [
           Text(
-            'Cambiar lectura',
+            'Cambiar libro',
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w800,
             ),
@@ -1066,14 +1059,23 @@ class _CurrentReadingMiniCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final progress = _bookProgress(book);
+    final primary = theme.colorScheme.primary;
+    final dark = Color.lerp(primary, Colors.black, 0.22)!;
+    final accent = theme.colorScheme.secondary;
+    final onDark = theme.colorScheme.onPrimary;
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            primary.withValues(alpha: 0.92),
+            dark.withValues(alpha: 0.96),
+          ],
         ),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: accent.withValues(alpha: 0.22)),
         boxShadow: AppShadows.soft(theme.colorScheme.primary),
       ),
       child: Material(
@@ -1101,9 +1103,10 @@ class _CurrentReadingMiniCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleMedium?.copyWith(
+                          color: onDark,
                           fontFamily: AppTypography.contentFontFamily,
                           fontFamilyFallback: AppTypography.contentFallback,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       if (book.author?.isNotEmpty == true)
@@ -1111,7 +1114,9 @@ class _CurrentReadingMiniCard extends StatelessWidget {
                           book.author!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: onDark.withValues(alpha: 0.72),
+                          ),
                         ),
                       const SizedBox(height: AppSpacing.sm),
                       ClipRRect(
@@ -1119,12 +1124,8 @@ class _CurrentReadingMiniCard extends StatelessWidget {
                         child: LinearProgressIndicator(
                           value: progress,
                           minHeight: 4,
-                          backgroundColor: theme.colorScheme.primary.withValues(
-                            alpha: 0.10,
-                          ),
-                          color: theme.colorScheme.primary.withValues(
-                            alpha: 0.74,
-                          ),
+                          backgroundColor: Colors.white.withValues(alpha: 0.16),
+                          color: accent,
                         ),
                       ),
                     ],
@@ -1134,7 +1135,8 @@ class _CurrentReadingMiniCard extends StatelessWidget {
                 Text(
                   '${(progress * 100).round()}%',
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: theme.colorScheme.primary,
+                    color: accent,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ],
@@ -1939,26 +1941,71 @@ class _BookCover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final placeholder = Container(
+    final theme = Theme.of(context);
+    final coverShadow = [
+      BoxShadow(
+        color: theme.colorScheme.secondary.withValues(alpha: 0.34),
+        blurRadius: 24,
+        spreadRadius: 1,
+        offset: const Offset(0, 10),
+      ),
+    ];
+    final placeholder = _CoverShell(
       width: width,
       height: height,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(radius),
+      radius: radius,
+      shadows: coverShadow,
+      child: Container(
+        color: theme.colorScheme.surfaceContainerHighest,
+        child: const Icon(AppIcons.book),
       ),
-      child: const Icon(AppIcons.book),
     );
 
     if (url == null || url!.isEmpty) return placeholder;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
+    return _CoverShell(
+      width: width,
+      height: height,
+      radius: radius,
+      shadows: coverShadow,
       child: Image.network(
         url!,
         width: width,
         height: height,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => placeholder,
+      ),
+    );
+  }
+}
+
+class _CoverShell extends StatelessWidget {
+  const _CoverShell({
+    required this.width,
+    required this.height,
+    required this.radius,
+    required this.shadows,
+    required this.child,
+  });
+
+  final double width;
+  final double height;
+  final double radius;
+  final List<BoxShadow> shadows;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: shadows,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: child,
       ),
     );
   }

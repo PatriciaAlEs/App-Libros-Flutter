@@ -287,79 +287,93 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('Añadir libro')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 112),
-        children: [
-          const _AddBookHero(),
-          const SizedBox(height: AppSpacing.lg),
-          _SearchField(
-            controller: _searchController,
-            isSearching: _isSearching,
-            onChanged: _onSearchChanged,
-            onSubmitted: _search,
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              theme.scaffoldBackgroundColor,
+              theme.colorScheme.primaryContainer.withValues(alpha: 0.16),
+              theme.scaffoldBackgroundColor,
+            ],
+            stops: const [0, 0.42, 1],
           ),
-          const SizedBox(height: 16),
-          if (_error != null) ...[
-            _InlineError(message: _error!),
-            const SizedBox(height: 16),
-          ],
-          if (_selectedBook != null) ...[
-            _SelectedBookCard(book: _selectedBook!),
-            const SizedBox(height: 16),
-          ],
-          _FormSection(
-            title: 'Cómo entra en tu biblioteca',
-            icon: AppIcons.bookmark,
-            child: _InitialStatusSelector(
-              selectedStatus: _selectedStatus,
-              onChanged: _changeStatus,
+        ),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 112),
+          children: [
+            const _AddBookHero(),
+            const SizedBox(height: AppSpacing.lg),
+            _SearchField(
+              controller: _searchController,
+              isSearching: _isSearching,
+              onChanged: _onSearchChanged,
+              onSubmitted: _search,
             ),
-          ),
-          const SizedBox(height: 16),
-          if (_selectedStatus != BookStatus.pending) ...[
+            const SizedBox(height: 16),
+            if (_error != null) ...[
+              _InlineError(message: _error!),
+              const SizedBox(height: 16),
+            ],
+            if (_selectedBook != null) ...[
+              _SelectedBookCard(book: _selectedBook!),
+              const SizedBox(height: 16),
+            ],
             _FormSection(
-              title: 'Fechas de lectura',
-              icon: AppIcons.calendar,
-              child: _InitialDatesFields(
-                startedAt: _startedAt,
-                finishedAt: _finishedAt,
-                showFinishedAt: _selectedStatus == BookStatus.completed,
-                onStartedAtTap: _pickStartedAt,
-                onFinishedAtTap: _pickFinishedAt,
-                onClearStartedAt: () => setState(() {
-                  _startedAt = null;
-                  _finishedAt = null;
-                }),
-                onClearFinishedAt: () => setState(() => _finishedAt = null),
+              title: 'Cómo entra en tu biblioteca',
+              icon: AppIcons.bookmark,
+              child: _InitialStatusSelector(
+                selectedStatus: _selectedStatus,
+                onChanged: _changeStatus,
               ),
             ),
             const SizedBox(height: 16),
-          ],
-          _FormSection(
-            title: 'Datos del libro',
-            icon: AppIcons.pages,
-            child: _TotalPagesField(
-              controller: _totalPagesController,
-              onChanged: (_) => _totalPagesAutoFilled = false,
+            if (_selectedStatus != BookStatus.pending) ...[
+              _FormSection(
+                title: 'Fechas de lectura',
+                icon: AppIcons.calendar,
+                child: _InitialDatesFields(
+                  startedAt: _startedAt,
+                  finishedAt: _finishedAt,
+                  showFinishedAt: _selectedStatus == BookStatus.completed,
+                  onStartedAtTap: _pickStartedAt,
+                  onFinishedAtTap: _pickFinishedAt,
+                  onClearStartedAt: () => setState(() {
+                    _startedAt = null;
+                    _finishedAt = null;
+                  }),
+                  onClearFinishedAt: () => setState(() => _finishedAt = null),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            _FormSection(
+              title: 'Datos del libro',
+              icon: AppIcons.pages,
+              child: _TotalPagesField(
+                controller: _totalPagesController,
+                onChanged: (_) => _totalPagesAutoFilled = false,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          _ResultsList(
-            results: _results,
-            hasSearched: _hasSearched,
-            isSearching: _isSearching,
-            visibleCount: _visibleResultsCount,
-            selectedBook: _selectedBook,
-            onSelected: _selectBook,
-            onShowMore: _showMoreResults,
-          ),
-          const SizedBox(height: 24),
-          _SaveButton(
-            isSaving: _isSaving,
-            enabled: _selectedBook != null,
-            onPressed: _save,
-          ),
-        ],
+            const SizedBox(height: 16),
+            _ResultsList(
+              results: _results,
+              hasSearched: _hasSearched,
+              isSearching: _isSearching,
+              visibleCount: _visibleResultsCount,
+              selectedBook: _selectedBook,
+              onSelected: _selectBook,
+              onShowMore: _showMoreResults,
+            ),
+            const SizedBox(height: 24),
+            _SaveButton(
+              isSaving: _isSaving,
+              enabled: _selectedBook != null,
+              onPressed: _save,
+            ),
+          ],
+        ),
       ),
     );
   }

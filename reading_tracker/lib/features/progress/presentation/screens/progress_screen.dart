@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
+import '../../../../core/preferences/reader_profile_controller.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
@@ -18,6 +19,7 @@ class ProgressScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final readerProfile = ref.watch(readerProfileControllerProvider);
     final summaryAsync = ref.watch(statisticsSummaryProvider);
     final books = ref.watch(booksProvider).valueOrNull ?? const <Book>[];
     final sessionsAsync = ref.watch(
@@ -55,7 +57,7 @@ class ProgressScreen extends ConsumerWidget {
                   128,
                 ),
                 children: [
-                  const _ProgressHeader(),
+                  _ProgressHeader(readerProfile: readerProfile),
                   const SizedBox(height: AppSpacing.xxl),
                   _ProgressHero(summary: summary, activeBook: activeBook),
                   const SizedBox(height: AppSpacing.xl),
@@ -91,7 +93,9 @@ class ProgressScreen extends ConsumerWidget {
 }
 
 class _ProgressHeader extends StatelessWidget {
-  const _ProgressHeader();
+  const _ProgressHeader({required this.readerProfile});
+
+  final ReaderProfile readerProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +105,7 @@ class _ProgressHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppBrandHeader(
+          readerProfile: readerProfile,
           onTap: () {
             Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
           },
