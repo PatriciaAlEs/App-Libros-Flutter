@@ -263,15 +263,7 @@ class _LibraryHeader extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.xl),
-        Text(
-          'Tu Biblioteca',
-          style: theme.textTheme.displaySmall?.copyWith(
-            color: theme.colorScheme.onSurface,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.lg),
         Text(
           '${stats.totalBooks} libros en tu colección',
           style: theme.textTheme.bodyMedium?.copyWith(

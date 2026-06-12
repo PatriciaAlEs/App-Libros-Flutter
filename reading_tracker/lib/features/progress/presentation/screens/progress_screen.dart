@@ -110,15 +110,7 @@ class _ProgressHeader extends StatelessWidget {
             Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
           },
         ),
-        const SizedBox(height: AppSpacing.xl),
-        Text(
-          'Tu Progreso',
-          style: theme.textTheme.displaySmall?.copyWith(
-            color: theme.colorScheme.onSurface,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.lg),
         Text(
           'Sigue tu ritmo, tus retos y tu actividad lectora.',
           style: theme.textTheme.bodyMedium?.copyWith(

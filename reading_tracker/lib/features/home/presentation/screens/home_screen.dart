@@ -49,10 +49,10 @@ class HomeScreen extends ConsumerWidget {
               end: Alignment.bottomCenter,
               colors: [
                 theme.scaffoldBackgroundColor,
-                theme.scaffoldBackgroundColor,
+                theme.colorScheme.primaryContainer.withValues(alpha: 0.16),
                 theme.scaffoldBackgroundColor,
               ],
-              stops: const [0, 0.46, 1],
+              stops: const [0, 0.40, 1],
             ),
           ),
           child: booksAsync.when(
@@ -88,7 +88,7 @@ class HomeScreen extends ConsumerWidget {
                       sliver: SliverList.list(
                         children: [
                           _HomeHeader(
-                            greetingText: readerProfile.homeGreeting(now),
+                            readerProfile: readerProfile,
                           ),
                           const SizedBox(height: AppSpacing.lg),
                           if (currentBooks.length > 1) ...[
@@ -356,45 +356,35 @@ class _HomeErrorState extends StatelessWidget {
 }
 
 class _HomeHeader extends StatelessWidget {
-  const _HomeHeader({required this.greetingText});
+  const _HomeHeader({required this.readerProfile});
 
-  final String greetingText;
+  final ReaderProfile readerProfile;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final greeting = Text(
-      '$greetingText 👋',
-      softWrap: true,
-      style: theme.textTheme.titleLarge?.copyWith(
-        color: theme.colorScheme.onSurface,
-        fontWeight: FontWeight.w900,
-      ),
-    );
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xs),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final compact = constraints.maxWidth < 390;
-
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    width: compact ? 150 : 184,
-                    child: AppBrandHeader(
-                      showGreeting: false,
-                      onTap: () => Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        '/',
-                        (route) => false,
-                      ),
+                  AppBrandHeader(
+                    readerProfile: readerProfile,
+                    showGreeting: false,
+                    onTap: () => Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/',
+                      (route) => false,
                     ),
                   ),
                   const Spacer(),
+                  const SizedBox(width: AppSpacing.md),
                   _HeaderActionButton(
                     icon: AppIcons.profile,
                     tooltip: 'Perfil',
@@ -402,11 +392,17 @@ class _HomeHeader extends StatelessWidget {
                   ),
                 ],
               ),
-              if (compact) ...[
-                const SizedBox(height: AppSpacing.sm),
-              ] else
-                const SizedBox(height: AppSpacing.md),
-              greeting,
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                '${readerProfile.homeGreeting(DateTime.now())} 👋',
+                softWrap: true,
+                overflow: TextOverflow.visible,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w900,
+                  height: 1.15,
+                ),
+              ),
               const SizedBox(height: AppSpacing.md),
               Row(
                 children: [
@@ -1339,13 +1335,18 @@ class _CompactMetricCard extends StatelessWidget {
             color: backgroundColor,
             borderRadius: BorderRadius.circular(26),
             border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+              color: theme.colorScheme.secondary.withValues(alpha: 0.20),
             ),
             boxShadow: [
               BoxShadow(
-                color: theme.colorScheme.primary.withValues(alpha: 0.08),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
+                color: theme.colorScheme.primary.withValues(alpha: 0.10),
+                blurRadius: 26,
+                offset: const Offset(0, 14),
+              ),
+              BoxShadow(
+                color: theme.colorScheme.secondary.withValues(alpha: 0.08),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
@@ -1460,16 +1461,21 @@ class _AnnualGoalCard extends StatelessWidget {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
+            color: theme.colorScheme.surface.withValues(alpha: 0.92),
             borderRadius: BorderRadius.circular(26),
             border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+              color: theme.colorScheme.secondary.withValues(alpha: 0.22),
             ),
             boxShadow: [
               BoxShadow(
-                color: theme.colorScheme.primary.withValues(alpha: 0.09),
-                blurRadius: 28,
-                offset: const Offset(0, 14),
+                color: theme.colorScheme.primary.withValues(alpha: 0.13),
+                blurRadius: 34,
+                offset: const Offset(0, 18),
+              ),
+              BoxShadow(
+                color: theme.colorScheme.secondary.withValues(alpha: 0.10),
+                blurRadius: 22,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
