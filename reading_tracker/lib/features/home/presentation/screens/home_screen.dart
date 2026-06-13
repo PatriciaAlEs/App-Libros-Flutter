@@ -1038,10 +1038,13 @@ class _CurrentReadingHero extends StatelessWidget {
                       alignment: Alignment.centerRight,
                       child: Text(
                         '$progressPercent%',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: onDark,
-                          fontWeight: FontWeight.w900,
-                          height: 1,
+                        style: GoogleFonts.cormorantGaramond(
+                          textStyle: theme.textTheme.titleLarge?.copyWith(
+                            color: onDark,
+                            fontSize: 27,
+                            fontWeight: FontWeight.w700,
+                            height: 1,
+                          ),
                         ),
                       ),
                     ),
@@ -1468,8 +1471,8 @@ class _TodayMetric extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: theme.colorScheme.primary, size: 17),
-              const SizedBox(width: 5),
+              Icon(icon, color: theme.colorScheme.primary, size: 22),
+              const SizedBox(width: 7),
               Expanded(
                 child: Text(
                   label,
@@ -1488,12 +1491,13 @@ class _TodayMetric extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: theme.colorScheme.primary,
-              fontFamily: AppTypography.contentFontFamily,
-              fontFamilyFallback: AppTypography.contentFallback,
-              fontWeight: FontWeight.w800,
-              height: 1,
+            style: GoogleFonts.cormorantGaramond(
+              textStyle: theme.textTheme.headlineSmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontSize: 31,
+                fontWeight: FontWeight.w700,
+                height: 0.98,
+              ),
             ),
           ),
           const SizedBox(height: 3),
@@ -1712,7 +1716,7 @@ class _HomeSectionTitle extends StatelessWidget {
     return Text(
       title,
       style: useSans
-          ? style
+          ? style?.copyWith(fontSize: 15.5)
           : GoogleFonts.cormorantGaramond(
               textStyle: style?.copyWith(
                 fontSize: 24,
@@ -1847,10 +1851,16 @@ class _CompactMetricCard extends StatelessWidget {
                 Row(
                   children: [
                     if (label == 'Racha')
-                      Text('🔥', style: theme.textTheme.titleMedium)
+                      Text(
+                        '🔥',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontSize: 25,
+                          height: 1,
+                        ),
+                      )
                     else
-                      Icon(icon, color: iconColor, size: 22),
-                    const SizedBox(width: AppSpacing.xs),
+                      Icon(icon, color: iconColor, size: 24),
+                    const SizedBox(width: 6),
                     Expanded(
                       child: Text(
                         label,
@@ -1889,13 +1899,13 @@ class _CompactMetricCard extends StatelessWidget {
                         value,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: foregroundColor,
-                          fontFamily: AppTypography.contentFontFamily,
-                          fontFamilyFallback: AppTypography.contentFallback,
-                          fontSize: 23,
-                          fontWeight: FontWeight.w800,
-                          height: 1,
+                        style: GoogleFonts.cormorantGaramond(
+                          textStyle: theme.textTheme.titleLarge?.copyWith(
+                            color: foregroundColor,
+                            fontSize: 31,
+                            fontWeight: FontWeight.w700,
+                            height: 0.96,
+                          ),
                         ),
                       ),
                     ),
@@ -2004,14 +2014,14 @@ class _AnnualGoalCard extends StatelessWidget {
                             children: [
                               Text(
                                 '${(safeProgress * 100).round()}%',
-                                style: theme.textTheme.displaySmall?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                  fontFamily: AppTypography.contentFontFamily,
-                                  fontFamilyFallback:
-                                      AppTypography.contentFallback,
-                                  fontSize: 38,
-                                  fontWeight: FontWeight.w800,
-                                  height: 0.95,
+                                style: GoogleFonts.cormorantGaramond(
+                                  textStyle:
+                                      theme.textTheme.displaySmall?.copyWith(
+                                    color: theme.colorScheme.primary,
+                                    fontSize: 42,
+                                    fontWeight: FontWeight.w700,
+                                    height: 0.92,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.sm),
