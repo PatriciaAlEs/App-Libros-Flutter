@@ -81,14 +81,14 @@ class HomeScreen extends ConsumerWidget {
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(
                         AppSpacing.lg,
-                        AppSpacing.md,
                         AppSpacing.lg,
-                        112,
+                        AppSpacing.lg,
+                        132,
                       ),
                       sliver: SliverList.list(
                         children: [
                           _HomeHeader(readerProfile: readerProfile),
-                          const SizedBox(height: AppSpacing.lg),
+                          const SizedBox(height: AppSpacing.xl),
                           if (currentBooks.length > 1) ...[
                             _CurrentReadingSwitcher(
                               books: _prioritizeCurrentBooks(
@@ -138,9 +138,9 @@ class HomeScreen extends ConsumerWidget {
                                   .updateCurrentReadingBookId(book.id),
                             ),
                           ],
-                          const SizedBox(height: AppSpacing.xl),
+                          const SizedBox(height: 28),
                           _TodaySummaryCard(sessions: todaySessions),
-                          const SizedBox(height: AppSpacing.xxl),
+                          const SizedBox(height: 30),
                           _QuickMetrics(
                             summary: summary,
                             onOpenCalendar: () =>
@@ -150,24 +150,24 @@ class HomeScreen extends ConsumerWidget {
                             onOpenProgress: () =>
                                 Navigator.pushNamed(context, '/progress'),
                           ),
-                          const SizedBox(height: AppSpacing.xl),
+                          const SizedBox(height: 28),
                           _AnnualGoalCard(
                             summary: summary,
                             onTap: () =>
                                 Navigator.pushNamed(context, '/progress'),
                           ),
-                          const SizedBox(height: AppSpacing.xxl),
+                          const SizedBox(height: 32),
                           _WeeklyCalendarPreview(
                             sessions: recentSessions,
                             onTap: () =>
                                 Navigator.pushNamed(context, '/calendar'),
                           ),
-                          const SizedBox(height: AppSpacing.xl),
+                          const SizedBox(height: 30),
                           _JournalHeader(
                             onSeeAll: () =>
                                 Navigator.pushNamed(context, '/calendar'),
                           ),
-                          const SizedBox(height: AppSpacing.md),
+                          const SizedBox(height: AppSpacing.lg),
                           _RecentActivityList(
                             sessions: recentSessions,
                             booksById: booksById,
@@ -588,7 +588,7 @@ class _JournalHeader extends StatelessWidget {
               Text(
                 'READING JOURNAL',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.74),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.54),
                   letterSpacing: 3,
                   fontWeight: FontWeight.w500,
                 ),
@@ -597,13 +597,24 @@ class _JournalHeader extends StatelessWidget {
               Text(
                 'Actividad reciente',
                 style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ],
           ),
         ),
-        TextButton(onPressed: onSeeAll, child: const Text('Abrir calendario')),
+        TextButton(
+          onPressed: onSeeAll,
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Abrir calendario'),
+              SizedBox(width: 4),
+              Icon(Icons.chevron_right_rounded, size: 18),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -901,24 +912,31 @@ class _CurrentReadingHero extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [primary, dark],
+          colors: [Color.lerp(primary, Colors.white, 0.03)!, primary, dark],
+          stops: const [0, 0.46, 1],
         ),
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         boxShadow: [
           BoxShadow(
-            color: dark.withValues(alpha: 0.20),
-            blurRadius: 36,
-            offset: const Offset(0, 20),
+            color: dark.withValues(alpha: 0.28),
+            blurRadius: 44,
+            offset: const Offset(0, 24),
+          ),
+          BoxShadow(
+            color: accent.withValues(alpha: 0.16),
+            blurRadius: 26,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(30),
           onTap: onOpenProgress,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -960,14 +978,14 @@ class _CurrentReadingHero extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.lg),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final isNarrow = constraints.maxWidth < 340;
                     final cover = _BookCover(
                       url: currentBook.coverUrl,
-                      width: isNarrow ? 102 : 118,
-                      height: isNarrow ? 154 : 176,
+                      width: isNarrow ? 108 : 126,
+                      height: isNarrow ? 162 : 188,
                       radius: 16,
                     );
 
@@ -999,7 +1017,7 @@ class _CurrentReadingHero extends StatelessWidget {
                               fontStyle: FontStyle.italic,
                             ),
                           ),
-                        const SizedBox(height: AppSpacing.xl),
+                        SizedBox(height: isNarrow ? AppSpacing.lg : 28),
                         Row(
                           children: [
                             Expanded(
@@ -1007,7 +1025,7 @@ class _CurrentReadingHero extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(999),
                                 child: LinearProgressIndicator(
                                   value: progress,
-                                  minHeight: 9,
+                                  minHeight: 10,
                                   backgroundColor: Colors.white.withValues(
                                     alpha: 0.14,
                                   ),
@@ -1052,13 +1070,13 @@ class _CurrentReadingHero extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         cover,
-                        const SizedBox(width: 22),
+                        const SizedBox(width: 24),
                         Expanded(child: details),
                       ],
                     );
                   },
                 ),
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.lg),
                 FilledButton.icon(
                   onPressed: onOpenProgress,
                   icon: const Icon(AppIcons.book),
@@ -1070,7 +1088,7 @@ class _CurrentReadingHero extends StatelessWidget {
                   style: FilledButton.styleFrom(
                     backgroundColor: theme.colorScheme.surface,
                     foregroundColor: theme.colorScheme.primary,
-                    minimumSize: const Size.fromHeight(42),
+                    minimumSize: const Size.fromHeight(46),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
@@ -1307,8 +1325,9 @@ class _CurrentReadingStrip extends StatelessWidget {
                 final book = books[index];
                 return _CurrentReadingChip(
                   book: book,
-                  isSelected:
-                      selectedBookId == null ? index == 0 : book.id == selectedBookId,
+                  isSelected: selectedBookId == null
+                      ? index == 0
+                      : book.id == selectedBookId,
                   onTap: () => onSelect(book),
                 );
               },
@@ -1353,7 +1372,9 @@ class _CurrentReadingChip extends StatelessWidget {
                   ? [primary, Color.lerp(primary, Colors.black, 0.20)!]
                   : [
                       theme.colorScheme.surface.withValues(alpha: 0.92),
-                      theme.colorScheme.primaryContainer.withValues(alpha: 0.22),
+                      theme.colorScheme.primaryContainer.withValues(
+                        alpha: 0.22,
+                      ),
                     ],
             ),
             borderRadius: BorderRadius.circular(24),
@@ -1372,12 +1393,7 @@ class _CurrentReadingChip extends StatelessWidget {
           ),
           child: Row(
             children: [
-              _BookCover(
-                url: book.coverUrl,
-                width: 54,
-                height: 78,
-                radius: 12,
-              ),
+              _BookCover(url: book.coverUrl, width: 54, height: 78, radius: 12),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
@@ -1403,7 +1419,9 @@ class _CurrentReadingChip extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: isSelected
-                            ? theme.colorScheme.onPrimary.withValues(alpha: 0.72)
+                            ? theme.colorScheme.onPrimary.withValues(
+                                alpha: 0.72,
+                              )
                             : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -1504,19 +1522,19 @@ class _TodayMetric extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      height: 118,
+      height: 122,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.84),
+        color: theme.colorScheme.surface.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: theme.colorScheme.secondary.withValues(alpha: 0.18),
+          color: theme.colorScheme.secondary.withValues(alpha: 0.14),
         ),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.07),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
+            color: theme.colorScheme.primary.withValues(alpha: 0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -1570,10 +1588,7 @@ class _TodayMetric extends StatelessWidget {
 }
 
 class _WeeklyCalendarPreview extends StatelessWidget {
-  const _WeeklyCalendarPreview({
-    required this.sessions,
-    required this.onTap,
-  });
+  const _WeeklyCalendarPreview({required this.sessions, required this.onTap});
 
   final List<ReadingSession> sessions;
   final VoidCallback onTap;
@@ -1601,7 +1616,9 @@ class _WeeklyCalendarPreview extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(child: _HomeSectionTitle(title: 'Actividad reciente')),
+              const Expanded(
+                child: _HomeSectionTitle(title: 'Actividad reciente'),
+              ),
               TextButton(
                 onPressed: onTap,
                 child: const Text('Abrir calendario'),
@@ -1655,10 +1672,10 @@ class _WeekDayPill extends StatelessWidget {
     final intensity = activity <= 0
         ? 0.0
         : activity < 30
-            ? 0.22
-            : activity < 90
-                ? 0.42
-                : 0.68;
+        ? 0.22
+        : activity < 90
+        ? 0.42
+        : 0.68;
     final fill = isToday
         ? theme.colorScheme.primary
         : theme.colorScheme.secondary.withValues(alpha: intensity + 0.12);
@@ -1706,8 +1723,8 @@ class _WeekDayPill extends StatelessWidget {
               color: isToday
                   ? theme.colorScheme.onPrimary
                   : activity > 0
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.primary.withValues(alpha: 0.22),
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.primary.withValues(alpha: 0.22),
               shape: BoxShape.circle,
             ),
           ),
@@ -1733,18 +1750,23 @@ class _HomeSectionSurface extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.58),
-        borderRadius: BorderRadius.circular(28),
+        color: theme.colorScheme.surface.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(30),
         border: Border.all(
-          color: theme.colorScheme.secondary.withValues(alpha: 0.16),
+          color: theme.colorScheme.secondary.withValues(alpha: 0.18),
         ),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 14),
+            color: theme.colorScheme.primary.withValues(alpha: 0.10),
+            blurRadius: 30,
+            offset: const Offset(0, 16),
+          ),
+          BoxShadow(
+            color: theme.colorScheme.secondary.withValues(alpha: 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -1797,8 +1819,9 @@ class _QuickMetrics extends StatelessWidget {
             value: '${summary.currentStreakDays}',
             label: 'Racha',
             footnote: 'días',
-            backgroundColor:
-                theme.colorScheme.primaryContainer.withValues(alpha: 0.30),
+            backgroundColor: theme.colorScheme.primaryContainer.withValues(
+              alpha: 0.22,
+            ),
             foregroundColor: theme.colorScheme.onSurface,
             iconColor: theme.colorScheme.primary,
             onTap: onOpenCalendar,
@@ -1811,8 +1834,9 @@ class _QuickMetrics extends StatelessWidget {
             value: '${summary.completedThisYear}',
             label: 'Libros',
             footnote: 'este año',
-            backgroundColor:
-                theme.colorScheme.primaryContainer.withValues(alpha: 0.30),
+            backgroundColor: theme.colorScheme.primaryContainer.withValues(
+              alpha: 0.22,
+            ),
             foregroundColor: theme.colorScheme.onSurface,
             iconColor: theme.colorScheme.primary,
             onTap: onOpenLibrary,
@@ -1825,8 +1849,9 @@ class _QuickMetrics extends StatelessWidget {
             value: _compactNumber(summary.totalPagesRead),
             label: 'Páginas',
             footnote: 'totales',
-            backgroundColor:
-                theme.colorScheme.primaryContainer.withValues(alpha: 0.30),
+            backgroundColor: theme.colorScheme.primaryContainer.withValues(
+              alpha: 0.22,
+            ),
             foregroundColor: theme.colorScheme.onSurface,
             iconColor: theme.colorScheme.primary,
             onTap: onOpenProgress,
@@ -1880,17 +1905,17 @@ class _CompactMetricCard extends StatelessWidget {
             color: backgroundColor,
             borderRadius: BorderRadius.circular(26),
             border: Border.all(
-              color: theme.colorScheme.secondary.withValues(alpha: 0.20),
+              color: theme.colorScheme.secondary.withValues(alpha: 0.16),
             ),
             boxShadow: [
               BoxShadow(
-                color: theme.colorScheme.primary.withValues(alpha: 0.10),
-                blurRadius: 26,
-                offset: const Offset(0, 14),
+                color: theme.colorScheme.primary.withValues(alpha: 0.09),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
               ),
               BoxShadow(
-                color: theme.colorScheme.secondary.withValues(alpha: 0.08),
-                blurRadius: 18,
+                color: theme.colorScheme.secondary.withValues(alpha: 0.06),
+                blurRadius: 16,
                 offset: const Offset(0, 6),
               ),
             ],
@@ -2004,35 +2029,42 @@ class _AnnualGoalCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(30),
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withValues(alpha: 0.78),
-            borderRadius: BorderRadius.circular(26),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                theme.colorScheme.surface.withValues(alpha: 0.94),
+                theme.colorScheme.primaryContainer.withValues(alpha: 0.20),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(30),
             border: Border.all(
-              color: theme.colorScheme.secondary.withValues(alpha: 0.22),
+              color: theme.colorScheme.secondary.withValues(alpha: 0.18),
             ),
             boxShadow: [
               BoxShadow(
-                color: theme.colorScheme.primary.withValues(alpha: 0.13),
-                blurRadius: 34,
-                offset: const Offset(0, 18),
+                color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                blurRadius: 38,
+                offset: const Offset(0, 20),
               ),
               BoxShadow(
-                color: theme.colorScheme.secondary.withValues(alpha: 0.10),
+                color: theme.colorScheme.secondary.withValues(alpha: 0.08),
                 blurRadius: 22,
                 offset: const Offset(0, 8),
               ),
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 22, 24, 22),
+            padding: const EdgeInsets.fromLTRB(24, 24, 18, 22),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: Column(
@@ -2043,7 +2075,7 @@ class _AnnualGoalCard extends StatelessWidget {
                               Icon(
                                 Icons.my_location_rounded,
                                 color: theme.colorScheme.primary,
-                                size: 26,
+                                size: 28,
                               ),
                               const SizedBox(width: AppSpacing.sm),
                               Text(
@@ -2051,33 +2083,12 @@ class _AnnualGoalCard extends StatelessWidget {
                                 style: theme.textTheme.headlineSmall?.copyWith(
                                   color: theme.colorScheme.primary,
                                   fontWeight: FontWeight.w900,
+                                  height: 1,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: AppSpacing.sm),
-                          Text(
-                            goal == null
-                                ? 'Define tu objetivo lector'
-                                : '${summary.completedThisYear} de $goal libros',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                          const SizedBox(height: AppSpacing.lg),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
@@ -2088,7 +2099,7 @@ class _AnnualGoalCard extends StatelessWidget {
                                   fontFamily: AppTypography.contentFontFamily,
                                   fontFamilyFallback:
                                       AppTypography.contentFallback,
-                                  fontSize: 40,
+                                  fontSize: 38,
                                   fontWeight: FontWeight.w900,
                                   height: 0.95,
                                 ),
@@ -2103,11 +2114,11 @@ class _AnnualGoalCard extends StatelessWidget {
                                         : '${summary.completedThisYear} de $goal libros',
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style:
-                                        theme.textTheme.titleMedium?.copyWith(
-                                      color: theme.colorScheme.primary,
-                                      fontWeight: FontWeight.w800,
-                                    ),
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(
+                                          color: theme.colorScheme.primary,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                   ),
                                 ),
                               ),
@@ -2116,9 +2127,11 @@ class _AnnualGoalCard extends StatelessWidget {
                           const SizedBox(height: AppSpacing.sm),
                           Text(
                             subtitle,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.primary.withValues(
-                                alpha: 0.82,
+                                alpha: 0.76,
                               ),
                               fontStyle: FontStyle.italic,
                             ),
@@ -2128,19 +2141,62 @@ class _AnnualGoalCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(999),
                             child: LinearProgressIndicator(
                               value: safeProgress,
-                              minHeight: 7,
+                              minHeight: 8,
                               backgroundColor: theme
-                                  .colorScheme.primaryContainer
-                                  .withValues(alpha: 0.42),
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withValues(alpha: 0.52),
                               color: theme.colorScheme.primary.withValues(
-                                alpha: 0.78,
+                                alpha: 0.84,
                               ),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Container(
+                            width: double.infinity,
+                            height: 42,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.lg,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface.withValues(
+                                alpha: 0.62,
+                              ),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.08,
+                                ),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    'Ver progreso anual',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.labelMedium
+                                        ?.copyWith(
+                                          color: theme.colorScheme.primary,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.md),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: theme.colorScheme.primary,
+                                  size: 20,
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.md),
+                    const SizedBox(width: AppSpacing.sm),
                     const _AnnualGoalIllustration(),
                   ],
                 ),
@@ -2161,10 +2217,11 @@ class _AnnualGoalIllustration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isCompact = MediaQuery.sizeOf(context).width < 390;
 
     return SizedBox(
-      width: 126,
-      height: 116,
+      width: isCompact ? 118 : 142,
+      height: isCompact ? 112 : 132,
       child: Image.asset(
         _asset,
         fit: BoxFit.contain,
@@ -2406,16 +2463,16 @@ class _RecentActivityList extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(26),
+        color: theme.colorScheme.surface.withValues(alpha: 0.96),
+        borderRadius: BorderRadius.circular(30),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+          color: theme.colorScheme.primary.withValues(alpha: 0.07),
         ),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
+            color: theme.colorScheme.primary.withValues(alpha: 0.09),
+            blurRadius: 28,
+            offset: const Offset(0, 14),
           ),
         ],
       ),
@@ -2455,7 +2512,7 @@ class _ActivityTile extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
+        vertical: AppSpacing.sm,
       ),
       leading: _BookCover(
         url: book?.coverUrl,
@@ -2471,7 +2528,7 @@ class _ActivityTile extends StatelessWidget {
           fontFamily: AppTypography.contentFontFamily,
           fontFamilyFallback: AppTypography.contentFallback,
           fontSize: 15,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w800,
         ),
       ),
       subtitle: Text(
@@ -2479,17 +2536,24 @@ class _ActivityTile extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.primary.withValues(alpha: 0.78),
-          fontWeight: FontWeight.w400,
+          color: theme.colorScheme.primary.withValues(alpha: 0.66),
+          fontWeight: FontWeight.w500,
         ),
       ),
-      trailing: Text(
-        _relativeDate(session.date),
-        textAlign: TextAlign.right,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.primary.withValues(alpha: 0.82),
-          letterSpacing: 1.6,
-          fontWeight: FontWeight.w700,
+      trailing: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.26),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          _relativeDate(session.date),
+          textAlign: TextAlign.right,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.primary.withValues(alpha: 0.66),
+            letterSpacing: 0.8,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
       onTap: book == null

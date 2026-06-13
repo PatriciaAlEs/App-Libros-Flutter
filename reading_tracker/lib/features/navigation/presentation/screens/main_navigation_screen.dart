@@ -83,9 +83,26 @@ class _MainBottomNavigation extends StatelessWidget {
           height: 82,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(0),
-            boxShadow: AppShadows.soft(theme.colorScheme.primary),
+            color: theme.colorScheme.surface.withValues(alpha: 0.96),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(28),
+              bottom: Radius.circular(22),
+            ),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.primary.withValues(alpha: 0.14),
+                blurRadius: 32,
+                offset: const Offset(0, 16),
+              ),
+              BoxShadow(
+                color: theme.colorScheme.secondary.withValues(alpha: 0.08),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
           child: Row(
             children: [
