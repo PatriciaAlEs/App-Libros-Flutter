@@ -44,7 +44,10 @@ Trabajo mas reciente completado:
 - Formulario de libro corrige keys duplicadas en resultados Open Library usando indice y metadatos para evitar errores con titulos repetidos.
 - Sprint 17.6 Onboarding Refresh aplicado: onboarding usa logo real ReadPp y nuevas imagenes desde `assets/images/onboarding/slide_1.png`, `slide_2.png` y `slide_3.png`.
 - Sprint 17.7 Home Premium Polish aplicado: Home se alinea a la referencia editorial premium con saludo protagonista, botones pill, hero mas compacto, resumen de hoy, mini calendario semanal y lecturas en curso.
+- `Lecturas en curso` en Home ahora es un carrusel horizontal con swipe, snap, preview lateral, indicadores de pagina y seleccion persistida del libro visible.
 - Reto anual de Home usa ilustracion editorial generada en `assets/images/home/annual_goal_illustration.png`.
+- ReadPp UI Consistency Pass aplicado: Biblioteca, Progreso, Estadisticas, Insights y Ajustes se alinean con Home usando la misma jerarquia tipografica, sistema de cards, bordes, sombras, spacing y header compartido.
+- `AppBrandHeader`, `MetricCard` y `SectionHeader` se refinan como componentes reutilizables del sistema visual actual.
 - Demo Polish Sprint 14 aplicado con cambios minimos de alto impacto visual.
 - Correccion de barra de reto anual en Home: `annualGoalProgress` se normaliza de porcentaje `0-100` a valor visual `0-1`.
 - Nombre por defecto hardcodeado unificado de `Daniela` a `Lectora`.
@@ -145,6 +148,7 @@ El sistema visual base ahora incluye:
 - Iconografia de Home/Bottom Navigation/metricas/acciones migrada hacia `AppIcons` con Lucide donde ya esta disponible.
 - Tipografia del proyecto fue iterada varias veces; el estado actual del codigo usa Roboto globalmente, aunque las referencias de diseno siguen hablando de estilo editorial.
 - Tipografia actual de producto: Roboto para texto general y Space Grotesk para titulos principales/display cuando aplica.
+- Guia visual actual aprobada: Cormorant Garamond como acento editorial selectivo para saludos, heroes, titulos grandes y valores destacados; Roboto para UI, labels, botones, formularios, navegacion y cuerpo.
 
 ## Estado reciente
 

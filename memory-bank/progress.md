@@ -254,7 +254,11 @@
 - Home ahora usa saludo editorial protagonista, perfil a la derecha y botones `Libro`/`Calendario` en pills blancos.
 - Hero de lectura actual compactado y equilibrado con portada protagonista, progreso y porcentaje junto a la barra.
 - Home suma `Resumen de hoy`, `Lecturas en curso` y mini calendario semanal sin tocar providers, repositorios ni navegacion.
+- `Lecturas en curso` se convierte en carrusel horizontal con `PageView`, swipe, snap, animacion suave, preview lateral e indicadores de pagina.
+- Al deslizar el carrusel, la lectura visible se persiste como lectura principal usando el mecanismo existente de `readerProfileControllerProvider`.
 - Reto anual redisenado con mayor jerarquia visual y asset `assets/images/home/annual_goal_illustration.png`.
+- ReadPp UI Consistency Pass aplicado usando Home como referencia: Biblioteca, Progreso, Estadisticas, Insights y Ajustes heredan la misma jerarquia tipografica, sistema de cards, bordes, sombras, spacing, `AppBrandHeader`, `MetricCard` y `SectionHeader` refinados.
+- La tipografia editorial Cormorant Garamond queda reservada a saludos, titulos grandes, heroes y valores destacados; Roboto se mantiene para botones, labels, cuerpo, formularios y navegacion.
 - Validacion Sprint 16/17.x pendiente en terminal del usuario: `dart format .`, `flutter pub get`, `flutter analyze`, `flutter test` y `git status`.
 
 ## Parcial / en seguimiento
@@ -265,7 +269,7 @@
 - Estado vigente tras Sprint 14: Demo Polish aplicado; pendiente validacion local por el usuario.
 - Estado vigente tras Sprint 15: Stats Premium Redesign aplicado; pendiente validacion local por el usuario.
 - Estado vigente tras Sprint 17.x: perfil lector local, logo real, headers consistentes y Home visual polish aplicados; pendiente validacion local por el usuario.
-- Estado vigente tras Sprint 17.7: Home premium, onboarding refrescado y assets visuales nuevos aplicados; pendiente validacion local por el usuario.
+- Estado vigente tras Sprint 17.7: Home premium, carrusel de lecturas en curso, onboarding refrescado, assets visuales nuevos y pase de consistencia UI aplicado; pendiente validacion local por el usuario.
 - Las notas pendientes de validacion de sprints anteriores quedan como historial superado por la validacion vigente de Sprint 13.
 
 - Actualizacion Sprint 12: ReadPp se considera feature-complete para v1, pendiente de release readiness.

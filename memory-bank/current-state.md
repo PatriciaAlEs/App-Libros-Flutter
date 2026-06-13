@@ -86,6 +86,9 @@ Sprint 16/17.x implementado:
 - Home Premium Polish toma referencia editorial premium: saludo grande, botones pill, hero compacto, resumen de hoy, lecturas en curso, mini calendario semanal y reto anual ilustrado.
 - Home adopta composicion editorial propia para esta referencia visual; otras pantallas principales mantienen `AppBrandHeader`.
 - Asset de reto anual: `assets/images/home/annual_goal_illustration.png`.
+- Home convierte `Lecturas en curso` en carrusel horizontal con swipe, snap por libro, preview lateral y page indicators.
+- Al hacer swipe en `Lecturas en curso`, el libro visible pasa a ser la lectura principal usando `readerProfileControllerProvider.updateCurrentReadingBookId`, la misma persistencia local existente.
+- Pase de consistencia visual aplicado desde Home hacia Biblioteca, Progreso, Estadisticas, Insights y Ajustes: tipografia editorial selectiva, cards premium, bordes suaves, sombras editoriales, `MetricCard`, `SectionHeader` y `AppBrandHeader` alineados.
 - No se modificaron providers de libros, repositorios, Supabase/backend ni navegacion inferior.
 
 Identidad visual vigente:
@@ -140,6 +143,8 @@ Estado actual implementado:
 - Home incluye seccion `Resumen de hoy` con paginas leidas, tiempo de lectura y sesiones.
 - Home incluye mini calendario semanal que abre el calendario completo.
 - Home incluye `Lecturas en curso` cuando hay varios libros en estado `Leyendo`.
+- `Lecturas en curso` se muestra como carrusel horizontal con `PageView`, swipe izquierda/derecha, snap nativo, preview de cards adyacentes e indicadores inferiores.
+- La card visible del carrusel se guarda como lectura principal reutilizando el mecanismo local existente de perfil lector.
 - El reto anual de Home usa la ilustracion editorial `assets/images/home/annual_goal_illustration.png`.
 - Si existen varios libros en estado `Leyendo`, Home permite elegir cual aparece como principal.
 - La seleccion de lectura principal se persiste localmente y no cambia sola mientras el libro siga en estado `Leyendo`.
