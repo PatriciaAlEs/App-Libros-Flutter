@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/branding/app_brand.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/preferences/reader_profile_controller.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -413,6 +414,8 @@ class _HomeHeader extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const _HomeBrandLogo(),
+              const SizedBox(height: AppSpacing.sm),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -464,6 +467,37 @@ class _HomeHeader extends StatelessWidget {
                 ],
               ),
             ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _HomeBrandLogo extends StatelessWidget {
+  const _HomeBrandLogo();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      width: 176,
+      height: 58,
+      child: Image.asset(
+        AppBrand.headerLogoAsset,
+        fit: BoxFit.contain,
+        alignment: Alignment.centerLeft,
+        errorBuilder: (context, error, stackTrace) {
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              AppBrand.name,
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
           );
         },
       ),
@@ -905,7 +939,6 @@ class _CurrentReadingHero extends StatelessWidget {
     final dark = Color.lerp(primary, Colors.black, 0.34)!;
     final onDark = theme.colorScheme.onPrimary;
     final accent = theme.colorScheme.secondary;
-    final genre = currentBook.genre?.trim();
 
     return Container(
       decoration: BoxDecoration(
@@ -936,166 +969,171 @@ class _CurrentReadingHero extends StatelessWidget {
           borderRadius: BorderRadius.circular(30),
           onTap: onOpenProgress,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
+            padding: const EdgeInsets.fromLTRB(22, 22, 22, 22),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = constraints.maxWidth < 350;
+                final cover = _BookCover(
+                  url: currentBook.coverUrl,
+                  width: isNarrow ? 112 : 148,
+                  height: isNarrow ? 168 : 220,
+                  radius: 12,
+                );
+
+                final details = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        'LECTURA ACTUAL',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: accent.withValues(alpha: 0.92),
-                          letterSpacing: 3,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    if (genre != null && genre.isNotEmpty)
-                      Container(
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md,
-                          vertical: AppSpacing.sm,
+                          horizontal: 14,
+                          vertical: 7,
                         ),
                         decoration: BoxDecoration(
-                          color: accent.withValues(alpha: 0.06),
+                          color: Colors.white.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(999),
                           border: Border.all(
-                            color: accent.withValues(alpha: 0.44),
+                            color: accent.withValues(alpha: 0.24),
                           ),
                         ),
                         child: Text(
-                          genre.toUpperCase(),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          'LECTURA ACTUAL',
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: accent.withValues(alpha: 0.98),
-                            letterSpacing: 1.8,
-                            fontWeight: FontWeight.w500,
+                            color: accent.withValues(alpha: 0.95),
+                            letterSpacing: 1.1,
+                            fontWeight: FontWeight.w800,
+                            height: 1,
                           ),
                         ),
                       ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isNarrow = constraints.maxWidth < 340;
-                    final cover = _BookCover(
-                      url: currentBook.coverUrl,
-                      width: isNarrow ? 108 : 126,
-                      height: isNarrow ? 162 : 188,
-                      radius: 16,
-                    );
-
-                    final details = Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          currentBook.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            color: onDark,
-                            fontFamily: AppTypography.displayFontFamily,
-                            fontFamilyFallback: AppTypography.displayFallback,
-                            fontSize: isNarrow ? 22 : 26,
-                            fontWeight: FontWeight.w800,
-                            height: 1.08,
-                          ),
+                    ),
+                    SizedBox(height: isNarrow ? AppSpacing.md : 18),
+                    Text(
+                      currentBook.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: onDark,
+                        fontFamily: AppTypography.displayFontFamily,
+                        fontFamilyFallback: AppTypography.displayFallback,
+                        fontSize: isNarrow ? 23 : 30,
+                        fontWeight: FontWeight.w900,
+                        height: 1.04,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    if (currentBook.author?.isNotEmpty == true)
+                      Text(
+                        currentBook.author!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: onDark.withValues(alpha: 0.76),
+                          fontWeight: FontWeight.w500,
+                          height: 1.1,
                         ),
-                        const SizedBox(height: AppSpacing.sm),
-                        if (currentBook.author?.isNotEmpty == true)
-                          Text(
-                            currentBook.author!,
+                      ),
+                    const Spacer(),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        '$progressPercent%',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: onDark,
+                          fontWeight: FontWeight.w900,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(999),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 13,
+                        backgroundColor: Colors.white.withValues(alpha: 0.12),
+                        color: accent.withValues(alpha: 1),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _pageProgressText(currentBook),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: accent.withValues(alpha: 0.94),
-                              fontStyle: FontStyle.italic,
+                              color: onDark.withValues(alpha: 0.78),
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        SizedBox(height: isNarrow ? AppSpacing.lg : 28),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(999),
-                                child: LinearProgressIndicator(
-                                  value: progress,
-                                  minHeight: 10,
-                                  backgroundColor: Colors.white.withValues(
-                                    alpha: 0.14,
-                                  ),
-                                  color: accent.withValues(alpha: 0.98),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.sm),
-                            Text(
-                              '$progressPercent%',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: onDark,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ],
                         ),
-                        const SizedBox(height: AppSpacing.sm),
+                        Icon(
+                          Icons.schedule_rounded,
+                          color: onDark.withValues(alpha: 0.82),
+                          size: 18,
+                        ),
+                        const SizedBox(width: 5),
                         Text(
-                          _pageProgressText(currentBook),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          'Registrar',
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             color: onDark.withValues(alpha: 0.78),
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
-                    );
-
-                    if (isNarrow) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(child: cover),
-                          const SizedBox(height: AppSpacing.lg),
-                          details,
-                        ],
-                      );
-                    }
-
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        cover,
-                        const SizedBox(width: 24),
-                        Expanded(child: details),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                FilledButton.icon(
-                  onPressed: onOpenProgress,
-                  icon: const Icon(AppIcons.book),
-                  label: Text(
-                    currentBook.totalPages == null
-                        ? 'Registrar avance'
-                        : 'Continuar lectura',
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: theme.colorScheme.surface,
-                    foregroundColor: theme.colorScheme.primary,
-                    minimumSize: const Size.fromHeight(46),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
                     ),
-                    elevation: 0,
-                  ),
-                ),
-              ],
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      height: 48,
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: onOpenProgress,
+                        icon: const Icon(Icons.swap_horiz_rounded),
+                        label: Text(
+                          currentBook.totalPages == null
+                              ? 'Registrar avance'
+                              : 'Continuar lectura',
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: onDark,
+                          side: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.13),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          textStyle: theme.textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+
+                if (isNarrow) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(child: cover),
+                      const SizedBox(height: AppSpacing.lg),
+                      SizedBox(height: 254, child: details),
+                    ],
+                  );
+                }
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    cover,
+                    const SizedBox(width: 30),
+                    Expanded(child: SizedBox(height: 220, child: details)),
+                  ],
+                );
+              },
             ),
           ),
         ),
