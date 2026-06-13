@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/preferences/reader_profile_controller.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
@@ -342,11 +342,13 @@ class _HeroMetric extends StatelessWidget {
       children: [
         Text(
           value,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            color: theme.colorScheme.onPrimary,
-            fontFamily: AppTypography.contentFontFamily,
-            fontFamilyFallback: AppTypography.contentFallback,
-            fontWeight: FontWeight.w800,
+          style: GoogleFonts.cormorantGaramond(
+            textStyle: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.onPrimary,
+              fontSize: 32,
+              fontWeight: FontWeight.w700,
+              height: 1,
+            ),
           ),
         ),
         const SizedBox(height: 2),
@@ -385,8 +387,12 @@ class _ReadingChallengeCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Reto lector $year',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
+                  style: GoogleFonts.cormorantGaramond(
+                    textStyle: theme.textTheme.headlineSmall?.copyWith(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      height: 1.08,
+                    ),
                   ),
                 ),
               ),
@@ -448,8 +454,12 @@ class _ReadingActivityCard extends StatelessWidget {
         children: [
           Text(
             'Actividad lectora',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
+            style: GoogleFonts.cormorantGaramond(
+              textStyle: theme.textTheme.headlineSmall?.copyWith(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                height: 1.08,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -610,8 +620,12 @@ class _QuickAccessSection extends StatelessWidget {
       children: [
         Text(
           'Accesos rápidos',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w800,
+          style: GoogleFonts.cormorantGaramond(
+            textStyle: theme.textTheme.headlineSmall?.copyWith(
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              height: 1.08,
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.md),

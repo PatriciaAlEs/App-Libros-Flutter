@@ -1226,7 +1226,7 @@ class _EmptyCurrentReadingCard extends StatelessWidget {
   }
 }
 
-class _CurrentReadingStrip extends StatelessWidget {
+class _CurrentReadingStrip extends StatefulWidget {
   const _CurrentReadingStrip({
     required this.books,
     required this.selectedBookId,
@@ -1238,7 +1238,71 @@ class _CurrentReadingStrip extends StatelessWidget {
   final ValueChanged<Book> onSelect;
 
   @override
+  State<_CurrentReadingStrip> createState() => _CurrentReadingStripState();
+}
+
+class _CurrentReadingStripState extends State<_CurrentReadingStrip> {
+  late final PageController _pageController;
+  late int _currentPage;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPage = _selectedIndex();
+    _pageController = PageController(
+      initialPage: _currentPage,
+      viewportFraction: 0.86,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _CurrentReadingStrip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final nextPage = _selectedIndex();
+    if (nextPage != _currentPage) {
+      _currentPage = nextPage;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_pageController.hasClients) return;
+        _pageController.animateToPage(
+          nextPage,
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeOutCubic,
+        );
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  int _selectedIndex() {
+    if (widget.books.isEmpty) return 0;
+    final selectedBookId = widget.selectedBookId;
+    if (selectedBookId == null) return 0;
+    final index = widget.books.indexWhere((book) => book.id == selectedBookId);
+    return index == -1 ? 0 : index;
+  }
+
+  void _selectPage(int index, {bool animate = false}) {
+    if (index < 0 || index >= widget.books.length) return;
+    setState(() => _currentPage = index);
+    widget.onSelect(widget.books[index]);
+    if (animate && _pageController.hasClients) {
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOutCubic,
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (widget.books.isEmpty) return const SizedBox.shrink();
+
     return _HomeSectionSurface(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1246,22 +1310,57 @@ class _CurrentReadingStrip extends StatelessWidget {
           _HomeSectionTitle(title: 'Lecturas en curso'),
           const SizedBox(height: AppSpacing.md),
           SizedBox(
-            height: 112,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: books.length,
-              separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
+            height: 124,
+            child: PageView.builder(
+              controller: _pageController,
+              clipBehavior: Clip.none,
+              padEnds: false,
+              physics: const BouncingScrollPhysics(
+                parent: PageScrollPhysics(),
+              ),
+              itemCount: widget.books.length,
+              onPageChanged: _selectPage,
               itemBuilder: (context, index) {
-                final book = books[index];
-                return _CurrentReadingChip(
-                  book: book,
-                  isSelected: selectedBookId == null
-                      ? index == 0
-                      : book.id == selectedBookId,
-                  onTap: () => onSelect(book),
+                final book = widget.books[index];
+                return Padding(
+                  padding: EdgeInsets.only(
+                    right: index == widget.books.length - 1
+                        ? 0
+                        : AppSpacing.md,
+                  ),
+                  child: _CurrentReadingChip(
+                    book: book,
+                    isSelected: index == _currentPage,
+                    onTap: () => _selectPage(index, animate: true),
+                  ),
                 );
               },
             ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(widget.books.length, (index) {
+              final isActive = index == _currentPage;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isActive
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.transparent,
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.55),
+                    width: 1.2,
+                  ),
+                ),
+              );
+            }),
           ),
         ],
       ),
@@ -1292,7 +1391,7 @@ class _CurrentReadingChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         onTap: onTap,
         child: Container(
-          width: 252,
+          width: double.infinity,
           padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
             gradient: LinearGradient(

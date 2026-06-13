@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
@@ -112,9 +113,13 @@ class _ProfileHero extends StatelessWidget {
               children: [
                 Text(
                   'Perfil y preferencias',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
+                  style: GoogleFonts.cormorantGaramond(
+                    textStyle: theme.textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                      fontSize: 31,
+                      fontWeight: FontWeight.w700,
+                      height: 1.05,
+                    ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
@@ -155,6 +160,7 @@ class _ThemePreferenceCard extends StatelessWidget {
         border: Border.all(
           color: theme.colorScheme.primary.withValues(alpha: 0.08),
         ),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/preferences/reader_profile_controller.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/statistics_summary.dart';
 import '../providers/statistics_summary_provider.dart';
 
@@ -374,11 +374,13 @@ class _HeroMetric extends StatelessWidget {
       children: [
         Text(
           value,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            color: theme.colorScheme.onPrimary,
-            fontFamily: AppTypography.contentFontFamily,
-            fontFamilyFallback: AppTypography.contentFallback,
-            fontWeight: FontWeight.w800,
+          style: GoogleFonts.cormorantGaramond(
+            textStyle: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.onPrimary,
+              fontSize: 32,
+              fontWeight: FontWeight.w700,
+              height: 1,
+            ),
           ),
         ),
         const SizedBox(height: 2),
@@ -458,8 +460,13 @@ class _AnnualGoalSection extends StatelessWidget {
                       hasGoal
                           ? '$completedThisYear / $annualReadingGoal libros'
                           : 'Define tu reto lector',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
+                      style: GoogleFonts.cormorantGaramond(
+                        textStyle: theme.textTheme.headlineSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontSize: 31,
+                          fontWeight: FontWeight.w700,
+                          height: 1.04,
+                        ),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),

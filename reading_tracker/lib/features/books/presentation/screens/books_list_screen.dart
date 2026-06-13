@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
@@ -424,10 +425,13 @@ class _FeaturedReadingCard extends StatelessWidget {
                         book.title,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          color: theme.colorScheme.onPrimary,
-                          fontWeight: FontWeight.w800,
-                          height: 1.05,
+                        style: GoogleFonts.cormorantGaramond(
+                          textStyle: theme.textTheme.headlineSmall?.copyWith(
+                            color: theme.colorScheme.onPrimary,
+                            fontSize: 31,
+                            fontWeight: FontWeight.w700,
+                            height: 1.04,
+                          ),
                         ),
                       ),
                       if (book.author?.isNotEmpty == true) ...[
@@ -448,11 +452,13 @@ class _FeaturedReadingCard extends StatelessWidget {
                         children: [
                           Text(
                             '$percent%',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              color: theme.colorScheme.onPrimary,
-                              fontFamily: AppTypography.contentFontFamily,
-                              fontFamilyFallback: AppTypography.contentFallback,
-                              fontWeight: FontWeight.w600,
+                            style: GoogleFonts.cormorantGaramond(
+                              textStyle: theme.textTheme.titleLarge?.copyWith(
+                                color: theme.colorScheme.onPrimary,
+                                fontSize: 27,
+                                fontWeight: FontWeight.w700,
+                                height: 1,
+                              ),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.sm),
@@ -658,8 +664,12 @@ class _CollectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             'Colección',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
+            style: GoogleFonts.cormorantGaramond(
+              textStyle: theme.textTheme.headlineSmall?.copyWith(
+                fontSize: 27,
+                fontWeight: FontWeight.w700,
+                height: 1.08,
+              ),
             ),
           ),
         ),

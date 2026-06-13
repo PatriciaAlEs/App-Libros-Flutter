@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../preferences/reader_profile_controller.dart';
 import '../app_brand.dart';
@@ -31,6 +32,13 @@ class AppBrandHeader extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final greetingText =
         readerProfile?.homeGreeting(DateTime.now()) ?? _greeting;
+    final commaIndex = greetingText.indexOf(',');
+    final greetingLead = commaIndex == -1
+        ? greetingText
+        : greetingText.substring(0, commaIndex + 1);
+    final greetingName = commaIndex == -1
+        ? ''
+        : greetingText.substring(commaIndex + 1).trim();
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -62,14 +70,35 @@ class AppBrandHeader extends StatelessWidget {
           children: [
             headerLogo,
             const SizedBox(height: 8),
-            Text(
-              '$greetingText 👋',
-              softWrap: true,
-              overflow: TextOverflow.visible,
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w800,
-                height: 1.15,
+            RichText(
+              text: TextSpan(
+                style: GoogleFonts.cormorantGaramond(
+                  textStyle: theme.textTheme.headlineSmall?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.88),
+                    fontSize: 26,
+                    fontWeight: FontWeight.w600,
+                    height: 1.08,
+                  ),
+                ),
+                children: [
+                  TextSpan(
+                    text: greetingName.isEmpty
+                        ? '$greetingLead \u{1F44B}'
+                        : '$greetingLead\n',
+                  ),
+                  if (greetingName.isNotEmpty)
+                    TextSpan(
+                      text: '$greetingName \u{1F44B}',
+                      style: GoogleFonts.cormorantGaramond(
+                        textStyle: theme.textTheme.displaySmall?.copyWith(
+                          color: colorScheme.primary,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w700,
+                          height: 1.02,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ],

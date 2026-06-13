@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
@@ -199,9 +200,13 @@ class _InsightsHero extends StatelessWidget {
         children: [
           Text(
             'Insights',
-            style: theme.textTheme.displaySmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
+            style: GoogleFonts.cormorantGaramond(
+              textStyle: theme.textTheme.displaySmall?.copyWith(
+                color: Colors.white,
+                fontSize: 39,
+                fontWeight: FontWeight.w700,
+                height: 1.02,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -232,9 +237,13 @@ class _InsightsHero extends StatelessWidget {
                         headline,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
+                        style: GoogleFonts.cormorantGaramond(
+                          textStyle: theme.textTheme.titleLarge?.copyWith(
+                            color: Colors.white,
+                            fontSize: 27,
+                            fontWeight: FontWeight.w700,
+                            height: 1.05,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -444,8 +453,13 @@ class _MetricPill extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             value,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
+            style: GoogleFonts.cormorantGaramond(
+              textStyle: theme.textTheme.titleLarge?.copyWith(
+                color: theme.colorScheme.primary,
+                fontSize: 29,
+                fontWeight: FontWeight.w700,
+                height: 1,
+              ),
             ),
           ),
           Text(
@@ -486,8 +500,12 @@ class _SectionTitle extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         Text(
           title,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w800,
+          style: GoogleFonts.cormorantGaramond(
+            textStyle: theme.textTheme.headlineSmall?.copyWith(
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              height: 1.08,
+            ),
           ),
         ),
       ],
