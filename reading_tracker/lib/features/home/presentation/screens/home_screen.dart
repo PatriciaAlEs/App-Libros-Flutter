@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/branding/app_brand.dart';
+import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/preferences/reader_profile_controller.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -510,8 +510,8 @@ class _HomeBrandLogo extends StatelessWidget {
     final theme = Theme.of(context);
 
     return SizedBox(
-      width: 166,
-      height: 52,
+      width: 184,
+      height: 68,
       child: Image.asset(
         AppBrand.headerLogoAsset,
         fit: BoxFit.contain,
@@ -1129,7 +1129,7 @@ class _CurrentReadingHero extends StatelessWidget {
                 }
 
                 return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     cover,
                     const SizedBox(width: 30),
@@ -1549,8 +1549,8 @@ class _TodayMetric extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      height: 122,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      height: 108,
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.90),
         borderRadius: BorderRadius.circular(22),
@@ -1585,7 +1585,7 @@ class _TodayMetric extends StatelessWidget {
               ),
             ],
           ),
-          const Spacer(),
+          const SizedBox(height: AppSpacing.md),
           Text(
             value,
             maxLines: 1,
@@ -1593,13 +1593,13 @@ class _TodayMetric extends StatelessWidget {
             style: GoogleFonts.cormorantGaramond(
               textStyle: theme.textTheme.headlineSmall?.copyWith(
                 color: theme.colorScheme.primary,
-                fontSize: 31,
-                fontWeight: FontWeight.w700,
-                height: 0.98,
+                fontSize: 40,
+                fontWeight: FontWeight.w800,
+                height: 0.90,
               ),
             ),
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 1),
           Text(
             footnote,
             maxLines: 1,
@@ -1927,12 +1927,12 @@ class _CompactMetricCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(26),
         onTap: onTap,
         child: Container(
-          height: 104,
+          height: 94,
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.09),
+              color: theme.colorScheme.primary.withValues(alpha: 0.18),
             ),
             boxShadow: [
               BoxShadow(
@@ -1943,7 +1943,7 @@ class _CompactMetricCard extends StatelessWidget {
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.fromLTRB(12, 11, 12, 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1989,7 +1989,7 @@ class _CompactMetricCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.sm),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -2001,9 +2001,9 @@ class _CompactMetricCard extends StatelessWidget {
                         style: GoogleFonts.cormorantGaramond(
                           textStyle: theme.textTheme.titleLarge?.copyWith(
                             color: foregroundColor,
-                            fontSize: 31,
-                            fontWeight: FontWeight.w700,
-                            height: 0.96,
+                            fontSize: 40,
+                            fontWeight: FontWeight.w800,
+                            height: 0.90,
                           ),
                         ),
                       ),
@@ -2064,7 +2064,7 @@ class _AnnualGoalCard extends StatelessWidget {
             color: theme.colorScheme.surface.withValues(alpha: 0.90),
             borderRadius: BorderRadius.circular(30),
             border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.09),
+              color: theme.colorScheme.primary.withValues(alpha: 0.18),
             ),
             boxShadow: [
               BoxShadow(
@@ -2075,7 +2075,7 @@ class _AnnualGoalCard extends StatelessWidget {
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 18, 22),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -2215,56 +2215,10 @@ class _AnnualGoalCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.sm),
-                    const _AnnualGoalIllustration(),
                   ],
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AnnualGoalIllustration extends StatelessWidget {
-  const _AnnualGoalIllustration();
-
-  static const _asset = 'assets/images/home/annual_goal_illustration.png';
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isCompact = MediaQuery.sizeOf(context).width < 390;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(22),
-      child: Container(
-        color: theme.colorScheme.surface.withValues(alpha: 0.58),
-        padding: const EdgeInsets.all(2),
-        child: SizedBox(
-          width: isCompact ? 118 : 142,
-          height: isCompact ? 112 : 132,
-          child: Image.asset(
-            _asset,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.secondary.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(26),
-                  border: Border.all(
-                    color: theme.colorScheme.secondary.withValues(alpha: 0.22),
-                  ),
-                ),
-                child: Icon(
-                  AppIcons.book,
-                  color: theme.colorScheme.primary,
-                  size: 34,
-                ),
-              );
-            },
           ),
         ),
       ),

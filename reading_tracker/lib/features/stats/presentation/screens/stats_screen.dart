@@ -250,6 +250,9 @@ class _StatsHeader extends StatelessWidget {
           readerProfile: readerProfile,
           onTap: () =>
               Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false),
+          onProfileTap: () => Navigator.pushNamed(context, '/settings'),
+          onAddBookTap: () => Navigator.pushNamed(context, '/book/add'),
+          onCalendarTap: () => Navigator.pushNamed(context, '/calendar'),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(

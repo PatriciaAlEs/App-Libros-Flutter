@@ -243,26 +243,18 @@ class _LibraryHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: AppBrandHeader(
-                readerProfile: readerProfile,
-                onTap: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    '/',
-                    (route) => false,
-                  );
-                },
-              ),
-            ),
-            _HeaderActionButton(
-              icon: AppIcons.add,
-              tooltip: 'Añadir o buscar libro',
-              onTap: onAddBook,
-            ),
-          ],
+        AppBrandHeader(
+          readerProfile: readerProfile,
+          onTap: () {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/',
+              (route) => false,
+            );
+          },
+          onProfileTap: () => Navigator.pushNamed(context, '/settings'),
+          onAddBookTap: onAddBook,
+          onCalendarTap: () => Navigator.pushNamed(context, '/calendar'),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
@@ -274,47 +266,6 @@ class _LibraryHeader extends StatelessWidget {
         const SizedBox(height: AppSpacing.lg),
         _SearchField(query: query, onChanged: onQueryChanged),
       ],
-    );
-  }
-}
-
-class _HeaderActionButton extends StatelessWidget {
-  const _HeaderActionButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: theme.colorScheme.surface.withValues(alpha: 0.68),
-        shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onTap,
-          child: Container(
-            width: 44,
-            height: 44,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: theme.colorScheme.primary.withValues(alpha: 0.10),
-              ),
-            ),
-            child: Icon(icon, color: theme.colorScheme.primary, size: 22),
-          ),
-        ),
-      ),
     );
   }
 }
