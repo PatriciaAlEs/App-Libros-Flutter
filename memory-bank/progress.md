@@ -258,6 +258,8 @@
 - Al deslizar el carrusel, la lectura visible se persiste como lectura principal usando el mecanismo existente de `readerProfileControllerProvider`.
 - Reto anual redisenado con mayor jerarquia visual y asset `assets/images/home/annual_goal_illustration.png`.
 - ReadPp UI Consistency Pass aplicado usando Home como referencia: Biblioteca, Progreso, Estadisticas, Insights y Ajustes heredan la misma jerarquia tipografica, sistema de cards, bordes, sombras, spacing, `AppBrandHeader`, `MetricCard` y `SectionHeader` refinados.
+- UI consistency pass extendido: Onboarding redisenado con ilustraciones nativas sin screenshots; Settings/Perfil refinado como preferencias; Calendario reordenado con calendario arriba y resumen abajo; botones globales unificados desde `AppTheme`.
+- Goal configuration UX: Objetivo anual en Stats se coloca primero y la card muestra objetivo actual, accion de definir/editar y preview antes del copy informativo.
 - La tipografia editorial Cormorant Garamond queda reservada a saludos, titulos grandes, heroes y valores destacados; Roboto se mantiene para botones, labels, cuerpo, formularios y navegacion.
 - Validacion Sprint 16/17.x pendiente en terminal del usuario: `dart format .`, `flutter pub get`, `flutter analyze`, `flutter test` y `git status`.
 

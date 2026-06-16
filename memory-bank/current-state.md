@@ -83,6 +83,9 @@ Sprint 16/17.x implementado:
 - Selector Mes/Semana se alinea visualmente con botones premium de ReadPp.
 - Formulario de libro evita keys duplicadas en resultados Open Library cuando existen titulos repetidos.
 - Onboarding usa logo real ReadPp y nuevas imagenes desde `assets/images/onboarding/`.
+- Onboarding actualizado: ya no usa screenshots/phone mockups como contenido de slides; usa ilustraciones nativas flotantes sobre el fondo, con Cormorant en titulos y Roboto en descripciones.
+- Calendario actualizado: `Book Journal` mantiene calendario arriba y mueve resumen de paginas/minutos/dias abajo; fondo suavizado y dias con borde visible.
+- Botones: tema global de botones reforzado en `AppTheme`; se eliminaron overrides locales repetidos en formularios, detalle, onboarding, insights y biblioteca para heredar un estilo unico.
 - Home Premium Polish toma referencia editorial premium: saludo grande, botones pill, hero compacto, resumen de hoy, lecturas en curso, mini calendario semanal y reto anual ilustrado.
 - Home adopta composicion editorial propia para esta referencia visual; otras pantallas principales mantienen `AppBrandHeader`.
 - Asset de reto anual: `assets/images/home/annual_goal_illustration.png`.
@@ -417,6 +420,7 @@ Estado actual implementado:
 - La seccion "Rachas" aparece en `/stats` con racha actual y mejor racha.
 - La seccion "Ritmo de lectura" aparece en `/stats` con paginas/minutos por semana y mes, promedios por dia activo, dias activos del mes y dia mas activo.
 - Sprint 15 redisenia visualmente `/stats` con header editorial, hero metrics, secciones `Lectura`, `Tiempo` y `Objetivo anual`.
+- Stats ajuste posterior: `Objetivo anual` pasa a primera posicion en la pantalla y prioriza configuracion/accion antes de informacion secundaria.
 - `/stats` reutiliza `MetricCard`, `SectionHeader`, `AppSpacing`, `AppIcons` y `Theme.colorScheme`.
 - La card de objetivo anual en `/stats` queda alineada visualmente con Home, Progreso e Insights.
 - La metrica duplicada `Lecturas activas` se elimina de la UI de Stats para evitar repetir `Leyendo`.

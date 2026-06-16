@@ -47,6 +47,9 @@ Trabajo mas reciente completado:
 - `Lecturas en curso` en Home ahora es un carrusel horizontal con swipe, snap, preview lateral, indicadores de pagina y seleccion persistida del libro visible.
 - Reto anual de Home usa ilustracion editorial generada en `assets/images/home/annual_goal_illustration.png`.
 - ReadPp UI Consistency Pass aplicado: Biblioteca, Progreso, Estadisticas, Insights y Ajustes se alinean con Home usando la misma jerarquia tipografica, sistema de cards, bordes, sombras, spacing y header compartido.
+- Actualizacion final UI consistency: Onboarding deja de usar screenshots y usa ilustraciones nativas flotantes; Settings/Perfil queda como pantalla de preferencias, no dashboard; Calendario muestra primero el calendario y abajo el resumen de paginas/minutos/dias.
+- Botones globales unificados desde `AppTheme`: `FilledButton`, `OutlinedButton` y `TextButton` comparten radio, padding, peso, colores y disabled state. Evitar `styleFrom` locales salvo excepcion justificada por contraste.
+- Objetivo anual en Estadisticas se reordeno: aparece como primer bloque util tras el header; accion `Definir/Editar objetivo` y preview de progreso van antes del copy informativo.
 - `AppBrandHeader`, `MetricCard` y `SectionHeader` se refinan como componentes reutilizables del sistema visual actual.
 - Demo Polish Sprint 14 aplicado con cambios minimos de alto impacto visual.
 - Correccion de barra de reto anual en Home: `annualGoalProgress` se normaliza de porcentaje `0-100` a valor visual `0-1`.
