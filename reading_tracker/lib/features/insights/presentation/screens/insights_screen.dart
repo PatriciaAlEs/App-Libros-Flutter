@@ -27,7 +27,7 @@ class InsightsScreen extends ConsumerWidget {
               end: Alignment.bottomCenter,
               colors: [
                 theme.scaffoldBackgroundColor,
-                theme.colorScheme.primaryContainer.withValues(alpha: 0.16),
+                theme.colorScheme.primaryContainer.withValues(alpha: 0.10),
                 theme.scaffoldBackgroundColor,
               ],
               stops: const [0, 0.42, 1],
@@ -196,7 +196,23 @@ class _InsightsHero extends StatelessWidget {
           ],
         ),
         borderRadius: BorderRadius.circular(30),
-        boxShadow: AppShadows.soft(theme.colorScheme.primary),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Color.lerp(
+              theme.colorScheme.primary,
+              Colors.black,
+              0.30,
+            )!.withValues(alpha: 0.24),
+            blurRadius: 38,
+            offset: const Offset(0, 20),
+          ),
+          BoxShadow(
+            color: theme.colorScheme.secondary.withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,10 +338,10 @@ class _PrimaryInsightPanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.colorScheme.surface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(26),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+          color: theme.colorScheme.primary.withValues(alpha: 0.16),
         ),
         boxShadow: AppShadows.editorial(theme.colorScheme.primary),
       ),
@@ -442,10 +458,10 @@ class _MetricPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.colorScheme.surface.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+          color: theme.colorScheme.primary.withValues(alpha: 0.14),
         ),
         boxShadow: AppShadows.editorial(theme.colorScheme.primary),
       ),
@@ -454,14 +470,19 @@ class _MetricPill extends StatelessWidget {
         children: [
           Icon(icon, color: theme.colorScheme.primary, size: 20),
           const SizedBox(height: AppSpacing.sm),
-          Text(
-            value,
-            style: GoogleFonts.cormorantGaramond(
-              textStyle: theme.textTheme.titleLarge?.copyWith(
-                color: theme.colorScheme.primary,
-                fontSize: 29,
-                fontWeight: FontWeight.w700,
-                height: 1,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: GoogleFonts.cormorantGaramond(
+                textStyle: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  height: 0.95,
+                ),
               ),
             ),
           ),
@@ -505,9 +526,10 @@ class _SectionTitle extends StatelessWidget {
           title,
           style: GoogleFonts.cormorantGaramond(
             textStyle: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.primary,
               fontSize: 28,
               fontWeight: FontWeight.w700,
-              height: 1.08,
+              height: 1,
             ),
           ),
         ),
@@ -564,10 +586,10 @@ class _InsightCard extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 168),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.colorScheme.surface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+          color: theme.colorScheme.primary.withValues(alpha: 0.16),
         ),
         boxShadow: AppShadows.editorial(theme.colorScheme.primary),
       ),
@@ -589,7 +611,8 @@ class _InsightCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
@@ -619,10 +642,10 @@ class _RatedBooksCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.colorScheme.surface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(26),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+          color: theme.colorScheme.primary.withValues(alpha: 0.16),
         ),
         boxShadow: AppShadows.editorial(theme.colorScheme.primary),
       ),
@@ -728,12 +751,12 @@ class _InsightsEmptyState extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.fromLTRB(26, 30, 26, 28),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
+            color: theme.colorScheme.surface.withValues(alpha: 0.92),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+              color: theme.colorScheme.primary.withValues(alpha: 0.16),
             ),
-            boxShadow: AppShadows.soft(theme.colorScheme.primary),
+            boxShadow: AppShadows.editorial(theme.colorScheme.primary),
           ),
           child: Column(
             children: [
@@ -816,6 +839,9 @@ class _InsightsLoadingState extends ConsumerWidget {
           decoration: BoxDecoration(
             color: theme.colorScheme.surface.withValues(alpha: 0.62),
             borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.10),
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -828,6 +854,9 @@ class _InsightsLoadingState extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surface.withValues(alpha: 0.50),
                     borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                    ),
                   ),
                 ),
               ),
@@ -858,11 +887,12 @@ class _InsightsErrorState extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.fromLTRB(26, 28, 26, 26),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
+            color: theme.colorScheme.surface.withValues(alpha: 0.92),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
               color: theme.colorScheme.error.withValues(alpha: 0.14),
             ),
+            boxShadow: AppShadows.editorial(theme.colorScheme.primary),
           ),
           child: Column(
             children: [

@@ -28,7 +28,7 @@ class SettingsScreen extends ConsumerWidget {
                 Theme.of(context).scaffoldBackgroundColor,
                 Theme.of(
                   context,
-                ).colorScheme.primaryContainer.withValues(alpha: 0.16),
+                ).colorScheme.primaryContainer.withValues(alpha: 0.10),
                 Theme.of(context).scaffoldBackgroundColor,
               ],
               stops: const [0, 0.42, 1],
@@ -94,7 +94,23 @@ class _ProfileHero extends StatelessWidget {
           ],
         ),
         borderRadius: BorderRadius.circular(30),
-        boxShadow: AppShadows.soft(theme.colorScheme.primary),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Color.lerp(
+              theme.colorScheme.primary,
+              Colors.black,
+              0.28,
+            )!.withValues(alpha: 0.22),
+            blurRadius: 36,
+            offset: const Offset(0, 18),
+          ),
+          BoxShadow(
+            color: theme.colorScheme.secondary.withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -158,10 +174,10 @@ class _ThemePreferenceCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.colorScheme.surface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+          color: theme.colorScheme.primary.withValues(alpha: 0.16),
         ),
         boxShadow: AppShadows.editorial(theme.colorScheme.primary),
       ),
@@ -175,7 +191,8 @@ class _ThemePreferenceCard extends StatelessWidget {
               Text(
                 'Estilo visual',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
@@ -264,10 +281,10 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.colorScheme.surface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+          color: theme.colorScheme.primary.withValues(alpha: 0.16),
         ),
         boxShadow: AppShadows.editorial(theme.colorScheme.primary),
       ),
@@ -281,7 +298,8 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
               Text(
                 'Perfil lector',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
@@ -299,6 +317,8 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
               labelText: 'Nombre',
               hintText: 'Patricia',
               prefixIcon: const Icon(AppIcons.profile),
+              filled: true,
+              fillColor: theme.colorScheme.surface.withValues(alpha: 0.72),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(
@@ -326,13 +346,34 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
             },
             child: Column(
               children: [
-                for (final preference in ReaderGreetingPreference.values)
-                  RadioListTile<ReaderGreetingPreference>(
-                    value: preference,
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(preference.label),
+                for (final preference in ReaderGreetingPreference.values) ...[
+                  Material(
+                    color: preference == _draftGreetingPreference
+                        ? theme.colorScheme.secondary.withValues(alpha: 0.14)
+                        : theme.colorScheme.surface.withValues(alpha: 0.48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: preference == _draftGreetingPreference
+                            ? theme.colorScheme.primary.withValues(alpha: 0.30)
+                            : theme.colorScheme.primary.withValues(alpha: 0.10),
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: RadioListTile<ReaderGreetingPreference>(
+                      value: preference,
+                      dense: true,
+                      activeColor: theme.colorScheme.primary,
+                      selected: preference == _draftGreetingPreference,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                      ),
+                      title: Text(preference.label),
+                    ),
                   ),
+                  if (preference != ReaderGreetingPreference.values.last)
+                    const SizedBox(height: AppSpacing.sm),
+                ],
               ],
             ),
           ),
@@ -344,6 +385,8 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
                 labelText: 'Mi propio saludo',
                 hintText: 'Ej. Lectora nocturna',
                 prefixIcon: const Icon(AppIcons.bookmark),
+                filled: true,
+                fillColor: theme.colorScheme.surface.withValues(alpha: 0.72),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(
@@ -446,11 +489,12 @@ class _ProfileSummaryItem extends StatelessWidget {
       width: 142,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.26),
+        color: theme.colorScheme.surface.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+          color: theme.colorScheme.primary.withValues(alpha: 0.14),
         ),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -498,15 +542,15 @@ class _ThemePreviewOption extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
             color: isSelected
-                ? option.accent.withValues(alpha: 0.18)
+                ? option.accent.withValues(alpha: 0.16)
                 : theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.54,
+                    alpha: 0.42,
                   ),
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
               color: isSelected
-                  ? option.primary.withValues(alpha: 0.54)
-                  : theme.colorScheme.primary.withValues(alpha: 0.08),
+                  ? option.primary.withValues(alpha: 0.48)
+                  : theme.colorScheme.primary.withValues(alpha: 0.12),
               width: isSelected ? 1.5 : 1,
             ),
           ),
@@ -639,10 +683,10 @@ class _PreferencesAction extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
+            color: theme.colorScheme.surface.withValues(alpha: 0.92),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+              color: theme.colorScheme.primary.withValues(alpha: 0.16),
             ),
             boxShadow: AppShadows.editorial(theme.colorScheme.primary),
           ),
@@ -669,7 +713,8 @@ class _PreferencesAction extends StatelessWidget {
                     Text(
                       'Próximamente',
                       style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
