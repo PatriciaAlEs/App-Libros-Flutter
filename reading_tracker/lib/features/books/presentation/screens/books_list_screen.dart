@@ -246,11 +246,7 @@ class _LibraryHeader extends StatelessWidget {
         AppBrandHeader(
           readerProfile: readerProfile,
           onTap: () {
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              '/',
-              (route) => false,
-            );
+            Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
           },
           onProfileTap: () => Navigator.pushNamed(context, '/settings'),
           onAddBookTap: onAddBook,

@@ -1315,18 +1315,14 @@ class _CurrentReadingStripState extends State<_CurrentReadingStrip> {
               controller: _pageController,
               clipBehavior: Clip.none,
               padEnds: false,
-              physics: const BouncingScrollPhysics(
-                parent: PageScrollPhysics(),
-              ),
+              physics: const BouncingScrollPhysics(parent: PageScrollPhysics()),
               itemCount: widget.books.length,
               onPageChanged: _selectPage,
               itemBuilder: (context, index) {
                 final book = widget.books[index];
                 return Padding(
                   padding: EdgeInsets.only(
-                    right: index == widget.books.length - 1
-                        ? 0
-                        : AppSpacing.md,
+                    right: index == widget.books.length - 1 ? 0 : AppSpacing.md,
                   ),
                   child: _CurrentReadingChip(
                     book: book,
@@ -1549,8 +1545,8 @@ class _TodayMetric extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      height: 108,
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+      height: 118,
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 11),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.90),
         borderRadius: BorderRadius.circular(22),
@@ -1585,7 +1581,7 @@ class _TodayMetric extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             value,
             maxLines: 1,
@@ -1593,9 +1589,9 @@ class _TodayMetric extends StatelessWidget {
             style: GoogleFonts.cormorantGaramond(
               textStyle: theme.textTheme.headlineSmall?.copyWith(
                 color: theme.colorScheme.primary,
-                fontSize: 40,
+                fontSize: 38,
                 fontWeight: FontWeight.w800,
-                height: 0.90,
+                height: 0.92,
               ),
             ),
           ),
@@ -2114,13 +2110,13 @@ class _AnnualGoalCard extends StatelessWidget {
                               Text(
                                 '${(safeProgress * 100).round()}%',
                                 style: GoogleFonts.cormorantGaramond(
-                                  textStyle:
-                                      theme.textTheme.displaySmall?.copyWith(
-                                    color: theme.colorScheme.primary,
-                                    fontSize: 42,
-                                    fontWeight: FontWeight.w700,
-                                    height: 0.92,
-                                  ),
+                                  textStyle: theme.textTheme.displaySmall
+                                      ?.copyWith(
+                                        color: theme.colorScheme.primary,
+                                        fontSize: 42,
+                                        fontWeight: FontWeight.w700,
+                                        height: 0.92,
+                                      ),
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.sm),

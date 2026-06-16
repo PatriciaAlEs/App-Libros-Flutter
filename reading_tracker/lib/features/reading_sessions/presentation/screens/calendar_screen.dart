@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../books/domain/entities/book.dart';
@@ -41,7 +42,21 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Book Journal'),
+        title: Builder(
+          builder: (context) {
+            final theme = Theme.of(context);
+            return Text(
+              'Book Journal',
+              style: GoogleFonts.cormorantGaramond(
+                textStyle: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                  height: 1,
+                ),
+              ),
+            );
+          },
+        ),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         surfaceTintColor: Colors.transparent,
         actions: [
@@ -133,12 +148,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         : _focusedDate.add(const Duration(days: 7));
                   }),
                 ),
-                _ActivitySummaryCard(
-                  title: _mode == CalendarMode.month
-                      ? 'Resumen mensual'
-                      : 'Resumen semanal',
-                  summary: summary,
-                ),
+                _ActivitySummaryCard(summary: summary),
                 const _ActivityLegend(),
                 Expanded(
                   child: _mode == CalendarMode.month
@@ -247,8 +257,12 @@ class _CalendarHeader extends StatelessWidget {
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
+              style: GoogleFonts.cormorantGaramond(
+                textStyle: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                  height: 1,
+                ),
               ),
             ),
           ),
@@ -286,9 +300,8 @@ class _RoundNavButton extends StatelessWidget {
 }
 
 class _ActivitySummaryCard extends StatelessWidget {
-  const _ActivitySummaryCard({required this.title, required this.summary});
+  const _ActivitySummaryCard({required this.summary});
 
-  final String title;
   final ReadingActivitySummary summary;
 
   @override
@@ -310,13 +323,6 @@ class _ActivitySummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 14),
             Row(
               children: [
                 Expanded(
