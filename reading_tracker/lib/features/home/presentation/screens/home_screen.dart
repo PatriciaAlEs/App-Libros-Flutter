@@ -1582,16 +1582,19 @@ class _TodayMetric extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.cormorantGaramond(
-              textStyle: theme.textTheme.headlineSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontSize: 38,
-                fontWeight: FontWeight.w800,
-                height: 0.92,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: GoogleFonts.cormorantGaramond(
+                textStyle: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontSize: 38,
+                  fontWeight: FontWeight.w800,
+                  height: 0.92,
+                ),
               ),
             ),
           ),
@@ -1990,10 +1993,12 @@ class _CompactMetricCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Flexible(
-                      child: Text(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
                         value,
                         maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.cormorantGaramond(
                           textStyle: theme.textTheme.titleLarge?.copyWith(
                             color: foregroundColor,
@@ -2002,6 +2007,7 @@ class _CompactMetricCard extends StatelessWidget {
                             height: 0.90,
                           ),
                         ),
+                      ),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.xs),
