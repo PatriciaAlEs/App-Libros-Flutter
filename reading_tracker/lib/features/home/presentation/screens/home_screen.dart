@@ -1999,17 +1999,17 @@ class _CompactMetricCard extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                        value,
-                        maxLines: 1,
-                        style: GoogleFonts.cormorantGaramond(
-                          textStyle: theme.textTheme.titleLarge?.copyWith(
-                            color: foregroundColor,
-                            fontSize: 40,
-                            fontWeight: FontWeight.w800,
-                            height: 0.90,
+                          value,
+                          maxLines: 1,
+                          style: GoogleFonts.cormorantGaramond(
+                            textStyle: theme.textTheme.titleLarge?.copyWith(
+                              color: foregroundColor,
+                              fontSize: 40,
+                              fontWeight: FontWeight.w800,
+                              height: 0.90,
+                            ),
                           ),
                         ),
-                      ),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.xs),

@@ -27,7 +27,7 @@ class StatsScreen extends ConsumerWidget {
               end: Alignment.bottomCenter,
               colors: [
                 theme.scaffoldBackgroundColor,
-                theme.colorScheme.primaryContainer.withValues(alpha: 0.16),
+                theme.colorScheme.primaryContainer.withValues(alpha: 0.10),
                 theme.scaffoldBackgroundColor,
               ],
               stops: const [0, 0.42, 1],
@@ -258,7 +258,8 @@ class _StatsHeader extends StatelessWidget {
         Text(
           'Una lectura clara de tu biblioteca, tus ritmos y tu reto anual.',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: theme.colorScheme.primary.withValues(alpha: 0.72),
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -288,11 +289,17 @@ class _StatsHero extends StatelessWidget {
           colors: [primary, dark],
         ),
         borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         boxShadow: [
           BoxShadow(
-            color: dark.withValues(alpha: 0.22),
-            blurRadius: 34,
-            offset: const Offset(0, 18),
+            color: dark.withValues(alpha: 0.28),
+            blurRadius: 44,
+            offset: const Offset(0, 24),
+          ),
+          BoxShadow(
+            color: accent.withValues(alpha: 0.16),
+            blurRadius: 26,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -375,14 +382,19 @@ class _HeroMetric extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          value,
-          style: GoogleFonts.cormorantGaramond(
-            textStyle: theme.textTheme.headlineSmall?.copyWith(
-              color: theme.colorScheme.onPrimary,
-              fontSize: 32,
-              fontWeight: FontWeight.w700,
-              height: 1,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            maxLines: 1,
+            style: GoogleFonts.cormorantGaramond(
+              textStyle: theme.textTheme.headlineSmall?.copyWith(
+                color: theme.colorScheme.onPrimary,
+                fontSize: 40,
+                fontWeight: FontWeight.w800,
+                height: 0.92,
+              ),
             ),
           ),
         ),
@@ -427,10 +439,10 @@ class _AnnualGoalSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.82),
+        color: theme.colorScheme.surface.withValues(alpha: 0.90),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+          color: theme.colorScheme.primary.withValues(alpha: 0.16),
         ),
         boxShadow: AppShadows.editorial(theme.colorScheme.primary),
       ),
@@ -446,7 +458,7 @@ class _AnnualGoalSection extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: theme.colorScheme.secondary.withValues(alpha: 0.52),
+                  color: theme.colorScheme.secondary.withValues(alpha: 0.28),
                 ),
                 child: Icon(
                   AppIcons.flag,
@@ -491,7 +503,7 @@ class _AnnualGoalSection extends StatelessWidget {
               value: hasGoal ? progress : 0,
               minHeight: 8,
               backgroundColor: theme.colorScheme.primaryContainer.withValues(
-                alpha: 0.40,
+                alpha: 0.26,
               ),
               color: theme.colorScheme.secondary,
             ),
@@ -554,8 +566,12 @@ class _GoalMetric extends StatelessWidget {
       height: 92,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.22),
+        color: theme.colorScheme.surface.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.14),
+        ),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -567,12 +583,20 @@ class _GoalMetric extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: GoogleFonts.cormorantGaramond(
+                textStyle: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  height: 0.95,
+                ),
+              ),
             ),
           ),
         ],
@@ -715,12 +739,12 @@ class _StatsEmptyState extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(26, 28, 26, 26),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withValues(alpha: 0.76),
+            color: theme.colorScheme.surface.withValues(alpha: 0.90),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+              color: theme.colorScheme.primary.withValues(alpha: 0.16),
             ),
-            boxShadow: AppShadows.soft(theme.colorScheme.primary),
+            boxShadow: AppShadows.editorial(theme.colorScheme.primary),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -770,12 +794,12 @@ class _StatsErrorState extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(26, 28, 26, 26),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withValues(alpha: 0.76),
+            color: theme.colorScheme.surface.withValues(alpha: 0.90),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
               color: theme.colorScheme.error.withValues(alpha: 0.12),
             ),
-            boxShadow: AppShadows.soft(theme.colorScheme.primary),
+            boxShadow: AppShadows.editorial(theme.colorScheme.primary),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -823,10 +847,10 @@ class _StatsLoadingState extends StatelessWidget {
           Container(
             height: index == 0 ? 132 : 92,
             decoration: BoxDecoration(
-              color: theme.colorScheme.surface.withValues(alpha: 0.72),
+              color: theme.colorScheme.surface.withValues(alpha: 0.86),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: theme.colorScheme.primary.withValues(alpha: 0.06),
+                color: theme.colorScheme.primary.withValues(alpha: 0.12),
               ),
             ),
           ),

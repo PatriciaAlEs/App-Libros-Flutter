@@ -26,7 +26,7 @@ class MetricCard extends StatelessWidget {
         color: theme.colorScheme.surface.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+          color: theme.colorScheme.primary.withValues(alpha: 0.16),
         ),
         boxShadow: AppShadows.editorial(theme.colorScheme.primary),
       ),
@@ -38,16 +38,19 @@ class MetricCard extends StatelessWidget {
           children: [
             Icon(icon, color: theme.colorScheme.primary, size: 24),
             const SizedBox(height: AppSpacing.sm),
-            Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.cormorantGaramond(
-                textStyle: theme.textTheme.headlineSmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontSize: 31,
-                  fontWeight: FontWeight.w700,
-                  height: 1.02,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                maxLines: 1,
+                style: GoogleFonts.cormorantGaramond(
+                  textStyle: theme.textTheme.headlineSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontSize: 38,
+                    fontWeight: FontWeight.w800,
+                    height: 0.92,
+                  ),
                 ),
               ),
             ),

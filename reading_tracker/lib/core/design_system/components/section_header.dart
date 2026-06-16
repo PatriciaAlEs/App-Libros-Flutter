@@ -28,10 +28,10 @@ class SectionHeader extends StatelessWidget {
               title,
               style: GoogleFonts.cormorantGaramond(
                 textStyle: theme.textTheme.headlineSmall?.copyWith(
-                  color: theme.colorScheme.onSurface,
-                  fontSize: 27,
+                  color: theme.colorScheme.primary,
+                  fontSize: 28,
                   fontWeight: FontWeight.w700,
-                  height: 1.08,
+                  height: 1,
                 ),
               ),
             ),
