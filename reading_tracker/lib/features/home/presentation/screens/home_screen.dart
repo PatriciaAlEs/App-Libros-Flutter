@@ -1251,7 +1251,7 @@ class _CurrentReadingStripState extends State<_CurrentReadingStrip> {
     _currentPage = _selectedIndex();
     _pageController = PageController(
       initialPage: _currentPage,
-      viewportFraction: 0.81,
+      viewportFraction: 0.80,
     );
   }
 
@@ -1323,8 +1323,8 @@ class _CurrentReadingStripState extends State<_CurrentReadingStrip> {
                 return Padding(
                   padding: EdgeInsets.only(
                     right: index == widget.books.length - 1
-                        ? AppSpacing.md
-                        : AppSpacing.xl,
+                        ? AppSpacing.xl
+                        : AppSpacing.xxl,
                   ),
                   child: _CurrentReadingChip(
                     book: book,

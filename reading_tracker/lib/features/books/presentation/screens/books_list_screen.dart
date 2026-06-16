@@ -256,7 +256,8 @@ class _LibraryHeader extends StatelessWidget {
         Text(
           '${stats.totalBooks} libros en tu colección',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: theme.colorScheme.primary.withValues(alpha: 0.72),
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -278,16 +279,16 @@ class _SearchField extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.colorScheme.surface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+          color: theme.colorScheme.primary.withValues(alpha: 0.16),
         ),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.07),
-            blurRadius: 22,
-            offset: const Offset(0, 10),
+            color: theme.colorScheme.primary.withValues(alpha: 0.09),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -336,11 +337,17 @@ class _FeaturedReadingCard extends StatelessWidget {
           colors: [primary, dark],
         ),
         borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         boxShadow: [
           BoxShadow(
-            color: dark.withValues(alpha: 0.20),
-            blurRadius: 34,
-            offset: const Offset(0, 18),
+            color: dark.withValues(alpha: 0.28),
+            blurRadius: 44,
+            offset: const Offset(0, 24),
+          ),
+          BoxShadow(
+            color: accent.withValues(alpha: 0.16),
+            blurRadius: 26,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -487,12 +494,12 @@ class _EditorialFilterBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xs),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.colorScheme.surface.withValues(alpha: 0.90),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+          color: theme.colorScheme.primary.withValues(alpha: 0.16),
         ),
-        boxShadow: AppShadows.soft(theme.colorScheme.primary),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -537,7 +544,7 @@ class _FilterSegment extends StatelessWidget {
 
     return Material(
       color: selected
-          ? theme.colorScheme.primary.withValues(alpha: 0.10)
+          ? theme.colorScheme.primary.withValues(alpha: 0.12)
           : Colors.transparent,
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
@@ -551,7 +558,7 @@ class _FilterSegment extends StatelessWidget {
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
               color: selected
-                  ? theme.colorScheme.secondary.withValues(alpha: 0.36)
+                  ? theme.colorScheme.primary.withValues(alpha: 0.18)
                   : Colors.transparent,
             ),
           ),
@@ -613,9 +620,10 @@ class _CollectionHeader extends StatelessWidget {
             'Colección',
             style: GoogleFonts.cormorantGaramond(
               textStyle: theme.textTheme.headlineSmall?.copyWith(
-                fontSize: 27,
+                color: theme.colorScheme.primary,
+                fontSize: 28,
                 fontWeight: FontWeight.w700,
-                height: 1.08,
+                height: 1,
               ),
             ),
           ),
@@ -652,16 +660,21 @@ class _BookShelfCard extends StatelessWidget {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
+            color: theme.colorScheme.surface.withValues(alpha: 0.92),
             borderRadius: BorderRadius.circular(26),
             border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+              color: theme.colorScheme.primary.withValues(alpha: 0.16),
             ),
             boxShadow: [
               BoxShadow(
-                color: theme.colorScheme.primary.withValues(alpha: 0.07),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
+                color: theme.colorScheme.primary.withValues(alpha: 0.10),
+                blurRadius: 28,
+                offset: const Offset(0, 14),
+              ),
+              BoxShadow(
+                color: theme.colorScheme.secondary.withValues(alpha: 0.05),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
