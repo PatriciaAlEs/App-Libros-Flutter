@@ -120,13 +120,52 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          disabledBackgroundColor: colorScheme.primary.withValues(alpha: 0.38),
+          disabledForegroundColor: colorScheme.onPrimary.withValues(
+            alpha: 0.76,
+          ),
           elevation: AppElevations.sm,
-          shape: RoundedRectangleBorder(borderRadius: AppRadii.control),
+          shadowColor: theme.primaryDark.withValues(alpha: 0.18),
+          minimumSize: const Size(0, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: AppRadii.control),
+          backgroundColor: colorScheme.surface.withValues(alpha: 0.88),
+          foregroundColor: colorScheme.primary,
+          disabledForegroundColor: colorScheme.primary.withValues(alpha: 0.42),
+          minimumSize: const Size(0, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+          side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.22)),
+          shadowColor: theme.primaryDark.withValues(alpha: 0.08),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: colorScheme.primary,
+          disabledForegroundColor: colorScheme.primary.withValues(alpha: 0.42),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(

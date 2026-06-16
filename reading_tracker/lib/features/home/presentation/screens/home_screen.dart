@@ -1099,19 +1099,6 @@ class _CurrentReadingHero extends StatelessWidget {
                               ? 'Registrar avance'
                               : 'Continuar lectura',
                         ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: onDark,
-                          side: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.13),
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          textStyle: theme.textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            height: 1,
-                          ),
-                        ),
                       ),
                     ),
                   ],
@@ -1213,7 +1200,7 @@ class _EmptyCurrentReadingCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                trailing: FilledButton.tonal(
+                trailing: FilledButton(
                   onPressed: () => onStartReading(book),
                   child: const Text('Empezar'),
                 ),

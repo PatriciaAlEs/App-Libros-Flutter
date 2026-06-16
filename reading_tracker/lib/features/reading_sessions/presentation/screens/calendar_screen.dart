@@ -118,7 +118,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               Theme.of(context).scaffoldBackgroundColor,
               Theme.of(
                 context,
-              ).colorScheme.primaryContainer.withValues(alpha: 0.16),
+              ).colorScheme.primaryContainer.withValues(alpha: 0.10),
               Theme.of(context).scaffoldBackgroundColor,
             ],
             stops: const [0, 0.40, 1],
@@ -148,8 +148,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         : _focusedDate.add(const Duration(days: 7));
                   }),
                 ),
-                _ActivitySummaryCard(summary: summary),
-                const _ActivityLegend(),
                 Expanded(
                   child: _mode == CalendarMode.month
                       ? _MonthCalendar(
@@ -165,6 +163,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           booksById: booksById,
                         ),
                 ),
+                const _ActivityLegend(),
+                _ActivitySummaryCard(summary: summary),
               ],
             );
           },

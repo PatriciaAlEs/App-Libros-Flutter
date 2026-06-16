@@ -340,10 +340,6 @@ class _AddSessionButton extends StatelessWidget {
       onPressed: onPressed,
       icon: const Icon(AppIcons.add),
       label: const Text('Añadir lectura'),
-      style: FilledButton.styleFrom(
-        minimumSize: const Size.fromHeight(48),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-      ),
     );
   }
 }

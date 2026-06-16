@@ -615,22 +615,20 @@ class _SearchField extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              FilledButton(
-                key: const Key('book_search_button'),
-                onPressed: isSearching ? null : onSubmitted,
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(52, 56),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+              SizedBox(
+                width: 56,
+                height: 56,
+                child: FilledButton(
+                  key: const Key('book_search_button'),
+                  onPressed: isSearching ? null : onSubmitted,
+                  child: isSearching
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.search_rounded),
                 ),
-                child: isSearching
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.search_rounded),
               ),
             ],
           ),
@@ -1139,7 +1137,6 @@ class _SaveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final canSubmit = enabled && !isSaving;
 
     return MouseRegion(
@@ -1149,20 +1146,6 @@ class _SaveButton extends StatelessWidget {
       child: SizedBox(
         width: double.infinity,
         child: FilledButton(
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(54),
-            backgroundColor: theme.colorScheme.primary,
-            foregroundColor: theme.colorScheme.onPrimary,
-            disabledBackgroundColor: theme.colorScheme.primary.withValues(
-              alpha: 0.34,
-            ),
-            disabledForegroundColor: theme.colorScheme.onPrimary.withValues(
-              alpha: 0.74,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-            ),
-          ),
           onPressed: canSubmit ? onPressed : null,
           child: isSaving
               ? const SizedBox(

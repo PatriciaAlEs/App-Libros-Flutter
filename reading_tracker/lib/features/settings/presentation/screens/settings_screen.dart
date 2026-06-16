@@ -432,26 +432,39 @@ class _ProfileSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: AppSpacing.md,
-      runSpacing: AppSpacing.md,
-      children: [
-        _ProfileSummaryItem(
-          icon: AppIcons.profile,
-          label: 'Nombre',
-          value: displayName,
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.74),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.10),
         ),
-        _ProfileSummaryItem(
-          icon: AppIcons.book,
-          label: 'Saludo',
-          value: greeting,
-        ),
-        _ProfileSummaryItem(
-          icon: Icons.palette_outlined,
-          label: 'Estilo visual',
-          value: themeName,
-        ),
-      ],
+      ),
+      child: Column(
+        children: [
+          _ProfileSummaryItem(
+            icon: AppIcons.profile,
+            label: 'Nombre',
+            value: displayName,
+          ),
+          const Divider(height: AppSpacing.lg),
+          _ProfileSummaryItem(
+            icon: AppIcons.book,
+            label: 'Saludo',
+            value: greeting,
+          ),
+          const Divider(height: AppSpacing.lg),
+          _ProfileSummaryItem(
+            icon: Icons.palette_outlined,
+            label: 'Estilo visual',
+            value: themeName,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -471,34 +484,43 @@ class _ProfileSummaryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      width: 142,
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.94),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.14),
-        ),
-        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: theme.colorScheme.primary, size: 20),
-          const SizedBox(height: AppSpacing.sm),
-          Text(label, style: theme.textTheme.labelSmall),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            value,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+    return Row(
+      children: [
+        Container(
+          width: 38,
+          height: 38,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.secondary.withValues(alpha: 0.18),
+            shape: BoxShape.circle,
           ),
-        ],
-      ),
+          child: Icon(icon, color: theme.colorScheme.primary, size: 19),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

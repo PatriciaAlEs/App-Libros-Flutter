@@ -805,12 +805,6 @@ class _InsightsEmptyState extends ConsumerWidget {
                   onPressed: () => Navigator.pushNamed(context, '/book/add'),
                   icon: const Icon(AppIcons.add),
                   label: const Text('Añadir primer libro'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(54),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                  ),
                 ),
               ),
             ],

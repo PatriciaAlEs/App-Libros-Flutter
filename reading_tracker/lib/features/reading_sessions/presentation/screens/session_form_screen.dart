@@ -237,12 +237,6 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
                 const SizedBox(height: 24),
                 FilledButton(
                   key: const Key('session_save_button'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(54),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                  ),
                   onPressed: _isSaving ? null : _save,
                   child: Text(
                     _isEditing ? 'Guardar cambios' : 'Guardar sesión',

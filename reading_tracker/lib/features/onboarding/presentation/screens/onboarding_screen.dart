@@ -19,22 +19,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   static const _pages = [
     _OnboardingPageData(
-      imageAsset: 'assets/images/onboarding/slide_1.png',
       title: 'Tu biblioteca personal',
       message:
           'Organiza tus lecturas, guarda tus libros favoritos y sigue tu progreso página a página.',
     ),
     _OnboardingPageData(
-      imageAsset: 'assets/images/onboarding/slide_2.png',
-      title: 'Convierte la lectura en un hábito',
+      title: 'Sigue tu avance lector',
       message:
-          'Registra páginas, tiempo y sesiones de lectura con un solo toque.',
+          'Registra sesiones, páginas y tiempo de lectura para mantener tu hábito.',
     ),
     _OnboardingPageData(
-      imageAsset: 'assets/images/onboarding/slide_3.png',
       title: 'Descubre tu perfil lector',
       message:
-          'Autores favoritos, géneros preferidos, estadísticas e insights sobre tu forma de leer.',
+          'Conoce tus hábitos, estadísticas y objetivos para leer más y mejor.',
     ),
   ];
 
@@ -112,12 +109,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 const SizedBox(height: AppSpacing.xl),
                 FilledButton(
                   onPressed: _next,
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(54),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
                   child: Text(isLastPage ? 'Empezar' : 'Siguiente'),
                 ),
               ],
@@ -180,7 +171,6 @@ class _OnboardingPage extends StatelessWidget {
           height: illustrationHeight,
           child: Center(
             child: _OnboardingIllustration(
-              imageAsset: data.imageAsset,
               index: index,
               maxHeight: illustrationHeight,
             ),
@@ -215,13 +205,8 @@ class _OnboardingPage extends StatelessWidget {
 }
 
 class _OnboardingIllustration extends StatelessWidget {
-  const _OnboardingIllustration({
-    required this.imageAsset,
-    required this.index,
-    required this.maxHeight,
-  });
+  const _OnboardingIllustration({required this.index, required this.maxHeight});
 
-  final String imageAsset;
   final int index;
   final double maxHeight;
 
@@ -229,31 +214,393 @@ class _OnboardingIllustration extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: 390, maxHeight: maxHeight),
-      child: Image.asset(
-        imageAsset,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) {
-          return SizedBox(
-            width: double.infinity,
-            height: 330,
-            child: Center(
-              child: Icon(
-                index == 0
-                    ? AppIcons.library
-                    : index == 1
-                    ? AppIcons.calendar
-                    : AppIcons.insightsNav,
-                color: theme.colorScheme.primary.withValues(alpha: 0.78),
-                size: 56,
+    return SizedBox(
+      height: maxHeight,
+      width: double.infinity,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            bottom: maxHeight * 0.10,
+            child: Container(
+              width: 250,
+              height: 34,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(999),
               ),
             ),
-          );
-        },
+          ),
+          if (index == 0) const _LibraryIllustration(),
+          if (index == 1) const _ProgressIllustration(),
+          if (index == 2) const _InsightsIllustration(),
+        ],
       ),
     );
   }
+}
+
+class _LibraryIllustration extends StatelessWidget {
+  const _LibraryIllustration();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      width: 300,
+      height: 280,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(top: 18, child: _SoftCircle(size: 210, alpha: 0.14)),
+          Positioned(
+            left: 28,
+            bottom: 70,
+            child: _BookSpine(
+              width: 44,
+              height: 134,
+              color: theme.colorScheme.primary,
+              rotation: -0.10,
+            ),
+          ),
+          Positioned(
+            left: 78,
+            bottom: 62,
+            child: _BookSpine(
+              width: 52,
+              height: 158,
+              color: theme.colorScheme.secondary,
+              rotation: 0.04,
+            ),
+          ),
+          Positioned(
+            right: 82,
+            bottom: 65,
+            child: _BookSpine(
+              width: 48,
+              height: 146,
+              color: Color.lerp(theme.colorScheme.primary, Colors.black, 0.18)!,
+              rotation: -0.03,
+            ),
+          ),
+          Positioned(
+            right: 28,
+            bottom: 74,
+            child: _BookSpine(
+              width: 42,
+              height: 124,
+              color: theme.colorScheme.tertiary,
+              rotation: 0.10,
+            ),
+          ),
+          Positioned(
+            bottom: 52,
+            child: Container(
+              width: 260,
+              height: 18,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.20),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+          const Positioned(
+            top: 54,
+            right: 46,
+            child: _Spark(icon: AppIcons.star, size: 30),
+          ),
+          const Positioned(
+            top: 92,
+            left: 42,
+            child: _Spark(icon: AppIcons.bookmark, size: 24),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProgressIllustration extends StatelessWidget {
+  const _ProgressIllustration();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      width: 310,
+      height: 280,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(top: 16, child: _SoftCircle(size: 220, alpha: 0.12)),
+          Positioned(
+            bottom: 72,
+            child: Transform.rotate(
+              angle: -0.05,
+              child: Container(
+                width: 178,
+                height: 210,
+                padding: const EdgeInsets.fromLTRB(24, 26, 24, 22),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface.withValues(alpha: 0.96),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.16),
+                  ),
+                  boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 74,
+                      height: 10,
+                      decoration: _lineDecoration(theme, alpha: 0.24),
+                    ),
+                    const SizedBox(height: 18),
+                    Container(
+                      width: 128,
+                      height: 8,
+                      decoration: _lineDecoration(theme, alpha: 0.12),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      width: 100,
+                      height: 8,
+                      decoration: _lineDecoration(theme, alpha: 0.12),
+                    ),
+                    const Spacer(),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(999),
+                      child: LinearProgressIndicator(
+                        value: 0.68,
+                        minHeight: 10,
+                        backgroundColor: theme.colorScheme.primaryContainer
+                            .withValues(alpha: 0.28),
+                        color: theme.colorScheme.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const Positioned(
+            right: 54,
+            top: 66,
+            child: _FloatingBadge(icon: AppIcons.bookmark),
+          ),
+          const Positioned(
+            left: 42,
+            bottom: 82,
+            child: _FloatingBadge(icon: AppIcons.time),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InsightsIllustration extends StatelessWidget {
+  const _InsightsIllustration();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      width: 310,
+      height: 280,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(top: 14, child: _SoftCircle(size: 220, alpha: 0.12)),
+          Positioned(
+            bottom: 64,
+            child: Container(
+              width: 218,
+              height: 184,
+              padding: const EdgeInsets.all(22),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface.withValues(alpha: 0.96),
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.16),
+                ),
+                boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: const [
+                  _ChartBar(height: 54, alpha: 0.28),
+                  SizedBox(width: 12),
+                  _ChartBar(height: 98, alpha: 0.72),
+                  SizedBox(width: 12),
+                  _ChartBar(height: 76, alpha: 0.44),
+                  SizedBox(width: 12),
+                  _ChartBar(height: 124, alpha: 0.86),
+                ],
+              ),
+            ),
+          ),
+          const Positioned(
+            top: 58,
+            right: 48,
+            child: _FloatingBadge(icon: AppIcons.star),
+          ),
+          const Positioned(
+            top: 84,
+            left: 44,
+            child: _FloatingBadge(icon: AppIcons.insightsNav),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BookSpine extends StatelessWidget {
+  const _BookSpine({
+    required this.width,
+    required this.height,
+    required this.color,
+    required this.rotation,
+  });
+
+  final double width;
+  final double height;
+  final Color color;
+  final double rotation;
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: rotation,
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.22),
+              blurRadius: 24,
+              offset: const Offset(0, 14),
+            ),
+          ],
+        ),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: Container(
+            margin: const EdgeInsets.only(top: 18),
+            width: width * 0.46,
+            height: 6,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.42),
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SoftCircle extends StatelessWidget {
+  const _SoftCircle({required this.size, required this.alpha});
+
+  final double size;
+  final double alpha;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: theme.colorScheme.secondary.withValues(alpha: alpha),
+      ),
+    );
+  }
+}
+
+class _FloatingBadge extends StatelessWidget {
+  const _FloatingBadge({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: 54,
+      height: 54,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.94),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.14),
+        ),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+      ),
+      child: Icon(icon, color: theme.colorScheme.primary, size: 26),
+    );
+  }
+}
+
+class _Spark extends StatelessWidget {
+  const _Spark({required this.icon, required this.size});
+
+  final IconData icon;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Icon(
+      icon,
+      color: theme.colorScheme.primary.withValues(alpha: 0.66),
+      size: size,
+    );
+  }
+}
+
+class _ChartBar extends StatelessWidget {
+  const _ChartBar({required this.height, required this.alpha});
+
+  final double height;
+  final double alpha;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Expanded(
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withValues(alpha: alpha),
+          borderRadius: BorderRadius.circular(999),
+        ),
+      ),
+    );
+  }
+}
+
+BoxDecoration _lineDecoration(ThemeData theme, {required double alpha}) {
+  return BoxDecoration(
+    color: theme.colorScheme.primary.withValues(alpha: alpha),
+    borderRadius: BorderRadius.circular(999),
+  );
 }
 
 class _PageIndicator extends StatelessWidget {
@@ -290,13 +637,8 @@ class _PageIndicator extends StatelessWidget {
 }
 
 class _OnboardingPageData {
-  const _OnboardingPageData({
-    required this.imageAsset,
-    required this.title,
-    required this.message,
-  });
+  const _OnboardingPageData({required this.title, required this.message});
 
-  final String imageAsset;
   final String title;
   final String message;
 }

@@ -448,15 +448,6 @@ class _FeaturedReadingCard extends StatelessWidget {
                         onPressed: onTap,
                         icon: const Icon(AppIcons.book, size: 18),
                         label: const Text('Ver lectura'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: theme.colorScheme.surface,
-                          foregroundColor: theme.colorScheme.primary,
-                          elevation: 0,
-                          minimumSize: const Size.fromHeight(42),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                        ),
                       ),
                     ],
                   ),

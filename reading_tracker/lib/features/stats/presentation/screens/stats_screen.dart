@@ -53,6 +53,29 @@ class StatsScreen extends ConsumerWidget {
                 children: [
                   _StatsHeader(readerProfile: readerProfile),
                   const SizedBox(height: AppSpacing.xxl),
+                  SectionHeader(
+                    title: 'Objetivo anual',
+                    actionLabel: 'Editar',
+                    onAction: () => _editAnnualGoal(
+                      context,
+                      ref,
+                      currentGoal: summary.annualReadingGoal,
+                    ),
+                  ),
+                  _AnnualGoalSection(
+                    annualReadingGoal: summary.annualReadingGoal,
+                    completedThisYear: summary.completedThisYear,
+                    annualGoalProgress: summary.annualGoalProgress,
+                    booksRemainingForAnnualGoal:
+                        summary.booksRemainingForAnnualGoal,
+                    isAnnualGoalReached: summary.isAnnualGoalReached,
+                    onEditGoal: () => _editAnnualGoal(
+                      context,
+                      ref,
+                      currentGoal: summary.annualReadingGoal,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
                   _StatsHero(summary: summary),
                   const SizedBox(height: AppSpacing.xl),
                   _StatsSection(
@@ -155,29 +178,6 @@ class StatsScreen extends ConsumerWidget {
                         subtitle: 'mejor marca',
                       ),
                     ],
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  SectionHeader(
-                    title: 'Objetivo anual',
-                    actionLabel: 'Editar',
-                    onAction: () => _editAnnualGoal(
-                      context,
-                      ref,
-                      currentGoal: summary.annualReadingGoal,
-                    ),
-                  ),
-                  _AnnualGoalSection(
-                    annualReadingGoal: summary.annualReadingGoal,
-                    completedThisYear: summary.completedThisYear,
-                    annualGoalProgress: summary.annualGoalProgress,
-                    booksRemainingForAnnualGoal:
-                        summary.booksRemainingForAnnualGoal,
-                    isAnnualGoalReached: summary.isAnnualGoalReached,
-                    onEditGoal: () => _editAnnualGoal(
-                      context,
-                      ref,
-                      currentGoal: summary.annualReadingGoal,
-                    ),
                   ),
                 ],
               );
@@ -484,17 +484,16 @@ class _AnnualGoalSection extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      _subtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
                   ],
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          OutlinedButton.icon(
+            onPressed: onEditGoal,
+            icon: Icon(hasGoal ? AppIcons.edit : AppIcons.add, size: 18),
+            label: Text(hasGoal ? 'Editar objetivo' : 'Definir objetivo'),
           ),
           const SizedBox(height: AppSpacing.lg),
           ClipRRect(
@@ -529,11 +528,12 @@ class _AnnualGoalSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-          OutlinedButton.icon(
-            onPressed: onEditGoal,
-            icon: Icon(hasGoal ? AppIcons.edit : AppIcons.add, size: 18),
-            label: Text(hasGoal ? 'Editar objetivo' : 'Definir objetivo'),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            _subtitle,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),

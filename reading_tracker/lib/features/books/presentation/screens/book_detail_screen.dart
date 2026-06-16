@@ -714,12 +714,6 @@ class _PremiumProgressCard extends StatelessWidget {
             onPressed: onEditPages,
             icon: const Icon(AppIcons.edit),
             label: const Text('Actualizar progreso'),
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(48),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
           ),
         ],
       ),
