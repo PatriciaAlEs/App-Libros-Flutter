@@ -85,32 +85,12 @@ class _ProfileHero extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 26, 24, 24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            theme.colorScheme.primary,
-            Color.lerp(theme.colorScheme.primary, Colors.black, 0.26)!,
-          ],
-        ),
+        color: theme.colorScheme.surface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-        boxShadow: [
-          BoxShadow(
-            color: Color.lerp(
-              theme.colorScheme.primary,
-              Colors.black,
-              0.28,
-            )!.withValues(alpha: 0.22),
-            blurRadius: 36,
-            offset: const Offset(0, 18),
-          ),
-          BoxShadow(
-            color: theme.colorScheme.secondary.withValues(alpha: 0.12),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.16),
+        ),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
       ),
       child: Row(
         children: [
@@ -119,11 +99,17 @@ class _ProfileHero extends StatelessWidget {
             height: 70,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.14),
+              color: theme.colorScheme.secondary.withValues(alpha: 0.24),
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.20)),
+              border: Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.14),
+              ),
             ),
-            child: const Icon(AppIcons.profile, color: Colors.white, size: 32),
+            child: Icon(
+              AppIcons.profile,
+              color: theme.colorScheme.primary,
+              size: 32,
+            ),
           ),
           const SizedBox(width: AppSpacing.lg),
           Expanded(
@@ -134,7 +120,7 @@ class _ProfileHero extends StatelessWidget {
                   'Perfil y preferencias',
                   style: GoogleFonts.cormorantGaramond(
                     textStyle: theme.textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
+                      color: theme.colorScheme.primary,
                       fontSize: 31,
                       fontWeight: FontWeight.w700,
                       height: 1.05,
@@ -145,7 +131,7 @@ class _ProfileHero extends StatelessWidget {
                 Text(
                   'Preferencias, estilo visual y detalles personales de ReadPp.',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.78),
+                    color: theme.colorScheme.onSurfaceVariant,
                     height: 1.35,
                   ),
                 ),

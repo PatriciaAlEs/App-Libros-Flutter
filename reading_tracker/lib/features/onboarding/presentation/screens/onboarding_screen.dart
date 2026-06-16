@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/branding/app_brand.dart';
 import '../../../../core/design_system/design_system.dart';
@@ -73,7 +74,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             end: Alignment.bottomCenter,
             colors: [
               theme.scaffoldBackgroundColor,
-              theme.colorScheme.primaryContainer.withValues(alpha: 0.16),
+              theme.colorScheme.primaryContainer.withValues(alpha: 0.10),
               theme.scaffoldBackgroundColor,
             ],
             stops: const [0, 0.42, 1],
@@ -91,7 +92,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     TextButton(onPressed: _finish, child: const Text('Omitir')),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.md),
                 Expanded(
                   child: PageView.builder(
                     controller: _pageController,
@@ -103,7 +104,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.xl),
                 _PageIndicator(
                   currentPage: _currentPage,
                   pageCount: _pages.length,
@@ -168,27 +169,37 @@ class _OnboardingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final illustrationHeight = (MediaQuery.sizeOf(context).height * 0.40).clamp(
+      260.0,
+      390.0,
+    );
 
     return Column(
       children: [
-        Expanded(
+        SizedBox(
+          height: illustrationHeight,
           child: Center(
             child: _OnboardingIllustration(
               imageAsset: data.imageAsset,
               index: index,
+              maxHeight: illustrationHeight,
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.xl),
+        const SizedBox(height: AppSpacing.xxl),
         Text(
           data.title,
           textAlign: TextAlign.center,
-          style: theme.textTheme.displaySmall?.copyWith(
-            fontWeight: FontWeight.w900,
-            height: 1.08,
+          style: GoogleFonts.cormorantGaramond(
+            textStyle: theme.textTheme.displaySmall?.copyWith(
+              color: theme.colorScheme.primary,
+              fontSize: 39,
+              fontWeight: FontWeight.w700,
+              height: 1.02,
+            ),
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
         Text(
           data.message,
           textAlign: TextAlign.center,
@@ -207,61 +218,39 @@ class _OnboardingIllustration extends StatelessWidget {
   const _OnboardingIllustration({
     required this.imageAsset,
     required this.index,
+    required this.maxHeight,
   });
 
   final String imageAsset;
   final int index;
+  final double maxHeight;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 350, maxHeight: 390),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(34),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.14),
-            blurRadius: 32,
-            offset: const Offset(0, 18),
-          ),
-          BoxShadow(
-            color: theme.colorScheme.secondary.withValues(alpha: 0.10),
-            blurRadius: 22,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(34),
-        child: Image.asset(
-          imageAsset,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              width: double.infinity,
-              height: 330,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withValues(alpha: 0.76),
-                borderRadius: BorderRadius.circular(34),
-                border: Border.all(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.10),
-                ),
-              ),
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: 390, maxHeight: maxHeight),
+      child: Image.asset(
+        imageAsset,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return SizedBox(
+            width: double.infinity,
+            height: 330,
+            child: Center(
               child: Icon(
                 index == 0
                     ? AppIcons.library
                     : index == 1
                     ? AppIcons.calendar
                     : AppIcons.insightsNav,
-                color: theme.colorScheme.primary,
-                size: 44,
+                color: theme.colorScheme.primary.withValues(alpha: 0.78),
+                size: 56,
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -289,8 +278,8 @@ class _PageIndicator extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(999),
               color: index == currentPage
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.primary.withValues(alpha: 0.18),
+                  ? theme.colorScheme.primary.withValues(alpha: 0.82)
+                  : theme.colorScheme.primary.withValues(alpha: 0.16),
             ),
           ),
           if (index < pageCount - 1) const SizedBox(width: AppSpacing.sm),
