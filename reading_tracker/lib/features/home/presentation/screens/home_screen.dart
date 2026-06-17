@@ -67,6 +67,19 @@ class HomeScreen extends ConsumerWidget {
               final todaySessions = _todaySessions(recentSessions);
               final booksById = {for (final book in books) book.id: book};
               final currentBooks = _currentReadingBooks(books);
+              final currentReadingBookId = _resolvedCurrentReadingBookId(
+                currentBooks,
+                readerProfile.currentReadingBookId,
+              );
+              _syncCurrentReadingPreference(
+                ref,
+                readerProfile.currentReadingBookId,
+                currentReadingBookId,
+              );
+              final prioritizedCurrentBooks = _prioritizeCurrentBooks(
+                currentBooks,
+                currentReadingBookId,
+              );
               final pendingBooks = _pendingBooks(books);
 
               return RefreshIndicator(
@@ -91,29 +104,16 @@ class HomeScreen extends ConsumerWidget {
                         children: [
                           _HomeHeader(readerProfile: readerProfile),
                           const SizedBox(height: AppSpacing.xl),
-                          if (currentBooks.length > 1) ...[
-                            _CurrentReadingSwitcher(
-                              books: _prioritizeCurrentBooks(
-                                currentBooks,
-                                readerProfile.currentReadingBookId,
-                              ),
-                              onChange: () => _showCurrentReadingPicker(
-                                context,
-                                ref,
-                                _prioritizeCurrentBooks(
-                                  currentBooks,
-                                  readerProfile.currentReadingBookId,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                          ],
                           _CurrentReadingCards(
-                            books: _prioritizeCurrentBooks(
-                              currentBooks,
-                              readerProfile.currentReadingBookId,
-                            ),
+                            books: prioritizedCurrentBooks,
                             pendingBooks: pendingBooks,
+                            currentReadingBookId: currentReadingBookId,
+                            onChangeCurrentReading: () =>
+                                _showCurrentReadingPicker(
+                                  context,
+                                  ref,
+                                  prioritizedCurrentBooks,
+                                ),
                             onOpenProgress: (book) => _openQuickProgress(
                               context,
                               ref,
@@ -129,10 +129,9 @@ class HomeScreen extends ConsumerWidget {
                             _CurrentReadingStrip(
                               books: _prioritizeCurrentBooks(
                                 currentBooks,
-                                readerProfile.currentReadingBookId,
+                                currentReadingBookId,
                               ),
-                              selectedBookId:
-                                  readerProfile.currentReadingBookId,
+                              selectedBookId: currentReadingBookId,
                               onSelect: (book) => ref
                                   .read(
                                     readerProfileControllerProvider.notifier,
@@ -272,6 +271,35 @@ class HomeScreen extends ConsumerWidget {
       return bDate.compareTo(aDate);
     });
     return readingBooks;
+  }
+
+  String? _resolvedCurrentReadingBookId(
+    List<Book> currentBooks,
+    String? storedBookId,
+  ) {
+    if (currentBooks.isEmpty) return null;
+    if (storedBookId != null &&
+        currentBooks.any((book) => book.id == storedBookId)) {
+      return storedBookId;
+    }
+    return currentBooks.first.id;
+  }
+
+  void _syncCurrentReadingPreference(
+    WidgetRef ref,
+    String? storedBookId,
+    String? resolvedBookId,
+  ) {
+    if (storedBookId == resolvedBookId) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = ref.read(readerProfileControllerProvider.notifier);
+      if (resolvedBookId == null) {
+        controller.clearCurrentReadingBookId();
+      } else {
+        controller.updateCurrentReadingBookId(resolvedBookId);
+      }
+    });
   }
 
   List<Book> _pendingBooks(List<Book> books) {
@@ -651,9 +679,14 @@ class _JournalHeader extends StatelessWidget {
 }
 
 class _CurrentReadingSwitcher extends StatelessWidget {
-  const _CurrentReadingSwitcher({required this.books, required this.onChange});
+  const _CurrentReadingSwitcher({
+    required this.currentIndex,
+    required this.total,
+    required this.onChange,
+  });
 
-  final List<Book> books;
+  final int currentIndex;
+  final int total;
   final VoidCallback onChange;
 
   @override
@@ -683,7 +716,8 @@ class _CurrentReadingSwitcher extends StatelessWidget {
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
-            '1 / ${books.length}',
+            '$currentIndex / $total',
+            key: const Key('current_reading_position_indicator'),
             style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.w800,
@@ -886,10 +920,12 @@ double _bookProgress(Book book) {
   return ((book.currentPage ?? 0) / totalPages).clamp(0.0, 1.0).toDouble();
 }
 
-class _CurrentReadingCards extends StatelessWidget {
+class _CurrentReadingCards extends StatefulWidget {
   const _CurrentReadingCards({
     required this.books,
     required this.pendingBooks,
+    required this.currentReadingBookId,
+    required this.onChangeCurrentReading,
     required this.onOpenProgress,
     required this.onAddBook,
     required this.onStartReading,
@@ -897,24 +933,111 @@ class _CurrentReadingCards extends StatelessWidget {
 
   final List<Book> books;
   final List<Book> pendingBooks;
+  final String? currentReadingBookId;
+  final VoidCallback onChangeCurrentReading;
   final ValueChanged<Book> onOpenProgress;
   final VoidCallback onAddBook;
   final ValueChanged<Book> onStartReading;
 
   @override
+  State<_CurrentReadingCards> createState() => _CurrentReadingCardsState();
+}
+
+class _CurrentReadingCardsState extends State<_CurrentReadingCards> {
+  late final PageController _pageController;
+  late int _currentPage;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPage = _selectedIndex();
+    _pageController = PageController(initialPage: _currentPage);
+  }
+
+  @override
+  void didUpdateWidget(covariant _CurrentReadingCards oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final nextPage = _selectedIndex();
+    if (nextPage != _currentPage) {
+      _currentPage = nextPage;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_pageController.hasClients) return;
+        _pageController.animateToPage(
+          nextPage,
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeOutCubic,
+        );
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  int _selectedIndex() {
+    if (widget.books.isEmpty) return 0;
+    final currentReadingBookId = widget.currentReadingBookId;
+    if (currentReadingBookId == null) return 0;
+    final index = widget.books.indexWhere(
+      (book) => book.id == currentReadingBookId,
+    );
+    return index == -1 ? 0 : index;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (books.isEmpty) {
+    if (widget.books.isEmpty) {
       return _EmptyCurrentReadingCard(
-        pendingBooks: pendingBooks,
-        onAddBook: onAddBook,
-        onStartReading: onStartReading,
+        pendingBooks: widget.pendingBooks,
+        onAddBook: widget.onAddBook,
+        onStartReading: widget.onStartReading,
       );
     }
 
-    final primaryBook = books.first;
-    return _CurrentReadingHero(
-      book: primaryBook,
-      onOpenProgress: () => onOpenProgress(primaryBook),
+    if (widget.books.length == 1) {
+      final primaryBook = widget.books.first;
+      return _CurrentReadingHero(
+        book: primaryBook,
+        onOpenProgress: () => widget.onOpenProgress(primaryBook),
+      );
+    }
+
+    return Column(
+      children: [
+        _CurrentReadingSwitcher(
+          currentIndex: _currentPage + 1,
+          total: widget.books.length,
+          onChange: widget.onChangeCurrentReading,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isNarrow = constraints.maxWidth < 350;
+            return SizedBox(
+              height: isNarrow ? 526 : 340,
+              child: PageView.builder(
+                key: const Key('current_reading_cards_page_view'),
+                controller: _pageController,
+                physics: const BouncingScrollPhysics(
+                  parent: PageScrollPhysics(),
+                ),
+                itemCount: widget.books.length,
+                onPageChanged: (index) => setState(() => _currentPage = index),
+                itemBuilder: (context, index) {
+                  final book = widget.books[index];
+                  return _CurrentReadingHero(
+                    book: book,
+                    onOpenProgress: () => widget.onOpenProgress(book),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

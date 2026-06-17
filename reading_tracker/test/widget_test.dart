@@ -14,6 +14,13 @@ import 'package:reading_tracker/features/books/domain/enums/book_status.dart';
 import 'package:reading_tracker/features/books/domain/repositories/book_repository.dart';
 import 'package:reading_tracker/features/books/presentation/screens/book_form_screen.dart';
 import 'package:reading_tracker/features/books/presentation/screens/books_list_screen.dart';
+import 'package:reading_tracker/features/home/presentation/screens/home_screen.dart';
+import 'package:reading_tracker/features/reading_sessions/data/repositories/reading_session_repository_provider.dart';
+import 'package:reading_tracker/features/reading_sessions/domain/entities/reading_session.dart';
+import 'package:reading_tracker/features/reading_sessions/domain/repositories/reading_session_repository.dart';
+import 'package:reading_tracker/features/stats/data/repositories/statistics_repository_provider.dart';
+import 'package:reading_tracker/features/stats/domain/entities/statistics_summary.dart';
+import 'package:reading_tracker/features/stats/domain/repositories/statistics_repository.dart';
 
 void main() {
   setUp(() {
@@ -191,6 +198,55 @@ void main() {
     );
     expect(resultTitle, findsOneWidget);
   });
+
+  testWidgets('home swipes between multiple active readings', (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'onboarding_completed': true,
+      'reader_profile_current_reading_id': 'book-1',
+    });
+    final books = [
+      _book(
+        id: 'book-1',
+        title: 'Lectura principal',
+        currentPage: 40,
+        updatedAt: DateTime(2026, 6, 16),
+      ),
+      _book(
+        id: 'book-2',
+        title: 'Segunda lectura',
+        currentPage: 90,
+        updatedAt: DateTime(2026, 6, 15),
+      ),
+    ];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookRepositoryProvider.overrideWithValue(_BooksRepository(books)),
+          statisticsRepositoryProvider.overrideWithValue(
+            const _EmptyStatisticsRepository(),
+          ),
+          readingSessionRepositoryProvider.overrideWithValue(
+            const _EmptyReadingSessionRepository(),
+          ),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 / 2'), findsOneWidget);
+    expect(find.text('Lectura principal'), findsWidgets);
+
+    await tester.drag(
+      find.byKey(const Key('current_reading_cards_page_view')),
+      const Offset(-500, 0),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('2 / 2'), findsOneWidget);
+    expect(find.text('Segunda lectura'), findsWidgets);
+  });
 }
 
 Finder _searchField() => find.byType(TextField).first;
@@ -200,6 +256,25 @@ DateTime _dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
 DateTime _today() {
   final now = DateTime.now();
   return DateTime(now.year, now.month, now.day);
+}
+
+Book _book({
+  required String id,
+  required String title,
+  required int currentPage,
+  required DateTime updatedAt,
+}) {
+  return Book(
+    id: id,
+    title: title,
+    author: 'Autora',
+    totalPages: 200,
+    currentPage: currentPage,
+    status: BookStatus.reading,
+    startDate: DateTime(2026, 6, 1),
+    createdAt: DateTime(2026, 5, 1),
+    updatedAt: updatedAt,
+  );
 }
 
 http.Response _searchResponse(String title) {
@@ -259,4 +334,70 @@ class _CapturingBookRepository implements BookRepository {
 
   @override
   Stream<List<Book>> watchBooks() => Stream.value(const []);
+}
+
+class _BooksRepository implements BookRepository {
+  const _BooksRepository(this.books);
+
+  final List<Book> books;
+
+  @override
+  Future<void> addBook(Book book) async {}
+
+  @override
+  Future<void> deleteBook(String id) async {}
+
+  @override
+  Future<List<Book>> getAllBooks() async => books;
+
+  @override
+  Future<Book?> getBookById(String id) async =>
+      books.where((book) => book.id == id).firstOrNull;
+
+  @override
+  Future<void> updateBook(Book book) async {}
+
+  @override
+  Stream<List<Book>> watchBooks() => Stream.value(books);
+}
+
+class _EmptyStatisticsRepository implements StatisticsRepository {
+  const _EmptyStatisticsRepository();
+
+  @override
+  Future<StatisticsSummary> getSummary() async =>
+      const StatisticsSummary.empty();
+}
+
+class _EmptyReadingSessionRepository implements ReadingSessionRepository {
+  const _EmptyReadingSessionRepository();
+
+  @override
+  Future<void> addSession(ReadingSession session) async {}
+
+  @override
+  Future<void> deleteSession(String id) async {}
+
+  @override
+  Future<List<ReadingSession>> getSessionsForBook(String bookId) async =>
+      const [];
+
+  @override
+  Future<List<ReadingSession>> getSessionsForDay(DateTime day) async =>
+      const [];
+
+  @override
+  Future<List<ReadingSession>> getSessionsInRange(
+    DateTime start,
+    DateTime end,
+  ) async => const [];
+
+  @override
+  Future<void> updateSession(ReadingSession session) async {}
+
+  @override
+  Stream<List<ReadingSession>> watchSessionsInRange(
+    DateTime start,
+    DateTime end,
+  ) => Stream.value(const []);
 }
