@@ -957,17 +957,34 @@ class _CurrentReadingCardsState extends State<_CurrentReadingCards> {
   @override
   void didUpdateWidget(covariant _CurrentReadingCards oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final nextPage = _selectedIndex();
-    if (nextPage != _currentPage) {
-      _currentPage = nextPage;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted || !_pageController.hasClients) return;
-        _pageController.animateToPage(
-          nextPage,
-          duration: const Duration(milliseconds: 260),
-          curve: Curves.easeOutCubic,
-        );
-      });
+
+    if (widget.books.isEmpty) {
+      _currentPage = 0;
+      return;
+    }
+
+    final selectedBookChanged =
+        oldWidget.currentReadingBookId != widget.currentReadingBookId;
+    final bookOrderChanged = !_sameBookOrder(oldWidget.books, widget.books);
+
+    if (selectedBookChanged) {
+      _moveToPage(_selectedIndex());
+      return;
+    }
+
+    if (bookOrderChanged) {
+      final visibleBookId = _currentPage < oldWidget.books.length
+          ? oldWidget.books[_currentPage].id
+          : null;
+      final nextPage = visibleBookId == null
+          ? _currentPage.clamp(0, widget.books.length - 1)
+          : widget.books.indexWhere((book) => book.id == visibleBookId);
+      _moveToPage(
+        nextPage == -1
+            ? _currentPage.clamp(0, widget.books.length - 1)
+            : nextPage,
+        animate: false,
+      );
     }
   }
 
@@ -985,6 +1002,32 @@ class _CurrentReadingCardsState extends State<_CurrentReadingCards> {
       (book) => book.id == currentReadingBookId,
     );
     return index == -1 ? 0 : index;
+  }
+
+  bool _sameBookOrder(List<Book> oldBooks, List<Book> newBooks) {
+    if (oldBooks.length != newBooks.length) return false;
+    for (var index = 0; index < oldBooks.length; index++) {
+      if (oldBooks[index].id != newBooks[index].id) return false;
+    }
+    return true;
+  }
+
+  void _moveToPage(int page, {bool animate = true}) {
+    final nextPage = page.clamp(0, widget.books.length - 1);
+    if (nextPage == _currentPage) return;
+    _currentPage = nextPage;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_pageController.hasClients) return;
+      if (animate) {
+        _pageController.animateToPage(
+          nextPage,
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeOutCubic,
+        );
+      } else {
+        _pageController.jumpToPage(nextPage);
+      }
+    });
   }
 
   @override
