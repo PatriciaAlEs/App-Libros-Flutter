@@ -13,12 +13,12 @@ class DatabaseSeeder {
     if (!kDebugMode || _hasRun) return;
 
     _hasRun = true;
+    await _database.readingSessionDao.deleteLegacySeedSessions();
 
     final existingBooks = await _database.bookDao.getAllBooks();
     if (existingBooks.isNotEmpty) return;
 
     await _database.bookDao.insertBooks(_seedBooks());
-    await _database.readingSessionDao.insertSessions(_seedSessions());
   }
 
   List<BooksTableCompanion> _seedBooks() {
@@ -85,60 +85,5 @@ class DatabaseSeeder {
         createdAt: Value(oneMonthAgo),
       ),
     ];
-  }
-
-  List<ReadingSessionsTableCompanion> _seedSessions() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    return [
-      _session('seed-session-1', 'seed-earthsea', today, 35),
-      _session(
-        'seed-session-2',
-        'seed-earthsea',
-        today.subtract(const Duration(days: 1)),
-        45,
-      ),
-      _session(
-        'seed-session-3',
-        'seed-left-hand-darkness',
-        today.subtract(const Duration(days: 2)),
-        60,
-      ),
-      _session(
-        'seed-session-4',
-        'seed-dune',
-        today.subtract(const Duration(days: 3)),
-        25,
-      ),
-      _session(
-        'seed-session-5',
-        'seed-earthsea',
-        today.subtract(const Duration(days: 3)),
-        30,
-      ),
-      _session(
-        'seed-session-6',
-        'seed-left-hand-darkness',
-        today.subtract(const Duration(days: 5)),
-        50,
-      ),
-    ];
-  }
-
-  ReadingSessionsTableCompanion _session(
-    String id,
-    String bookId,
-    DateTime date,
-    int minutes,
-  ) {
-    return ReadingSessionsTableCompanion.insert(
-      id: id,
-      bookId: bookId,
-      date: date,
-      minutes: minutes,
-      note: const Value('Sesion de prueba'),
-      createdAt: Value(date),
-    );
   }
 }

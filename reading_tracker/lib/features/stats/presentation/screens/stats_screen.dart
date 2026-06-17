@@ -5,7 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/preferences/reader_profile_controller.dart';
+import '../../../books/data/datasources/book_api_datasource.dart';
+import '../../../books/domain/entities/book_search_result.dart';
 import '../../domain/entities/statistics_summary.dart';
+import '../providers/annual_goal_cover_controller.dart';
 import '../providers/statistics_summary_provider.dart';
 
 class StatsScreen extends ConsumerWidget {
@@ -16,6 +19,7 @@ class StatsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final readerProfile = ref.watch(readerProfileControllerProvider);
     final summaryAsync = ref.watch(statisticsSummaryProvider);
+    final annualGoalCover = ref.watch(annualGoalCoverControllerProvider);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -69,11 +73,13 @@ class StatsScreen extends ConsumerWidget {
                     booksRemainingForAnnualGoal:
                         summary.booksRemainingForAnnualGoal,
                     isAnnualGoalReached: summary.isAnnualGoalReached,
+                    cover: annualGoalCover,
                     onEditGoal: () => _editAnnualGoal(
                       context,
                       ref,
                       currentGoal: summary.annualReadingGoal,
                     ),
+                    onSearchCover: () => _searchAnnualGoalCover(context, ref),
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   _StatsHero(summary: summary),
@@ -231,6 +237,25 @@ class StatsScreen extends ConsumerWidget {
 
     await ref.read(saveAnnualReadingGoalProvider)(goal);
     ref.invalidate(statisticsSummaryProvider);
+  }
+
+  Future<void> _searchAnnualGoalCover(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final selectedBook = await showDialog<BookSearchResult>(
+      context: context,
+      builder: (_) => const _AnnualGoalCoverSearchDialog(),
+    );
+    if (selectedBook == null) return;
+
+    await ref
+        .read(annualGoalCoverControllerProvider.notifier)
+        .selectBook(selectedBook);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Portada del reto actualizada')),
+    );
   }
 }
 
@@ -417,7 +442,9 @@ class _AnnualGoalSection extends StatelessWidget {
     required this.annualGoalProgress,
     required this.booksRemainingForAnnualGoal,
     required this.isAnnualGoalReached,
+    required this.cover,
     required this.onEditGoal,
+    required this.onSearchCover,
   });
 
   final int? annualReadingGoal;
@@ -425,7 +452,9 @@ class _AnnualGoalSection extends StatelessWidget {
   final double? annualGoalProgress;
   final int? booksRemainingForAnnualGoal;
   final bool isAnnualGoalReached;
+  final AnnualGoalCover? cover;
   final VoidCallback onEditGoal;
+  final VoidCallback onSearchCover;
 
   @override
   Widget build(BuildContext context) {
@@ -452,20 +481,7 @@ class _AnnualGoalSection extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 42,
-                height: 42,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: theme.colorScheme.secondary.withValues(alpha: 0.28),
-                ),
-                child: Icon(
-                  AppIcons.flag,
-                  color: theme.colorScheme.primary,
-                  size: 22,
-                ),
-              ),
+              _AnnualGoalCoverFrame(cover: cover),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -484,16 +500,50 @@ class _AnnualGoalSection extends StatelessWidget {
                         ),
                       ),
                     ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      cover?.title ?? 'Elige una portada para tu reto',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (cover?.author?.isNotEmpty == true) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        cover!.author!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          OutlinedButton.icon(
-            onPressed: onEditGoal,
-            icon: Icon(hasGoal ? AppIcons.edit : AppIcons.add, size: 18),
-            label: Text(hasGoal ? 'Editar objetivo' : 'Definir objetivo'),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              OutlinedButton.icon(
+                onPressed: onEditGoal,
+                icon: Icon(hasGoal ? AppIcons.edit : AppIcons.add, size: 18),
+                label: Text(hasGoal ? 'Editar objetivo' : 'Definir objetivo'),
+              ),
+              OutlinedButton.icon(
+                onPressed: onSearchCover,
+                icon: const Icon(Icons.search_rounded, size: 18),
+                label: Text(
+                  cover == null ? 'Buscar portada' : 'Cambiar portada',
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.lg),
           ClipRRect(
@@ -548,6 +598,47 @@ class _AnnualGoalSection extends StatelessWidget {
       return 'Objetivo alcanzado. Buen ritmo.';
     }
     return 'Vas por $completedThisYear de $annualReadingGoal libros.';
+  }
+}
+
+class _AnnualGoalCoverFrame extends StatelessWidget {
+  const _AnnualGoalCoverFrame({required this.cover});
+
+  final AnnualGoalCover? cover;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final coverUrl = cover?.coverUrl;
+
+    return Container(
+      width: 72,
+      height: 104,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.12),
+        ),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: coverUrl == null || coverUrl.isEmpty
+          ? Icon(
+              AppIcons.book,
+              color: theme.colorScheme.primary.withValues(alpha: 0.62),
+              size: 28,
+            )
+          : Image.network(
+              coverUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Icon(
+                AppIcons.book,
+                color: theme.colorScheme.primary.withValues(alpha: 0.62),
+                size: 28,
+              ),
+            ),
+    );
   }
 }
 
@@ -672,6 +763,286 @@ class _AnnualGoalDialogState extends State<_AnnualGoalDialog> {
         ),
         FilledButton(onPressed: _save, child: const Text('Guardar')),
       ],
+    );
+  }
+}
+
+class _AnnualGoalCoverSearchDialog extends ConsumerStatefulWidget {
+  const _AnnualGoalCoverSearchDialog();
+
+  @override
+  ConsumerState<_AnnualGoalCoverSearchDialog> createState() =>
+      _AnnualGoalCoverSearchDialogState();
+}
+
+class _AnnualGoalCoverSearchDialogState
+    extends ConsumerState<_AnnualGoalCoverSearchDialog> {
+  final _controller = TextEditingController();
+  Future<List<BookSearchResult>>? _searchFuture;
+  String _query = '';
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _search() {
+    final query = _controller.text.trim();
+    if (query.isEmpty) return;
+    setState(() {
+      _query = query;
+      _searchFuture = ref.read(bookApiDatasourceProvider).searchBooks(query);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Buscar portada'),
+      content: SizedBox(
+        width: 420,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              key: const Key('annual_goal_cover_search_field'),
+              controller: _controller,
+              autofocus: true,
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                labelText: 'Título, autor o ISBN',
+                suffixIcon: IconButton(
+                  tooltip: 'Buscar',
+                  icon: const Icon(Icons.search_rounded),
+                  onPressed: _search,
+                ),
+                border: const OutlineInputBorder(),
+              ),
+              onSubmitted: (_) => _search(),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _SearchResults(future: _searchFuture, query: _query),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+      ],
+    );
+  }
+}
+
+class _SearchResults extends StatelessWidget {
+  const _SearchResults({required this.future, required this.query});
+
+  final Future<List<BookSearchResult>>? future;
+  final String query;
+
+  @override
+  Widget build(BuildContext context) {
+    if (future == null) {
+      return const _CoverSearchEmptyState();
+    }
+
+    return FutureBuilder<List<BookSearchResult>>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const SizedBox(
+            height: 160,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return _CoverSearchMessage(
+            icon: Icons.wifi_off_rounded,
+            title: 'No pudimos buscar',
+            message: 'Revisa la conexión e inténtalo otra vez.',
+          );
+        }
+
+        final results = snapshot.data ?? const [];
+        if (results.isEmpty) {
+          return _CoverSearchMessage(
+            icon: Icons.search_off_rounded,
+            title: 'Sin resultados',
+            message: 'No encontramos coincidencias para "$query".',
+          );
+        }
+
+        return ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 360),
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: results.length,
+            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+            itemBuilder: (context, index) {
+              final book = results[index];
+              return _CoverSearchResultTile(book: book);
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _CoverSearchEmptyState extends StatelessWidget {
+  const _CoverSearchEmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const _CoverSearchMessage(
+      icon: Icons.search_rounded,
+      title: 'Busca una portada',
+      message: 'Puedes usar título, autora o ISBN.',
+    );
+  }
+}
+
+class _CoverSearchMessage extends StatelessWidget {
+  const _CoverSearchMessage({
+    required this.icon,
+    required this.title,
+    required this.message,
+  });
+
+  final IconData icon;
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      height: 160,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: theme.colorScheme.primary),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              title,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CoverSearchResultTile extends StatelessWidget {
+  const _CoverSearchResultTile({required this.book});
+
+  final BookSearchResult book;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.colorScheme.surface.withValues(alpha: 0.92),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => Navigator.pop(context, book),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          child: Row(
+            children: [
+              _SearchCoverThumb(url: book.coverUrl),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      book.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _resultSubtitle(book),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _resultSubtitle(BookSearchResult book) {
+    final parts = <String>[
+      if (book.author?.isNotEmpty == true) book.author!,
+      if (book.firstPublishYear != null) '${book.firstPublishYear}',
+      if (book.coverUrl == null) 'Sin portada',
+    ];
+    return parts.isEmpty ? 'Resultado de Open Library' : parts.join(' · ');
+  }
+}
+
+class _SearchCoverThumb extends StatelessWidget {
+  const _SearchCoverThumb({required this.url});
+
+  final String? url;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final placeholder = Container(
+      width: 42,
+      height: 60,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Icon(
+        AppIcons.book,
+        color: theme.colorScheme.primary.withValues(alpha: 0.62),
+        size: 18,
+      ),
+    );
+
+    if (url == null || url!.isEmpty) return placeholder;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.network(
+        url!,
+        width: 42,
+        height: 60,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => placeholder,
+      ),
     );
   }
 }

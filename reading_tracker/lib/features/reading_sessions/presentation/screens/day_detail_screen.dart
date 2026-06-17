@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design_system/design_system.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/presentation/providers/books_provider.dart';
-import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
-import '../../../stats/presentation/providers/stats_provider.dart';
 import '../../data/repositories/reading_session_repository_provider.dart';
 import '../../domain/entities/reading_session.dart';
 import '../providers/reading_sessions_provider.dart';
+import '../utils/reading_session_refresh.dart';
 
 class DayDetailScreen extends ConsumerWidget {
   const DayDetailScreen({super.key, required this.day});
@@ -17,23 +17,22 @@ class DayDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sessionsAsync = ref.watch(readingSessionsForDayProvider(day));
+    final selectedDay = _dateOnly(day);
+    final sessionsAsync = ref.watch(readingSessionsForDayProvider(selectedDay));
     final booksAsync = ref.watch(booksProvider);
-    final canAddSession = !_isFutureDay(day);
+    final canAddSession = !_isFutureDay(selectedDay);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Diario lector'),
-        actions: [
-          IconButton(
-            tooltip: 'Añadir lectura',
-            icon: const Icon(Icons.add_rounded),
-            onPressed: canAddSession
-                ? () => _openSessionForm(context, ref)
-                : null,
+        title: Text(
+          'Diario lector',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontFamily: AppTypography.displayFontFamily,
+            fontFamilyFallback: AppTypography.displayFallback,
+            fontWeight: FontWeight.w800,
           ),
-        ],
+        ),
       ),
       body: sessionsAsync.when(
         loading: () => const _DayLoadingState(),
@@ -57,7 +56,7 @@ class DayDetailScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             children: [
               _DayEditorialHeader(
-                day: day,
+                day: selectedDay,
                 totalMinutes: totalMinutes,
                 totalPages: totalPages,
                 sessionCount: sessions.length,
@@ -95,14 +94,15 @@ class DayDetailScreen extends ConsumerWidget {
   }
 
   Future<void> _openSessionForm(BuildContext context, WidgetRef ref) async {
+    final selectedDay = _dateOnly(day);
     final saved = await Navigator.pushNamed(
       context,
       '/session/add',
-      arguments: day,
+      arguments: selectedDay,
     );
     if (!context.mounted) return;
     if (saved == true) {
-      ref.invalidate(readingSessionsForDayProvider(day));
+      refreshReadingSessionUi(ref, days: [selectedDay]);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Tiempo de lectura guardado')),
       );
@@ -114,6 +114,7 @@ class DayDetailScreen extends ConsumerWidget {
     WidgetRef ref,
     ReadingSession session,
   ) async {
+    final selectedDay = _dateOnly(day);
     final saved = await Navigator.pushNamed(
       context,
       '/session/edit',
@@ -121,7 +122,7 @@ class DayDetailScreen extends ConsumerWidget {
     );
     if (!context.mounted) return;
     if (saved == true) {
-      ref.invalidate(readingSessionsForDayProvider(day));
+      refreshReadingSessionUi(ref, days: [selectedDay, session.date]);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Tiempo de lectura actualizado')),
       );
@@ -140,9 +141,7 @@ class DayDetailScreen extends ConsumerWidget {
     if (confirmed != true) return;
 
     await ref.read(readingSessionRepositoryProvider).deleteSession(session.id);
-    ref.invalidate(statsProvider);
-    ref.invalidate(readingInsightsSummaryProvider);
-    ref.invalidate(readingSessionsForDayProvider(day));
+    refreshReadingSessionUi(ref, days: [_dateOnly(day), session.date]);
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Tiempo de lectura eliminado')),
@@ -154,6 +153,10 @@ class DayDetailScreen extends ConsumerWidget {
     final today = DateTime(now.year, now.month, now.day);
     final dayOnly = DateTime(date.year, date.month, date.day);
     return dayOnly.isAfter(today);
+  }
+
+  DateTime _dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
   }
 
   Book? _focusBookForDay(
@@ -236,10 +239,10 @@ class _DayEditorialHeader extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _DayMetric(value: '$totalPages', label: 'páginas'),
+                child: _DayMetric(value: '$totalPages', label: 'pág.'),
               ),
               Expanded(
-                child: _DayMetric(value: '$totalMinutes', label: 'minutos'),
+                child: _DayMetric(value: '$totalMinutes', label: 'min'),
               ),
               Expanded(
                 child: _DayMetric(value: '$sessionCount', label: 'sesiones'),

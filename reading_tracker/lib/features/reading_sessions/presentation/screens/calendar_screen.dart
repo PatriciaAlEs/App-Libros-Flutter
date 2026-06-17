@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../../../../core/design_system/design_system.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../domain/entities/reading_session.dart';
@@ -11,12 +9,11 @@ import '../providers/reading_sessions_provider.dart';
 enum CalendarMode { month, week }
 
 Color _activityColor(BuildContext context, ReadingActivityIntensity intensity) {
-  final colorScheme = Theme.of(context).colorScheme;
   return switch (intensity) {
-    ReadingActivityIntensity.none => colorScheme.surface,
-    ReadingActivityIntensity.low => colorScheme.secondaryContainer,
-    ReadingActivityIntensity.medium => colorScheme.tertiaryContainer,
-    ReadingActivityIntensity.high => colorScheme.primaryContainer,
+    ReadingActivityIntensity.none => const Color(0xFFF4F4F2),
+    ReadingActivityIntensity.low => const Color(0xFFDDDDD9),
+    ReadingActivityIntensity.medium => const Color(0xFFA7A7A1),
+    ReadingActivityIntensity.high => const Color(0xFF4F4F4A),
   };
 }
 
@@ -47,12 +44,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             final theme = Theme.of(context);
             return Text(
               'Book Journal',
-              style: GoogleFonts.cormorantGaramond(
-                textStyle: theme.textTheme.headlineSmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                  height: 1,
-                ),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w800,
+                height: 1,
               ),
             );
           },
@@ -257,12 +252,10 @@ class _CalendarHeader extends StatelessWidget {
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: GoogleFonts.cormorantGaramond(
-                textStyle: theme.textTheme.headlineSmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                  height: 1,
-                ),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w800,
+                height: 1,
               ),
             ),
           ),
@@ -328,14 +321,14 @@ class _ActivitySummaryCard extends StatelessWidget {
                 Expanded(
                   child: _SummaryMetric(
                     emoji: '📄',
-                    label: 'Páginas',
+                    label: 'pág.',
                     value: '${summary.pagesRead}',
                   ),
                 ),
                 Expanded(
                   child: _SummaryMetric(
                     emoji: '⏱',
-                    label: 'Minutos',
+                    label: 'min',
                     value: '${summary.minutes}',
                   ),
                 ),
@@ -688,9 +681,13 @@ class _WeekDaySection extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
+          key: Key(_calendarDayKey(day)),
           borderRadius: BorderRadius.circular(22),
-          onTap: () =>
-              Navigator.pushNamed(context, '/calendar/day', arguments: day),
+          onTap: () => Navigator.pushNamed(
+            context,
+            '/calendar/day',
+            arguments: _dateOnly(day),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Column(
@@ -731,7 +728,7 @@ class _WeekDaySection extends StatelessWidget {
 
   String _activityValue(int pagesRead, int minutes) {
     final parts = <String>[
-      if (pagesRead > 0) '$pagesRead pag.',
+      if (pagesRead > 0) '$pagesRead pág.',
       if (minutes > 0) '$minutes min',
     ];
     return parts.join(' · ');
@@ -749,6 +746,15 @@ class _WeekDaySection extends StatelessWidget {
     ];
     return '${weekdays[date.weekday - 1]} ${date.day}/${date.month}';
   }
+
+  DateTime _dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+  String _calendarDayKey(DateTime date) {
+    final day = _dateOnly(date);
+    return 'calendar_day_${day.year}_${day.month}_${day.day}';
+  }
 }
 
 class _ActivityBadge extends StatelessWidget {
@@ -763,7 +769,7 @@ class _ActivityBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: theme.colorScheme.secondary.withValues(alpha: 0.24),
+        color: const Color(0xFFDDDDD9),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
@@ -808,7 +814,7 @@ class _WeekSessionRow extends StatelessWidget {
 
   String _sessionValue() {
     final parts = <String>[
-      if (session.pagesRead > 0) '${session.pagesRead} pag.',
+      if (session.pagesRead > 0) '${session.pagesRead} pág.',
       if (session.minutes > 0) '${session.minutes} min',
     ];
     return parts.isEmpty ? '-' : parts.join(' · ');
@@ -873,9 +879,13 @@ class _CalendarDayCell extends StatelessWidget {
     final hasActivity = totalPages > 0 || totalMinutes > 0;
 
     return InkWell(
+      key: Key(_calendarDayKey(day)),
       borderRadius: BorderRadius.circular(compact ? 14 : 18),
-      onTap: () =>
-          Navigator.pushNamed(context, '/calendar/day', arguments: day),
+      onTap: () => Navigator.pushNamed(
+        context,
+        '/calendar/day',
+        arguments: _dateOnly(day),
+      ),
       child: AnimatedContainer(
         duration: AppMotion.fast,
         curve: AppMotion.standard,
@@ -940,14 +950,17 @@ class _CalendarDayCell extends StatelessWidget {
                         ),
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      child: Text(
-                        _activityLabel(totalPages, totalMinutes),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          fontSize: compact ? 9 : null,
-                          fontWeight: FontWeight.w900,
-                          color: theme.colorScheme.primary,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          _activityLabel(totalPages, totalMinutes),
+                          maxLines: 1,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            fontSize: compact ? 9 : null,
+                            fontWeight: FontWeight.w900,
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
                       ),
                     ),
@@ -979,8 +992,17 @@ class _CalendarDayCell extends StatelessWidget {
   }
 
   String _activityLabel(int pagesRead, int minutes) {
-    if (pagesRead > 0) return '$pagesRead pag.';
+    if (pagesRead > 0) return '$pagesRead pág.';
     return '$minutes min';
+  }
+
+  DateTime _dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+  String _calendarDayKey(DateTime date) {
+    final day = _dateOnly(date);
+    return 'calendar_day_${day.year}_${day.month}_${day.day}';
   }
 }
 

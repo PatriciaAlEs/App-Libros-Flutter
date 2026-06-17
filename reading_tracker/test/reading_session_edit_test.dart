@@ -8,6 +8,7 @@ import 'package:reading_tracker/features/books/domain/repositories/book_reposito
 import 'package:reading_tracker/features/reading_sessions/data/repositories/reading_session_repository_provider.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/entities/reading_session.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/repositories/reading_session_repository.dart';
+import 'package:reading_tracker/features/reading_sessions/presentation/screens/calendar_screen.dart';
 import 'package:reading_tracker/features/reading_sessions/presentation/screens/day_detail_screen.dart';
 import 'package:reading_tracker/features/reading_sessions/presentation/screens/session_form_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -137,6 +138,52 @@ void main() {
     expect(sessionRepository.addedSession, isNull);
   });
 
+  testWidgets('edit session book dropdown fits long title on narrow Android', (
+    tester,
+  ) async {
+    final view = tester.view;
+    view.physicalSize = const Size(360, 740);
+    view.devicePixelRatio = 1;
+    addTearDown(() {
+      view.resetPhysicalSize();
+      view.resetDevicePixelRatio();
+    });
+
+    final session = ReadingSession(
+      id: 'session-long-book',
+      bookId: 'book-long',
+      date: DateTime(2026, 5, 21),
+      minutes: 25,
+      createdAt: DateTime(2026, 5, 20),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookRepositoryProvider.overrideWithValue(
+            _FakeBookRepository([
+              _book(
+                'book-long',
+                'Un titulo extraordinariamente largo que deberia truncarse sin desbordar el selector',
+                BookStatus.completed,
+                author:
+                    'Una autora con un nombre tambien excesivamente largo para una pantalla pequena',
+              ),
+              _book('book-2', 'Reading Book', BookStatus.reading),
+            ]),
+          ),
+          readingSessionRepositoryProvider.overrideWithValue(
+            _FakeReadingSessionRepository(),
+          ),
+        ],
+        child: MaterialApp(home: SessionFormScreen(session: session)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('session_book_dropdown')), findsOneWidget);
+  });
+
   testWidgets('day detail opens edit route with selected session', (
     tester,
   ) async {
@@ -190,6 +237,90 @@ void main() {
     expect(editArguments, same(session));
     expect(find.text('Edit route'), findsOneWidget);
   });
+
+  testWidgets('day detail exposes a single add reading action', (tester) async {
+    final day = DateTime(2026, 5, 21);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookRepositoryProvider.overrideWithValue(
+            _FakeBookRepository([
+              _book('book-1', 'Current Book', BookStatus.reading),
+            ]),
+          ),
+          readingSessionRepositoryProvider.overrideWithValue(
+            _FakeReadingSessionRepository(),
+          ),
+        ],
+        child: MaterialApp(home: DayDetailScreen(day: day)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(FilledButton, 'Añadir lectura'), findsOneWidget);
+    expect(find.byTooltip('Añadir lectura'), findsNothing);
+  });
+
+  testWidgets('calendar opens the selected activity day normalized', (
+    tester,
+  ) async {
+    final now = DateTime.now();
+    final selectedDay = DateTime(now.year, now.month, now.day);
+    final session = ReadingSession(
+      id: 'session-activity',
+      bookId: 'book-1',
+      date: selectedDay.add(const Duration(hours: 18, minutes: 30)),
+      pagesRead: 12,
+      minutes: 30,
+      createdAt: selectedDay,
+    );
+    DateTime? openedDay;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookRepositoryProvider.overrideWithValue(
+            _FakeBookRepository([
+              _book('book-1', 'Current Book', BookStatus.reading),
+            ]),
+          ),
+          readingSessionRepositoryProvider.overrideWithValue(
+            _FakeReadingSessionRepository(sessionsForDay: [session]),
+          ),
+        ],
+        child: MaterialApp(
+          home: const CalendarScreen(),
+          onGenerateRoute: (settings) {
+            if (settings.name == '/calendar/day') {
+              openedDay = settings.arguments as DateTime?;
+              return MaterialPageRoute<void>(
+                builder: (_) => const Scaffold(body: Text('Day route')),
+              );
+            }
+            return null;
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final dayCell = find.byKey(
+      Key(
+        'calendar_day_${selectedDay.year}_${selectedDay.month}_${selectedDay.day}',
+      ),
+    );
+    await tester.scrollUntilVisible(
+      dayCell,
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(dayCell);
+    await tester.pumpAndSettle();
+
+    expect(openedDay, selectedDay);
+    expect(find.text('Day route'), findsOneWidget);
+  });
 }
 
 class _OpenFormHost extends StatelessWidget {
@@ -221,8 +352,14 @@ class _OpenFormHost extends StatelessWidget {
   }
 }
 
-Book _book(String id, String title, BookStatus status) {
-  return Book(id: id, title: title, status: status, createdAt: DateTime(2026));
+Book _book(String id, String title, BookStatus status, {String? author}) {
+  return Book(
+    id: id,
+    title: title,
+    author: author,
+    status: status,
+    createdAt: DateTime(2026),
+  );
 }
 
 class _FakeBookRepository implements BookRepository {
@@ -271,7 +408,9 @@ class _FakeReadingSessionRepository implements ReadingSessionRepository {
 
   @override
   Future<List<ReadingSession>> getSessionsForDay(DateTime day) async {
-    return sessionsForDay;
+    return sessionsForDay.where((session) {
+      return _isSameDay(session.date, day);
+    }).toList();
   }
 
   @override
@@ -284,7 +423,10 @@ class _FakeReadingSessionRepository implements ReadingSessionRepository {
     DateTime start,
     DateTime end,
   ) async {
-    return sessionsForDay;
+    return sessionsForDay.where((session) {
+      final day = _dateOnly(session.date);
+      return !day.isBefore(_dateOnly(start)) && day.isBefore(_dateOnly(end));
+    }).toList();
   }
 
   @override
@@ -297,6 +439,21 @@ class _FakeReadingSessionRepository implements ReadingSessionRepository {
     DateTime start,
     DateTime end,
   ) {
-    return Stream.value(sessionsForDay);
+    return Stream.value(
+      sessionsForDay.where((session) {
+        final day = _dateOnly(session.date);
+        return !day.isBefore(_dateOnly(start)) && day.isBefore(_dateOnly(end));
+      }).toList(),
+    );
+  }
+
+  DateTime _dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+  bool _isSameDay(DateTime left, DateTime right) {
+    return left.year == right.year &&
+        left.month == right.month &&
+        left.day == right.day;
   }
 }

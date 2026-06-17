@@ -1611,7 +1611,7 @@ class _TodaySummaryCard extends StatelessWidget {
                 icon: AppIcons.pages,
                 label: 'Páginas leídas',
                 value: '$pages',
-                footnote: 'páginas',
+                footnote: 'pág.',
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -1620,7 +1620,7 @@ class _TodaySummaryCard extends StatelessWidget {
                 icon: AppIcons.time,
                 label: 'Tiempo de lectura',
                 value: '$minutes',
-                footnote: 'minutos',
+                footnote: 'min',
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -1915,24 +1915,20 @@ class _HomeSectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final useSans = title == 'Resumen de hoy';
 
     final style = theme.textTheme.titleLarge?.copyWith(
       color: theme.colorScheme.onSurface.withValues(alpha: 0.86),
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w800,
       height: 1.1,
     );
 
     return Text(
       title,
-      style: useSans
-          ? style?.copyWith(fontSize: 15.5)
-          : GoogleFonts.cormorantGaramond(
-              textStyle: style?.copyWith(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+      style: GoogleFonts.spaceGrotesk(
+        textStyle: style?.copyWith(
+          fontSize: title == 'Resumen de hoy' ? 15.5 : 22,
+        ),
+      ),
     );
   }
 }
@@ -1986,7 +1982,7 @@ class _QuickMetrics extends StatelessWidget {
           child: _CompactMetricCard(
             icon: AppIcons.pages,
             value: _compactNumber(summary.totalPagesRead),
-            label: 'Páginas',
+            label: 'pág.',
             footnote: 'totales',
             backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.78),
             foregroundColor: theme.colorScheme.onSurface,
@@ -2662,7 +2658,7 @@ class _ActivityTile extends StatelessWidget {
 
   String _activitySubtitle(ReadingSession session, Book? book) {
     final parts = <String>[
-      if (session.pagesRead > 0) '${session.pagesRead} páginas',
+      if (session.pagesRead > 0) '${session.pagesRead} pág.',
       if (session.minutes > 0) '${session.minutes} min',
       if (book?.author?.isNotEmpty == true) book!.author!,
     ];

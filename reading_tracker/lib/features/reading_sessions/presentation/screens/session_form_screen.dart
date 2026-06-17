@@ -2,17 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design_system/design_system.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
-import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
-import '../../../stats/presentation/providers/stats_provider.dart';
-import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 import '../../data/repositories/reading_session_repository_provider.dart';
 import '../../domain/entities/reading_session.dart';
 import '../../domain/usecases/register_reading_session.dart';
-import '../providers/reading_sessions_provider.dart';
 import '../providers/register_reading_session_provider.dart';
+import '../utils/reading_session_refresh.dart';
 import '../utils/session_completion_flow.dart';
 
 class SessionFormScreen extends ConsumerStatefulWidget {
@@ -71,6 +69,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
           ? null
           : _noteController.text.trim();
       final existingSession = widget.session;
+      final previousDate = existingSession?.date;
       final selectedBook = _selectedBookFromCache();
 
       if (_isEditing) {
@@ -99,11 +98,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
               ),
             );
       }
-      ref.invalidate(statsProvider);
-      ref.invalidate(statisticsSummaryProvider);
-      ref.invalidate(readingInsightsSummaryProvider);
-      ref.invalidate(booksProvider);
-      ref.invalidate(readingSessionsForDayProvider(_date));
+      refreshReadingSessionUi(ref, days: [_date, ?previousDate]);
       if (!mounted) return;
       if (!_isEditing && selectedBook != null) {
         await maybeOfferSessionCompletion(
@@ -163,6 +158,8 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
                   child: Column(
                     children: [
                       DropdownButtonFormField<String>(
+                        key: const Key('session_book_dropdown'),
+                        isExpanded: true,
                         initialValue: _bookId,
                         decoration: const InputDecoration(
                           labelText: 'Libro',
@@ -430,6 +427,8 @@ class _FormSection extends StatelessWidget {
               Text(
                 title,
                 style: theme.textTheme.titleSmall?.copyWith(
+                  fontFamily: AppTypography.displayFontFamily,
+                  fontFamilyFallback: AppTypography.displayFallback,
                   fontWeight: FontWeight.w900,
                 ),
               ),

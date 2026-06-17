@@ -26,12 +26,12 @@ class SectionHeader extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: GoogleFonts.cormorantGaramond(
+              style: GoogleFonts.spaceGrotesk(
                 textStyle: theme.textTheme.headlineSmall?.copyWith(
                   color: theme.colorScheme.primary,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  height: 1,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  height: 1.05,
                 ),
               ),
             ),

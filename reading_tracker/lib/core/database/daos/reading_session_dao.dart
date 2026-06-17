@@ -36,6 +36,15 @@ class ReadingSessionDao extends DatabaseAccessor<AppDatabase>
     )..where((table) => table.id.equals(id))).go();
   }
 
+  Future<int> deleteLegacySeedSessions() {
+    return (delete(readingSessionsTable)..where(
+          (table) =>
+              table.id.like('seed-session-%') &
+              table.note.equals('Sesion de prueba'),
+        ))
+        .go();
+  }
+
   Future<List<ReadingSessionsTableData>> getSessionsForDay(DateTime day) {
     final range = _dayRange(day);
     return _sessionsInRange(range.start, range.end).get();
