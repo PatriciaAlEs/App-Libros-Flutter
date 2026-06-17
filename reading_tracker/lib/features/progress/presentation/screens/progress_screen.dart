@@ -209,10 +209,10 @@ class _CoverSearchResults extends StatelessWidget {
         }
 
         if (snapshot.hasError) {
-          return const _CoverSearchMessage(
+          return _CoverSearchMessage(
             icon: Icons.wifi_off_rounded,
             title: 'No pudimos buscar',
-            message: 'Revisa la conexion e intentalo otra vez.',
+            message: _coverSearchErrorMessage(snapshot.error),
           );
         }
 
@@ -221,7 +221,7 @@ class _CoverSearchResults extends StatelessWidget {
           return _CoverSearchMessage(
             icon: Icons.search_off_rounded,
             title: 'Sin resultados',
-            message: 'No encontramos coincidencias para "$query".',
+            message: 'No encontramos resultados para esa búsqueda.',
           );
         }
 
@@ -240,6 +240,20 @@ class _CoverSearchResults extends StatelessWidget {
       },
     );
   }
+}
+
+String _coverSearchErrorMessage(Object? error) {
+  if (error is BookSearchException) {
+    return switch (error.kind) {
+      BookSearchFailureKind.connection => 'Parece que no hay conexión.',
+      BookSearchFailureKind.timeout =>
+        'La búsqueda está tardando más de lo normal. Reintenta.',
+      BookSearchFailureKind.api =>
+        'Open Library no respondió. Puedes reintentar o añadirlo manualmente.',
+    };
+  }
+
+  return 'Open Library no respondió. Puedes reintentar o añadirlo manualmente.';
 }
 
 class _CoverSearchEmptyState extends StatelessWidget {

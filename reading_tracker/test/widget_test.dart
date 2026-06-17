@@ -199,6 +199,60 @@ void main() {
     expect(resultTitle, findsOneWidget);
   });
 
+  testWidgets('book form can save a manual book when search has no results', (
+    tester,
+  ) async {
+    final repository = _CapturingBookRepository();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookRepositoryProvider.overrideWithValue(repository),
+          bookApiDatasourceProvider.overrideWithValue(
+            BookApiDatasource(
+              MockClient((request) async {
+                return http.Response(jsonEncode({'docs': []}), 200);
+              }),
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: BookFormScreen()),
+      ),
+    );
+
+    await tester.enterText(_searchField(), 'Libro sin portada');
+    await tester.tap(find.byKey(const Key('book_search_button')));
+    await tester.pumpAndSettle();
+    final manualButton = find.widgetWithText(
+      OutlinedButton,
+      'Añadir sin portada',
+    );
+    await tester.scrollUntilVisible(
+      manualButton,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -120));
+    await tester.pumpAndSettle();
+    await tester.tap(manualButton);
+    await tester.pumpAndSettle();
+
+    final saveButton = find.widgetWithText(FilledButton, 'Guardar libro');
+    await tester.scrollUntilVisible(
+      saveButton,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -80));
+    await tester.pumpAndSettle();
+    await tester.tap(saveButton);
+    await tester.pumpAndSettle();
+
+    expect(repository.addedBook, isNotNull);
+    expect(repository.addedBook!.title, 'Libro sin portada');
+    expect(repository.addedBook!.coverUrl, isNull);
+  });
+
   testWidgets('home swipes between multiple active readings', (tester) async {
     SharedPreferences.setMockInitialValues({
       'onboarding_completed': true,

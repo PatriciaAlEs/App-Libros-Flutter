@@ -106,7 +106,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     } catch (error) {
       if (!_isCurrentSearch(requestQuery)) return;
       setState(() {
-        _error = 'No se pudo buscar el libro. Inténtalo de nuevo.';
+        _error = _bookSearchErrorMessage(error);
         _results = const [];
       });
     } finally {
@@ -132,6 +132,26 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
         _totalPagesController.text = book.numberOfPages.toString();
         _totalPagesAutoFilled = true;
       } else if (book.numberOfPages == null && _totalPagesAutoFilled) {
+        _totalPagesController.clear();
+        _totalPagesAutoFilled = false;
+      }
+    });
+  }
+
+  void _selectManualBook() {
+    _searchDebounce?.cancel();
+    final title = _searchController.text.trim();
+    if (title.isEmpty) return;
+
+    setState(() {
+      _selectedBook = BookSearchResult(title: title);
+      _results = const [];
+      _visibleResultsCount = _initialVisibleResults;
+      _isSearching = false;
+      _hasSearched = true;
+      _error = null;
+
+      if (_totalPagesAutoFilled) {
         _totalPagesController.clear();
         _totalPagesAutoFilled = false;
       }
@@ -313,7 +333,12 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
             ),
             const SizedBox(height: 16),
             if (_error != null) ...[
-              _InlineError(message: _error!),
+              _InlineError(
+                message: _error!,
+                onManualAdd: _searchController.text.trim().isEmpty
+                    ? null
+                    : _selectManualBook,
+              ),
               const SizedBox(height: 16),
             ],
             if (_selectedBook != null) ...[
@@ -365,6 +390,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
               selectedBook: _selectedBook,
               onSelected: _selectBook,
               onShowMore: _showMoreResults,
+              onManualAdd: _selectManualBook,
             ),
             const SizedBox(height: 24),
             _SaveButton(
@@ -442,6 +468,20 @@ class _AddBookHero extends StatelessWidget {
   }
 }
 
+String _bookSearchErrorMessage(Object error) {
+  if (error is BookSearchException) {
+    return switch (error.kind) {
+      BookSearchFailureKind.connection => 'Parece que no hay conexión.',
+      BookSearchFailureKind.timeout =>
+        'La búsqueda está tardando más de lo normal. Reintenta.',
+      BookSearchFailureKind.api =>
+        'Open Library no respondió. Puedes reintentar o añadirlo manualmente.',
+    };
+  }
+
+  return 'Open Library no respondió. Puedes reintentar o añadirlo manualmente.';
+}
+
 class _FormSection extends StatelessWidget {
   const _FormSection({
     required this.title,
@@ -502,9 +542,10 @@ class _FormSection extends StatelessWidget {
 }
 
 class _InlineError extends StatelessWidget {
-  const _InlineError({required this.message});
+  const _InlineError({required this.message, this.onManualAdd});
 
   final String message;
+  final VoidCallback? onManualAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -516,18 +557,31 @@ class _InlineError extends StatelessWidget {
         color: theme.colorScheme.errorContainer.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(18),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.error_outline_rounded, color: theme.colorScheme.error),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              message,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onErrorContainer,
+          Row(
+            children: [
+              Icon(Icons.error_outline_rounded, color: theme.colorScheme.error),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  message,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onErrorContainer,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
+          if (onManualAdd != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            OutlinedButton.icon(
+              onPressed: onManualAdd,
+              icon: const Icon(Icons.edit_note_rounded),
+              label: const Text('Añadir sin portada'),
+            ),
+          ],
         ],
       ),
     );
@@ -647,6 +701,7 @@ class _ResultsList extends StatelessWidget {
     required this.selectedBook,
     required this.onSelected,
     required this.onShowMore,
+    required this.onManualAdd,
   });
 
   final List<BookSearchResult> results;
@@ -656,6 +711,7 @@ class _ResultsList extends StatelessWidget {
   final BookSearchResult? selectedBook;
   final ValueChanged<BookSearchResult> onSelected;
   final VoidCallback onShowMore;
+  final VoidCallback onManualAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -672,10 +728,12 @@ class _ResultsList extends StatelessWidget {
 
     if (results.isEmpty) {
       if (!hasSearched) return const SizedBox.shrink();
-      return const _SearchFeedbackCard(
+      return _SearchFeedbackCard(
         icon: AppIcons.book,
-        title: 'No encontramos ese libro',
+        title: 'No encontramos resultados para esa búsqueda',
         message: 'Prueba con otro título, autor o ISBN más específico.',
+        actionLabel: 'Añadir sin portada',
+        onAction: onManualAdd,
       );
     }
 
@@ -742,12 +800,16 @@ class _SearchFeedbackCard extends StatelessWidget {
     required this.title,
     required this.message,
     this.isLoading = false,
+    this.actionLabel,
+    this.onAction,
   });
 
   final IconData icon;
   final String title;
   final String message;
   final bool isLoading;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -788,6 +850,14 @@ class _SearchFeedbackCard extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
+          if (actionLabel != null && onAction != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            OutlinedButton.icon(
+              onPressed: onAction,
+              icon: const Icon(Icons.edit_note_rounded),
+              label: Text(actionLabel!),
+            ),
+          ],
         ],
       ),
     );

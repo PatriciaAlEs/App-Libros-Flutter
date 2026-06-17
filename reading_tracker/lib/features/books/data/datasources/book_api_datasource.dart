@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
@@ -13,6 +16,9 @@ final bookApiDatasourceProvider = Provider<BookApiDatasource>((ref) {
 
 class BookApiDatasource {
   const BookApiDatasource(this._client);
+
+  static const _requestTimeout = Duration(seconds: 8);
+  static const _maxAttempts = 2;
 
   final http.Client _client;
 
@@ -35,19 +41,51 @@ class BookApiDatasource {
       ].join(','),
     });
 
-    final response = await _client.get(uri);
-    if (response.statusCode != 200) {
-      throw Exception('Book search failed (${response.statusCode})');
+    for (var attempt = 1; attempt <= _maxAttempts; attempt++) {
+      try {
+        final response = await _client.get(uri).timeout(_requestTimeout);
+        if (response.statusCode != 200) {
+          throw BookSearchException.api(
+            'Open Library returned ${response.statusCode}',
+          );
+        }
+
+        final payload = jsonDecode(response.body) as Map<String, dynamic>;
+        final docs = payload['docs'] as List<dynamic>? ?? const [];
+
+        return docs
+            .whereType<Map<String, dynamic>>()
+            .map(_toSearchResult)
+            .where((book) => book.title.trim().isNotEmpty)
+            .toList();
+      } on TimeoutException catch (error, stackTrace) {
+        if (attempt == _maxAttempts) {
+          _logSearchFailure(error, stackTrace);
+          throw BookSearchException.timeout(error);
+        }
+      } on SocketException catch (error, stackTrace) {
+        if (attempt == _maxAttempts) {
+          _logSearchFailure(error, stackTrace);
+          throw BookSearchException.connection(error);
+        }
+      } on http.ClientException catch (error, stackTrace) {
+        if (attempt == _maxAttempts) {
+          _logSearchFailure(error, stackTrace);
+          throw BookSearchException.connection(error);
+        }
+      } on FormatException catch (error, stackTrace) {
+        _logSearchFailure(error, stackTrace);
+        throw BookSearchException.api(error);
+      } on BookSearchException catch (error, stackTrace) {
+        if (attempt == _maxAttempts ||
+            error.kind == BookSearchFailureKind.api) {
+          _logSearchFailure(error, stackTrace);
+          rethrow;
+        }
+      }
     }
 
-    final payload = jsonDecode(response.body) as Map<String, dynamic>;
-    final docs = payload['docs'] as List<dynamic>? ?? const [];
-
-    return docs
-        .whereType<Map<String, dynamic>>()
-        .map(_toSearchResult)
-        .where((book) => book.title.trim().isNotEmpty)
-        .toList();
+    throw const BookSearchException.api('Open Library search failed');
   }
 
   BookSearchResult _toSearchResult(Map<String, dynamic> json) {
@@ -95,4 +133,31 @@ class BookApiDatasource {
     }
     return null;
   }
+
+  void _logSearchFailure(Object error, StackTrace stackTrace) {
+    if (!kDebugMode) return;
+    debugPrint('Open Library search failed: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
+}
+
+enum BookSearchFailureKind { connection, timeout, api }
+
+class BookSearchException implements Exception {
+  const BookSearchException(this.kind, this.cause);
+
+  const BookSearchException.connection(Object cause)
+    : this(BookSearchFailureKind.connection, cause);
+
+  const BookSearchException.timeout(Object cause)
+    : this(BookSearchFailureKind.timeout, cause);
+
+  const BookSearchException.api(Object cause)
+    : this(BookSearchFailureKind.api, cause);
+
+  final BookSearchFailureKind kind;
+  final Object cause;
+
+  @override
+  String toString() => 'BookSearchException($kind, $cause)';
 }
