@@ -43,10 +43,6 @@ class StatsScreen extends ConsumerWidget {
               onRetry: () => ref.invalidate(statisticsSummaryProvider),
             ),
             data: (summary) {
-              if (summary.totalBooks == 0) {
-                return const _StatsEmptyState();
-              }
-
               return ListView(
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.lg,
@@ -1096,6 +1092,7 @@ class _StatsCardGrid extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _StatsEmptyState extends StatelessWidget {
   const _StatsEmptyState();
 
