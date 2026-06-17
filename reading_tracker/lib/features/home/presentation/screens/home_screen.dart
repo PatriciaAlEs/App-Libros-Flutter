@@ -9,6 +9,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
+import '../../../books/presentation/widgets/current_reading_card.dart';
 import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
 import '../../../reading_sessions/domain/entities/reading_session.dart';
 import '../../../reading_sessions/domain/usecases/register_reading_session.dart';
@@ -49,11 +50,11 @@ class HomeScreen extends ConsumerWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                theme.colorScheme.secondaryContainer.withValues(alpha: 0.18),
-                theme.colorScheme.primaryContainer.withValues(alpha: 0.24),
+                theme.scaffoldBackgroundColor,
+                theme.colorScheme.primaryContainer.withValues(alpha: 0.14),
                 theme.scaffoldBackgroundColor,
               ],
-              stops: const [0, 0.40, 1],
+              stops: const [0, 0.44, 1],
             ),
           ),
           child: booksAsync.when(
@@ -80,6 +81,9 @@ class HomeScreen extends ConsumerWidget {
                 currentBooks,
                 currentReadingBookId,
               );
+              final otherCurrentBooks = currentBooks
+                  .where((book) => book.id != currentReadingBookId)
+                  .toList();
               final pendingBooks = _pendingBooks(books);
 
               return RefreshIndicator(
@@ -96,13 +100,28 @@ class HomeScreen extends ConsumerWidget {
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(
                         AppSpacing.lg,
-                        AppSpacing.lg,
+                        AppSpacing.md,
                         AppSpacing.lg,
                         132,
                       ),
                       sliver: SliverList.list(
                         children: [
-                          _HomeHeader(readerProfile: readerProfile),
+                          ReadPpPageHeader(
+                            readerProfile: readerProfile,
+                            onTap: () {
+                              Navigator.pushNamedAndRemoveUntil(
+                                context,
+                                '/',
+                                (route) => false,
+                              );
+                            },
+                            onProfileTap: () =>
+                                Navigator.pushNamed(context, '/settings'),
+                            onAddBookTap: () =>
+                                Navigator.pushNamed(context, '/book/add'),
+                            onCalendarTap: () =>
+                                Navigator.pushNamed(context, '/calendar'),
+                          ),
                           const SizedBox(height: AppSpacing.xl),
                           _CurrentReadingCards(
                             books: prioritizedCurrentBooks,
@@ -124,13 +143,10 @@ class HomeScreen extends ConsumerWidget {
                             onStartReading: (book) =>
                                 _startReading(context, ref, book),
                           ),
-                          if (currentBooks.length > 1) ...[
+                          if (otherCurrentBooks.isNotEmpty) ...[
                             const SizedBox(height: AppSpacing.lg),
                             _CurrentReadingStrip(
-                              books: _prioritizeCurrentBooks(
-                                currentBooks,
-                                currentReadingBookId,
-                              ),
+                              books: otherCurrentBooks,
                               selectedBookId: currentReadingBookId,
                               onSelect: (book) => ref
                                   .read(
@@ -416,6 +432,7 @@ class _HomeErrorState extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _HomeHeader extends StatelessWidget {
   const _HomeHeader({required this.readerProfile});
 
@@ -501,22 +518,11 @@ class _HomeHeader extends StatelessWidget {
                     ),
                   );
 
-                  if (constraints.maxWidth < 390) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        greeting,
-                        const SizedBox(height: AppSpacing.md),
-                        Align(alignment: Alignment.centerRight, child: buttons),
-                      ],
-                    );
-                  }
-
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: greeting),
-                      const SizedBox(width: AppSpacing.md),
+                      greeting,
+                      const SizedBox(height: AppSpacing.md),
                       buttons,
                     ],
                   );
@@ -678,6 +684,7 @@ class _JournalHeader extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _CurrentReadingSwitcher extends StatelessWidget {
   const _CurrentReadingSwitcher({
     required this.currentIndex,
@@ -1042,25 +1049,24 @@ class _CurrentReadingCardsState extends State<_CurrentReadingCards> {
 
     if (widget.books.length == 1) {
       final primaryBook = widget.books.first;
-      return _CurrentReadingHero(
-        book: primaryBook,
-        onOpenProgress: () => widget.onOpenProgress(primaryBook),
+      return SizedBox(
+        height: 334,
+        child: CurrentReadingCard(
+          book: primaryBook,
+          currentIndex: 1,
+          totalReadings: 1,
+          onTap: () => widget.onOpenProgress(primaryBook),
+        ),
       );
     }
 
     return Column(
       children: [
-        _CurrentReadingSwitcher(
-          currentIndex: _currentPage + 1,
-          total: widget.books.length,
-          onChange: widget.onChangeCurrentReading,
-        ),
-        const SizedBox(height: AppSpacing.sm),
         LayoutBuilder(
           builder: (context, constraints) {
             final isNarrow = constraints.maxWidth < 350;
             return SizedBox(
-              height: isNarrow ? 526 : 340,
+              height: isNarrow ? 332 : 334,
               child: PageView.builder(
                 key: const Key('current_reading_cards_page_view'),
                 controller: _pageController,
@@ -1071,9 +1077,12 @@ class _CurrentReadingCardsState extends State<_CurrentReadingCards> {
                 onPageChanged: (index) => setState(() => _currentPage = index),
                 itemBuilder: (context, index) {
                   final book = widget.books[index];
-                  return _CurrentReadingHero(
+                  return CurrentReadingCard(
                     book: book,
-                    onOpenProgress: () => widget.onOpenProgress(book),
+                    currentIndex: index + 1,
+                    totalReadings: widget.books.length,
+                    onChangeCurrentReading: widget.onChangeCurrentReading,
+                    onTap: () => widget.onOpenProgress(book),
                   );
                 },
               ),
@@ -1082,230 +1091,6 @@ class _CurrentReadingCardsState extends State<_CurrentReadingCards> {
         ),
       ],
     );
-  }
-}
-
-class _CurrentReadingHero extends StatelessWidget {
-  const _CurrentReadingHero({required this.book, required this.onOpenProgress});
-
-  final Book book;
-  final VoidCallback onOpenProgress;
-
-  @override
-  Widget build(BuildContext context) {
-    final currentBook = book;
-    final theme = Theme.of(context);
-    final progress = _bookProgress(currentBook);
-    final progressPercent = (progress * 100).round();
-    final primary = theme.colorScheme.primary;
-    final dark = Color.lerp(primary, Colors.black, 0.34)!;
-    final onDark = theme.colorScheme.onPrimary;
-    final accent = theme.colorScheme.secondary;
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color.lerp(primary, Colors.white, 0.03)!, primary, dark],
-          stops: const [0, 0.46, 1],
-        ),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-        boxShadow: [
-          BoxShadow(
-            color: dark.withValues(alpha: 0.28),
-            blurRadius: 44,
-            offset: const Offset(0, 24),
-          ),
-          BoxShadow(
-            color: accent.withValues(alpha: 0.16),
-            blurRadius: 26,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(30),
-          onTap: onOpenProgress,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(22, 22, 22, 22),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final isNarrow = constraints.maxWidth < 350;
-                final cover = _BookCover(
-                  url: currentBook.coverUrl,
-                  width: isNarrow ? 96 : 148,
-                  height: isNarrow ? 144 : 220,
-                  radius: 12,
-                );
-
-                final details = Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 7,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color: accent.withValues(alpha: 0.24),
-                          ),
-                        ),
-                        child: Text(
-                          'LECTURA ACTUAL',
-                          style: GoogleFonts.cormorantGaramond(
-                            textStyle: theme.textTheme.labelSmall?.copyWith(
-                              color: accent.withValues(alpha: 0.95),
-                              letterSpacing: 1.1,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              height: 1,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: isNarrow ? AppSpacing.md : 18),
-                    Text(
-                      currentBook.title,
-                      maxLines: isNarrow ? 1 : 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.cormorantGaramond(
-                        textStyle: theme.textTheme.headlineSmall?.copyWith(
-                          color: onDark,
-                          fontSize: isNarrow ? 23 : 32,
-                          fontWeight: FontWeight.w700,
-                          height: 1.02,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    if (currentBook.author?.isNotEmpty == true)
-                      Text(
-                        currentBook.author!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: onDark.withValues(alpha: 0.76),
-                          fontWeight: FontWeight.w500,
-                          height: 1.1,
-                        ),
-                      ),
-                    SizedBox(height: isNarrow ? AppSpacing.md : 28),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        '$progressPercent%',
-                        style: GoogleFonts.cormorantGaramond(
-                          textStyle: theme.textTheme.titleLarge?.copyWith(
-                            color: onDark,
-                            fontSize: isNarrow ? 24 : 27,
-                            fontWeight: FontWeight.w700,
-                            height: 1,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        minHeight: 13,
-                        backgroundColor: Colors.white.withValues(alpha: 0.12),
-                        color: accent.withValues(alpha: 1),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            _pageProgressText(currentBook),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: onDark.withValues(alpha: 0.78),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.schedule_rounded,
-                          color: onDark.withValues(alpha: 0.82),
-                          size: 18,
-                        ),
-                        const SizedBox(width: 5),
-                        Flexible(
-                          child: Text(
-                            'Registrar',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: onDark.withValues(alpha: 0.78),
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: isNarrow ? AppSpacing.sm : 16),
-                    SizedBox(
-                      height: isNarrow ? 40 : 44,
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: onOpenProgress,
-                        icon: const Icon(Icons.swap_horiz_rounded, size: 18),
-                        label: Text(
-                          currentBook.totalPages == null
-                              ? 'Registrar avance'
-                              : 'Continuar lectura',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    cover,
-                    SizedBox(width: isNarrow ? AppSpacing.md : 30),
-                    Expanded(child: details),
-                  ],
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  double _bookProgress(Book book) {
-    final currentPage = book.currentPage;
-    final totalPages = book.totalPages;
-    if (currentPage == null || totalPages == null || totalPages <= 0) {
-      return 0;
-    }
-    return (currentPage / totalPages).clamp(0, 1).toDouble();
-  }
-
-  String _pageProgressText(Book book) {
-    if (book.currentPage == null || book.totalPages == null) {
-      return 'Progreso por registrar';
-    }
-    return '${book.currentPage} / ${book.totalPages} p.';
   }
 }
 
@@ -1455,7 +1240,18 @@ class _CurrentReadingStripState extends State<_CurrentReadingStrip> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _HomeSectionTitle(title: 'Lecturas en curso'),
+          Text(
+            'Otras lecturas',
+            style: GoogleFonts.cormorantGaramond(
+              textStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.88),
+                fontWeight: FontWeight.w700,
+                height: 1,
+              ),
+            ),
+          ),
           const SizedBox(height: AppSpacing.md),
           SizedBox(
             height: 124,
@@ -1647,27 +1443,24 @@ class _TodaySummaryCard extends StatelessWidget {
             Expanded(
               child: _TodayMetric(
                 icon: AppIcons.pages,
-                label: 'Páginas leídas',
                 value: '$pages',
-                footnote: 'pág.',
+                unit: 'pág.',
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: _TodayMetric(
                 icon: AppIcons.time,
-                label: 'Tiempo de lectura',
                 value: '$minutes',
-                footnote: 'min',
+                unit: 'min',
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: _TodayMetric(
                 icon: AppIcons.calendar,
-                label: 'Sesiones',
                 value: '${sessions.length}',
-                footnote: 'sesiones',
+                unit: 'sesiones',
               ),
             ),
           ],
@@ -1680,23 +1473,21 @@ class _TodaySummaryCard extends StatelessWidget {
 class _TodayMetric extends StatelessWidget {
   const _TodayMetric({
     required this.icon,
-    required this.label,
     required this.value,
-    required this.footnote,
+    required this.unit,
   });
 
   final IconData icon;
-  final String label;
   final String value;
-  final String footnote;
+  final String unit;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Container(
-      height: 118,
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 11),
+      height: 112,
+      padding: const EdgeInsets.fromLTRB(12, 13, 12, 12),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.90),
         borderRadius: BorderRadius.circular(22),
@@ -1712,50 +1503,34 @@ class _TodayMetric extends StatelessWidget {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              Icon(icon, color: theme.colorScheme.primary, size: 22),
-              const SizedBox(width: 7),
-              Expanded(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.78),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
+          Icon(icon, color: theme.colorScheme.primary, size: 23),
           FittedBox(
             fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
             child: Text(
               value,
               maxLines: 1,
               style: GoogleFonts.cormorantGaramond(
                 textStyle: theme.textTheme.headlineSmall?.copyWith(
                   color: theme.colorScheme.primary,
-                  fontSize: 38,
+                  fontSize: 42,
                   fontWeight: FontWeight.w800,
                   height: 0.92,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 1),
-          Text(
-            footnote,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              unit,
+              maxLines: 1,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -1793,28 +1568,31 @@ class _WeeklyCalendarPreview extends StatelessWidget {
         Row(
           children: [
             const Expanded(child: _HomeSectionTitle(title: 'Book Journal')),
-            TextButton(onPressed: onTap, child: const Text('Abrir calendario')),
+            Icon(
+              AppIcons.calendar,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ],
         ),
         const SizedBox(height: AppSpacing.md),
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(22),
-            onTap: onTap,
-            child: Row(
-              children: [
-                for (final day in days)
-                  Expanded(
+        Row(
+          children: [
+            for (final day in days)
+              Expanded(
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(18),
+                    onTap: onTap,
                     child: _WeekDayPill(
                       day: day,
                       isToday: _isSameDay(day, today),
                       activity: activityByDay[day] ?? 0,
                     ),
                   ),
-              ],
-            ),
-          ),
+                ),
+              ),
+          ],
         ),
       ],
     );
@@ -1954,20 +1732,13 @@ class _HomeSectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final style = theme.textTheme.titleLarge?.copyWith(
+    final style = theme.textTheme.headlineSmall?.copyWith(
       color: theme.colorScheme.onSurface.withValues(alpha: 0.86),
-      fontWeight: FontWeight.w800,
+      fontWeight: FontWeight.w700,
       height: 1.1,
     );
 
-    return Text(
-      title,
-      style: GoogleFonts.spaceGrotesk(
-        textStyle: style?.copyWith(
-          fontSize: title == 'Resumen de hoy' ? 15.5 : 22,
-        ),
-      ),
-    );
+    return Text(title, style: GoogleFonts.cormorantGaramond(textStyle: style));
   }
 }
 

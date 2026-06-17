@@ -9,6 +9,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/enums/book_status.dart';
 import '../providers/books_provider.dart';
+import '../widgets/current_reading_card.dart';
 
 class BooksListScreen extends ConsumerStatefulWidget {
   const BooksListScreen({super.key});
@@ -78,9 +79,14 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
                         ),
                         const SizedBox(height: AppSpacing.xxl),
                         if (featuredBook != null) ...[
-                          _FeaturedReadingCard(
-                            book: featuredBook,
-                            onTap: () => _openBook(featuredBook),
+                          SizedBox(
+                            height: 334,
+                            child: CurrentReadingCard(
+                              book: featuredBook,
+                              currentIndex: 1,
+                              totalReadings: libraryStats.readingBooks,
+                              onTap: () => _openBook(featuredBook),
+                            ),
                           ),
                           const SizedBox(height: AppSpacing.xxl),
                         ],
@@ -238,27 +244,18 @@ class _LibraryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppBrandHeader(
+        ReadPpPageHeader(
           readerProfile: readerProfile,
+          subtitle: '${stats.totalBooks} libros en tu colección',
           onTap: () {
             Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
           },
           onProfileTap: () => Navigator.pushNamed(context, '/settings'),
           onAddBookTap: onAddBook,
           onCalendarTap: () => Navigator.pushNamed(context, '/calendar'),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(
-          '${stats.totalBooks} libros en tu colección',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.primary.withValues(alpha: 0.72),
-            fontWeight: FontWeight.w600,
-          ),
         ),
         const SizedBox(height: AppSpacing.lg),
         _SearchField(query: query, onChanged: onQueryChanged),
@@ -307,153 +304,6 @@ class _SearchField extends StatelessWidget {
           contentPadding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FeaturedReadingCard extends StatelessWidget {
-  const _FeaturedReadingCard({required this.book, required this.onTap});
-
-  final Book book;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final progress = _bookProgress(book);
-    final percent = (progress * 100).round();
-    final primary = theme.colorScheme.primary;
-    final dark = Color.lerp(primary, Colors.black, 0.32)!;
-    final accent = theme.colorScheme.secondary;
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [primary, dark],
-        ),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-        boxShadow: [
-          BoxShadow(
-            color: dark.withValues(alpha: 0.28),
-            blurRadius: 44,
-            offset: const Offset(0, 24),
-          ),
-          BoxShadow(
-            color: accent.withValues(alpha: 0.16),
-            blurRadius: 26,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(30),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 26, 24, 24),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _BookCover(url: book.coverUrl, width: 116, height: 174),
-                const SizedBox(width: AppSpacing.xl),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'LECTURA ACTUAL',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: accent.withValues(alpha: 0.94),
-                          letterSpacing: 2.8,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      Text(
-                        book.title,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.cormorantGaramond(
-                          textStyle: theme.textTheme.headlineSmall?.copyWith(
-                            color: theme.colorScheme.onPrimary,
-                            fontSize: 31,
-                            fontWeight: FontWeight.w700,
-                            height: 1.04,
-                          ),
-                        ),
-                      ),
-                      if (book.author?.isNotEmpty == true) ...[
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          book.author!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: accent.withValues(alpha: 0.95),
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 22),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '$percent%',
-                            style: GoogleFonts.cormorantGaramond(
-                              textStyle: theme.textTheme.titleLarge?.copyWith(
-                                color: theme.colorScheme.onPrimary,
-                                fontSize: 27,
-                                fontWeight: FontWeight.w700,
-                                height: 1,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 3),
-                              child: Text(
-                                _pageProgress(book),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onPrimary.withValues(
-                                    alpha: 0.74,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(999),
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          minHeight: 5,
-                          backgroundColor: Colors.white.withValues(alpha: 0.12),
-                          color: accent.withValues(alpha: 0.96),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      FilledButton.icon(
-                        onPressed: onTap,
-                        icon: const Icon(AppIcons.book, size: 18),
-                        label: const Text('Ver lectura'),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),

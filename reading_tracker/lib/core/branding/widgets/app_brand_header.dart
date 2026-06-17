@@ -11,6 +11,8 @@ class AppBrandHeader extends StatelessWidget {
     this.readerName = 'Lectora',
     this.readerProfile,
     this.showGreeting = true,
+    this.title,
+    this.subtitle,
     this.onTap,
     this.onProfileTap,
     this.onAddBookTap,
@@ -20,6 +22,8 @@ class AppBrandHeader extends StatelessWidget {
   final String readerName;
   final ReaderProfile? readerProfile;
   final bool showGreeting;
+  final String? title;
+  final String? subtitle;
   final VoidCallback? onTap;
   final VoidCallback? onProfileTap;
   final VoidCallback? onAddBookTap;
@@ -38,7 +42,7 @@ class AppBrandHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final greetingText =
-        readerProfile?.homeGreeting(DateTime.now()) ?? _greeting;
+        title ?? readerProfile?.homeGreeting(DateTime.now()) ?? _greeting;
     final commaIndex = greetingText.indexOf(',');
     final greetingLead = commaIndex == -1
         ? greetingText
@@ -124,7 +128,7 @@ class AppBrandHeader extends StatelessWidget {
             if (onAddBookTap != null || onCalendarTap != null) ...[
               const SizedBox(height: AppSpacing.md),
               Wrap(
-                alignment: WrapAlignment.end,
+                alignment: WrapAlignment.start,
                 spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.sm,
                 children: [
@@ -143,9 +147,59 @@ class AppBrandHeader extends StatelessWidget {
                 ],
               ),
             ],
+            if (subtitle?.trim().isNotEmpty == true) ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                subtitle!.trim(),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.primary.withValues(alpha: 0.72),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ],
         );
       },
+    );
+  }
+}
+
+class ReadPpPageHeader extends StatelessWidget {
+  const ReadPpPageHeader({
+    super.key,
+    this.readerName = 'Lectora',
+    this.readerProfile,
+    this.showGreeting = true,
+    this.title,
+    this.subtitle,
+    this.onTap,
+    this.onProfileTap,
+    this.onAddBookTap,
+    this.onCalendarTap,
+  });
+
+  final String readerName;
+  final ReaderProfile? readerProfile;
+  final bool showGreeting;
+  final String? title;
+  final String? subtitle;
+  final VoidCallback? onTap;
+  final VoidCallback? onProfileTap;
+  final VoidCallback? onAddBookTap;
+  final VoidCallback? onCalendarTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBrandHeader(
+      readerName: readerName,
+      readerProfile: readerProfile,
+      showGreeting: showGreeting,
+      title: title,
+      subtitle: subtitle,
+      onTap: onTap,
+      onProfileTap: onProfileTap,
+      onAddBookTap: onAddBookTap,
+      onCalendarTap: onCalendarTap,
     );
   }
 }

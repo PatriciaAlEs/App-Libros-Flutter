@@ -6,7 +6,10 @@ import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/preferences/reader_profile_controller.dart';
 import '../../../books/data/datasources/book_api_datasource.dart';
+import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/entities/book_search_result.dart';
+import '../../../books/domain/enums/book_status.dart';
+import '../../../books/presentation/providers/books_provider.dart';
 import '../../domain/entities/statistics_summary.dart';
 import '../providers/annual_goal_cover_controller.dart';
 import '../providers/statistics_summary_provider.dart';
@@ -20,6 +23,7 @@ class StatsScreen extends ConsumerWidget {
     final readerProfile = ref.watch(readerProfileControllerProvider);
     final summaryAsync = ref.watch(statisticsSummaryProvider);
     final annualGoalCover = ref.watch(annualGoalCoverControllerProvider);
+    final books = ref.watch(booksProvider).valueOrNull ?? const <Book>[];
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -43,6 +47,8 @@ class StatsScreen extends ConsumerWidget {
               onRetry: () => ref.invalidate(statisticsSummaryProvider),
             ),
             data: (summary) {
+              final effectiveAnnualGoalCover =
+                  annualGoalCover ?? _latestCompletedBookCover(books);
               return ListView(
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.lg,
@@ -69,7 +75,7 @@ class StatsScreen extends ConsumerWidget {
                     booksRemainingForAnnualGoal:
                         summary.booksRemainingForAnnualGoal,
                     isAnnualGoalReached: summary.isAnnualGoalReached,
-                    cover: annualGoalCover,
+                    cover: effectiveAnnualGoalCover,
                     onEditGoal: () => _editAnnualGoal(
                       context,
                       ref,
@@ -253,6 +259,27 @@ class StatsScreen extends ConsumerWidget {
       const SnackBar(content: Text('Portada del reto actualizada')),
     );
   }
+}
+
+AnnualGoalCover? _latestCompletedBookCover(List<Book> books) {
+  final completedBooks = books
+      .where((book) => book.status == BookStatus.completed)
+      .toList();
+  if (completedBooks.isEmpty) return null;
+
+  completedBooks.sort((a, b) {
+    final aDate = a.updatedAt ?? a.completedDate ?? a.createdAt;
+    final bDate = b.updatedAt ?? b.completedDate ?? b.createdAt;
+    return bDate.compareTo(aDate);
+  });
+
+  final book = completedBooks.first;
+  return AnnualGoalCover(
+    title: book.title,
+    author: book.author,
+    coverUrl: book.coverUrl,
+    isbn: book.isbn,
+  );
 }
 
 class _StatsHeader extends StatelessWidget {
@@ -498,7 +525,7 @@ class _AnnualGoalSection extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      cover?.title ?? 'Elige una portada para tu reto',
+                      cover?.title ?? 'Elige un libro para tu reto',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium?.copyWith(
@@ -535,9 +562,7 @@ class _AnnualGoalSection extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onSearchCover,
                 icon: const Icon(Icons.search_rounded, size: 18),
-                label: Text(
-                  cover == null ? 'Buscar portada' : 'Cambiar portada',
-                ),
+                label: Text(cover == null ? 'Buscar libro' : 'Cambiar libro'),
               ),
             ],
           ),
@@ -795,7 +820,7 @@ class _AnnualGoalCoverSearchDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Buscar portada'),
+      title: const Text('Buscar libro'),
       content: SizedBox(
         width: 420,
         child: Column(
@@ -909,7 +934,7 @@ class _CoverSearchEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return const _CoverSearchMessage(
       icon: Icons.search_rounded,
-      title: 'Busca una portada',
+      title: 'Busca un libro',
       message: 'Puedes usar título, autora o ISBN.',
     );
   }
