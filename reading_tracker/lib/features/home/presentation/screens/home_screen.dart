@@ -1094,8 +1094,8 @@ class _CurrentReadingHero extends StatelessWidget {
                 final isNarrow = constraints.maxWidth < 350;
                 final cover = _BookCover(
                   url: currentBook.coverUrl,
-                  width: isNarrow ? 112 : 148,
-                  height: isNarrow ? 168 : 220,
+                  width: isNarrow ? 96 : 148,
+                  height: isNarrow ? 144 : 220,
                   radius: 12,
                 );
 
@@ -1133,12 +1133,12 @@ class _CurrentReadingHero extends StatelessWidget {
                     SizedBox(height: isNarrow ? AppSpacing.md : 18),
                     Text(
                       currentBook.title,
-                      maxLines: 2,
+                      maxLines: isNarrow ? 1 : 2,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.cormorantGaramond(
                         textStyle: theme.textTheme.headlineSmall?.copyWith(
                           color: onDark,
-                          fontSize: isNarrow ? 25 : 32,
+                          fontSize: isNarrow ? 23 : 32,
                           fontWeight: FontWeight.w700,
                           height: 1.02,
                         ),
@@ -1156,7 +1156,7 @@ class _CurrentReadingHero extends StatelessWidget {
                           height: 1.1,
                         ),
                       ),
-                    SizedBox(height: isNarrow ? AppSpacing.lg : 28),
+                    SizedBox(height: isNarrow ? AppSpacing.md : 28),
                     Align(
                       alignment: Alignment.centerRight,
                       child: Text(
@@ -1164,7 +1164,7 @@ class _CurrentReadingHero extends StatelessWidget {
                         style: GoogleFonts.cormorantGaramond(
                           textStyle: theme.textTheme.titleLarge?.copyWith(
                             color: onDark,
-                            fontSize: 27,
+                            fontSize: isNarrow ? 24 : 27,
                             fontWeight: FontWeight.w700,
                             height: 1,
                           ),
@@ -1201,48 +1201,43 @@ class _CurrentReadingHero extends StatelessWidget {
                           size: 18,
                         ),
                         const SizedBox(width: 5),
-                        Text(
-                          'Registrar',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: onDark.withValues(alpha: 0.78),
-                            fontWeight: FontWeight.w700,
+                        Flexible(
+                          child: Text(
+                            'Registrar',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: onDark.withValues(alpha: 0.78),
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: isNarrow ? AppSpacing.sm : 16),
                     SizedBox(
-                      height: 44,
+                      height: isNarrow ? 40 : 44,
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         onPressed: onOpenProgress,
-                        icon: const Icon(Icons.swap_horiz_rounded),
+                        icon: const Icon(Icons.swap_horiz_rounded, size: 18),
                         label: Text(
                           currentBook.totalPages == null
                               ? 'Registrar avance'
                               : 'Continuar lectura',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
                   ],
                 );
 
-                if (isNarrow) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Center(child: cover),
-                      const SizedBox(height: AppSpacing.lg),
-                      details,
-                    ],
-                  );
-                }
-
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     cover,
-                    const SizedBox(width: 30),
+                    SizedBox(width: isNarrow ? AppSpacing.md : 30),
                     Expanded(child: details),
                   ],
                 );
