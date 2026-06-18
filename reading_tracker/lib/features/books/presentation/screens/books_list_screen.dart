@@ -9,6 +9,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/enums/book_status.dart';
 import '../providers/books_provider.dart';
+import '../widgets/book_cover_image.dart';
 import '../widgets/current_reading_card.dart';
 
 class BooksListScreen extends ConsumerStatefulWidget {
@@ -791,30 +792,7 @@ class _BookCover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final placeholder = Container(
-      width: width,
-      height: height,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Icon(AppIcons.book, color: theme.colorScheme.primary),
-    );
-
-    if (url == null || url!.isEmpty) return placeholder;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Image.network(
-        url!,
-        width: width,
-        height: height,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => placeholder,
-      ),
-    );
+    return BookCoverImage(url: url, width: width, height: height, radius: 16);
   }
 }
 

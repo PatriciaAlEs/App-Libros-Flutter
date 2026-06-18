@@ -227,7 +227,7 @@ void main() {
     await tester.pumpAndSettle();
     final manualButton = find.widgetWithText(
       OutlinedButton,
-      'Añadir sin portada',
+      'Añadir manualmente',
     );
     await tester.scrollUntilVisible(
       manualButton,

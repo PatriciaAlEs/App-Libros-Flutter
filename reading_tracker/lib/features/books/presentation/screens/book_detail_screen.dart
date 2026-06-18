@@ -11,6 +11,7 @@ import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/enums/book_status.dart';
 import '../providers/books_provider.dart';
+import '../widgets/book_cover_image.dart';
 import '../widgets/completion_review_sheet.dart';
 
 class BookDetailScreen extends ConsumerWidget {
@@ -1463,31 +1464,11 @@ class _Cover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final placeholder = Container(
+    return BookCoverImage(
+      url: url,
       width: width,
       height: height,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      child: Icon(AppIcons.book, color: theme.colorScheme.primary),
-    );
-
-    if (url == null) {
-      return placeholder;
-    }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: Image.network(
-        url!,
-        width: width,
-        height: height,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => placeholder,
-      ),
+      radius: radius,
     );
   }
 }

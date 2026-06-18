@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/enums/book_status.dart';
+import 'book_cover_image.dart';
 
 class BookCard extends StatelessWidget {
   const BookCard({super.key, required this.book, required this.onTap});
@@ -91,29 +92,11 @@ class _BookCover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (url == null) {
-      return Container(
-        width: 42,
-        height: 56,
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        child: const Icon(Icons.menu_book),
-      );
-    }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(4),
-      child: Image.network(
-        url!,
-        width: 42,
-        height: 56,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Container(
-          width: 42,
-          height: 56,
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: const Icon(Icons.menu_book),
-        ),
-      ),
+    return BookCoverImage(
+      url: url,
+      width: 42,
+      height: 56,
+      icon: Icons.menu_book,
     );
   }
 }

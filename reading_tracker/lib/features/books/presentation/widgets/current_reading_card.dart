@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -372,6 +374,19 @@ class _CardBookCover extends StatelessWidget {
     );
 
     if (url == null || url!.isEmpty) return placeholder;
+    final uri = Uri.tryParse(url!);
+    if (uri != null && uri.scheme == 'file') {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Image.file(
+          File.fromUri(uri),
+          width: width,
+          height: height,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => placeholder,
+        ),
+      );
+    }
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),

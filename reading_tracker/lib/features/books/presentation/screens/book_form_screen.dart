@@ -1,7 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/design_system/design_system.dart';
@@ -15,6 +20,7 @@ import '../../../insights/presentation/providers/reading_insights_summary_provid
 import '../../../stats/presentation/providers/stats_provider.dart';
 import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 import '../providers/books_provider.dart';
+import '../widgets/book_cover_image.dart';
 import '../widgets/completion_review_sheet.dart';
 
 class BookFormScreen extends ConsumerStatefulWidget {
@@ -30,6 +36,9 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   static const _initialVisibleResults = 5;
 
   final _searchController = TextEditingController();
+  final _manualTitleController = TextEditingController();
+  final _manualAuthorController = TextEditingController();
+  final _manualIsbnController = TextEditingController();
   final _totalPagesController = TextEditingController();
   List<BookSearchResult> _results = const [];
   int _visibleResultsCount = _initialVisibleResults;
@@ -39,6 +48,8 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   BookStatus _selectedStatus = BookStatus.pending;
   DateTime? _startedAt;
   DateTime? _finishedAt;
+  String? _localCoverUrl;
+  bool _isManualEntry = false;
   bool _totalPagesAutoFilled = false;
   bool _isSearching = false;
   bool _isSaving = false;
@@ -49,6 +60,9 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   void dispose() {
     _searchDebounce?.cancel();
     _searchController.dispose();
+    _manualTitleController.dispose();
+    _manualAuthorController.dispose();
+    _manualIsbnController.dispose();
     _totalPagesController.dispose();
     super.dispose();
   }
@@ -66,6 +80,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
         _results = const [];
         _visibleResultsCount = _initialVisibleResults;
         _selectedBook = null;
+        _isManualEntry = false;
         if (_totalPagesAutoFilled) {
           _totalPagesController.clear();
           _totalPagesAutoFilled = false;
@@ -94,6 +109,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
       _hasSearched = true;
       _error = null;
       _selectedBook = null;
+      _isManualEntry = false;
       _visibleResultsCount = _initialVisibleResults;
     });
 
@@ -127,6 +143,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   void _selectBook(BookSearchResult book) {
     setState(() {
       _selectedBook = book;
+      _isManualEntry = false;
 
       if (book.numberOfPages != null &&
           (_totalPagesAutoFilled ||
@@ -146,7 +163,9 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     if (title.isEmpty) return;
 
     setState(() {
-      _selectedBook = BookSearchResult(title: title);
+      _isManualEntry = true;
+      _manualTitleController.text = title;
+      _selectedBook = null;
       _results = const [];
       _visibleResultsCount = _initialVisibleResults;
       _isSearching = false;
@@ -160,12 +179,155 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     });
   }
 
+  BookSearchResult? _currentBookCandidate() {
+    if (!_isManualEntry) return _selectedBook;
+    final title = _manualTitleController.text.trim();
+    if (title.isEmpty) return null;
+    return BookSearchResult(
+      title: title,
+      author:
+          _emptyToNull(_manualAuthorController.text) ?? _selectedBook?.author,
+      coverUrl: _localCoverUrl ?? _selectedBook?.coverUrl,
+      isbn: _emptyToNull(_manualIsbnController.text) ?? _selectedBook?.isbn,
+      externalSource: _selectedBook?.externalSource,
+      externalId: _selectedBook?.externalId,
+      firstPublishYear: _selectedBook?.firstPublishYear,
+      numberOfPages:
+          int.tryParse(_totalPagesController.text.trim()) ??
+          _selectedBook?.numberOfPages,
+    );
+  }
+
+  String? _emptyToNull(String value) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
   void _showMoreResults() {
     setState(() {
       _visibleResultsCount = (_visibleResultsCount + _initialVisibleResults)
           .clamp(0, _results.length)
           .toInt();
     });
+  }
+
+  Future<void> _scanIsbn() async {
+    final isbn = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (_) => const _IsbnScannerScreen()),
+    );
+    if (!mounted || isbn == null || isbn.isEmpty) return;
+
+    setState(() {
+      _isManualEntry = true;
+      _manualIsbnController.text = isbn;
+      _hasSearched = true;
+    });
+
+    await _enrichManualBookFromIsbn(isbn);
+  }
+
+  Future<void> _enrichManualBookFromIsbn(String isbn) async {
+    setState(() {
+      _isSearching = true;
+      _error = null;
+    });
+
+    try {
+      final results = await ref
+          .read(bookSearchRepositoryProvider)
+          .searchBooks(isbn);
+      if (!mounted) return;
+      final match = _bestIsbnMatch(isbn, results);
+      if (match == null) return;
+      final apply = await showDialog<bool>(
+        context: context,
+        builder: (context) => _ManualEnrichmentDialog(book: match),
+      );
+      if (!mounted || apply != true) return;
+      setState(() => _applyManualEnrichment(match));
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _error = _bookSearchErrorMessage(error));
+    } finally {
+      if (mounted) setState(() => _isSearching = false);
+    }
+  }
+
+  BookSearchResult? _bestIsbnMatch(
+    String isbn,
+    List<BookSearchResult> results,
+  ) {
+    final normalizedIsbn = normalizeBookIdentifier(isbn);
+    for (final result in results) {
+      if (normalizedIsbn.isNotEmpty &&
+          normalizeBookIdentifier(result.isbn) == normalizedIsbn) {
+        return result;
+      }
+    }
+    return results.isEmpty ? null : results.first;
+  }
+
+  void _applyManualEnrichment(BookSearchResult book) {
+    if (_manualTitleController.text.trim().isEmpty) {
+      _manualTitleController.text = book.title;
+    }
+    if (_manualAuthorController.text.trim().isEmpty && book.author != null) {
+      _manualAuthorController.text = book.author!;
+    }
+    if (_manualIsbnController.text.trim().isEmpty && book.isbn != null) {
+      _manualIsbnController.text = book.isbn!;
+    }
+    if ((_totalPagesController.text.trim().isEmpty || _totalPagesAutoFilled) &&
+        book.numberOfPages != null) {
+      _totalPagesController.text = book.numberOfPages.toString();
+      _totalPagesAutoFilled = true;
+    }
+    _selectedBook = BookSearchResult(
+      title: _manualTitleController.text.trim().isEmpty
+          ? book.title
+          : _manualTitleController.text.trim(),
+      author: _emptyToNull(_manualAuthorController.text) ?? book.author,
+      coverUrl: _localCoverUrl ?? book.coverUrl,
+      isbn: _emptyToNull(_manualIsbnController.text) ?? book.isbn,
+      externalSource: book.externalSource,
+      externalId: book.externalId,
+      firstPublishYear: book.firstPublishYear,
+      numberOfPages:
+          int.tryParse(_totalPagesController.text.trim()) ?? book.numberOfPages,
+    );
+  }
+
+  Future<void> _pickLocalCover(ImageSource source) async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: source,
+      imageQuality: 88,
+      maxWidth: 1400,
+    );
+    if (!mounted || picked == null) return;
+
+    final directory = await getApplicationDocumentsDirectory();
+    final coversDirectory = Directory(p.join(directory.path, 'book_covers'));
+    if (!coversDirectory.existsSync()) {
+      await coversDirectory.create(recursive: true);
+    }
+    final extension = p.extension(picked.path).isEmpty
+        ? '.jpg'
+        : p.extension(picked.path);
+    final destination = File(
+      p.join(coversDirectory.path, '${const Uuid().v4()}$extension'),
+    );
+    await File(picked.path).copy(destination.path);
+    if (!mounted) return;
+    setState(() {
+      _isManualEntry = true;
+      _localCoverUrl = destination.uri.toString();
+    });
+  }
+
+  void _removeLocalCover() {
+    setState(() => _localCoverUrl = null);
   }
 
   void _changeStatus(BookStatus status) {
@@ -224,7 +386,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
   }
 
   Future<void> _save() async {
-    final selectedBook = _selectedBook;
+    final selectedBook = _currentBookCandidate();
     if (selectedBook == null) return;
 
     final existingBooks = await ref.read(booksProvider.future);
@@ -234,7 +396,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     );
     if (duplicateBook != null) {
       if (!mounted) return;
-      await _showDuplicateBookActions(duplicateBook);
+      await _showDuplicateBookActions(duplicateBook, selectedBook);
       return;
     }
 
@@ -292,10 +454,14 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     if (mounted) Navigator.pop(context, _selectedStatus);
   }
 
-  Future<void> _showDuplicateBookActions(Book duplicateBook) async {
+  Future<void> _showDuplicateBookActions(
+    Book duplicateBook,
+    BookSearchResult candidate,
+  ) async {
     final action = await showDialog<_DuplicateBookAction>(
       context: context,
-      builder: (context) => _DuplicateBookDialog(book: duplicateBook),
+      builder: (context) =>
+          _DuplicateBookDialog(book: duplicateBook, candidate: candidate),
     );
     if (!mounted || action == null) return;
 
@@ -330,6 +496,34 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
           const SnackBar(content: Text('Estado del libro actualizado')),
         );
     }
+
+    if (action == _DuplicateBookAction.enrich) {
+      await ref
+          .read(booksProvider.notifier)
+          .updateBook(_enrichedDuplicateBook(duplicateBook, candidate));
+      ref.invalidate(statsProvider);
+      ref.invalidate(statisticsSummaryProvider);
+      ref.invalidate(readingInsightsSummaryProvider);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('Datos del libro actualizados')),
+        );
+    }
+  }
+
+  Book _enrichedDuplicateBook(Book existing, BookSearchResult candidate) {
+    return existing.copyWith(
+      author: existing.author ?? candidate.author,
+      totalPages: existing.totalPages ?? candidate.numberOfPages,
+      coverUrl: existing.coverUrl ?? candidate.coverUrl,
+      isbn: existing.isbn ?? candidate.isbn,
+      externalSource: existing.externalSource ?? candidate.externalSource,
+      externalId: existing.externalId ?? candidate.externalId,
+      firstPublishYear: existing.firstPublishYear ?? candidate.firstPublishYear,
+      updatedAt: DateTime.now(),
+    );
   }
 
   ({DateTime? startedAt, DateTime? finishedAt}) _normalizedReadingDates() {
@@ -396,8 +590,26 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
               ),
               const SizedBox(height: 16),
             ],
-            if (_selectedBook != null) ...[
+            if (_selectedBook != null && !_isManualEntry) ...[
               _SelectedBookCard(book: _selectedBook!),
+              const SizedBox(height: 16),
+            ],
+            if (_isManualEntry) ...[
+              _FormSection(
+                title: 'Añadir manualmente',
+                icon: Icons.edit_note_rounded,
+                child: _ManualBookFields(
+                  titleController: _manualTitleController,
+                  authorController: _manualAuthorController,
+                  isbnController: _manualIsbnController,
+                  coverUrl: _localCoverUrl ?? _selectedBook?.coverUrl,
+                  onChanged: () => setState(() {}),
+                  onScanIsbn: _scanIsbn,
+                  onPickCamera: () => _pickLocalCover(ImageSource.camera),
+                  onPickGallery: () => _pickLocalCover(ImageSource.gallery),
+                  onRemoveCover: _removeLocalCover,
+                ),
+              ),
               const SizedBox(height: 16),
             ],
             _FormSection(
@@ -450,7 +662,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
             const SizedBox(height: 24),
             _SaveButton(
               isSaving: _isSaving,
-              enabled: _selectedBook != null,
+              enabled: _currentBookCandidate() != null,
               onPressed: _save,
             ),
           ],
@@ -636,7 +848,7 @@ class _InlineError extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onManualAdd,
               icon: const Icon(Icons.edit_note_rounded),
-              label: const Text('Añadir sin portada'),
+              label: const Text('Añadir manualmente'),
             ),
           ],
         ],
@@ -645,12 +857,13 @@ class _InlineError extends StatelessWidget {
   }
 }
 
-enum _DuplicateBookAction { view, changeStatus }
+enum _DuplicateBookAction { view, changeStatus, enrich }
 
 class _DuplicateBookDialog extends StatelessWidget {
-  const _DuplicateBookDialog({required this.book});
+  const _DuplicateBookDialog({required this.book, required this.candidate});
 
   final Book book;
+  final BookSearchResult candidate;
 
   @override
   Widget build(BuildContext context) {
@@ -672,9 +885,156 @@ class _DuplicateBookDialog extends StatelessWidget {
               Navigator.pop(context, _DuplicateBookAction.changeStatus),
           child: const Text('Cambiar estado'),
         ),
+        if (_hasEnrichment)
+          TextButton(
+            onPressed: () =>
+                Navigator.pop(context, _DuplicateBookAction.enrich),
+            child: const Text('Actualizar datos'),
+          ),
         FilledButton(
           onPressed: () => Navigator.pop(context, _DuplicateBookAction.view),
           child: const Text('Ver libro'),
+        ),
+      ],
+    );
+  }
+
+  bool get _hasEnrichment {
+    return (book.author == null && candidate.author != null) ||
+        (book.totalPages == null && candidate.numberOfPages != null) ||
+        (book.coverUrl == null && candidate.coverUrl != null) ||
+        (book.isbn == null && candidate.isbn != null) ||
+        (book.externalSource == null && candidate.externalSource != null) ||
+        (book.externalId == null && candidate.externalId != null) ||
+        (book.firstPublishYear == null && candidate.firstPublishYear != null);
+  }
+}
+
+class _ManualBookFields extends StatelessWidget {
+  const _ManualBookFields({
+    required this.titleController,
+    required this.authorController,
+    required this.isbnController,
+    required this.coverUrl,
+    required this.onChanged,
+    required this.onScanIsbn,
+    required this.onPickCamera,
+    required this.onPickGallery,
+    required this.onRemoveCover,
+  });
+
+  final TextEditingController titleController;
+  final TextEditingController authorController;
+  final TextEditingController isbnController;
+  final String? coverUrl;
+  final VoidCallback onChanged;
+  final VoidCallback onScanIsbn;
+  final VoidCallback onPickCamera;
+  final VoidCallback onPickGallery;
+  final VoidCallback onRemoveCover;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _Cover(url: coverUrl, width: 74, height: 108),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Portada opcional',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: onPickGallery,
+                        icon: const Icon(Icons.photo_library_outlined),
+                        label: const Text('Galería'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: onPickCamera,
+                        icon: const Icon(Icons.photo_camera_outlined),
+                        label: const Text('Cámara'),
+                      ),
+                      if (coverUrl != null)
+                        IconButton.filledTonal(
+                          tooltip: 'Quitar portada',
+                          onPressed: onRemoveCover,
+                          icon: const Icon(Icons.close_rounded),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          key: const Key('manual_book_title_field'),
+          controller: titleController,
+          textInputAction: TextInputAction.next,
+          onChanged: (_) => onChanged(),
+          decoration: const InputDecoration(
+            labelText: 'Título',
+            hintText: 'Obligatorio',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          key: const Key('manual_book_author_field'),
+          controller: authorController,
+          textInputAction: TextInputAction.next,
+          onChanged: (_) => onChanged(),
+          decoration: const InputDecoration(
+            labelText: 'Autor',
+            hintText: 'Recomendado',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: TextField(
+                key: const Key('manual_book_isbn_field'),
+                controller: isbnController,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.done,
+                onChanged: (_) => onChanged(),
+                decoration: const InputDecoration(
+                  labelText: 'ISBN',
+                  hintText: 'Opcional',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              height: 56,
+              child: OutlinedButton.icon(
+                onPressed: onScanIsbn,
+                icon: const Icon(Icons.qr_code_scanner_rounded),
+                label: const Text('Escanear ISBN'),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -825,7 +1185,7 @@ class _ResultsList extends StatelessWidget {
         icon: AppIcons.book,
         title: 'No encontramos resultados para esa búsqueda',
         message: 'Prueba con otro título, autor o ISBN más específico.',
-        actionLabel: 'Añadir sin portada',
+        actionLabel: 'Añadir manualmente',
         onAction: onManualAdd,
       );
     }
@@ -873,6 +1233,12 @@ class _ResultsList extends StatelessWidget {
             ),
           ),
         ],
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: onManualAdd,
+          icon: const Icon(Icons.edit_note_rounded),
+          label: const Text('Añadir manualmente'),
+        ),
       ],
     );
   }
@@ -1251,6 +1617,111 @@ class _SelectedBookCard extends StatelessWidget {
   }
 }
 
+class _ManualEnrichmentDialog extends StatelessWidget {
+  const _ManualEnrichmentDialog({required this.book});
+
+  final BookSearchResult book;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Completar datos del libro'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(book.title),
+          if (book.author != null) Text(book.author!),
+          if (book.numberOfPages != null) Text('${book.numberOfPages} pág.'),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Mantener manual'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Completar'),
+        ),
+      ],
+    );
+  }
+}
+
+class _IsbnScannerScreen extends StatefulWidget {
+  const _IsbnScannerScreen();
+
+  @override
+  State<_IsbnScannerScreen> createState() => _IsbnScannerScreenState();
+}
+
+class _IsbnScannerScreenState extends State<_IsbnScannerScreen> {
+  bool _hasReturned = false;
+
+  void _handleDetection(BarcodeCapture capture) {
+    if (_hasReturned) return;
+    for (final barcode in capture.barcodes) {
+      final isbn = _normalizedIsbn(barcode.rawValue);
+      if (isbn == null) continue;
+      _hasReturned = true;
+      Navigator.pop(context, isbn);
+      return;
+    }
+  }
+
+  String? _normalizedIsbn(String? value) {
+    final digits = (value ?? '').replaceAll(RegExp(r'[^0-9Xx]'), '');
+    if (digits.length == 13 || digits.length == 10) {
+      return digits.toUpperCase();
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Escanear ISBN')),
+      body: Stack(
+        children: [
+          MobileScanner(onDetect: _handleDetection),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              color: theme.colorScheme.surface.withValues(alpha: 0.92),
+              child: SafeArea(
+                top: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Enfoca el código de barras del libro',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Si la cámara no está disponible, vuelve atrás y continúa manualmente.',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _Cover extends StatelessWidget {
   const _Cover({required this.url, this.width = 48, this.height = 72});
 
@@ -1260,30 +1731,7 @@ class _Cover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (url == null) {
-      return Container(
-        width: width,
-        height: height,
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        child: const Icon(AppIcons.book),
-      );
-    }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(4),
-      child: Image.network(
-        url!,
-        width: width,
-        height: height,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Container(
-          width: width,
-          height: height,
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: const Icon(AppIcons.book),
-        ),
-      ),
-    );
+    return BookCoverImage(url: url, width: width, height: height);
   }
 }
 
