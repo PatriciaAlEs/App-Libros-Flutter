@@ -873,10 +873,7 @@ class _SearchResults extends StatelessWidget {
       future: future,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const SizedBox(
-            height: 160,
-            child: Center(child: CircularProgressIndicator()),
-          );
+          return const AppSearchSkeletonList(itemCount: 2);
         }
 
         if (snapshot.hasError) {

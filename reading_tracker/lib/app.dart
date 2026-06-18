@@ -48,68 +48,84 @@ class App extends ConsumerWidget {
   Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
-        return MaterialPageRoute(builder: (_) => const MainNavigationScreen());
+        return _route(settings, (_) => const MainNavigationScreen());
 
       case '/home':
-        return MaterialPageRoute(builder: (_) => const HomeScreen());
+        return _route(settings, (_) => const HomeScreen());
 
       case '/books':
-        return MaterialPageRoute(builder: (_) => const BooksListScreen());
+        return _route(settings, (_) => const BooksListScreen());
 
       case '/book/add':
-        return MaterialPageRoute(builder: (_) => const BookFormScreen());
+        return _route(settings, (_) => const BookFormScreen());
 
       case '/book/detail':
         final bookId = settings.arguments as String?;
         if (bookId == null) return _notFoundRoute();
-        return MaterialPageRoute(
-          builder: (_) => BookDetailScreen(bookId: bookId),
+        return _route(
+          settings,
+          (_) => BookDetailScreen(bookId: bookId),
+          slideOffset: const Offset(0.024, 0),
         );
 
       case '/calendar':
-        return MaterialPageRoute(builder: (_) => const CalendarScreen());
+        return _route(settings, (_) => const CalendarScreen());
 
       case '/calendar/day':
         final day = settings.arguments as DateTime?;
         if (day == null) return _notFoundRoute();
-        return MaterialPageRoute(builder: (_) => DayDetailScreen(day: day));
+        return _route(settings, (_) => DayDetailScreen(day: day));
 
       case '/session/add':
         final initialDate = settings.arguments as DateTime?;
-        return MaterialPageRoute(
-          builder: (_) => SessionFormScreen(initialDate: initialDate),
+        return _route(
+          settings,
+          (_) => SessionFormScreen(initialDate: initialDate),
         );
 
       case '/session/edit':
         final session = settings.arguments as ReadingSession?;
         if (session == null) return _notFoundRoute();
-        return MaterialPageRoute(
-          builder: (_) => SessionFormScreen(session: session),
-        );
+        return _route(settings, (_) => SessionFormScreen(session: session));
 
       case '/stats':
-        return MaterialPageRoute(builder: (_) => const StatsScreen());
+        return _route(settings, (_) => const StatsScreen());
 
       case '/progress':
-        return MaterialPageRoute(
-          builder: (_) => const MainNavigationScreen(initialIndex: 2),
+        return _route(
+          settings,
+          (_) => const MainNavigationScreen(initialIndex: 2),
         );
 
       case '/insights':
-        return MaterialPageRoute(builder: (_) => const InsightsScreen());
+        return _route(settings, (_) => const InsightsScreen());
 
       case '/settings':
-        return MaterialPageRoute(builder: (_) => const SettingsScreen());
+        return _route(settings, (_) => const SettingsScreen());
 
       default:
         return _notFoundRoute();
     }
   }
 
-  Route<dynamic> _notFoundRoute() => MaterialPageRoute(
-    builder: (_) =>
-        const Scaffold(body: Center(child: Text('Pantalla no encontrada.'))),
-  );
+  Route<dynamic> _route(
+    RouteSettings settings,
+    WidgetBuilder builder, {
+    Offset slideOffset = const Offset(0.018, 0),
+  }) {
+    return AppFadeThroughPageRoute(
+      settings: settings,
+      builder: builder,
+      slideOffset: slideOffset,
+    );
+  }
+
+  Route<dynamic> _notFoundRoute() =>
+      _route(const RouteSettings(name: '/not-found'), (_) {
+        return const Scaffold(
+          body: Center(child: Text('Pantalla no encontrada.')),
+        );
+      });
 }
 
 class _AppBootstrapScreen extends StatelessWidget {

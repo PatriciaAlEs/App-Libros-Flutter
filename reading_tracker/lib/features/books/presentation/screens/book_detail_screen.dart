@@ -89,6 +89,10 @@ class _BookDetailView extends ConsumerWidget {
     ref.invalidate(readingInsightsSummaryProvider);
 
     if (!context.mounted) return true;
+    if (book.status != BookStatus.completed &&
+        newStatus == BookStatus.completed) {
+      showBookCompletionCelebration(context);
+    }
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Estado actualizado')));
@@ -110,6 +114,8 @@ class _BookDetailView extends ConsumerWidget {
       publisher: book.publisher,
       coverUrl: book.coverUrl,
       isbn: book.isbn,
+      externalSource: book.externalSource,
+      externalId: book.externalId,
       firstPublishYear: book.firstPublishYear,
       genre: book.genre,
       language: book.language,
@@ -141,6 +147,8 @@ class _BookDetailView extends ConsumerWidget {
       publisher: book.publisher,
       coverUrl: book.coverUrl,
       isbn: book.isbn,
+      externalSource: book.externalSource,
+      externalId: book.externalId,
       firstPublishYear: book.firstPublishYear,
       genre: book.genre,
       language: book.language,

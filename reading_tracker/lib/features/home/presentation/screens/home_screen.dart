@@ -577,7 +577,7 @@ class _HomePillButton extends StatelessWidget {
     return Material(
       color: theme.colorScheme.surface.withValues(alpha: 0.94),
       borderRadius: BorderRadius.circular(18),
-      child: InkWell(
+      child: AppPressable(
         borderRadius: BorderRadius.circular(18),
         onTap: onTap,
         child: Container(
@@ -636,8 +636,8 @@ class _HeaderActionButton extends StatelessWidget {
       child: Material(
         color: theme.colorScheme.surface.withValues(alpha: 0.68),
         shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
+        child: AppPressable(
+          borderRadius: BorderRadius.circular(999),
           onTap: onTap,
           child: Container(
             width: 44,
@@ -1043,11 +1043,14 @@ class _CurrentReadingCardsState extends State<_CurrentReadingCards> {
       final primaryBook = widget.books.first;
       return SizedBox(
         height: 334,
-        child: CurrentReadingCard(
-          book: primaryBook,
-          currentIndex: 1,
-          totalReadings: 1,
-          onTap: () => widget.onOpenProgress(primaryBook),
+        child: AppAnimatedPageSwitch(
+          child: CurrentReadingCard(
+            key: ValueKey('current-reading-${primaryBook.id}'),
+            book: primaryBook,
+            currentIndex: 1,
+            totalReadings: 1,
+            onTap: () => widget.onOpenProgress(primaryBook),
+          ),
         ),
       );
     }
@@ -1069,12 +1072,17 @@ class _CurrentReadingCardsState extends State<_CurrentReadingCards> {
                 onPageChanged: (index) => setState(() => _currentPage = index),
                 itemBuilder: (context, index) {
                   final book = widget.books[index];
-                  return CurrentReadingCard(
-                    book: book,
-                    currentIndex: index + 1,
-                    totalReadings: widget.books.length,
-                    onChangeCurrentReading: widget.onChangeCurrentReading,
-                    onTap: () => widget.onOpenProgress(book),
+                  return _CurrentReadingCardMotion(
+                    controller: _pageController,
+                    pageIndex: index,
+                    child: CurrentReadingCard(
+                      key: ValueKey('current-reading-${book.id}'),
+                      book: book,
+                      currentIndex: index + 1,
+                      totalReadings: widget.books.length,
+                      onChangeCurrentReading: widget.onChangeCurrentReading,
+                      onTap: () => widget.onOpenProgress(book),
+                    ),
                   );
                 },
               ),
@@ -1082,6 +1090,39 @@ class _CurrentReadingCardsState extends State<_CurrentReadingCards> {
           },
         ),
       ],
+    );
+  }
+}
+
+class _CurrentReadingCardMotion extends StatelessWidget {
+  const _CurrentReadingCardMotion({
+    required this.controller,
+    required this.pageIndex,
+    required this.child,
+  });
+
+  final PageController controller;
+  final int pageIndex;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      child: child,
+      builder: (context, child) {
+        var page = pageIndex.toDouble();
+        if (controller.hasClients && controller.position.haveDimensions) {
+          page = controller.page ?? pageIndex.toDouble();
+        }
+        final distance = (page - pageIndex).abs().clamp(0.0, 1.0);
+        final opacity = 1 - (distance * 0.22);
+        final dx = (pageIndex - page) * 18;
+        return Opacity(
+          opacity: opacity,
+          child: Transform.translate(offset: Offset(dx, 0), child: child),
+        );
+      },
     );
   }
 }

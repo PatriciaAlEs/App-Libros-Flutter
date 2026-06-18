@@ -7,6 +7,7 @@ import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
 import '../../../books/presentation/widgets/completion_review_sheet.dart';
+import '../../../../core/design_system/design_system.dart';
 import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
 import '../../../stats/presentation/providers/stats_provider.dart';
 import '../../../stats/presentation/providers/statistics_summary_provider.dart';
@@ -47,6 +48,7 @@ Future<void> maybeOfferSessionCompletion({
   _invalidateCompletionProviders(ref);
 
   if (!context.mounted) return;
+  showBookCompletionCelebration(context);
   final review = await showModalBottomSheet<CompletionReview>(
     context: context,
     isScrollControlled: true,
@@ -71,6 +73,8 @@ Future<void> maybeOfferSessionCompletion({
     publisher: completedBook.publisher,
     coverUrl: completedBook.coverUrl,
     isbn: completedBook.isbn,
+    externalSource: completedBook.externalSource,
+    externalId: completedBook.externalId,
     firstPublishYear: completedBook.firstPublishYear,
     genre: completedBook.genre,
     language: completedBook.language,

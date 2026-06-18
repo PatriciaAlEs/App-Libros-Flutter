@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../design_system/motion/app_motion.dart';
 import 'app_theme_tokens.dart';
 import 'app_typography.dart';
 
@@ -126,6 +127,7 @@ class AppTheme {
           disabledForegroundColor: colorScheme.onPrimary.withValues(
             alpha: 0.76,
           ),
+          animationDuration: AppMotion.fast,
           elevation: AppElevations.sm,
           shadowColor: theme.primaryDark.withValues(alpha: 0.18),
           minimumSize: const Size(0, 48),
@@ -143,6 +145,7 @@ class AppTheme {
           backgroundColor: colorScheme.surface.withValues(alpha: 0.88),
           foregroundColor: colorScheme.primary,
           disabledForegroundColor: colorScheme.primary.withValues(alpha: 0.42),
+          animationDuration: AppMotion.fast,
           minimumSize: const Size(0, 48),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
           side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.22)),
@@ -159,6 +162,7 @@ class AppTheme {
         style: TextButton.styleFrom(
           foregroundColor: colorScheme.primary,
           disabledForegroundColor: colorScheme.primary.withValues(alpha: 0.42),
+          animationDuration: AppMotion.fast,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           textStyle: textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w800,

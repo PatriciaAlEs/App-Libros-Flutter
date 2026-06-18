@@ -1171,12 +1171,7 @@ class _ResultsList extends StatelessWidget {
     final theme = Theme.of(context);
 
     if (isSearching) {
-      return _SearchFeedbackCard(
-        icon: AppIcons.search,
-        title: 'Buscando tu libro',
-        message: 'Estamos revisando resultados y portadas disponibles.',
-        isLoading: true,
-      );
+      return const _SearchLoadingSkeleton();
     }
 
     if (results.isEmpty) {
@@ -1253,12 +1248,41 @@ class _ResultsList extends StatelessWidget {
   }
 }
 
+class _SearchLoadingSkeleton extends StatelessWidget {
+  const _SearchLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Buscando tu libro',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Estamos revisando resultados y portadas disponibles.',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 12),
+        const AppSearchSkeletonList(),
+      ],
+    );
+  }
+}
+
 class _SearchFeedbackCard extends StatelessWidget {
   const _SearchFeedbackCard({
     required this.icon,
     required this.title,
     required this.message,
-    this.isLoading = false,
     this.actionLabel,
     this.onAction,
   });
@@ -1266,7 +1290,6 @@ class _SearchFeedbackCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String message;
-  final bool isLoading;
   final String? actionLabel;
   final VoidCallback? onAction;
 
@@ -1285,14 +1308,7 @@ class _SearchFeedbackCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          if (isLoading)
-            const SizedBox(
-              width: 28,
-              height: 28,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          else
-            Icon(icon, color: theme.colorScheme.primary, size: 30),
+          Icon(icon, color: theme.colorScheme.primary, size: 30),
           const SizedBox(height: AppSpacing.md),
           Text(
             title,

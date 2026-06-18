@@ -5,5 +5,7 @@ export 'components/progress_card.dart';
 export 'components/section_header.dart';
 export 'icons/app_icons.dart';
 export 'motion/app_motion.dart';
+export 'motion/app_completion_celebration.dart';
 export 'motion/app_pressable.dart';
+export 'motion/app_skeleton.dart';
 export '../theme/app_theme_tokens.dart';

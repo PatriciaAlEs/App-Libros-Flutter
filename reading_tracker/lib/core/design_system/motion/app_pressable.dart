@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'app_motion.dart';
 
@@ -31,7 +32,12 @@ class _AppPressableState extends State<AppPressable> {
       curve: AppMotion.standard,
       child: InkWell(
         borderRadius: widget.borderRadius,
-        onTap: widget.onTap,
+        onTap: widget.onTap == null
+            ? null
+            : () {
+                HapticFeedback.selectionClick();
+                widget.onTap!();
+              },
         onTapDown: (_) => _setPressed(true),
         onTapCancel: () => _setPressed(false),
         onTapUp: (_) => _setPressed(false),

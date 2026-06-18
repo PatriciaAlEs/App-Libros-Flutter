@@ -222,7 +222,7 @@ class _BrandHeaderPillButton extends StatelessWidget {
     return Material(
       color: theme.colorScheme.surface.withValues(alpha: 0.94),
       borderRadius: BorderRadius.circular(18),
-      child: InkWell(
+      child: AppPressable(
         borderRadius: BorderRadius.circular(18),
         onTap: onTap,
         child: Container(
@@ -281,8 +281,8 @@ class _BrandHeaderIconButton extends StatelessWidget {
       child: Material(
         color: theme.colorScheme.surface.withValues(alpha: 0.72),
         shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
+        child: AppPressable(
+          borderRadius: BorderRadius.circular(999),
           onTap: onTap,
           child: Container(
             width: 44,

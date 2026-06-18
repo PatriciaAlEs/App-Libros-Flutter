@@ -30,30 +30,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          KeyedSubtree(
-            key: ValueKey('home-${_tabVersions[0]}'),
-            child: const HomeScreen(),
-          ),
-          KeyedSubtree(
-            key: ValueKey('books-${_tabVersions[1]}'),
-            child: const BooksListScreen(),
-          ),
-          KeyedSubtree(
-            key: ValueKey('progress-${_tabVersions[2]}'),
-            child: const ProgressScreen(),
-          ),
-          KeyedSubtree(
-            key: ValueKey('insights-${_tabVersions[3]}'),
-            child: const InsightsScreen(),
-          ),
-          KeyedSubtree(
-            key: ValueKey('profile-${_tabVersions[4]}'),
-            child: const SettingsScreen(),
-          ),
-        ],
+      body: AppAnimatedPageSwitch(
+        child: KeyedSubtree(
+          key: ValueKey('tab-$_selectedIndex-${_tabVersions[_selectedIndex]}'),
+          child: _screenForIndex(_selectedIndex),
+        ),
       ),
       bottomNavigationBar: _MainBottomNavigation(
         selectedIndex: _selectedIndex,
@@ -63,10 +44,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _selectTab(int index) {
+    if (index == _selectedIndex) return;
     setState(() {
       _selectedIndex = index;
       _tabVersions[index]++;
     });
+  }
+
+  Widget _screenForIndex(int index) {
+    return switch (index) {
+      0 => const HomeScreen(),
+      1 => const BooksListScreen(),
+      2 => const ProgressScreen(),
+      3 => const InsightsScreen(),
+      _ => const SettingsScreen(),
+    };
   }
 }
 
