@@ -12,7 +12,6 @@ import 'features/insights/presentation/screens/insights_screen.dart';
 import 'features/navigation/presentation/screens/main_navigation_screen.dart';
 import 'features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
-import 'features/progress/presentation/screens/progress_screen.dart';
 import 'features/reading_sessions/presentation/screens/calendar_screen.dart';
 import 'features/reading_sessions/presentation/screens/day_detail_screen.dart';
 import 'features/reading_sessions/presentation/screens/session_form_screen.dart';
@@ -92,7 +91,9 @@ class App extends ConsumerWidget {
         return MaterialPageRoute(builder: (_) => const StatsScreen());
 
       case '/progress':
-        return MaterialPageRoute(builder: (_) => const ProgressScreen());
+        return MaterialPageRoute(
+          builder: (_) => const MainNavigationScreen(initialIndex: 2),
+        );
 
       case '/insights':
         return MaterialPageRoute(builder: (_) => const InsightsScreen());

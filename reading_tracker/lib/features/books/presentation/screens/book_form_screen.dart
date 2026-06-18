@@ -225,6 +225,17 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     final selectedBook = _selectedBook;
     if (selectedBook == null) return;
 
+    final existingBooks = await ref.read(booksProvider.future);
+    if (_isDuplicateBook(selectedBook, existingBooks)) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('Este libro ya está en tu biblioteca')),
+        );
+      return;
+    }
+
     setState(() => _isSaving = true);
     final normalizedDates = _normalizedReadingDates();
 
@@ -275,6 +286,52 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     }
 
     if (mounted) Navigator.pop(context, _selectedStatus);
+  }
+
+  bool _isDuplicateBook(
+    BookSearchResult selectedBook,
+    List<Book> existingBooks,
+  ) {
+    final selectedIsbn = _normalizedIdentifier(selectedBook.isbn);
+    final selectedTitle = _normalizedText(selectedBook.title);
+    final selectedAuthor = _normalizedText(selectedBook.author ?? '');
+
+    for (final book in existingBooks) {
+      final existingIsbn = _normalizedIdentifier(book.isbn);
+      if (selectedIsbn.isNotEmpty &&
+          existingIsbn.isNotEmpty &&
+          selectedIsbn == existingIsbn) {
+        return true;
+      }
+
+      final existingTitle = _normalizedText(book.title);
+      final existingAuthor = _normalizedText(book.author ?? '');
+      if (selectedTitle.isNotEmpty &&
+          selectedAuthor.isNotEmpty &&
+          selectedTitle == existingTitle &&
+          selectedAuthor == existingAuthor) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  String _normalizedIdentifier(String? value) {
+    return (value ?? '').toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
+  }
+
+  String _normalizedText(String value) {
+    final lower = value.toLowerCase().trim();
+    final withoutAccents = lower
+        .replaceAll(RegExp(r'[áàäâã]'), 'a')
+        .replaceAll(RegExp(r'[éèëê]'), 'e')
+        .replaceAll(RegExp(r'[íìïî]'), 'i')
+        .replaceAll(RegExp(r'[óòöôõ]'), 'o')
+        .replaceAll(RegExp(r'[úùüû]'), 'u')
+        .replaceAll('ñ', 'n')
+        .replaceAll('ç', 'c');
+    return withoutAccents.replaceAll(RegExp(r'[^a-z0-9]+'), '');
   }
 
   ({DateTime? startedAt, DateTime? finishedAt}) _normalizedReadingDates() {

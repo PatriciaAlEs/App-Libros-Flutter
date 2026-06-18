@@ -4,6 +4,7 @@ class ReadingInsightsSummary {
     this.mostReadBookPages = 0,
     this.mostReadAuthor,
     this.mostReadAuthorPages = 0,
+    this.mostReadAuthorBooks = const [],
     this.favoriteGenre,
     this.favoriteGenrePages = 0,
     this.averagePagesPerSession,
@@ -44,6 +45,7 @@ class ReadingInsightsSummary {
       mostReadBookPages = 0,
       mostReadAuthor = null,
       mostReadAuthorPages = 0,
+      mostReadAuthorBooks = const [],
       favoriteGenre = null,
       favoriteGenrePages = 0,
       averagePagesPerSession = null,
@@ -82,6 +84,7 @@ class ReadingInsightsSummary {
   final int mostReadBookPages;
   final String? mostReadAuthor;
   final int mostReadAuthorPages;
+  final List<ReadingInsightBookPreview> mostReadAuthorBooks;
   final String? favoriteGenre;
   final int favoriteGenrePages;
   final double? averagePagesPerSession;
@@ -174,4 +177,16 @@ class ReadingInsightRatedBook {
 
   final String title;
   final double rating;
+}
+
+class ReadingInsightBookPreview {
+  const ReadingInsightBookPreview({
+    required this.title,
+    this.author,
+    this.coverUrl,
+  });
+
+  final String title;
+  final String? author;
+  final String? coverUrl;
 }

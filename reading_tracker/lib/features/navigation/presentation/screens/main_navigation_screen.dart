@@ -8,15 +8,23 @@ import '../../../progress/presentation/screens/progress_screen.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({super.key});
+  const MainNavigationScreen({super.key, this.initialIndex = 0});
+
+  final int initialIndex;
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
   final List<int> _tabVersions = List.filled(5, 0);
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex.clamp(0, 4);
+  }
 
   @override
   Widget build(BuildContext context) {

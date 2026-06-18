@@ -92,6 +92,13 @@ class InsightsRepositoryImpl implements InsightsRepository {
     final topBookEntry = _topEntry(pagesByBookId);
     final topBook = topBookEntry == null ? null : booksById[topBookEntry.key];
     final topAuthorEntry = _topEntry(pagesByAuthor);
+    final mostReadAuthorBooks = topAuthorEntry == null
+        ? const <ReadingInsightBookPreview>[]
+        : _booksForAuthor(
+            books,
+            pagesByBookId.keys.toSet(),
+            topAuthorEntry.key,
+          );
     final topGenreEntry = _topEntry(pagesByGenre);
     final finishPrediction = _calculateFinishPrediction(
       books,
@@ -113,6 +120,7 @@ class InsightsRepositoryImpl implements InsightsRepository {
       mostReadBookPages: topBookEntry?.value ?? 0,
       mostReadAuthor: topAuthorEntry?.key,
       mostReadAuthorPages: topAuthorEntry?.value ?? 0,
+      mostReadAuthorBooks: mostReadAuthorBooks,
       favoriteGenre: topGenreEntry?.key,
       favoriteGenrePages: topGenreEntry?.value ?? 0,
       averagePagesPerSession: _averagePagesPerSession(pagesSessions),
@@ -156,6 +164,39 @@ class InsightsRepositoryImpl implements InsightsRepository {
       (total, session) => total + session.pagesRead,
     );
     return totalPages / sessions.length;
+  }
+
+  List<ReadingInsightBookPreview> _booksForAuthor(
+    List<Book> books,
+    Set<String> activeBookIds,
+    String author,
+  ) {
+    final normalizedAuthor = _cleanValue(author);
+    if (normalizedAuthor == null) return const [];
+
+    final matchingBooks =
+        books.where((book) {
+          return _cleanValue(book.author) == normalizedAuthor &&
+              (book.status == BookStatus.completed ||
+                  activeBookIds.contains(book.id));
+        }).toList()..sort((a, b) {
+          final aCompleted = a.status == BookStatus.completed ? 0 : 1;
+          final bCompleted = b.status == BookStatus.completed ? 0 : 1;
+          if (aCompleted != bCompleted) return aCompleted.compareTo(bCompleted);
+          final aDate = a.completedDate ?? a.updatedAt ?? a.createdAt;
+          final bDate = b.completedDate ?? b.updatedAt ?? b.createdAt;
+          return bDate.compareTo(aDate);
+        });
+
+    return matchingBooks
+        .map(
+          (book) => ReadingInsightBookPreview(
+            title: book.title,
+            author: book.author,
+            coverUrl: book.coverUrl,
+          ),
+        )
+        .toList();
   }
 
   double? _averageMinutesPerSession(List<ReadingSession> sessions) {

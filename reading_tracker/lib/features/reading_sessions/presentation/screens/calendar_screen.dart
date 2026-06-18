@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../domain/entities/reading_session.dart';
@@ -9,11 +10,28 @@ import '../providers/reading_sessions_provider.dart';
 enum CalendarMode { month, week }
 
 Color _activityColor(BuildContext context, ReadingActivityIntensity intensity) {
+  final colorScheme = Theme.of(context).colorScheme;
   return switch (intensity) {
-    ReadingActivityIntensity.none => const Color(0xFFF4F4F2),
-    ReadingActivityIntensity.low => const Color(0xFFDDDDD9),
-    ReadingActivityIntensity.medium => const Color(0xFFA7A7A1),
-    ReadingActivityIntensity.high => const Color(0xFF4F4F4A),
+    ReadingActivityIntensity.none => Color.lerp(
+      colorScheme.surface,
+      colorScheme.primaryContainer,
+      0.22,
+    )!,
+    ReadingActivityIntensity.low => Color.lerp(
+      colorScheme.surface,
+      colorScheme.primary,
+      0.13,
+    )!,
+    ReadingActivityIntensity.medium => Color.lerp(
+      colorScheme.surface,
+      colorScheme.primary,
+      0.34,
+    )!,
+    ReadingActivityIntensity.high => Color.lerp(
+      colorScheme.surface,
+      colorScheme.primary,
+      0.68,
+    )!,
   };
 }
 
@@ -44,10 +62,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             final theme = Theme.of(context);
             return Text(
               'Book Journal',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w800,
-                height: 1,
+              style: GoogleFonts.cormorantGaramond(
+                textStyle: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w800,
+                  height: 1,
+                ),
               ),
             );
           },
@@ -55,52 +75,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         surfaceTintColor: Colors.transparent,
         actions: [
-          SegmentedButton<CalendarMode>(
-            showSelectedIcon: false,
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.resolveWith((states) {
-                final colorScheme = Theme.of(context).colorScheme;
-                if (states.contains(WidgetState.selected)) {
-                  return colorScheme.primary;
-                }
-                return colorScheme.surface.withValues(alpha: 0.72);
-              }),
-              foregroundColor: WidgetStateProperty.resolveWith((states) {
-                final colorScheme = Theme.of(context).colorScheme;
-                if (states.contains(WidgetState.selected)) {
-                  return colorScheme.onPrimary;
-                }
-                return colorScheme.primary;
-              }),
-              side: WidgetStatePropertyAll(
-                BorderSide(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withValues(alpha: 0.18),
-                ),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(42, 42),
+                padding: EdgeInsets.zero,
+                shape: const CircleBorder(),
               ),
-              shape: WidgetStatePropertyAll(
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-              ),
-              textStyle: WidgetStatePropertyAll(
-                Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
-              ),
+              onPressed: () => Navigator.pushNamed(context, '/session/add'),
+              child: const Icon(Icons.add_rounded),
             ),
-            segments: const [
-              ButtonSegment(value: CalendarMode.month, label: Text('Mes')),
-              ButtonSegment(value: CalendarMode.week, label: Text('Semana')),
-            ],
-            selected: {_mode},
-            onSelectionChanged: (selection) {
-              setState(() => _mode = selection.first);
-            },
-          ),
-          IconButton(
-            tooltip: 'Nueva sesión',
-            icon: const Icon(Icons.add_rounded),
-            onPressed: () => Navigator.pushNamed(context, '/session/add'),
           ),
         ],
       ),
@@ -157,6 +142,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           activitiesByDay: activitiesByDay,
                           booksById: booksById,
                         ),
+                ),
+                _CalendarModeSelector(
+                  mode: _mode,
+                  onChanged: (mode) => setState(() => _mode = mode),
                 ),
                 const _ActivityLegend(),
                 _ActivitySummaryCard(summary: summary),
@@ -252,10 +241,12 @@ class _CalendarHeader extends StatelessWidget {
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w800,
-                height: 1,
+              style: GoogleFonts.cormorantGaramond(
+                textStyle: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w800,
+                  height: 1,
+                ),
               ),
             ),
           ),
@@ -286,6 +277,90 @@ class _RoundNavButton extends StatelessWidget {
           width: 42,
           height: 42,
           child: Icon(icon, color: theme.colorScheme.primary),
+        ),
+      ),
+    );
+  }
+}
+
+class _CalendarModeSelector extends StatelessWidget {
+  const _CalendarModeSelector({required this.mode, required this.onChanged});
+
+  final CalendarMode mode;
+  final ValueChanged<CalendarMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+      child: Container(
+        height: 44,
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface.withValues(alpha: 0.78),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: theme.colorScheme.primary.withValues(alpha: 0.12),
+          ),
+          boxShadow: AppShadows.soft(theme.colorScheme.primary),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: _CalendarModePill(
+                label: 'Mes',
+                selected: mode == CalendarMode.month,
+                onTap: () => onChanged(CalendarMode.month),
+              ),
+            ),
+            Expanded(
+              child: _CalendarModePill(
+                label: 'Semana',
+                selected: mode == CalendarMode.week,
+                onTap: () => onChanged(CalendarMode.week),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CalendarModePill extends StatelessWidget {
+  const _CalendarModePill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: selected ? theme.colorScheme.primary : Colors.transparent,
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: onTap,
+        child: Center(
+          child: Text(
+            label,
+            maxLines: 1,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: selected
+                  ? theme.colorScheme.onPrimary
+                  : theme.colorScheme.primary,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ),
       ),
     );
@@ -660,8 +735,6 @@ class _WeekDaySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final activity = this.activity;
-    final totalPages = activity?.pagesRead ?? 0;
-    final totalMinutes = activity?.minutes ?? 0;
     final intensity = activity?.intensity ?? ReadingActivityIntensity.none;
 
     final theme = Theme.of(context);
@@ -703,10 +776,6 @@ class _WeekDaySection extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (totalPages > 0 || totalMinutes > 0)
-                      _ActivityBadge(
-                        label: _activityValue(totalPages, totalMinutes),
-                      ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -724,14 +793,6 @@ class _WeekDaySection extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _activityValue(int pagesRead, int minutes) {
-    final parts = <String>[
-      if (pagesRead > 0) '$pagesRead pág.',
-      if (minutes > 0) '$minutes min',
-    ];
-    return parts.join(' · ');
   }
 
   String _dayTitle(DateTime date) {
@@ -754,32 +815,6 @@ class _WeekDaySection extends StatelessWidget {
   String _calendarDayKey(DateTime date) {
     final day = _dateOnly(date);
     return 'calendar_day_${day.year}_${day.month}_${day.day}';
-  }
-}
-
-class _ActivityBadge extends StatelessWidget {
-  const _ActivityBadge({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFDDDDD9),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.primary,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    );
   }
 }
 
@@ -865,11 +900,11 @@ class _CalendarDayCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final books = _uniqueBooks();
-    final maxCovers = compact ? 2 : 3;
+    const maxCovers = 3;
     final visibleBooks = books.take(maxCovers).toList();
     final extraCount = books.length - visibleBooks.length;
-    final coverWidth = compact ? 16.0 : 28.0;
-    final coverHeight = compact ? 22.0 : 40.0;
+    final coverWidth = compact ? 14.0 : 28.0;
+    final coverHeight = compact ? 20.0 : 40.0;
     final intensity = activity?.intensity ?? ReadingActivityIntensity.none;
     final totalPages = activity?.pagesRead ?? 0;
     final totalMinutes = activity?.minutes ?? 0;
@@ -877,6 +912,11 @@ class _CalendarDayCell extends StatelessWidget {
 
     final theme = Theme.of(context);
     final hasActivity = totalPages > 0 || totalMinutes > 0;
+    final dayTextColor = isMuted
+        ? theme.colorScheme.onSurface.withValues(alpha: 0.34)
+        : intensity == ReadingActivityIntensity.high
+        ? theme.colorScheme.onPrimary
+        : theme.colorScheme.onSurface;
 
     return InkWell(
       key: Key(_calendarDayKey(day)),
@@ -917,9 +957,7 @@ class _CalendarDayCell extends StatelessWidget {
                 '${day.day}',
                 maxLines: 1,
                 style: TextStyle(
-                  color: isMuted
-                      ? theme.colorScheme.onSurface.withValues(alpha: 0.34)
-                      : theme.colorScheme.onSurface,
+                  color: dayTextColor,
                   fontSize: compact ? 12 : null,
                   fontWeight: FontWeight.w900,
                 ),
@@ -937,33 +975,6 @@ class _CalendarDayCell extends StatelessWidget {
                     coverHeight: coverHeight,
                     compact: compact,
                   ),
-                  const Spacer(),
-                  if (totalPages > 0 || totalMinutes > 0)
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: compact ? 5 : 7,
-                        vertical: compact ? 2 : 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface.withValues(
-                          alpha: 0.72,
-                        ),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _activityLabel(totalPages, totalMinutes),
-                          maxLines: 1,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            fontSize: compact ? 9 : null,
-                            fontWeight: FontWeight.w900,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -989,11 +1000,6 @@ class _CalendarDayCell extends StatelessWidget {
     return date.year == now.year &&
         date.month == now.month &&
         date.day == now.day;
-  }
-
-  String _activityLabel(int pagesRead, int minutes) {
-    if (pagesRead > 0) return '$pagesRead pág.';
-    return '$minutes min';
   }
 
   DateTime _dateOnly(DateTime date) {

@@ -54,19 +54,12 @@ class InsightsScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.lg),
                   _PrimaryInsightPanel(summary: summary),
                   const SizedBox(height: AppSpacing.xxl),
-                  _SectionTitle(
-                    eyebrow: 'LECTURA PERSONAL',
-                    title: 'Tu perfil lector',
-                  ),
+                  const _SectionTitle(title: 'Tu perfil lector'),
+                  const SizedBox(height: AppSpacing.md),
+                  _FavoriteAuthorCard(summary: summary),
                   const SizedBox(height: AppSpacing.md),
                   _InsightGrid(
                     children: [
-                      _InsightCard(
-                        icon: AppIcons.profile,
-                        title: 'Autor favorito',
-                        value: summary.mostReadAuthor ?? 'Sin datos',
-                        subtitle: _formatPages(summary.mostReadAuthorPages),
-                      ),
                       _InsightCard(
                         icon: AppIcons.bookmark,
                         title: 'Género favorito',
@@ -75,25 +68,14 @@ class InsightsScreen extends ConsumerWidget {
                             ? 'Sin géneros registrados'
                             : _formatPages(summary.favoriteGenrePages),
                       ),
-                      _InsightCard(
-                        icon: AppIcons.pages,
-                        title: 'Libro más largo',
-                        value: summary.longestBookTitle ?? 'Sin datos',
-                        subtitle: summary.longestBookPages == null
-                            ? 'Sin libros completados con páginas'
-                            : '${summary.longestBookPages} páginas',
-                      ),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.xxl),
-                  _SectionTitle(
-                    eyebrow: 'MEJORES LECTURAS',
-                    title: 'Lecturas destacadas',
-                  ),
+                  const _SectionTitle(title: 'Mejores lecturas'),
                   const SizedBox(height: AppSpacing.md),
                   _RatedBooksCard(books: summary.topRatedBooks),
                   const SizedBox(height: AppSpacing.xxl),
-                  _SectionTitle(eyebrow: 'PATRONES', title: 'Curiosidades'),
+                  const _SectionTitle(title: 'Curiosidades'),
                   const SizedBox(height: AppSpacing.md),
                   _InsightGrid(
                     children: [
@@ -230,7 +212,7 @@ class _InsightsHero extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Patrones, gustos y señales de tu vida lectora.',
+            'Gustos, hallazgos y señales de tu vida lectora.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: Colors.white.withValues(alpha: 0.78),
               height: 1.35,
@@ -501,9 +483,8 @@ class _MetricPill extends StatelessWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.eyebrow, required this.title});
+  const _SectionTitle({required this.title});
 
-  final String eyebrow;
   final String title;
 
   @override
@@ -513,15 +494,6 @@ class _SectionTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          eyebrow,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.primary.withValues(alpha: 0.72),
-            fontWeight: FontWeight.w800,
-            letterSpacing: 2.4,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
         Text(
           title,
           style: GoogleFonts.cormorantGaramond(
@@ -534,6 +506,167 @@ class _SectionTitle extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _FavoriteAuthorCard extends StatelessWidget {
+  const _FavoriteAuthorCard({required this.summary});
+
+  final ReadingInsightsSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final books = summary.mostReadAuthorBooks;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.16),
+        ),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(AppIcons.profile, color: theme.colorScheme.primary),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Autor favorito',
+                      style: GoogleFonts.cormorantGaramond(
+                        textStyle: theme.textTheme.titleLarge?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w800,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      summary.mostReadAuthor ?? 'Sin datos',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      summary.mostReadAuthor == null
+                          ? 'Lee algunas sesiones para descubrirlo.'
+                          : _formatPages(summary.mostReadAuthorPages),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (books.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            SizedBox(
+              height: 132,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: books.length,
+                separatorBuilder: (_, _) =>
+                    const SizedBox(width: AppSpacing.sm),
+                itemBuilder: (context, index) {
+                  return _AuthorBookCover(book: books[index]);
+                },
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _AuthorBookCover extends StatelessWidget {
+  const _AuthorBookCover({required this.book});
+
+  final ReadingInsightBookPreview book;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      width: 84,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _InsightBookCover(url: book.coverUrl, width: 62, height: 88),
+          const SizedBox(height: 6),
+          Text(
+            book.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              height: 1.1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InsightBookCover extends StatelessWidget {
+  const _InsightBookCover({
+    required this.url,
+    required this.width,
+    required this.height,
+  });
+
+  final String? url;
+  final double width;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final placeholder = Container(
+      width: width,
+      height: height,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(
+        AppIcons.book,
+        color: theme.colorScheme.primary.withValues(alpha: 0.62),
+        size: 18,
+      ),
+    );
+
+    if (url == null || url!.isEmpty) return placeholder;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: Image.network(
+        url!,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => placeholder,
+      ),
     );
   }
 }
@@ -600,9 +733,12 @@ class _InsightCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             title,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w800,
+            style: GoogleFonts.cormorantGaramond(
+              textStyle: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w800,
+                height: 1,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -658,8 +794,12 @@ class _RatedBooksCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'Top 3 del año',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
+                style: GoogleFonts.cormorantGaramond(
+                  textStyle: theme.textTheme.titleLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w800,
+                    height: 1,
+                  ),
                 ),
               ),
             ],
@@ -778,8 +918,12 @@ class _InsightsEmptyState extends ConsumerWidget {
               Text(
                 '¡Añade tu primer libro!',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
+                style: GoogleFonts.cormorantGaramond(
+                  textStyle: theme.textTheme.headlineSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w800,
+                    height: 1,
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),

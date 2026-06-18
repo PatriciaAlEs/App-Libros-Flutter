@@ -5,10 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/preferences/reader_profile_controller.dart';
-import '../../../books/data/datasources/book_api_datasource.dart';
 import '../../../books/domain/entities/book.dart';
-import '../../../books/domain/enums/book_status.dart';
 import '../../../books/domain/entities/book_search_result.dart';
+import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
 import '../../../reading_sessions/domain/entities/reading_session.dart';
 import '../../../reading_sessions/presentation/providers/reading_sessions_provider.dart';
@@ -28,6 +27,9 @@ class ProgressScreen extends ConsumerWidget {
     final books = ref.watch(booksProvider).valueOrNull ?? const <Book>[];
     final sessionsAsync = ref.watch(
       readingSessionsForRangeProvider(_recentRange()),
+    );
+    final allTimeSessionsAsync = ref.watch(
+      readingSessionsForRangeProvider(_allTimeRange()),
     );
 
     return Scaffold(
@@ -52,6 +54,11 @@ class ProgressScreen extends ConsumerWidget {
             data: (summary) {
               final activeBook = _activeReadingBook(books);
               final sessions = sessionsAsync.valueOrNull ?? const [];
+              final totalMinutes =
+                  (allTimeSessionsAsync.valueOrNull ?? const []).fold<int>(
+                    0,
+                    (total, session) => total + session.minutes,
+                  );
               final effectiveAnnualGoalCover =
                   annualGoalCover ?? _latestCompletedBookCover(books);
 
@@ -65,13 +72,18 @@ class ProgressScreen extends ConsumerWidget {
                 children: [
                   _ProgressHeader(readerProfile: readerProfile),
                   const SizedBox(height: AppSpacing.xxl),
-                  _ProgressHero(summary: summary, activeBook: activeBook),
+                  _ProgressHero(
+                    summary: summary,
+                    activeBook: activeBook,
+                    totalMinutes: totalMinutes,
+                  ),
                   const SizedBox(height: AppSpacing.xl),
                   _ReadingChallengeCard(
                     summary: summary,
                     cover: effectiveAnnualGoalCover,
                     onTap: () => Navigator.pushNamed(context, '/stats'),
-                    onSearchCover: () => _searchAnnualGoalCover(context, ref),
+                    onSearchCover: () =>
+                        _searchAnnualGoalCover(context, ref, books),
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   _ReadingActivityCard(
@@ -102,21 +114,34 @@ class ProgressScreen extends ConsumerWidget {
   Future<void> _searchAnnualGoalCover(
     BuildContext context,
     WidgetRef ref,
+    List<Book> books,
   ) async {
-    final selectedBook = await showDialog<BookSearchResult>(
+    final selectedBook = await showDialog<Book>(
       context: context,
-      builder: (_) => const _ProgressAnnualGoalCoverSearchDialog(),
+      builder: (_) => _ProgressAnnualGoalBookPickerDialog(books: books),
     );
     if (selectedBook == null) return;
 
     await ref
         .read(annualGoalCoverControllerProvider.notifier)
-        .selectBook(selectedBook);
+        .selectBook(_bookToSearchResult(selectedBook));
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Portada del reto actualizada')),
     );
   }
+}
+
+BookSearchResult _bookToSearchResult(Book book) {
+  return BookSearchResult(
+    title: book.title,
+    author: book.author,
+    publisher: book.publisher,
+    coverUrl: book.coverUrl,
+    isbn: book.isbn,
+    firstPublishYear: book.firstPublishYear,
+    numberOfPages: book.totalPages,
+  );
 }
 
 AnnualGoalCover? _latestCompletedBookCover(List<Book> books) {
@@ -140,18 +165,19 @@ AnnualGoalCover? _latestCompletedBookCover(List<Book> books) {
   );
 }
 
-class _ProgressAnnualGoalCoverSearchDialog extends ConsumerStatefulWidget {
-  const _ProgressAnnualGoalCoverSearchDialog();
+class _ProgressAnnualGoalBookPickerDialog extends StatefulWidget {
+  const _ProgressAnnualGoalBookPickerDialog({required this.books});
+
+  final List<Book> books;
 
   @override
-  ConsumerState<_ProgressAnnualGoalCoverSearchDialog> createState() =>
-      _ProgressAnnualGoalCoverSearchDialogState();
+  State<_ProgressAnnualGoalBookPickerDialog> createState() =>
+      _ProgressAnnualGoalBookPickerDialogState();
 }
 
-class _ProgressAnnualGoalCoverSearchDialogState
-    extends ConsumerState<_ProgressAnnualGoalCoverSearchDialog> {
+class _ProgressAnnualGoalBookPickerDialogState
+    extends State<_ProgressAnnualGoalBookPickerDialog> {
   final _controller = TextEditingController();
-  Future<List<BookSearchResult>>? _searchFuture;
   String _query = '';
 
   @override
@@ -160,42 +186,43 @@ class _ProgressAnnualGoalCoverSearchDialogState
     super.dispose();
   }
 
-  void _search() {
-    final query = _controller.text.trim();
-    if (query.isEmpty) return;
-    setState(() {
-      _query = query;
-      _searchFuture = ref.read(bookApiDatasourceProvider).searchBooks(query);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    final cleanQuery = _query.trim();
+    final books = cleanQuery.isEmpty
+        ? _recommendedBooks(widget.books)
+        : _filterBooks(widget.books, cleanQuery);
+
     return AlertDialog(
       title: const Text('Buscar libro'),
       content: SizedBox(
         width: 420,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'Elige un libro como portada de tu reto lector',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: AppSpacing.md),
             TextField(
               key: const Key('progress_annual_goal_cover_search_field'),
               controller: _controller,
               autofocus: true,
               textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                labelText: 'Titulo, autor o ISBN',
-                suffixIcon: IconButton(
-                  tooltip: 'Buscar',
-                  icon: const Icon(Icons.search_rounded),
-                  onPressed: _search,
-                ),
-                border: const OutlineInputBorder(),
+              decoration: const InputDecoration(
+                labelText: 'Título, autor o ISBN',
+                prefixIcon: Icon(Icons.search_rounded),
+                border: OutlineInputBorder(),
               ),
-              onSubmitted: (_) => _search(),
+              onChanged: (value) => setState(() => _query = value),
             ),
             const SizedBox(height: AppSpacing.md),
-            _CoverSearchResults(future: _searchFuture, query: _query),
+            _LocalBookPickerResults(
+              books: books,
+              isSearching: cleanQuery.isNotEmpty,
+            ),
           ],
         ),
       ),
@@ -209,87 +236,150 @@ class _ProgressAnnualGoalCoverSearchDialogState
   }
 }
 
-class _CoverSearchResults extends StatelessWidget {
-  const _CoverSearchResults({required this.future, required this.query});
+List<Book> _recommendedBooks(List<Book> books) {
+  final recommended = <Book>[];
+  final seen = <String>{};
+  final readingBooks =
+      books.where((book) => book.status == BookStatus.reading).toList()
+        ..sort((a, b) {
+          final aDate = a.updatedAt ?? a.startDate ?? a.createdAt;
+          final bDate = b.updatedAt ?? b.startDate ?? b.createdAt;
+          return bDate.compareTo(aDate);
+        });
+  final completedBooks =
+      books.where((book) => book.status == BookStatus.completed).toList()
+        ..sort((a, b) {
+          final aDate = a.updatedAt ?? a.completedDate ?? a.createdAt;
+          final bDate = b.updatedAt ?? b.completedDate ?? b.createdAt;
+          return bDate.compareTo(aDate);
+        });
 
-  final Future<List<BookSearchResult>>? future;
-  final String query;
+  for (final book in [...readingBooks.take(3), ...completedBooks.take(1)]) {
+    if (seen.add(book.id)) recommended.add(book);
+  }
+
+  return recommended.isEmpty ? books.take(6).toList() : recommended;
+}
+
+List<Book> _filterBooks(List<Book> books, String query) {
+  final normalizedQuery = _normalizeBookQuery(query);
+  return books.where((book) {
+    final haystack = _normalizeBookQuery(
+      '${book.title} ${book.author ?? ''} ${book.isbn ?? ''}',
+    );
+    return haystack.contains(normalizedQuery);
+  }).toList();
+}
+
+String _normalizeBookQuery(String value) {
+  final lower = value.toLowerCase().trim();
+  final withoutAccents = lower
+      .replaceAll(RegExp(r'[áàäâã]'), 'a')
+      .replaceAll(RegExp(r'[éèëê]'), 'e')
+      .replaceAll(RegExp(r'[íìïî]'), 'i')
+      .replaceAll(RegExp(r'[óòöôõ]'), 'o')
+      .replaceAll(RegExp(r'[úùüû]'), 'u')
+      .replaceAll('ñ', 'n')
+      .replaceAll('ç', 'c');
+  return withoutAccents.replaceAll(RegExp(r'[^a-z0-9]+'), '');
+}
+
+class _LocalBookPickerResults extends StatelessWidget {
+  const _LocalBookPickerResults({
+    required this.books,
+    required this.isSearching,
+  });
+
+  final List<Book> books;
+  final bool isSearching;
 
   @override
   Widget build(BuildContext context) {
-    if (future == null) {
-      return const _CoverSearchEmptyState();
+    if (books.isEmpty) {
+      return _CoverSearchMessage(
+        icon: Icons.search_off_rounded,
+        title: isSearching ? 'Sin resultados' : 'Sin libros disponibles',
+        message: isSearching
+            ? 'No encontramos libros de tu biblioteca para esa búsqueda.'
+            : 'Añade libros a tu biblioteca para elegir portada.',
+      );
     }
 
-    return FutureBuilder<List<BookSearchResult>>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const SizedBox(
-            height: 160,
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        if (snapshot.hasError) {
-          return _CoverSearchMessage(
-            icon: Icons.wifi_off_rounded,
-            title: 'No pudimos buscar',
-            message: _coverSearchErrorMessage(snapshot.error),
-          );
-        }
-
-        final results = snapshot.data ?? const [];
-        if (results.isEmpty) {
-          return _CoverSearchMessage(
-            icon: Icons.search_off_rounded,
-            title: 'Sin resultados',
-            message: 'No encontramos resultados para esa búsqueda.',
-          );
-        }
-
-        return ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 360),
-          child: ListView.separated(
-            shrinkWrap: true,
-            itemCount: results.length,
-            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-            itemBuilder: (context, index) {
-              final book = results[index];
-              return _CoverSearchResultTile(book: book);
-            },
-          ),
-        );
-      },
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 360),
+      child: ListView.separated(
+        shrinkWrap: true,
+        itemCount: books.length,
+        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+        itemBuilder: (context, index) {
+          return _LocalBookResultTile(book: books[index]);
+        },
+      ),
     );
   }
 }
 
-String _coverSearchErrorMessage(Object? error) {
-  if (error is BookSearchException) {
-    return switch (error.kind) {
-      BookSearchFailureKind.connection => 'Parece que no hay conexión.',
-      BookSearchFailureKind.timeout =>
-        'La búsqueda está tardando más de lo normal. Reintenta.',
-      BookSearchFailureKind.api =>
-        'Open Library no respondió. Puedes reintentar o añadirlo manualmente.',
-    };
-  }
+class _LocalBookResultTile extends StatelessWidget {
+  const _LocalBookResultTile({required this.book});
 
-  return 'Open Library no respondió. Puedes reintentar o añadirlo manualmente.';
-}
-
-class _CoverSearchEmptyState extends StatelessWidget {
-  const _CoverSearchEmptyState();
+  final Book book;
 
   @override
   Widget build(BuildContext context) {
-    return const _CoverSearchMessage(
-      icon: Icons.search_rounded,
-      title: 'Busca un libro',
-      message: 'Puedes usar titulo, autora o ISBN.',
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.colorScheme.surface.withValues(alpha: 0.92),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => Navigator.pop(context, book),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          child: Row(
+            children: [
+              _SearchCoverThumb(url: book.coverUrl),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      book.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _localBookSubtitle(book),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
+}
+
+String _localBookSubtitle(Book book) {
+  final parts = <String>[
+    if (book.author?.isNotEmpty == true) book.author!,
+    if (book.status == BookStatus.reading) 'Lectura actual',
+    if (book.status == BookStatus.completed) 'Completado',
+    if (book.coverUrl == null) 'Sin portada',
+  ];
+  return parts.isEmpty ? 'Libro de tu biblioteca' : parts.join(' · ');
 }
 
 class _CoverSearchMessage extends StatelessWidget {
@@ -331,68 +421,6 @@ class _CoverSearchMessage extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _CoverSearchResultTile extends StatelessWidget {
-  const _CoverSearchResultTile({required this.book});
-
-  final BookSearchResult book;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Material(
-      color: theme.colorScheme.surface.withValues(alpha: 0.92),
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: () => Navigator.pop(context, book),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          child: Row(
-            children: [
-              _SearchCoverThumb(url: book.coverUrl),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      book.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _resultSubtitle(book),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _resultSubtitle(BookSearchResult book) {
-    final parts = <String>[
-      if (book.author?.isNotEmpty == true) book.author!,
-      if (book.firstPublishYear != null) '${book.firstPublishYear}',
-      if (book.coverUrl == null) 'Sin portada',
-    ];
-    return parts.isEmpty ? 'Resultado de Open Library' : parts.join(' · ');
   }
 }
 
@@ -562,10 +590,15 @@ class _ProgressErrorState extends StatelessWidget {
 }
 
 class _ProgressHero extends StatelessWidget {
-  const _ProgressHero({required this.summary, required this.activeBook});
+  const _ProgressHero({
+    required this.summary,
+    required this.activeBook,
+    required this.totalMinutes,
+  });
 
   final StatisticsSummary summary;
   final Book? activeBook;
+  final int totalMinutes;
 
   @override
   Widget build(BuildContext context) {
@@ -573,7 +606,6 @@ class _ProgressHero extends StatelessWidget {
     final primary = theme.colorScheme.primary;
     final dark = Color.lerp(primary, Colors.black, 0.30)!;
     final accent = theme.colorScheme.secondary;
-    final year = DateTime.now().year;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
@@ -613,20 +645,22 @@ class _ProgressHero extends StatelessWidget {
             children: [
               Expanded(
                 child: _HeroMetric(
-                  value: '${summary.currentStreakDays}',
-                  label: 'racha',
-                ),
-              ),
-              Expanded(
-                child: _HeroMetric(
                   value: '${summary.completedThisYear}',
-                  label: 'libros $year',
+                  label: summary.completedThisYear == 1
+                      ? 'libro leído'
+                      : 'libros leídos',
                 ),
               ),
               Expanded(
                 child: _HeroMetric(
                   value: _compactNumber(summary.totalPagesRead),
                   label: 'páginas',
+                ),
+              ),
+              Expanded(
+                child: _HeroMetric(
+                  value: _formatMinutes(totalMinutes),
+                  label: 'minutos',
                 ),
               ),
             ],
@@ -737,10 +771,10 @@ class _ReadingChallengeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final goal = summary.annualReadingGoal;
-    final year = DateTime.now().year;
     final rawProgress = summary.annualGoalProgress ?? 0;
     final progress = (rawProgress / 100).clamp(0, 1).toDouble();
     final percent = rawProgress.clamp(0, 100).round();
+    final remaining = summary.booksRemainingForAnnualGoal ?? 0;
 
     return _EditorialSurface(
       child: Column(
@@ -756,7 +790,7 @@ class _ReadingChallengeCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Reto lector $year',
+                      'Objetivo del reto',
                       style: GoogleFonts.cormorantGaramond(
                         textStyle: theme.textTheme.headlineSmall?.copyWith(
                           color: theme.colorScheme.primary,
@@ -785,7 +819,7 @@ class _ReadingChallengeCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             goal == null
-                ? 'Configura tu objetivo anual para seguir el avance de tu año lector.'
+                ? 'Configura tu objetivo del reto para seguir tu avance lector.'
                 : '${summary.completedThisYear} / $goal libros completados',
             style: theme.textTheme.bodyMedium,
           ),
@@ -800,6 +834,28 @@ class _ReadingChallengeCard extends StatelessWidget {
               ),
               color: theme.colorScheme.secondary,
             ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: _ChallengeMiniMetric(icon: '📈', value: '$percent%'),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _ChallengeMiniMetric(
+                  icon: '✅',
+                  value: '${summary.completedThisYear}',
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _ChallengeMiniMetric(
+                  icon: '🎯',
+                  value: goal == null ? '-' : '$remaining',
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.lg),
           Wrap(
@@ -822,6 +878,50 @@ class _ReadingChallengeCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChallengeMiniMetric extends StatelessWidget {
+  const _ChallengeMiniMetric({required this.icon, required this.value});
+
+  final String icon;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.10),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(icon, style: theme.textTheme.titleSmall),
+          const SizedBox(width: 6),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                maxLines: 1,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -1257,12 +1357,28 @@ DateRange _recentRange() {
   );
 }
 
+DateRange _allTimeRange() {
+  final now = DateTime.now();
+  final tomorrow = DateTime(
+    now.year,
+    now.month,
+    now.day,
+  ).add(const Duration(days: 1));
+  return DateRange(start: DateTime(1900), end: tomorrow);
+}
+
 String _compactNumber(int value) {
   if (value >= 1000) {
     final compact = value / 1000;
     return '${compact.toStringAsFixed(compact >= 10 ? 0 : 1)}k';
   }
   return '$value';
+}
+
+String _formatMinutes(int minutes) {
+  if (minutes < 1000) return '$minutes';
+  final compact = minutes / 1000;
+  return '${compact.toStringAsFixed(compact >= 10 ? 0 : 1)}k';
 }
 
 String _humanDate(DateTime date) {

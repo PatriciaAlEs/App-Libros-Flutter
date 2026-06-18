@@ -145,15 +145,7 @@ class HomeScreen extends ConsumerWidget {
                           ),
                           if (otherCurrentBooks.isNotEmpty) ...[
                             const SizedBox(height: AppSpacing.lg),
-                            _CurrentReadingStrip(
-                              books: otherCurrentBooks,
-                              selectedBookId: currentReadingBookId,
-                              onSelect: (book) => ref
-                                  .read(
-                                    readerProfileControllerProvider.notifier,
-                                  )
-                                  .updateCurrentReadingBookId(book.id),
-                            ),
+                            _CurrentReadingStrip(books: otherCurrentBooks),
                           ],
                           const SizedBox(height: 28),
                           _TodaySummaryCard(sessions: todaySessions),
@@ -1160,15 +1152,9 @@ class _EmptyCurrentReadingCard extends StatelessWidget {
 }
 
 class _CurrentReadingStrip extends StatefulWidget {
-  const _CurrentReadingStrip({
-    required this.books,
-    required this.selectedBookId,
-    required this.onSelect,
-  });
+  const _CurrentReadingStrip({required this.books});
 
   final List<Book> books;
-  final String? selectedBookId;
-  final ValueChanged<Book> onSelect;
 
   @override
   State<_CurrentReadingStrip> createState() => _CurrentReadingStripState();
@@ -1181,7 +1167,7 @@ class _CurrentReadingStripState extends State<_CurrentReadingStrip> {
   @override
   void initState() {
     super.initState();
-    _currentPage = _selectedIndex();
+    _currentPage = 0;
     _pageController = PageController(
       initialPage: _currentPage,
       viewportFraction: 0.80,
@@ -1191,18 +1177,22 @@ class _CurrentReadingStripState extends State<_CurrentReadingStrip> {
   @override
   void didUpdateWidget(covariant _CurrentReadingStrip oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final nextPage = _selectedIndex();
-    if (nextPage != _currentPage) {
-      _currentPage = nextPage;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted || !_pageController.hasClients) return;
-        _pageController.animateToPage(
-          nextPage,
-          duration: const Duration(milliseconds: 260),
-          curve: Curves.easeOutCubic,
-        );
-      });
-    }
+    if (_sameBookOrder(oldWidget.books, widget.books)) return;
+
+    final visibleBookId = _currentPage < oldWidget.books.length
+        ? oldWidget.books[_currentPage].id
+        : null;
+    final nextPage = visibleBookId == null
+        ? _currentPage.clamp(0, widget.books.length - 1)
+        : widget.books.indexWhere((book) => book.id == visibleBookId);
+    _currentPage = nextPage == -1
+        ? _currentPage.clamp(0, widget.books.length - 1)
+        : nextPage;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_pageController.hasClients) return;
+      _pageController.jumpToPage(_currentPage);
+    });
   }
 
   @override
@@ -1211,18 +1201,17 @@ class _CurrentReadingStripState extends State<_CurrentReadingStrip> {
     super.dispose();
   }
 
-  int _selectedIndex() {
-    if (widget.books.isEmpty) return 0;
-    final selectedBookId = widget.selectedBookId;
-    if (selectedBookId == null) return 0;
-    final index = widget.books.indexWhere((book) => book.id == selectedBookId);
-    return index == -1 ? 0 : index;
+  bool _sameBookOrder(List<Book> oldBooks, List<Book> newBooks) {
+    if (oldBooks.length != newBooks.length) return false;
+    for (var index = 0; index < oldBooks.length; index++) {
+      if (oldBooks[index].id != newBooks[index].id) return false;
+    }
+    return true;
   }
 
-  void _selectPage(int index, {bool animate = false}) {
+  void _showPage(int index, {bool animate = false}) {
     if (index < 0 || index >= widget.books.length) return;
     setState(() => _currentPage = index);
-    widget.onSelect(widget.books[index]);
     if (animate && _pageController.hasClients) {
       _pageController.animateToPage(
         index,
@@ -1261,7 +1250,7 @@ class _CurrentReadingStripState extends State<_CurrentReadingStrip> {
               padEnds: false,
               physics: const BouncingScrollPhysics(parent: PageScrollPhysics()),
               itemCount: widget.books.length,
-              onPageChanged: _selectPage,
+              onPageChanged: (index) => _showPage(index),
               itemBuilder: (context, index) {
                 final book = widget.books[index];
                 return Padding(
@@ -1273,7 +1262,7 @@ class _CurrentReadingStripState extends State<_CurrentReadingStrip> {
                   child: _CurrentReadingChip(
                     book: book,
                     isSelected: index == _currentPage,
-                    onTap: () => _selectPage(index, animate: true),
+                    onTap: () => _showPage(index, animate: true),
                   ),
                 );
               },
@@ -1763,39 +1752,36 @@ class _QuickMetrics extends StatelessWidget {
       children: [
         Expanded(
           child: _CompactMetricCard(
-            icon: AppIcons.fire,
+            title: 'Racha',
+            iconText: '🔥',
             value: '${summary.currentStreakDays}',
-            label: 'Racha',
-            footnote: 'días',
+            unit: summary.currentStreakDays == 1 ? 'día' : 'días',
             backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.78),
             foregroundColor: theme.colorScheme.onSurface,
-            iconColor: theme.colorScheme.primary,
             onTap: onOpenCalendar,
           ),
         ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
           child: _CompactMetricCard(
-            icon: AppIcons.book,
+            title: 'Libros',
+            iconText: '📖',
             value: '${summary.completedThisYear}',
-            label: 'Libros',
-            footnote: 'este año',
+            unit: '',
             backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.78),
             foregroundColor: theme.colorScheme.onSurface,
-            iconColor: theme.colorScheme.primary,
             onTap: onOpenLibrary,
           ),
         ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
           child: _CompactMetricCard(
-            icon: AppIcons.pages,
+            title: 'Páginas',
+            iconText: '📄',
             value: _compactNumber(summary.totalPagesRead),
-            label: 'pág.',
-            footnote: 'totales',
+            unit: 'pág.',
             backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.78),
             foregroundColor: theme.colorScheme.onSurface,
-            iconColor: theme.colorScheme.primary,
             onTap: onOpenProgress,
           ),
         ),
@@ -1814,23 +1800,21 @@ class _QuickMetrics extends StatelessWidget {
 
 class _CompactMetricCard extends StatelessWidget {
   const _CompactMetricCard({
-    required this.icon,
+    required this.title,
+    required this.iconText,
     required this.value,
-    required this.label,
-    required this.footnote,
+    required this.unit,
     required this.backgroundColor,
     required this.foregroundColor,
-    required this.iconColor,
     required this.onTap,
   });
 
-  final IconData icon;
+  final String title;
+  final String iconText;
   final String value;
-  final String label;
-  final String footnote;
+  final String unit;
   final Color backgroundColor;
   final Color foregroundColor;
-  final Color iconColor;
   final VoidCallback onTap;
 
   @override
@@ -1863,82 +1847,61 @@ class _CompactMetricCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    if (label == 'Racha')
-                      Text(
-                        '🔥',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontSize: 25,
-                          height: 1,
-                        ),
-                      )
-                    else
-                      Icon(icon, color: iconColor, size: 24),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: foregroundColor.withValues(alpha: 0.78),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 26,
-                      height: 26,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: theme.colorScheme.primary.withValues(
-                          alpha: 0.08,
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.chevron_right_rounded,
-                        size: 20,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ],
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.visible,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                const Spacer(),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    Text(
+                      iconText,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontSize: 22,
+                        height: 1,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
                     Flexible(
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
-                        child: Text(
-                          value,
-                          maxLines: 1,
-                          style: GoogleFonts.cormorantGaramond(
-                            textStyle: theme.textTheme.titleLarge?.copyWith(
-                              color: foregroundColor,
-                              fontSize: 40,
-                              fontWeight: FontWeight.w800,
-                              height: 0.90,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              value,
+                              maxLines: 1,
+                              style: GoogleFonts.cormorantGaramond(
+                                textStyle: theme.textTheme.titleLarge?.copyWith(
+                                  color: foregroundColor,
+                                  fontSize: 34,
+                                  fontWeight: FontWeight.w800,
+                                  height: 0.92,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 2),
-                        child: Text(
-                          footnote,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
+                            if (unit.isNotEmpty) ...[
+                              const SizedBox(width: 4),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 3),
+                                child: Text(
+                                  unit,
+                                  maxLines: 1,
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                     ),

@@ -103,6 +103,8 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.ensureVisible(saveButton);
+    await tester.pumpAndSettle();
     await tester.tap(saveButton);
     await tester.pumpAndSettle();
 
@@ -271,6 +273,18 @@ void main() {
         currentPage: 90,
         updatedAt: DateTime(2026, 6, 15),
       ),
+      _book(
+        id: 'book-3',
+        title: 'Tercera lectura',
+        currentPage: 25,
+        updatedAt: DateTime(2026, 6, 14),
+      ),
+      _book(
+        id: 'book-4',
+        title: 'Cuarta lectura',
+        currentPage: 120,
+        updatedAt: DateTime(2026, 6, 13),
+      ),
     ];
 
     await tester.pumpWidget(
@@ -289,18 +303,174 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('1 / 2'), findsOneWidget);
+    expect(find.text('1 / 4'), findsOneWidget);
     expect(find.text('Lectura principal'), findsWidgets);
 
-    await tester.drag(
-      find.byKey(const Key('current_reading_cards_page_view')),
-      const Offset(-500, 0),
-    );
+    final carousel = find.byKey(const Key('current_reading_cards_page_view'));
+
+    await tester.drag(carousel, const Offset(-500, 0));
     await tester.pumpAndSettle();
 
-    expect(find.text('2 / 2'), findsOneWidget);
+    expect(find.text('2 / 4'), findsOneWidget);
     expect(find.text('Segunda lectura'), findsWidgets);
+
+    await tester.drag(carousel, const Offset(-500, 0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('3 / 4'), findsOneWidget);
+    expect(find.text('Tercera lectura'), findsWidgets);
+
+    await tester.drag(carousel, const Offset(-500, 0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('4 / 4'), findsOneWidget);
+    expect(find.text('Cuarta lectura'), findsWidgets);
   });
+
+  testWidgets('book form blocks duplicate books by ISBN', (tester) async {
+    final repository = _CapturingBookRepository(
+      existingBooks: [
+        Book(
+          id: 'existing-book',
+          title: 'Libro existente',
+          author: 'Autora',
+          isbn: '978-84-376-0494-7',
+          createdAt: DateTime(2026, 1, 1),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookRepositoryProvider.overrideWithValue(repository),
+          bookApiDatasourceProvider.overrideWithValue(
+            BookApiDatasource(
+              MockClient((request) async {
+                return http.Response(
+                  jsonEncode({
+                    'docs': [
+                      {
+                        'title': 'Otra edición',
+                        'author_name': ['Autora'],
+                        'isbn': ['9788437604947'],
+                        'first_publish_year': 2024,
+                      },
+                    ],
+                  }),
+                  200,
+                );
+              }),
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: BookFormScreen()),
+      ),
+    );
+
+    await tester.enterText(_searchField(), 'Libro duplicado');
+    await tester.tap(find.byKey(const Key('book_search_button')));
+    await tester.pumpAndSettle();
+
+    final resultTile = find.byKey(
+      const Key('book_result_0_Otra edición_Autora_2024'),
+    );
+    await tester.scrollUntilVisible(
+      resultTile,
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(resultTile);
+    await tester.pumpAndSettle();
+
+    final saveButton = find.widgetWithText(FilledButton, 'Guardar libro');
+    await tester.scrollUntilVisible(
+      saveButton,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(saveButton);
+    await tester.pumpAndSettle();
+    await tester.tap(saveButton);
+    await tester.pumpAndSettle();
+
+    expect(repository.addedBook, isNull);
+    expect(find.text('Este libro ya está en tu biblioteca'), findsOneWidget);
+  });
+
+  testWidgets(
+    'book form blocks duplicate books by normalized title and author',
+    (tester) async {
+      final repository = _CapturingBookRepository(
+        existingBooks: [
+          Book(
+            id: 'existing-book',
+            title: 'Cien años de soledad',
+            author: 'Gabriel García Márquez',
+            createdAt: DateTime(2026, 1, 1),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            bookRepositoryProvider.overrideWithValue(repository),
+            bookApiDatasourceProvider.overrideWithValue(
+              BookApiDatasource(
+                MockClient((request) async {
+                  return http.Response(
+                    jsonEncode({
+                      'docs': [
+                        {
+                          'title': 'Cien anos de soledad',
+                          'author_name': ['Gabriel Garcia Marquez'],
+                          'first_publish_year': 1967,
+                        },
+                      ],
+                    }),
+                    200,
+                  );
+                }),
+              ),
+            ),
+          ],
+          child: const MaterialApp(home: BookFormScreen()),
+        ),
+      );
+
+      await tester.enterText(_searchField(), 'Cien años');
+      await tester.tap(find.byKey(const Key('book_search_button')));
+      await tester.pumpAndSettle();
+
+      final resultTile = find.byKey(
+        const Key(
+          'book_result_0_Cien anos de soledad_Gabriel Garcia Marquez_1967',
+        ),
+      );
+      await tester.scrollUntilVisible(
+        resultTile,
+        260,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(resultTile);
+      await tester.pumpAndSettle();
+
+      final saveButton = find.widgetWithText(FilledButton, 'Guardar libro');
+      await tester.scrollUntilVisible(
+        saveButton,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(saveButton);
+      await tester.pumpAndSettle();
+      await tester.tap(saveButton);
+      await tester.pumpAndSettle();
+
+      expect(repository.addedBook, isNull);
+      expect(find.text('Este libro ya está en tu biblioteca'), findsOneWidget);
+    },
+  );
 }
 
 Finder _searchField() => find.byType(TextField).first;
@@ -367,6 +537,9 @@ class _EmptyBookRepository implements BookRepository {
 }
 
 class _CapturingBookRepository implements BookRepository {
+  _CapturingBookRepository({this.existingBooks = const []});
+
+  final List<Book> existingBooks;
   Book? addedBook;
 
   @override
@@ -378,7 +551,7 @@ class _CapturingBookRepository implements BookRepository {
   Future<void> deleteBook(String id) async {}
 
   @override
-  Future<List<Book>> getAllBooks() async => const [];
+  Future<List<Book>> getAllBooks() async => existingBooks;
 
   @override
   Future<Book?> getBookById(String id) async => null;
