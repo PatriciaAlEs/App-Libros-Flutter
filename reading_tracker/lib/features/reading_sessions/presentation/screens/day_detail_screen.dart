@@ -10,14 +10,21 @@ import '../../domain/entities/reading_session.dart';
 import '../providers/reading_sessions_provider.dart';
 import '../utils/reading_session_refresh.dart';
 
-class DayDetailScreen extends ConsumerWidget {
+class DayDetailScreen extends ConsumerStatefulWidget {
   const DayDetailScreen({super.key, required this.day});
 
   final DateTime day;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedDay = _dateOnly(day);
+  ConsumerState<DayDetailScreen> createState() => _DayDetailScreenState();
+}
+
+class _DayDetailScreenState extends ConsumerState<DayDetailScreen> {
+  String? _selectedSessionId;
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedDay = _dateOnly(widget.day);
     final sessionsAsync = ref.watch(readingSessionsForDayProvider(selectedDay));
     final booksAsync = ref.watch(booksProvider);
     final canAddSession = !_isFutureDay(selectedDay);
@@ -26,7 +33,7 @@ class DayDetailScreen extends ConsumerWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Diario lector',
+          'Diario de lectura',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontFamily: AppTypography.displayFontFamily,
             fontFamilyFallback: AppTypography.displayFallback,
@@ -42,30 +49,31 @@ class DayDetailScreen extends ConsumerWidget {
             data: (books) => {for (final book in books) book.id: book},
             orElse: () => <String, Book>{},
           );
-          final totalMinutes = sessions.fold<int>(
-            0,
-            (sum, session) => sum + session.minutes,
-          );
-          final totalPages = sessions.fold<int>(
-            0,
-            (sum, session) => sum + session.pagesRead,
-          );
-          final focusBook = _focusBookForDay(sessions, booksById);
+          final selectedSession = _selectedSession(sessions);
+          final selectedBook = selectedSession == null
+              ? null
+              : booksById[selectedSession.bookId];
 
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
               _DayEditorialHeader(
                 day: selectedDay,
-                totalMinutes: totalMinutes,
-                totalPages: totalPages,
+                session: selectedSession,
                 sessionCount: sessions.length,
-                focusBook: focusBook,
+                book: selectedBook,
+                onTap: selectedBook == null
+                    ? null
+                    : () => Navigator.pushNamed(
+                        context,
+                        '/book/detail',
+                        arguments: selectedBook.id,
+                      ),
               ),
               const SizedBox(height: 16),
               _AddSessionButton(
                 onPressed: canAddSession
-                    ? () => _openSessionForm(context, ref)
+                    ? () => _openSessionForm(context)
                     : null,
               ),
               const SizedBox(height: 16),
@@ -78,10 +86,14 @@ class DayDetailScreen extends ConsumerWidget {
                     child: _SessionTile(
                       session: sessions[index],
                       book: booksById[sessions[index].bookId],
+                      isSelected: sessions[index].id == selectedSession?.id,
+                      onSelect: () => setState(
+                        () => _selectedSessionId = sessions[index].id,
+                      ),
                       onEdit: () =>
-                          _openEditSessionForm(context, ref, sessions[index]),
+                          _openEditSessionForm(context, sessions[index]),
                       onDelete: () =>
-                          _confirmDeleteSession(context, ref, sessions[index]),
+                          _confirmDeleteSession(context, sessions[index]),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -93,8 +105,16 @@ class DayDetailScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _openSessionForm(BuildContext context, WidgetRef ref) async {
-    final selectedDay = _dateOnly(day);
+  ReadingSession? _selectedSession(List<ReadingSession> sessions) {
+    if (sessions.isEmpty) return null;
+    for (final session in sessions) {
+      if (session.id == _selectedSessionId) return session;
+    }
+    return sessions.first;
+  }
+
+  Future<void> _openSessionForm(BuildContext context) async {
+    final selectedDay = _dateOnly(widget.day);
     final saved = await Navigator.pushNamed(
       context,
       '/session/add',
@@ -111,10 +131,9 @@ class DayDetailScreen extends ConsumerWidget {
 
   Future<void> _openEditSessionForm(
     BuildContext context,
-    WidgetRef ref,
     ReadingSession session,
   ) async {
-    final selectedDay = _dateOnly(day);
+    final selectedDay = _dateOnly(widget.day);
     final saved = await Navigator.pushNamed(
       context,
       '/session/edit',
@@ -131,7 +150,6 @@ class DayDetailScreen extends ConsumerWidget {
 
   Future<void> _confirmDeleteSession(
     BuildContext context,
-    WidgetRef ref,
     ReadingSession session,
   ) async {
     final confirmed = await showDialog<bool>(
@@ -141,7 +159,10 @@ class DayDetailScreen extends ConsumerWidget {
     if (confirmed != true) return;
 
     await ref.read(readingSessionRepositoryProvider).deleteSession(session.id);
-    refreshReadingSessionUi(ref, days: [_dateOnly(day), session.date]);
+    if (_selectedSessionId == session.id && mounted) {
+      setState(() => _selectedSessionId = null);
+    }
+    refreshReadingSessionUi(ref, days: [_dateOnly(widget.day), session.date]);
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Tiempo de lectura eliminado')),
@@ -158,126 +179,116 @@ class DayDetailScreen extends ConsumerWidget {
   DateTime _dateOnly(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }
-
-  Book? _focusBookForDay(
-    List<ReadingSession> sessions,
-    Map<String, Book> booksById,
-  ) {
-    if (sessions.isEmpty) return null;
-    final scoreByBook = <String, int>{};
-    for (final session in sessions) {
-      scoreByBook[session.bookId] =
-          (scoreByBook[session.bookId] ?? 0) +
-          session.pagesRead +
-          session.minutes;
-    }
-    final best = scoreByBook.entries.fold<MapEntry<String, int>?>(null, (
-      current,
-      entry,
-    ) {
-      if (current == null) return entry;
-      return entry.value > current.value ? entry : current;
-    });
-    if (best == null) return null;
-    return booksById[best.key];
-  }
 }
 
 class _DayEditorialHeader extends StatelessWidget {
   const _DayEditorialHeader({
     required this.day,
-    required this.totalMinutes,
-    required this.totalPages,
+    required this.session,
     required this.sessionCount,
-    required this.focusBook,
+    required this.book,
+    required this.onTap,
   });
 
   final DateTime day;
-  final int totalMinutes;
-  final int totalPages;
+  final ReadingSession? session;
   final int sessionCount;
-  final Book? focusBook;
+  final Book? book;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final totalPages = session?.pagesRead ?? 0;
+    final totalMinutes = session?.minutes ?? 0;
+    final focusBook = book;
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            theme.colorScheme.primary,
-            Color.lerp(theme.colorScheme.primary, Colors.black, 0.28)!,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: AppShadows.soft(theme.colorScheme.primary),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'DIARIO DE LECTURA',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.secondary,
-              letterSpacing: 2.4,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _humanDay(day),
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: theme.colorScheme.onPrimary,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 18),
-          Row(
-            children: [
-              Expanded(
-                child: _DayMetric(value: '$totalPages', label: 'pág.'),
-              ),
-              Expanded(
-                child: _DayMetric(value: '$totalMinutes', label: 'min'),
-              ),
-              Expanded(
-                child: _DayMetric(value: '$sessionCount', label: 'sesiones'),
-              ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              theme.colorScheme.primary,
+              Color.lerp(theme.colorScheme.primary, Colors.black, 0.28)!,
             ],
           ),
-          if (focusBook != null) ...[
-            const SizedBox(height: 18),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-              ),
-              child: Row(
-                children: [
-                  Icon(AppIcons.book, color: theme.colorScheme.secondary),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      focusBook!.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onPrimary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ],
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: AppShadows.soft(theme.colorScheme.primary),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _humanDay(day),
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.secondary,
+                fontFamily: AppTypography.displayFontFamily,
+                fontFamilyFallback: AppTypography.displayFallback,
+                letterSpacing: 0,
+                fontWeight: FontWeight.w800,
               ),
             ),
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _Cover(url: focusBook?.coverUrl),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        focusBook?.title ?? 'Sin lectura seleccionada',
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          color: theme.colorScheme.onPrimary,
+                          fontFamily: AppTypography.displayFontFamily,
+                          fontFamilyFallback: AppTypography.displayFallback,
+                          fontWeight: FontWeight.w800,
+                          height: 1.04,
+                        ),
+                      ),
+                      if (focusBook?.author != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          focusBook!.author!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onPrimary.withValues(
+                              alpha: 0.72,
+                            ),
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Expanded(
+                  child: _DayMetric(value: '$totalPages', label: 'pág.'),
+                ),
+                Expanded(
+                  child: _DayMetric(value: '$totalMinutes', label: 'min'),
+                ),
+                Expanded(
+                  child: _DayMetric(value: '$sessionCount', label: 'sesiones'),
+                ),
+              ],
+            ),
           ],
-        ],
+        ),
       ),
     );
   }
@@ -318,6 +329,8 @@ class _DayMetric extends StatelessWidget {
           value,
           style: theme.textTheme.titleLarge?.copyWith(
             color: theme.colorScheme.onPrimary,
+            fontFamily: AppTypography.displayFontFamily,
+            fontFamilyFallback: AppTypography.displayFallback,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -468,12 +481,16 @@ class _SessionTile extends StatelessWidget {
   const _SessionTile({
     required this.session,
     required this.book,
+    required this.isSelected,
+    required this.onSelect,
     required this.onEdit,
     required this.onDelete,
   });
 
   final ReadingSession session;
   final Book? book;
+  final bool isSelected;
+  final VoidCallback onSelect;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -485,22 +502,17 @@ class _SessionTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
-        onTap: book == null
-            ? null
-            : () {
-                Navigator.pushNamed(
-                  context,
-                  '/book/detail',
-                  arguments: book!.id,
-                );
-              },
+        onTap: onSelect,
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: theme.colorScheme.surface.withValues(alpha: 0.82),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+              color: theme.colorScheme.primary.withValues(
+                alpha: isSelected ? 0.42 : 0.08,
+              ),
+              width: isSelected ? 1.4 : 1,
             ),
             boxShadow: AppShadows.soft(theme.colorScheme.primary),
           ),

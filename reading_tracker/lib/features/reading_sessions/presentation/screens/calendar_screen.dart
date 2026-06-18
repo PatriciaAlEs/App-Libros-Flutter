@@ -738,18 +738,29 @@ class _WeekDaySection extends StatelessWidget {
     final intensity = activity?.intensity ?? ReadingActivityIntensity.none;
 
     final theme = Theme.of(context);
+    final activityColor = _activityColor(context, intensity);
+    final hasActivity = sessions.isNotEmpty;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: _activityColor(context, intensity).withValues(alpha: 0.72),
+        color: theme.colorScheme.surface.withValues(alpha: 0.96),
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(
-            alpha: intensity == ReadingActivityIntensity.none ? 0.14 : 0.24,
-          ),
-          width: 1.1,
+          color: hasActivity
+              ? activityColor.withValues(alpha: 0.58)
+              : theme.colorScheme.primary.withValues(alpha: 0.12),
+          width: hasActivity ? 1.35 : 1.05,
         ),
+        boxShadow: hasActivity
+            ? [
+                BoxShadow(
+                  color: activityColor.withValues(alpha: 0.12),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ]
+            : null,
       ),
       child: Material(
         color: Colors.transparent,
@@ -912,10 +923,11 @@ class _CalendarDayCell extends StatelessWidget {
 
     final theme = Theme.of(context);
     final hasActivity = totalPages > 0 || totalMinutes > 0;
+    final activityColor = _activityColor(context, intensity);
     final dayTextColor = isMuted
         ? theme.colorScheme.onSurface.withValues(alpha: 0.34)
-        : intensity == ReadingActivityIntensity.high
-        ? theme.colorScheme.onPrimary
+        : isToday
+        ? theme.colorScheme.primary
         : theme.colorScheme.onSurface;
 
     return InkWell(
@@ -931,21 +943,28 @@ class _CalendarDayCell extends StatelessWidget {
         curve: AppMotion.standard,
         padding: EdgeInsets.all(compact ? 5 : 7),
         decoration: BoxDecoration(
-          color: _activityColor(
-            context,
-            intensity,
-          ).withValues(alpha: hasActivity ? 0.92 : 0.58),
+          color: theme.colorScheme.surface.withValues(alpha: 0.98),
           border: Border.all(
             color: isToday
                 ? theme.colorScheme.primary
-                : theme.colorScheme.primary.withValues(
-                    alpha: hasActivity ? 0.24 : 0.16,
-                  ),
-            width: isToday ? 1.8 : 1.15,
+                : hasActivity
+                ? activityColor.withValues(alpha: 0.62)
+                : theme.colorScheme.primary.withValues(alpha: 0.13),
+            width: isToday
+                ? 1.8
+                : hasActivity
+                ? 1.25
+                : 1.0,
           ),
           borderRadius: BorderRadius.circular(compact ? 14 : 18),
           boxShadow: hasActivity && !compact
-              ? AppShadows.editorial(theme.colorScheme.primary)
+              ? [
+                  BoxShadow(
+                    color: activityColor.withValues(alpha: 0.14),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
               : null,
         ),
         child: Column(
@@ -963,7 +982,18 @@ class _CalendarDayCell extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 2),
+            if (hasActivity) ...[
+              Container(
+                width: compact ? 18 : 28,
+                height: compact ? 2 : 3,
+                decoration: BoxDecoration(
+                  color: activityColor.withValues(alpha: 0.86),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              const SizedBox(height: 2),
+            ] else
+              const SizedBox(height: 2),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
