@@ -919,6 +919,8 @@ String _coverSearchErrorMessage(Object? error) {
       BookSearchFailureKind.connection => 'Parece que no hay conexión.',
       BookSearchFailureKind.timeout =>
         'La búsqueda está tardando más de lo normal. Reintenta.',
+      BookSearchFailureKind.invalidResponse =>
+        'Open Library devolvió una respuesta inesperada. Puedes reintentar.',
       BookSearchFailureKind.api =>
         'Open Library no respondió. Puedes reintentar o añadirlo manualmente.',
     };

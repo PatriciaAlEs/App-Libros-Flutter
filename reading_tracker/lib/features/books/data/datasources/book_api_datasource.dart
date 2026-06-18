@@ -33,6 +33,7 @@ class BookApiDatasource {
         'title',
         'author_name',
         'publisher',
+        'key',
         'cover_i',
         'isbn',
         'first_publish_year',
@@ -50,8 +51,20 @@ class BookApiDatasource {
           );
         }
 
-        final payload = jsonDecode(response.body) as Map<String, dynamic>;
-        final docs = payload['docs'] as List<dynamic>? ?? const [];
+        final decoded = jsonDecode(response.body);
+        if (decoded is! Map<String, dynamic>) {
+          throw const BookSearchException.invalidResponse(
+            'Open Library returned a non-object payload',
+          );
+        }
+        final payload = decoded;
+        final rawDocs = payload['docs'];
+        if (rawDocs != null && rawDocs is! List) {
+          throw const BookSearchException.invalidResponse(
+            'Open Library returned a non-list docs payload',
+          );
+        }
+        final docs = rawDocs as List<dynamic>? ?? const [];
 
         return docs
             .whereType<Map<String, dynamic>>()
@@ -75,10 +88,11 @@ class BookApiDatasource {
         }
       } on FormatException catch (error, stackTrace) {
         _logSearchFailure(error, stackTrace);
-        throw BookSearchException.api(error);
+        throw BookSearchException.invalidResponse(error);
       } on BookSearchException catch (error, stackTrace) {
         if (attempt == _maxAttempts ||
-            error.kind == BookSearchFailureKind.api) {
+            error.kind == BookSearchFailureKind.api ||
+            error.kind == BookSearchFailureKind.invalidResponse) {
           _logSearchFailure(error, stackTrace);
           rethrow;
         }
@@ -100,6 +114,8 @@ class BookApiDatasource {
           ? 'https://covers.openlibrary.org/b/id/$coverId-M.jpg'
           : null,
       isbn: isbns.isEmpty ? null : isbns.first,
+      externalSource: 'open_library',
+      externalId: json['key'] as String?,
       firstPublishYear: json['first_publish_year'] as int?,
       numberOfPages:
           _intValue(json['number_of_pages']) ??
@@ -141,7 +157,7 @@ class BookApiDatasource {
   }
 }
 
-enum BookSearchFailureKind { connection, timeout, api }
+enum BookSearchFailureKind { connection, timeout, api, invalidResponse }
 
 class BookSearchException implements Exception {
   const BookSearchException(this.kind, this.cause);
@@ -154,6 +170,9 @@ class BookSearchException implements Exception {
 
   const BookSearchException.api(Object cause)
     : this(BookSearchFailureKind.api, cause);
+
+  const BookSearchException.invalidResponse(Object cause)
+    : this(BookSearchFailureKind.invalidResponse, cause);
 
   final BookSearchFailureKind kind;
   final Object cause;

@@ -83,6 +83,43 @@ void main() {
       ),
     );
   });
+
+  test('searchBooks maps invalid payloads to invalid response error', () async {
+    final datasource = BookApiDatasource(
+      MockClient((request) async => http.Response('[]', 200)),
+    );
+
+    expect(
+      () => datasource.searchBooks('Libro'),
+      throwsA(
+        isA<BookSearchException>().having(
+          (error) => error.kind,
+          'kind',
+          BookSearchFailureKind.invalidResponse,
+        ),
+      ),
+    );
+  });
+
+  test('searchBooks keeps Open Library key as external id', () async {
+    final datasource = BookApiDatasource(
+      MockClient(
+        (request) async => http.Response(
+          jsonEncode({
+            'docs': [
+              {'title': 'Dune', 'key': '/works/OL893415W'},
+            ],
+          }),
+          200,
+        ),
+      ),
+    );
+
+    final results = await datasource.searchBooks('Dune');
+
+    expect(results.single.externalSource, 'open_library');
+    expect(results.single.externalId, '/works/OL893415W');
+  });
 }
 
 http.Response _searchResponse(String title) {

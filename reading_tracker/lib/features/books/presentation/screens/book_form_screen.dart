@@ -6,9 +6,11 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../data/datasources/book_api_datasource.dart';
+import '../../data/repositories/book_repository_provider.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/entities/book_search_result.dart';
 import '../../domain/enums/book_status.dart';
+import '../../domain/services/book_duplicate_matcher.dart';
 import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
 import '../../../stats/presentation/providers/stats_provider.dart';
 import '../../../stats/presentation/providers/statistics_summary_provider.dart';
@@ -96,8 +98,8 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     });
 
     try {
-      final datasource = ref.read(bookApiDatasourceProvider);
-      final results = await datasource.searchBooks(requestQuery);
+      final repository = ref.read(bookSearchRepositoryProvider);
+      final results = await repository.searchBooks(requestQuery);
       if (!_isCurrentSearch(requestQuery)) return;
       setState(() {
         _results = results;
@@ -226,13 +228,13 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     if (selectedBook == null) return;
 
     final existingBooks = await ref.read(booksProvider.future);
-    if (_isDuplicateBook(selectedBook, existingBooks)) {
+    final duplicateBook = const BookDuplicateMatcher().findDuplicate(
+      selectedBook,
+      existingBooks,
+    );
+    if (duplicateBook != null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(content: Text('Este libro ya está en tu biblioteca')),
-        );
+      await _showDuplicateBookActions(duplicateBook);
       return;
     }
 
@@ -246,6 +248,8 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
       publisher: selectedBook.publisher,
       coverUrl: selectedBook.coverUrl,
       isbn: selectedBook.isbn,
+      externalSource: selectedBook.externalSource,
+      externalId: selectedBook.externalId,
       firstPublishYear: selectedBook.firstPublishYear,
       totalPages: int.tryParse(_totalPagesController.text.trim()),
       status: _selectedStatus,
@@ -288,50 +292,44 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     if (mounted) Navigator.pop(context, _selectedStatus);
   }
 
-  bool _isDuplicateBook(
-    BookSearchResult selectedBook,
-    List<Book> existingBooks,
-  ) {
-    final selectedIsbn = _normalizedIdentifier(selectedBook.isbn);
-    final selectedTitle = _normalizedText(selectedBook.title);
-    final selectedAuthor = _normalizedText(selectedBook.author ?? '');
+  Future<void> _showDuplicateBookActions(Book duplicateBook) async {
+    final action = await showDialog<_DuplicateBookAction>(
+      context: context,
+      builder: (context) => _DuplicateBookDialog(book: duplicateBook),
+    );
+    if (!mounted || action == null) return;
 
-    for (final book in existingBooks) {
-      final existingIsbn = _normalizedIdentifier(book.isbn);
-      if (selectedIsbn.isNotEmpty &&
-          existingIsbn.isNotEmpty &&
-          selectedIsbn == existingIsbn) {
-        return true;
-      }
-
-      final existingTitle = _normalizedText(book.title);
-      final existingAuthor = _normalizedText(book.author ?? '');
-      if (selectedTitle.isNotEmpty &&
-          selectedAuthor.isNotEmpty &&
-          selectedTitle == existingTitle &&
-          selectedAuthor == existingAuthor) {
-        return true;
-      }
+    if (action == _DuplicateBookAction.view) {
+      Navigator.pushReplacementNamed(
+        context,
+        '/book/detail',
+        arguments: duplicateBook.id,
+      );
+      return;
     }
 
-    return false;
-  }
-
-  String _normalizedIdentifier(String? value) {
-    return (value ?? '').toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
-  }
-
-  String _normalizedText(String value) {
-    final lower = value.toLowerCase().trim();
-    final withoutAccents = lower
-        .replaceAll(RegExp(r'[áàäâã]'), 'a')
-        .replaceAll(RegExp(r'[éèëê]'), 'e')
-        .replaceAll(RegExp(r'[íìïî]'), 'i')
-        .replaceAll(RegExp(r'[óòöôõ]'), 'o')
-        .replaceAll(RegExp(r'[úùüû]'), 'u')
-        .replaceAll('ñ', 'n')
-        .replaceAll('ç', 'c');
-    return withoutAccents.replaceAll(RegExp(r'[^a-z0-9]+'), '');
+    if (action == _DuplicateBookAction.changeStatus) {
+      final normalizedDates = _normalizedReadingDates();
+      await ref
+          .read(booksProvider.notifier)
+          .updateBook(
+            duplicateBook.copyWith(
+              status: _selectedStatus,
+              startDate: normalizedDates.startedAt,
+              completedDate: normalizedDates.finishedAt,
+              updatedAt: DateTime.now(),
+            ),
+          );
+      ref.invalidate(statsProvider);
+      ref.invalidate(statisticsSummaryProvider);
+      ref.invalidate(readingInsightsSummaryProvider);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('Estado del libro actualizado')),
+        );
+    }
   }
 
   ({DateTime? startedAt, DateTime? finishedAt}) _normalizedReadingDates() {
@@ -531,6 +529,8 @@ String _bookSearchErrorMessage(Object error) {
       BookSearchFailureKind.connection => 'Parece que no hay conexión.',
       BookSearchFailureKind.timeout =>
         'La búsqueda está tardando más de lo normal. Reintenta.',
+      BookSearchFailureKind.invalidResponse =>
+        'Open Library devolvió una respuesta inesperada. Puedes reintentar o añadirlo manualmente.',
       BookSearchFailureKind.api =>
         'Open Library no respondió. Puedes reintentar o añadirlo manualmente.',
     };
@@ -641,6 +641,42 @@ class _InlineError extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+enum _DuplicateBookAction { view, changeStatus }
+
+class _DuplicateBookDialog extends StatelessWidget {
+  const _DuplicateBookDialog({required this.book});
+
+  final Book book;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return AlertDialog(
+      title: const Text('Este libro ya está en tu biblioteca'),
+      content: Text(
+        book.author == null ? book.title : '${book.title}\n${book.author}',
+        style: theme.textTheme.bodyMedium,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () =>
+              Navigator.pop(context, _DuplicateBookAction.changeStatus),
+          child: const Text('Cambiar estado'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _DuplicateBookAction.view),
+          child: const Text('Ver libro'),
+        ),
+      ],
     );
   }
 }

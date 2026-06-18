@@ -13,6 +13,8 @@ class Book {
     this.publisher,
     this.coverUrl,
     this.isbn,
+    this.externalSource,
+    this.externalId,
     this.firstPublishYear,
     this.genre,
     this.language,
@@ -32,6 +34,8 @@ class Book {
   final String? publisher;
   final String? coverUrl;
   final String? isbn;
+  final String? externalSource;
+  final String? externalId;
   final int? firstPublishYear;
   final String? genre;
   final String? language;
@@ -56,6 +60,8 @@ class Book {
     String? publisher,
     String? coverUrl,
     String? isbn,
+    String? externalSource,
+    String? externalId,
     int? firstPublishYear,
     String? genre,
     String? language,
@@ -76,6 +82,8 @@ class Book {
       publisher: publisher ?? this.publisher,
       coverUrl: coverUrl ?? this.coverUrl,
       isbn: isbn ?? this.isbn,
+      externalSource: externalSource ?? this.externalSource,
+      externalId: externalId ?? this.externalId,
       firstPublishYear: firstPublishYear ?? this.firstPublishYear,
       genre: genre ?? this.genre,
       language: language ?? this.language,

@@ -5,6 +5,8 @@ class BookSearchResult {
     this.publisher,
     this.coverUrl,
     this.isbn,
+    this.externalSource,
+    this.externalId,
     this.firstPublishYear,
     this.numberOfPages,
   });
@@ -14,6 +16,8 @@ class BookSearchResult {
   final String? publisher;
   final String? coverUrl;
   final String? isbn;
+  final String? externalSource;
+  final String? externalId;
   final int? firstPublishYear;
   final int? numberOfPages;
 }
