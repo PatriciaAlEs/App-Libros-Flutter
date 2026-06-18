@@ -118,7 +118,7 @@ void main() {
     final results = await datasource.searchBooks('Dune');
 
     expect(results.single.externalSource, 'open_library');
-    expect(results.single.externalId, '/works/OL893415W');
+    expect(results.single.externalId, 'WORKSOL893415W');
   });
 }
 

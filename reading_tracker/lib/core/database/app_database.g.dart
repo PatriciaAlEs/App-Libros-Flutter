@@ -67,6 +67,28 @@ class $BooksTableTable extends BooksTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _externalSourceMeta = const VerificationMeta(
+    'externalSource',
+  );
+  @override
+  late final GeneratedColumn<String> externalSource = GeneratedColumn<String>(
+    'external_source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _externalIdMeta = const VerificationMeta(
+    'externalId',
+  );
+  @override
+  late final GeneratedColumn<String> externalId = GeneratedColumn<String>(
+    'external_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _firstPublishYearMeta = const VerificationMeta(
     'firstPublishYear',
   );
@@ -202,6 +224,8 @@ class $BooksTableTable extends BooksTable
     publisher,
     coverUrl,
     isbn,
+    externalSource,
+    externalId,
     firstPublishYear,
     genre,
     language,
@@ -262,6 +286,21 @@ class $BooksTableTable extends BooksTable
       context.handle(
         _isbnMeta,
         isbn.isAcceptableOrUnknown(data['isbn']!, _isbnMeta),
+      );
+    }
+    if (data.containsKey('external_source')) {
+      context.handle(
+        _externalSourceMeta,
+        externalSource.isAcceptableOrUnknown(
+          data['external_source']!,
+          _externalSourceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('external_id')) {
+      context.handle(
+        _externalIdMeta,
+        externalId.isAcceptableOrUnknown(data['external_id']!, _externalIdMeta),
       );
     }
     if (data.containsKey('first_publish_year')) {
@@ -378,6 +417,14 @@ class $BooksTableTable extends BooksTable
         DriftSqlType.string,
         data['${effectivePrefix}isbn'],
       ),
+      externalSource: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}external_source'],
+      ),
+      externalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}external_id'],
+      ),
       firstPublishYear: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}first_publish_year'],
@@ -442,6 +489,8 @@ class BooksTableData extends DataClass implements Insertable<BooksTableData> {
   final String? publisher;
   final String? coverUrl;
   final String? isbn;
+  final String? externalSource;
+  final String? externalId;
   final int? firstPublishYear;
   final String? genre;
   final String? language;
@@ -461,6 +510,8 @@ class BooksTableData extends DataClass implements Insertable<BooksTableData> {
     this.publisher,
     this.coverUrl,
     this.isbn,
+    this.externalSource,
+    this.externalId,
     this.firstPublishYear,
     this.genre,
     this.language,
@@ -490,6 +541,12 @@ class BooksTableData extends DataClass implements Insertable<BooksTableData> {
     }
     if (!nullToAbsent || isbn != null) {
       map['isbn'] = Variable<String>(isbn);
+    }
+    if (!nullToAbsent || externalSource != null) {
+      map['external_source'] = Variable<String>(externalSource);
+    }
+    if (!nullToAbsent || externalId != null) {
+      map['external_id'] = Variable<String>(externalId);
     }
     if (!nullToAbsent || firstPublishYear != null) {
       map['first_publish_year'] = Variable<int>(firstPublishYear);
@@ -540,6 +597,12 @@ class BooksTableData extends DataClass implements Insertable<BooksTableData> {
           ? const Value.absent()
           : Value(coverUrl),
       isbn: isbn == null && nullToAbsent ? const Value.absent() : Value(isbn),
+      externalSource: externalSource == null && nullToAbsent
+          ? const Value.absent()
+          : Value(externalSource),
+      externalId: externalId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(externalId),
       firstPublishYear: firstPublishYear == null && nullToAbsent
           ? const Value.absent()
           : Value(firstPublishYear),
@@ -587,6 +650,8 @@ class BooksTableData extends DataClass implements Insertable<BooksTableData> {
       publisher: serializer.fromJson<String?>(json['publisher']),
       coverUrl: serializer.fromJson<String?>(json['coverUrl']),
       isbn: serializer.fromJson<String?>(json['isbn']),
+      externalSource: serializer.fromJson<String?>(json['externalSource']),
+      externalId: serializer.fromJson<String?>(json['externalId']),
       firstPublishYear: serializer.fromJson<int?>(json['firstPublishYear']),
       genre: serializer.fromJson<String?>(json['genre']),
       language: serializer.fromJson<String?>(json['language']),
@@ -611,6 +676,8 @@ class BooksTableData extends DataClass implements Insertable<BooksTableData> {
       'publisher': serializer.toJson<String?>(publisher),
       'coverUrl': serializer.toJson<String?>(coverUrl),
       'isbn': serializer.toJson<String?>(isbn),
+      'externalSource': serializer.toJson<String?>(externalSource),
+      'externalId': serializer.toJson<String?>(externalId),
       'firstPublishYear': serializer.toJson<int?>(firstPublishYear),
       'genre': serializer.toJson<String?>(genre),
       'language': serializer.toJson<String?>(language),
@@ -633,6 +700,8 @@ class BooksTableData extends DataClass implements Insertable<BooksTableData> {
     Value<String?> publisher = const Value.absent(),
     Value<String?> coverUrl = const Value.absent(),
     Value<String?> isbn = const Value.absent(),
+    Value<String?> externalSource = const Value.absent(),
+    Value<String?> externalId = const Value.absent(),
     Value<int?> firstPublishYear = const Value.absent(),
     Value<String?> genre = const Value.absent(),
     Value<String?> language = const Value.absent(),
@@ -652,6 +721,10 @@ class BooksTableData extends DataClass implements Insertable<BooksTableData> {
     publisher: publisher.present ? publisher.value : this.publisher,
     coverUrl: coverUrl.present ? coverUrl.value : this.coverUrl,
     isbn: isbn.present ? isbn.value : this.isbn,
+    externalSource: externalSource.present
+        ? externalSource.value
+        : this.externalSource,
+    externalId: externalId.present ? externalId.value : this.externalId,
     firstPublishYear: firstPublishYear.present
         ? firstPublishYear.value
         : this.firstPublishYear,
@@ -677,6 +750,12 @@ class BooksTableData extends DataClass implements Insertable<BooksTableData> {
       publisher: data.publisher.present ? data.publisher.value : this.publisher,
       coverUrl: data.coverUrl.present ? data.coverUrl.value : this.coverUrl,
       isbn: data.isbn.present ? data.isbn.value : this.isbn,
+      externalSource: data.externalSource.present
+          ? data.externalSource.value
+          : this.externalSource,
+      externalId: data.externalId.present
+          ? data.externalId.value
+          : this.externalId,
       firstPublishYear: data.firstPublishYear.present
           ? data.firstPublishYear.value
           : this.firstPublishYear,
@@ -709,6 +788,8 @@ class BooksTableData extends DataClass implements Insertable<BooksTableData> {
           ..write('publisher: $publisher, ')
           ..write('coverUrl: $coverUrl, ')
           ..write('isbn: $isbn, ')
+          ..write('externalSource: $externalSource, ')
+          ..write('externalId: $externalId, ')
           ..write('firstPublishYear: $firstPublishYear, ')
           ..write('genre: $genre, ')
           ..write('language: $language, ')
@@ -733,6 +814,8 @@ class BooksTableData extends DataClass implements Insertable<BooksTableData> {
     publisher,
     coverUrl,
     isbn,
+    externalSource,
+    externalId,
     firstPublishYear,
     genre,
     language,
@@ -756,6 +839,8 @@ class BooksTableData extends DataClass implements Insertable<BooksTableData> {
           other.publisher == this.publisher &&
           other.coverUrl == this.coverUrl &&
           other.isbn == this.isbn &&
+          other.externalSource == this.externalSource &&
+          other.externalId == this.externalId &&
           other.firstPublishYear == this.firstPublishYear &&
           other.genre == this.genre &&
           other.language == this.language &&
@@ -777,6 +862,8 @@ class BooksTableCompanion extends UpdateCompanion<BooksTableData> {
   final Value<String?> publisher;
   final Value<String?> coverUrl;
   final Value<String?> isbn;
+  final Value<String?> externalSource;
+  final Value<String?> externalId;
   final Value<int?> firstPublishYear;
   final Value<String?> genre;
   final Value<String?> language;
@@ -797,6 +884,8 @@ class BooksTableCompanion extends UpdateCompanion<BooksTableData> {
     this.publisher = const Value.absent(),
     this.coverUrl = const Value.absent(),
     this.isbn = const Value.absent(),
+    this.externalSource = const Value.absent(),
+    this.externalId = const Value.absent(),
     this.firstPublishYear = const Value.absent(),
     this.genre = const Value.absent(),
     this.language = const Value.absent(),
@@ -818,6 +907,8 @@ class BooksTableCompanion extends UpdateCompanion<BooksTableData> {
     this.publisher = const Value.absent(),
     this.coverUrl = const Value.absent(),
     this.isbn = const Value.absent(),
+    this.externalSource = const Value.absent(),
+    this.externalId = const Value.absent(),
     this.firstPublishYear = const Value.absent(),
     this.genre = const Value.absent(),
     this.language = const Value.absent(),
@@ -840,6 +931,8 @@ class BooksTableCompanion extends UpdateCompanion<BooksTableData> {
     Expression<String>? publisher,
     Expression<String>? coverUrl,
     Expression<String>? isbn,
+    Expression<String>? externalSource,
+    Expression<String>? externalId,
     Expression<int>? firstPublishYear,
     Expression<String>? genre,
     Expression<String>? language,
@@ -861,6 +954,8 @@ class BooksTableCompanion extends UpdateCompanion<BooksTableData> {
       if (publisher != null) 'publisher': publisher,
       if (coverUrl != null) 'cover_url': coverUrl,
       if (isbn != null) 'isbn': isbn,
+      if (externalSource != null) 'external_source': externalSource,
+      if (externalId != null) 'external_id': externalId,
       if (firstPublishYear != null) 'first_publish_year': firstPublishYear,
       if (genre != null) 'genre': genre,
       if (language != null) 'language': language,
@@ -884,6 +979,8 @@ class BooksTableCompanion extends UpdateCompanion<BooksTableData> {
     Value<String?>? publisher,
     Value<String?>? coverUrl,
     Value<String?>? isbn,
+    Value<String?>? externalSource,
+    Value<String?>? externalId,
     Value<int?>? firstPublishYear,
     Value<String?>? genre,
     Value<String?>? language,
@@ -905,6 +1002,8 @@ class BooksTableCompanion extends UpdateCompanion<BooksTableData> {
       publisher: publisher ?? this.publisher,
       coverUrl: coverUrl ?? this.coverUrl,
       isbn: isbn ?? this.isbn,
+      externalSource: externalSource ?? this.externalSource,
+      externalId: externalId ?? this.externalId,
       firstPublishYear: firstPublishYear ?? this.firstPublishYear,
       genre: genre ?? this.genre,
       language: language ?? this.language,
@@ -941,6 +1040,12 @@ class BooksTableCompanion extends UpdateCompanion<BooksTableData> {
     }
     if (isbn.present) {
       map['isbn'] = Variable<String>(isbn.value);
+    }
+    if (externalSource.present) {
+      map['external_source'] = Variable<String>(externalSource.value);
+    }
+    if (externalId.present) {
+      map['external_id'] = Variable<String>(externalId.value);
     }
     if (firstPublishYear.present) {
       map['first_publish_year'] = Variable<int>(firstPublishYear.value);
@@ -993,6 +1098,8 @@ class BooksTableCompanion extends UpdateCompanion<BooksTableData> {
           ..write('publisher: $publisher, ')
           ..write('coverUrl: $coverUrl, ')
           ..write('isbn: $isbn, ')
+          ..write('externalSource: $externalSource, ')
+          ..write('externalId: $externalId, ')
           ..write('firstPublishYear: $firstPublishYear, ')
           ..write('genre: $genre, ')
           ..write('language: $language, ')
@@ -1551,6 +1658,8 @@ typedef $$BooksTableTableCreateCompanionBuilder =
       Value<String?> publisher,
       Value<String?> coverUrl,
       Value<String?> isbn,
+      Value<String?> externalSource,
+      Value<String?> externalId,
       Value<int?> firstPublishYear,
       Value<String?> genre,
       Value<String?> language,
@@ -1573,6 +1682,8 @@ typedef $$BooksTableTableUpdateCompanionBuilder =
       Value<String?> publisher,
       Value<String?> coverUrl,
       Value<String?> isbn,
+      Value<String?> externalSource,
+      Value<String?> externalId,
       Value<int?> firstPublishYear,
       Value<String?> genre,
       Value<String?> language,
@@ -1657,6 +1768,16 @@ class $$BooksTableTableFilterComposer
 
   ColumnFilters<String> get isbn => $composableBuilder(
     column: $table.isbn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get externalSource => $composableBuilder(
+    column: $table.externalSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get externalId => $composableBuilder(
+    column: $table.externalId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1785,6 +1906,16 @@ class $$BooksTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get externalSource => $composableBuilder(
+    column: $table.externalSource,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get externalId => $composableBuilder(
+    column: $table.externalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get firstPublishYear => $composableBuilder(
     column: $table.firstPublishYear,
     builder: (column) => ColumnOrderings(column),
@@ -1872,6 +2003,16 @@ class $$BooksTableTableAnnotationComposer
 
   GeneratedColumn<String> get isbn =>
       $composableBuilder(column: $table.isbn, builder: (column) => column);
+
+  GeneratedColumn<String> get externalSource => $composableBuilder(
+    column: $table.externalSource,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get externalId => $composableBuilder(
+    column: $table.externalId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get firstPublishYear => $composableBuilder(
     column: $table.firstPublishYear,
@@ -1978,6 +2119,8 @@ class $$BooksTableTableTableManager
                 Value<String?> publisher = const Value.absent(),
                 Value<String?> coverUrl = const Value.absent(),
                 Value<String?> isbn = const Value.absent(),
+                Value<String?> externalSource = const Value.absent(),
+                Value<String?> externalId = const Value.absent(),
                 Value<int?> firstPublishYear = const Value.absent(),
                 Value<String?> genre = const Value.absent(),
                 Value<String?> language = const Value.absent(),
@@ -1998,6 +2141,8 @@ class $$BooksTableTableTableManager
                 publisher: publisher,
                 coverUrl: coverUrl,
                 isbn: isbn,
+                externalSource: externalSource,
+                externalId: externalId,
                 firstPublishYear: firstPublishYear,
                 genre: genre,
                 language: language,
@@ -2020,6 +2165,8 @@ class $$BooksTableTableTableManager
                 Value<String?> publisher = const Value.absent(),
                 Value<String?> coverUrl = const Value.absent(),
                 Value<String?> isbn = const Value.absent(),
+                Value<String?> externalSource = const Value.absent(),
+                Value<String?> externalId = const Value.absent(),
                 Value<int?> firstPublishYear = const Value.absent(),
                 Value<String?> genre = const Value.absent(),
                 Value<String?> language = const Value.absent(),
@@ -2040,6 +2187,8 @@ class $$BooksTableTableTableManager
                 publisher: publisher,
                 coverUrl: coverUrl,
                 isbn: isbn,
+                externalSource: externalSource,
+                externalId: externalId,
                 firstPublishYear: firstPublishYear,
                 genre: genre,
                 language: language,

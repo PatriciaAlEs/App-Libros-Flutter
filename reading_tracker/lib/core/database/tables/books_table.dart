@@ -10,6 +10,8 @@ class BooksTable extends Table {
   TextColumn get publisher => text().nullable()();
   TextColumn get coverUrl => text().nullable()();
   TextColumn get isbn => text().nullable()();
+  TextColumn get externalSource => text().nullable()();
+  TextColumn get externalId => text().nullable()();
   IntColumn get firstPublishYear => integer().nullable()();
   TextColumn get genre => text().nullable()();
   TextColumn get language => text().nullable()();

@@ -115,7 +115,7 @@ class BookApiDatasource {
           : null,
       isbn: isbns.isEmpty ? null : isbns.first,
       externalSource: 'open_library',
-      externalId: json['key'] as String?,
+      externalId: _normalizedExternalId(json['key'] as String?),
       firstPublishYear: json['first_publish_year'] as int?,
       numberOfPages:
           _intValue(json['number_of_pages']) ??
@@ -148,6 +148,14 @@ class BookApiDatasource {
       }
     }
     return null;
+  }
+
+  String? _normalizedExternalId(String? value) {
+    final normalized = (value ?? '').toUpperCase().replaceAll(
+      RegExp(r'[^A-Z0-9]'),
+      '',
+    );
+    return normalized.isEmpty ? null : normalized;
   }
 
   void _logSearchFailure(Object error, StackTrace stackTrace) {

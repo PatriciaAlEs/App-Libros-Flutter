@@ -16,7 +16,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(openDatabaseConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -43,6 +43,10 @@ class AppDatabase extends _$AppDatabase {
           readingSessionsTable,
           readingSessionsTable.updatedAt,
         );
+      }
+      if (from < 5) {
+        await migrator.addColumn(booksTable, booksTable.externalSource);
+        await migrator.addColumn(booksTable, booksTable.externalId);
       }
     },
   );
