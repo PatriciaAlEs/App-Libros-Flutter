@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../domain/entities/book.dart';
@@ -14,6 +13,7 @@ class CurrentReadingCard extends StatelessWidget {
     this.currentIndex,
     this.totalReadings,
     this.onChangeCurrentReading,
+    this.isPrimaryReading = true,
   });
 
   final Book book;
@@ -21,6 +21,7 @@ class CurrentReadingCard extends StatelessWidget {
   final int? currentIndex;
   final int? totalReadings;
   final VoidCallback? onChangeCurrentReading;
+  final bool isPrimaryReading;
 
   @override
   Widget build(BuildContext context) {
@@ -36,89 +37,111 @@ class CurrentReadingCard extends StatelessWidget {
     final showChange =
         onChangeCurrentReading != null && (totalReadings ?? 0) > 1;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color.lerp(primary, Colors.white, 0.03)!, primary, dark],
-          stops: const [0, 0.46, 1],
-        ),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-        boxShadow: [
-          BoxShadow(
-            color: dark.withValues(alpha: 0.28),
-            blurRadius: 44,
-            offset: const Offset(0, 24),
+    return Semantics(
+      button: true,
+      label: isPrimaryReading
+          ? 'Lectura principal: ${book.title}'
+          : 'Lectura en curso: ${book.title}',
+      hint: 'Abre el progreso de lectura',
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color.lerp(primary, Colors.white, 0.03)!, primary, dark],
+            stops: const [0, 0.46, 1],
           ),
-          BoxShadow(
-            color: accent.withValues(alpha: 0.16),
-            blurRadius: 26,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
           borderRadius: BorderRadius.circular(30),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(28, 26, 28, 26),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final isCompact = constraints.maxWidth < 360;
-                final coverWidth = isCompact ? 106.0 : 138.0;
-                final coverHeight = isCompact ? 156.0 : 204.0;
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+          boxShadow: [
+            BoxShadow(
+              color: dark.withValues(alpha: 0.28),
+              blurRadius: 44,
+              offset: const Offset(0, 24),
+            ),
+            BoxShadow(
+              color: accent.withValues(alpha: 0.16),
+              blurRadius: 26,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(30),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(28, 26, 28, 26),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isCompact = constraints.maxWidth < 360;
+                  final coverWidth = isCompact ? 106.0 : 138.0;
+                  final coverHeight = isCompact ? 156.0 : 204.0;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _CardHeader(
-                      showPosition: showPosition,
-                      currentIndex: currentIndex,
-                      totalReadings: totalReadings,
-                      showChange: showChange,
-                      onChangeCurrentReading: onChangeCurrentReading,
-                      accent: accent,
-                      onDark: onDark,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Expanded(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          _CardBookCover(
-                            url: book.coverUrl,
-                            width: coverWidth,
-                            height: coverHeight,
-                          ),
-                          SizedBox(
-                            width: isCompact ? AppSpacing.lg : AppSpacing.xxl,
-                          ),
-                          Expanded(
-                            child: _BookIdentity(
-                              book: book,
-                              isCompact: isCompact,
-                              onDark: onDark,
-                              accent: accent,
-                            ),
-                          ),
-                        ],
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _CardHeader(
+                        isPrimaryReading: isPrimaryReading,
+                        showPosition: showPosition,
+                        currentIndex: currentIndex,
+                        totalReadings: totalReadings,
+                        showChange: showChange,
+                        onChangeCurrentReading: onChangeCurrentReading,
+                        accent: accent,
+                        onDark: onDark,
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _ProgressFooter(
-                      progress: progress,
-                      percent: progressPercent,
-                      pageText: _pageProgressText(book),
-                      accent: accent,
-                      onDark: onDark,
-                    ),
-                  ],
-                );
-              },
+                      const SizedBox(height: AppSpacing.lg),
+                      Expanded(
+                        child: LayoutBuilder(
+                          builder: (context, contentConstraints) {
+                            final fittedCoverHeight =
+                                contentConstraints.maxHeight;
+                            final fittedCoverWidth =
+                                (fittedCoverHeight * (coverWidth / coverHeight))
+                                    .clamp(72.0, coverWidth)
+                                    .toDouble();
+
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                _CardBookCover(
+                                  url: book.coverUrl,
+                                  width: fittedCoverWidth,
+                                  height: fittedCoverHeight,
+                                ),
+                                SizedBox(
+                                  width: isCompact
+                                      ? AppSpacing.lg
+                                      : AppSpacing.xxl,
+                                ),
+                                Expanded(
+                                  child: _BookIdentity(
+                                    book: book,
+                                    isCompact: isCompact,
+                                    onDark: onDark,
+                                    accent: accent,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      _ProgressFooter(
+                        progress: progress,
+                        percent: progressPercent,
+                        pageText: _pageProgressText(book),
+                        remainingText: _remainingPagesText(book),
+                        accent: accent,
+                        onDark: onDark,
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -129,6 +152,7 @@ class CurrentReadingCard extends StatelessWidget {
 
 class _CardHeader extends StatelessWidget {
   const _CardHeader({
+    required this.isPrimaryReading,
     required this.showPosition,
     required this.currentIndex,
     required this.totalReadings,
@@ -138,6 +162,7 @@ class _CardHeader extends StatelessWidget {
     required this.onDark,
   });
 
+  final bool isPrimaryReading;
   final bool showPosition;
   final int? currentIndex;
   final int? totalReadings;
@@ -155,7 +180,7 @@ class _CardHeader extends StatelessWidget {
         Expanded(child: Divider(color: accent.withValues(alpha: 0.24))),
         const SizedBox(width: AppSpacing.md),
         Text(
-          'LECTURA ACTUAL',
+          isPrimaryReading ? 'LECTURA PRINCIPAL' : 'LECTURA EN CURSO',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: theme.textTheme.labelSmall?.copyWith(
@@ -181,7 +206,7 @@ class _CardHeader extends StatelessWidget {
             tooltip: 'Cambiar lectura principal',
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints.tightFor(width: 34, height: 34),
+            constraints: const BoxConstraints.tightFor(width: 44, height: 44),
             icon: Icon(
               Icons.swap_horiz_rounded,
               color: onDark.withValues(alpha: 0.90),
@@ -253,13 +278,11 @@ class _BookIdentity extends StatelessWidget {
           book.title,
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.cormorantGaramond(
-            textStyle: theme.textTheme.headlineSmall?.copyWith(
-              color: onDark,
-              fontSize: isCompact ? 28 : 38,
-              fontWeight: FontWeight.w700,
-              height: 1.04,
-            ),
+          style: theme.textTheme.headlineSmall?.copyWith(
+            color: onDark,
+            fontSize: isCompact ? 26 : 34,
+            fontWeight: FontWeight.w800,
+            height: 1.08,
           ),
         ),
         if (book.author?.isNotEmpty == true) ...[
@@ -285,6 +308,7 @@ class _ProgressFooter extends StatelessWidget {
     required this.progress,
     required this.percent,
     required this.pageText,
+    required this.remainingText,
     required this.accent,
     required this.onDark,
   });
@@ -292,6 +316,7 @@ class _ProgressFooter extends StatelessWidget {
   final double progress;
   final int percent;
   final String pageText;
+  final String? remainingText;
   final Color accent;
   final Color onDark;
 
@@ -299,43 +324,67 @@ class _ProgressFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Row(
+    final metadataStyle = theme.textTheme.bodySmall?.copyWith(
+      color: onDark.withValues(alpha: 0.76),
+      fontWeight: FontWeight.w700,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(
-          width: 56,
-          child: Text(
-            '$percent%',
-            maxLines: 1,
-            style: GoogleFonts.cormorantGaramond(
-              textStyle: theme.textTheme.titleLarge?.copyWith(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              '$percent%',
+              maxLines: 1,
+              style: theme.textTheme.titleLarge?.copyWith(
                 color: onDark,
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
                 height: 1,
               ),
             ),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 8,
-              backgroundColor: Colors.white.withValues(alpha: 0.13),
-              color: accent.withValues(alpha: 1),
+            const Spacer(),
+            Flexible(
+              child: Text(
+                pageText,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+                style: metadataStyle,
+              ),
             ),
-          ),
+            if (remainingText != null) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 7),
+                child: Text(
+                  '\u00b7',
+                  style: metadataStyle?.copyWith(
+                    color: onDark.withValues(alpha: 0.42),
+                  ),
+                ),
+              ),
+              Flexible(
+                child: Text(
+                  remainingText!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                  style: metadataStyle,
+                ),
+              ),
+            ],
+          ],
         ),
-        const SizedBox(width: AppSpacing.md),
-        Text(
-          pageText,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: onDark.withValues(alpha: 0.74),
-            fontWeight: FontWeight.w700,
+        const SizedBox(height: AppSpacing.sm),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: LinearProgressIndicator(
+            value: progress,
+            minHeight: 8,
+            backgroundColor: Colors.white.withValues(alpha: 0.13),
+            color: accent.withValues(alpha: 1),
           ),
         ),
       ],
@@ -414,5 +463,13 @@ String _pageProgressText(Book book) {
   if (book.currentPage == null || book.totalPages == null) {
     return 'Progreso por registrar';
   }
-  return '${book.currentPage} / ${book.totalPages} p.';
+  return '${book.currentPage} / ${book.totalPages} pág.';
+}
+
+String? _remainingPagesText(Book book) {
+  final currentPage = book.currentPage;
+  final totalPages = book.totalPages;
+  if (currentPage == null || totalPages == null || totalPages <= 0) return null;
+  final remaining = (totalPages - currentPage).clamp(0, totalPages);
+  return '$remaining restantes';
 }

@@ -4,7 +4,60 @@
 
 `reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario, estadisticas basicas e insights de lectura.
 
-Estado tras Hito 5 Sprint 13, Branding Final, Sprint 14 Demo Polish y Sprint 15 Stats Premium Redesign: ReadPp v1.0 RC esta completo.
+Estado tras Hito 6 Sprint 18.x: ReadPp esta en Alpha Testing & Polish, con foco en Android QA, UX consistency, visual polish, busqueda robusta y preparacion Beta.
+
+Sprint 18.x Alpha QA implementado:
+
+- Home soporta multiples libros en estado `reading` con indicador `1 / N`, swipe completo y seleccion de lectura principal persistida.
+- La card de lectura actual se unifico como card editorial burgundy: portada protagonista, titulo grande, autor, badge `LECTURA ACTUAL`, indicador `1 / N`, progreso y card completa clicable.
+- `ReadPpPageHeader` / header compartido queda basado en Biblioteca como referencia visual, no en Home.
+- Biblioteca es la pantalla fuente de verdad visual para headers, fondo, spacing y jerarquia.
+- Calendario usa celdas blancas con intensidad por bordes/sombras/acento, portadas pequenas y selector Mes/Semana alineado a botones premium.
+- Diario cambia a `Diario de lectura`, con titulo externo, card principal del dia con portada y seleccion local de sesion; las cards pequenas seleccionan sesion y no navegan al libro.
+- Reading Challenge cambia el CTA a `Buscar libro`; la portada por defecto puede venir del ultimo libro completado y se mantiene opcion manual.
+- Insights usa `Tu perfil lector`, `Mejores lecturas` y `Curiosidades`; autor favorito muestra libros/portadas.
+- Open Library se robustecio con timeout, retry, errores tipados y logs debug.
+- `BookSearchRepository` es el punto unico de entrada para busqueda de libros.
+- `GoogleBooksDatasource` se agrega como proveedor secundario: Open Library -> Google Books -> alta manual.
+- `BookDuplicateMatcher` centraliza deduplicacion por ISBN, `externalSource + externalId` y titulo+autor normalizados.
+- `externalSource` y `externalId` se persisten en Drift con migracion segura de schemaVersion 5.
+- Alta manual permite titulo obligatorio, autor recomendado, ISBN opcional, paginas opcionales, estado inicial y portada opcional.
+- Escaneo ISBN se incorpora como ayuda mediante `mobile_scanner`; si falla o se rechaza camara, el flujo manual continua.
+- Portada local usa `image_picker`, se copia a documentos de la app y se guarda como `file://` en `coverUrl`.
+- `BookCoverImage` renderiza portadas remotas y locales, con placeholder editorial ReadPp cuando no hay portada.
+
+Validacion vigente Sprint 18.17:
+
+- `dart format` aplicado.
+- `flutter analyze` OK.
+- `flutter test` OK, 55/55 tests passed.
+- Android Emulator compilo/arranco en validaciones recientes usando `JAVA_HOME=C:\Program Files\Android\Android Studio\jbr`.
+
+Limitaciones conocidas:
+
+- Escaneo ISBN y seleccion de portada local necesitan validacion manual en dispositivo/emulador con camara/galeria reales.
+- Google Books se usa sin API key y como fallback publico; no hay backend ni cache remoto.
+- No hay sincronizacion cloud; ReadPp sigue local-first con Drift/SQLite.
+- Logs de proveedor/fallback se limitan a debug.
+
+Estado de roadmap:
+
+- Hito 6 continua con Alpha QA, polish y Beta readiness.
+- Hito 7 ya inicio con Premium Experience: Motion & Delight y Premium Statistics aplicados.
+- Proximo paso tecnico mayor post-Alpha: Supabase Auth + backend cloud + sincronizacion multi-dispositivo manteniendo persistencia local.
+- Hito 7: Premium Experience (motion, skeleton loaders, microinteracciones, empty states, estadisticas visuales premium).
+- Hito 8: Beta Readiness (Android/Web/Windows QA, Beta APK/AAB, store assets, privacy policy, Play Store release preparation).
+
+Sprint 19.x implementado:
+
+- Sprint 19.1 agrega motion premium calmado: confeti breve al completar libro, transiciones suaves, microinteracciones, skeletons y empty states animados.
+- Sprint 19.2 transforma Estadisticas con visualizaciones editoriales: progress ring para reto lector, donut de estados, distribucion de generos, tiempo semanal y paginas por mes.
+- Sprint 19.3 mejora first run y estados vacios con `ReadPpEmptyState` compartido en Biblioteca, Calendario/Diario, Estadisticas, Insights y Reto lector.
+- Las visualizaciones de Sprint 19.2 usan `StatisticsSummary`, `Book` y `ReadingSession` existentes, sin nuevas tablas ni dependencias.
+- Distribucion de formatos queda como estado preparado porque aun no existe metadata de formato en el modelo de libro.
+- Validacion vigente Sprint 19.3: `dart format lib test`, `flutter analyze` OK y `flutter test` OK, 55/55 tests passed.
+
+Estado historico tras Hito 5 Sprint 13, Branding Final, Sprint 14 Demo Polish y Sprint 15 Stats Premium Redesign: ReadPp v1.0 RC esta completo.
 
 Actualizacion Sprint 17.x: perfil lector local, branding real, headers consistentes y Home visual polish estan implementados.
 
@@ -397,6 +450,24 @@ Estado confirmado por el usuario:
 - Estado actual: ReadPp es feature-complete para v1; quedan tareas de release readiness.
 - Hito 5 Sprint 13 - Release Candidate & Store Readiness completado y validado.
 - Estado actual: ReadPp v1.0 RC Complete; Ready for Store Preparation.
+- Hito 7 Sprint 19.4 - Design System Consolidation completado y validado.
+- Estado actual de Design System: `ReadPpPageHeader`, `CurrentReadingCard`, `MetricCard`, `ReadPpEmptyState` y `ReadPpSurface` son componentes compartidos vigentes.
+- Pantallas principales alineadas: Home, Biblioteca, Calendario, Progreso, Estadisticas, Insights y Settings usan titulos/datos destacados desde el tema oficial.
+- Validacion vigente Sprint 19.4: `dart format lib test` OK, `flutter analyze` OK y `flutter test` OK con 55/55 tests.
+- Hito 7 Sprint 19.5 - Reading Experience Polish implementado.
+- Estado actual de lecturas activas: swipe de revision independiente de la seleccion principal, etiquetas explicitas y acceso a progreso desde lecturas secundarias.
+- Estado actual de progreso: porcentaje, paginas actuales/totales y restantes visibles en `CurrentReadingCard`.
+- Estado actual de historial: sesiones recientes ordenadas de forma estable, ultimo avance destacado y notas visibles con limite de lineas.
+- Relecturas siguen fuera de alcance y sin cambios de modelo; arquitectura futura documentada en `architecture.md`.
+- Validacion disponible Sprint 19.5: format, `dart analyze` y `git diff --check` OK; validacion Flutter pendiente por bloqueo del SDK local durante esta ejecucion.
+- Hito 7 Sprint 19.6 - Insights Premium implementado.
+- Insights actual: autor favorito con carrusel de portadas; mejores lecturas con portada, rating y review; curiosidades con libro largo/corto y ritmo medio.
+- Validacion intermedia 19.6: format y `dart analyze` OK.
+- Hito 7 Sprint 19.7 - Accessibility & Responsiveness implementado.
+- Navbar visible y consistente en rutas principales; tabs con estado semantico seleccionado.
+- Portadas, lectura actual, calendario y diario incorporan labels semanticos en interacciones clave.
+- Responsive actual: alturas sensibles al text scale, metricas de Insights en Wrap y cards premium horizontales con ancho adaptable.
+- Validacion final disponible: format, `dart analyze` y `git diff --check` OK; `flutter analyze/test` pendientes por bloqueo del SDK local.
 
 ## Estadisticas MVP
 

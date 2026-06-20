@@ -220,3 +220,146 @@
 - Resumenes, calendario semanal y lecturas en curso pueden calcularse en presentation desde datos ya cargados, sin crear providers ni modificar logica de negocio.
 - El reto anual de Home usa el asset `assets/images/home/annual_goal_illustration.png` como soporte visual decorativo.
 - El hero de lectura actual debe mantener portada, progreso, paginas, tiempo y accion de cambio sin eliminar informacion funcional.
+
+## Alpha QA y Visual Source of Truth Hito 6 Sprint 18.x
+
+- ReadPp entra en fase Alpha Testing & Polish; el orden de prioridad es bugs funcionales, inconsistencias UX, polish visual, interacciones premium y preparacion Beta.
+- Biblioteca pasa a ser la fuente de verdad visual de la aplicacion. Cuando Home difiere de Biblioteca, Home debe adaptarse a Biblioteca.
+- El header superior se centraliza en un componente compartido (`ReadPpPageHeader` / header de pantalla) con logo, perfil opcional, titulo/saludo, subtitulo opcional, acciones principales, SafeArea, padding y fondo coherentes.
+- La tarjeta de lectura actual se centraliza como componente compartido (`CurrentReadingCard` / card destacada) con card burgundy editorial, portada a la izquierda, badge `LECTURA ACTUAL`, indicador `1 / N`, accion discreta de cambio, titulo grande, autor, progreso y card completa clicable.
+- La card de lectura actual no debe incluir CTA interno `Ver lectura`; la card completa es la accion de navegacion.
+- El carrusel de lecturas activas en Home es para revisar rapidamente otras lecturas en curso, no para elegir implicitamente la lectura principal.
+- La accion para cambiar lectura principal debe existir separada conceptualmente del swipe y persistir en `reader_profile_current_reading_id`.
+- Las pantallas principales deben mantener la navbar inferior visible, incluida la pantalla de reto lector.
+- No anadir nuevas funcionalidades durante polish si el sprint pide solo correccion de comportamiento o sincronizacion.
+
+## Design Decisions - Do Not Regress
+
+- Visual source of truth: Biblioteca es la referencia visual principal.
+- Current Reading Card: toda la card es clicable.
+- Current Reading Card: no debe volver el boton interno `Ver lectura`.
+- Typography: Space Grotesk se usa para titulos.
+- Typography: Roboto se usa para cuerpo, textos pequenos, labels y UI.
+- Reading Challenge: el CTA debe ser `Buscar libro` o `Cambiar libro`, nunca `Buscar portada`.
+- Calendar: los dias son clicables.
+- Calendar: no mostrar CTA textual `Abrir calendario`.
+
+## Calendar, Diario y Reading Challenge Hito 6 Sprint 18.x
+
+- En Calendario, seleccionar un dia debe mostrar las sesiones de ese dia y crear/editar una sesion debe refrescar Calendario y Diario sin reiniciar la app.
+- Las celdas del calendario deben tener fondo blanco; la intensidad se comunica con bordes, sombras suaves o acentos del tema Burgundy/Forest, no coloreando agresivamente toda la celda.
+- El calendario muestra hasta 3 portadas pequenas por dia y `+N` si hay mas libros; se eliminan textos internos tipo `75 pag` o `35 min`.
+- El CTA textual `Abrir calendario` es redundante y debe eliminarse porque los dias ya son interactivos.
+- El titulo visible del diario pasa a `Diario de lectura`, fuera de la card principal y con la tipografia oficial de titulos.
+- La card principal del dia muestra la sesion/libro seleccionado y es la unica que navega al detalle; las cards pequenas de sesiones actualizan la seleccion y mantienen editar/borrar.
+- El reto lector usa copy `Buscar libro` / `Cambiar libro`, no `Buscar portada`.
+- Si existe al menos un libro completado, el reto lector puede usar automaticamente la portada del ultimo completado como imagen principal, manteniendo override manual.
+- El selector del reto busca entre libros del usuario para elegir portada, no abre directamente una busqueda remota como flujo principal.
+
+## Book Search, Deduplicacion y Fallbacks Hito 6 Sprint 18.15-18.17
+
+- `BookSearchRepository` es el punto unico de entrada para busqueda de libros; las pantallas de alta no deben acoplarse a Open Library ni a un proveedor concreto.
+- Open Library se mantiene como proveedor primario y Google Books se incorpora como proveedor secundario de fallback.
+- Si Open Library devuelve resultados, se usan esos resultados y no se consulta Google Books.
+- Si Open Library responde sin resultados, hace timeout o falla, se activa Google Books.
+- Si Google Books tambien falla o no encuentra resultados, el flujo pasa a alta manual.
+- Los mensajes de usuario distinguen sin conexion, timeout, API no disponible, respuesta invalida y sin resultados; los nombres de proveedor quedan ocultos para usuario final salvo debug.
+- Los logs debug deben registrar proveedor usado, numero de resultados, fallback activado y motivo del fallback.
+- `BookDuplicateMatcher` centraliza la deduplicacion y debe reutilizarse en alta por API, alta manual y futuros enriquecimientos.
+- Criterios de deduplicacion: ISBN normalizado, `externalSource + externalId`, y fallback por titulo+autor normalizados.
+- La normalizacion compara lowercase, trim, espacios duplicados eliminados, diacriticos ignorados, puntuacion basica ignorada y autor principal cuando exista.
+- Drift persiste `externalSource` y `externalId` en libros para detectar duplicados entre proveedores y preparar enriquecimiento futuro.
+- Un intento de duplicado no crea libro y muestra `Este libro ya esta en tu biblioteca.` con acciones `Ver libro`, `Cambiar estado` y `Cancelar`.
+- El alta manual es ultima opcion de fallback, no el flujo principal. El escaneo ISBN es una ayuda opcional, no un bloqueo.
+- Una portada local se guarda solo en el dispositivo como referencia/ruta local y no se sube a backend.
+- Si un libro manual aparece mas tarde via API, el flujo futuro debe enriquecer el libro existente sin perder estado, progreso, sesiones, rating ni review.
+
+## Roadmap Backend y Local-first
+
+- ReadPp sigue local-first con Drift/SQLite durante Alpha.
+- Proximo paso tecnico mayor post-Alpha: Supabase para Auth, backend cloud y sincronizacion multi-dispositivo.
+- La sincronizacion futura debe recuperar biblioteca, sesiones, progreso, estadisticas y perfil lector en otro dispositivo.
+- La persistencia local debe mantenerse para que la app no dependa siempre de internet.
+
+## Motion & Delight Hito 7 Sprint 19.1
+
+- Las animaciones de ReadPp deben sentirse calmadas, elegantes, editoriales y modernas.
+- Evitar animaciones excesivas, rebotes constantes, efectos arcade o gamificacion agresiva.
+- El momento principal de celebracion es completar un libro desde `reading` a `completed`.
+- El confeti de completado debe ser breve, no bloqueante y dispararse una sola vez por evento real de finalizacion.
+- Cambiar entre lecturas activas usa fade + slide horizontal ligero sobre `CurrentReadingCard`.
+- Navegacion entre pantallas principales usa fade/fade-through corto, sin animaciones teatrales.
+- Abrir libro desde Home, Biblioteca o Calendario usa transicion suave hacia Book Detail; no usar Hero de portadas todavia.
+- Los botones principales conservan ripple Material y microinteraccion de escala/feedback tactil cuando usan componentes custom.
+- Empty states pueden tener entrada suave; no introducir ilustraciones complejas todavia.
+- Busqueda de libros debe mostrar skeletons/placeholders en vez de pantallas vacias o spinners principales.
+
+## Premium Statistics Hito 7 Sprint 19.2
+
+- Las estadisticas deben leerse como visualizaciones editoriales, no como dashboard corporativo.
+- `StatsScreen` puede calcular visualizaciones de presentacion desde `StatisticsSummary`, libros y sesiones existentes sin crear tablas nuevas.
+- El reto lector debe mostrar un progress ring ademas del copy de progreso.
+- El donut de biblioteca muestra solo las categorias pedidas para claridad: pendientes, leyendo, completados y abandonados.
+- La distribucion de generos usa `Book.genre` cuando existe y agrupa categorias sobrantes como `Otros`.
+- Tiempo de lectura reciente se visualiza como barras semanales de minutos.
+- Paginas leidas por mes se visualizan como barras mensuales.
+- La distribucion de formatos queda preparada como estado informativo porque el modelo `Book` todavia no guarda metadata de formato.
+- Colores de graficos deben derivar de Burgundy/Forest/acento y neutros del tema ReadPp.
+
+## Empty States & First Run Hito 7 Sprint 19.3
+
+- `ReadPpEmptyState` queda como componente compartido para estados vacios editoriales con icono/asset opcional, titulo, descripcion y CTA opcional.
+- Los estados vacios deben guiar la siguiente accion sin usar mensajes genericos tipo `No data`.
+- Reto lector sin configurar debe mostrar CTA `Configurar reto` y no metricas confusas.
+- Estadisticas sin datos suficientes deben ofrecer registrar la primera sesion.
+- Calendario/Diario vacio debe explicar que las sesiones apareceran al registrar lectura y ofrecer CTA `Registrar lectura`.
+- Biblioteca vacia debe explicar que alli aparecera la biblioteca personal y ofrecer CTA `+ Añadir libro`.
+- Insights vacio debe explicar que los insights apareceran al anadir lecturas y registrar sesiones.
+- Durante la migracion a `ReadPpEmptyState`, algunos widgets antiguos quedan temporalmente marcados como no usados para evitar editar bloques con mojibake heredado; deben eliminarse en Sprint 19.4 Design System Consolidation.
+
+## Design System Consolidation Hito 7 Sprint 19.4
+
+- `ReadPpSurface` queda como superficie editorial compartida para cards, empty states y bloques visuales que requieran fondo, borde y sombra ReadPp.
+- Las pantallas principales deben consumir `ReadPpPageHeader`; `AppBrandHeader` queda como implementacion interna/base del header compartido, no como API preferida de pantallas feature.
+- Biblioteca sigue siendo la fuente de verdad visual; Home y resto de pantallas deben adaptar header, espaciados y tipografia a ese lenguaje.
+- `MetricCard` usa `ReadPpSurface` y tokens del tema; no debe duplicar decoraciones de card si existe una superficie compartida.
+- `ReadPpEmptyState` usa `ReadPpSurface` y motion suave compartida.
+- `CurrentReadingCard` debe usar la tipografia del tema para titulo y porcentaje; no debe recuperar estilos locales de Cormorant ni boton interno `Ver lectura`.
+- Los titulos y datos destacados de Home, Biblioteca, Calendario, Progreso, Estadisticas, Insights y Settings deben usar `Theme.textTheme` con Space Grotesk definido por el tema.
+- `GoogleFonts` debe quedar concentrado en el tema/componentes base cuando sea necesario, no repetido directamente en pantallas principales.
+- Se mantiene Roboto para cuerpo, labels, copy pequeno y controles.
+- Los cambios de 19.4 son visuales/estructurales de componentes compartidos; no cambian logica de negocio ni flujos de datos.
+
+## Reading Experience Polish Hito 7 Sprint 19.5
+
+- El swipe del carrusel solo cambia la lectura visible; nunca modifica `reader_profile_current_reading_id`.
+- La lectura principal se identifica explicitamente como `LECTURA PRINCIPAL`; el resto se identifica como `LECTURA EN CURSO`.
+- Cambiar la lectura principal sigue siendo una accion explicita mediante el selector existente.
+- `Otras lecturas` sirve para revisar y abrir lecturas activas, no para cambiar silenciosamente la principal.
+- El progreso destacado debe mostrar porcentaje, paginas actuales/totales y paginas restantes sin truncados evitables.
+- La portada de `CurrentReadingCard` se adapta al espacio vertical real para evitar overflows en dispositivos pequenos.
+- El historial de progreso prioriza sesiones recientes y usa `createdAt` como desempate para sesiones del mismo dia.
+- Relecturas no estan activas. La arquitectura futura recomendada usa ciclos de lectura separados para no duplicar libros ni perder historial.
+
+## Insights Premium Hito 7 Sprint 19.6
+
+- La seccion se titula unicamente `Tu perfil lector`; no recuperar `Lectura personal`.
+- Autor favorito muestra el nombre y todos los libros asociados mediante lista horizontal de portadas.
+- `Mejores lecturas` es la unica denominacion para el ranking visual; no duplicar `Lecturas destacadas`.
+- Las mejores lecturas priorizan portada, rating y review/notas cuando existen.
+- `ReadingInsightRatedBook` es el contrato de presentacion enriquecido con autor, portada y review.
+- Insights reutiliza `BookCoverImage` para soportar portada remota, local y placeholder.
+- La seccion se llama `Curiosidades`, nunca `Patrones`.
+- Curiosidades puede calcularse con datos existentes e incluye libro largo/corto, actividad, genero y ritmo sin nuevas tablas.
+
+## Accessibility & Responsiveness Hito 7 Sprint 19.7
+
+- Las rutas de tabs principales deben abrir `MainNavigationScreen(initialIndex: ...)` para mantener navbar y navegacion coherente.
+- Cada item de navbar debe exponer semantica de boton, label y estado seleccionado; la seleccion no puede depender solo del color.
+- Botones solo-icono deben tener tooltip/label semantico y area tactil aproximada de 48 px cuando el layout lo permita.
+- `BookCoverImage` acepta `semanticLabel` opcional y centraliza semantica de portadas remotas/locales/placeholder.
+- Cards completas clicables deben anunciar rol de boton, contenido principal y hint de accion.
+- Dias del calendario anuncian fecha, numero de sesiones y actividad; la intensidad visual no es la unica fuente de informacion.
+- Alturas sensibles de navbar, Current Reading e Insights deben responder al escalado de texto.
+- Grupos de metricas deben usar Wrap/columnas adaptativas cuando tres elementos no quepan con legibilidad.
+- No introducir cambios de negocio para resolver accesibilidad o responsive.

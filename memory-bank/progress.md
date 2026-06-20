@@ -263,6 +263,81 @@
 - La tipografia editorial Cormorant Garamond queda reservada a saludos, titulos grandes, heroes y valores destacados; Roboto se mantiene para botones, labels, cuerpo, formularios y navegacion.
 - Validacion Sprint 16/17.x pendiente en terminal del usuario: `dart format .`, `flutter pub get`, `flutter analyze`, `flutter test` y `git status`.
 
+## Hito 6 - Alpha Testing & Polish Sprint 18.x
+
+- ReadPp entra en Alpha Testing & Polish con foco en Android QA, consistencia UX/UI, robustez de busqueda y preparacion Beta.
+- Sprint 18.1 Home Android QA: Home gestiona multiples libros en estado `reading`, indicador `1 / N`, swipe horizontal y accion separada para cambiar lectura principal.
+- Bug resuelto: Home ya no muestra solo una lectura destacada cuando existen varias lecturas activas.
+- Bug resuelto: el carrusel de lecturas activas permite recorrer 4 o mas libros y mantiene indicador sincronizado sin reiniciar posicion automaticamente.
+- Bug resuelto: `CurrentReadingCard` evita overflows verticales en Android con titulos/autores largos mediante limites de lineas, ellipsis y layout flexible.
+- Sprint 18.2 Calendar QA: seleccion de dia, sesiones del dia, creacion y edicion refrescan Calendario/Diario sin reiniciar la app.
+- Sprint 18.3 Layout Android: pantalla Editar sesion corrige overflow horizontal del campo Libro con titulos o combinaciones libro+autor extensas.
+- Sprint 18.4 UX Cleanup: Diario lector reduce acciones duplicadas para anadir lectura y simplifica navegacion Calendario -> Diario -> Crear/Editar sesion.
+- Sprint 18.5 Visual Polish: titulos y cabeceras se alinean con la tipografia principal; indicadores compactos evitan truncados tipo `25 p...`.
+- Sprint 18.6 Reading Challenge: el usuario puede buscar/seleccionar un libro para asociar portada al reto lector, con placeholder si no hay portada.
+- Sprint 18.7 Home Reading Card Polish: se mantiene carrusel y seleccion de principal, mejorando jerarquia visual de la card de lectura actual.
+- Refactor UI: se crea header compartido basado en Biblioteca y se aplica primero en Home/Biblioteca.
+- Refactor UI: se crea card compartida de lectura actual con referencia visual burgundy editorial, sin boton interno y con toda la card clicable.
+- Sprint 18.9 Home/Calendario/Reto/Insights Polish: se reducen textos redundantes, se unifican titulos, se retira `Abrir calendario` y el reto usa `Buscar libro`.
+- Sprint 18.10 Home QA: metricas superiores quedan sin chevron, con titulos completos `Racha`, `Libros`, `Paginas` y formato compacto.
+- Sprint 18.11 Calendar QA: calendario usa intensidad Burgundy/Forest, celdas blancas, portadas pequenas, `+N`, selector Mes/Semana premium y boton `+` como boton real.
+- Sprint 18.12 Progress & Challenge: metricas superiores mas claras, `Objetivo del reto`, cards internas compactas y selector de portada orientado a libros del usuario.
+- Sprint 18.13 Insights: `Tu perfil lector`, autor favorito con libros/portadas, `Mejores lecturas` y `Curiosidades`.
+- Sprint 18.14 Reading Journal: `Diario de lectura`, titulo externo, card principal con portada y seleccion de sesion sin navegacion accidental desde cards pequenas.
+- Sprint 18.15 Book Search Reliability & Duplicate Protection: `BookSearchRepository`, errores diferenciados, fallback manual preparado y `BookDuplicateMatcher`.
+- Sprint 18.15b Persist external identifiers: libros persisten `externalSource` y `externalId` en Drift para deduplicacion entre proveedores.
+- Sprint 18.16 Manual Book Entry, ISBN Scanner & Local Cover: alta manual como fallback, escaneo ISBN opcional y portada local persistida como referencia local.
+- Sprint 18.17 Multi-Source Book Search: Open Library queda como proveedor primario y Google Books como fallback secundario antes de alta manual.
+- Bugs resueltos en busqueda: fallos intermitentes de Open Library tienen timeout, retry, errores diferenciados, logs debug y fallback.
+- Bugs resueltos en duplicados: no se permite anadir el mismo libro por ISBN, proveedor+externalId o titulo+autor normalizados.
+- Funcionalidad implementada: libros de Open Library guardan `externalSource = open_library` y `externalId` normalizado.
+- Funcionalidad implementada: resultados de Google Books se mapean al mismo modelo de dominio y guardan `externalSource = google_books`.
+- Funcionalidad implementada: `BookCoverImage` soporta portadas remotas, portadas locales `file://` y placeholder editorial.
+- Validacion Sprint 18.17: `dart format` aplicado, `flutter analyze` OK y `flutter test` OK con 55/55 tests.
+- Limitacion conocida: escaneo ISBN y portada local requieren validacion manual en dispositivo/emulador con camara/galeria reales.
+- Limitacion conocida: Google Books funciona sin API key como fallback publico; no hay backend ni cache remoto en esta fase.
+- Limitacion conocida: ReadPp sigue local-first sin Supabase, login ni sincronizacion cloud.
+
+## Hito 7 - Premium Experience Sprint 19.x
+
+- Sprint 19.1 Motion & Delight implementado: confeti breve al completar libro, fade/fade-through en rutas, motion suave en `CurrentReadingCard`, microinteracciones de botones custom, skeleton loaders y empty states animados.
+- Sprint 19.1 validado con `dart format lib test`, `flutter analyze`, `flutter test` 55/55 y arranque Android Emulator.
+- Sprint 19.2 Premium Statistics implementado: progress ring del reto lector, donut de estados, distribucion de generos, barras de tiempo semanal y barras de paginas por mes.
+- Sprint 19.2 mantiene estilo editorial ReadPp y evita dashboard corporativo.
+- Sprint 19.2 usa datos existentes de libros/sesiones; no introduce nuevas tablas ni dependencias de graficos.
+- Limitacion conocida Sprint 19.2: formato de lectura no existe en metadata de `Book`; la card de formatos queda preparada como estado informativo.
+- Sprint 19.2 validado con `dart format lib test`, `flutter analyze` OK y `flutter test` OK con 55/55 tests.
+- Sprint 19.3 implementado: creado `ReadPpEmptyState` compartido y aplicado a Biblioteca vacia, Calendario/Diario vacio, Estadisticas vacias, Insights vacios y Reto lector sin configurar.
+- Sprint 19.3 validado con `dart format lib test`, `flutter analyze` OK y `flutter test` OK con 55/55 tests.
+- Deuda tecnica Sprint 19.3: widgets empty state antiguos quedan temporalmente ignorados como no usados; eliminarlos en Sprint 19.4 al consolidar Design System y limpiar copy heredado.
+- Sprint 19.4 Design System Consolidation implementado: creado `ReadPpSurface` como superficie editorial compartida para cards/empty states.
+- Sprint 19.4 aplica `ReadPpPageHeader` en pantallas principales que aun usaban el header bajo nivel: Progreso, Estadisticas, Insights y Settings; Home y Biblioteca ya lo usaban.
+- Sprint 19.4 consolida `MetricCard`, `ReadPpEmptyState`, `CurrentReadingCard`, header compartido y hero de Settings sobre tokens/componentes comunes.
+- Sprint 19.4 elimina usos directos de Cormorant/GoogleFonts en pantallas principales Home, Biblioteca, Calendario, Progreso, Estadisticas, Insights y Settings; los titulos/datos destacados consumen `Theme.textTheme` con Space Grotesk.
+- Sprint 19.4 mantiene Roboto para cuerpo, labels y UI a traves del tema.
+- Sprint 19.4 validado con `dart format lib test`, `flutter analyze` OK y `flutter test` OK con 55/55 tests.
+- Sprint 19.5 Reading Experience Polish implementado: el carrusel distingue lectura principal de otras lecturas en curso sin cambiar la preferencia al hacer swipe.
+- `CurrentReadingCard` muestra porcentaje, paginas actuales/totales y paginas restantes con layout adaptable; la portada se ajusta a la altura disponible para evitar overflow.
+- `Otras lecturas` mantiene navegacion horizontal y abre el flujo de progreso del libro al pulsar, sin convertirlo implicitamente en principal.
+- El historial del detalle pasa a `Historial de progreso`, prioriza sesiones recientes con orden estable, marca `Ultimo avance` e incluye notas breves cuando existen.
+- Relecturas permanecen desactivadas; se documenta una futura entidad `ReadingCycle`/`BookReading` sin modificar `Book`, Drift ni sesiones actuales.
+- Validacion Sprint 19.5: `dart format lib test` OK, `dart analyze lib test` OK y `git diff --check` OK.
+- Limitacion de validacion Sprint 19.5: `flutter analyze` y `flutter test` fueron lanzados varias veces, pero el SDK local quedo esperando antes de crear proceso o producir salida; no se consideran validados en esta ejecucion.
+- Sprint 19.6 Insights Premium implementado: autor favorito mantiene nombre y carrusel horizontal con todos sus libros y portadas.
+- `Mejores lecturas` usa cards horizontales con portada protagonista, posicion, autor, rating y review/notas cuando existen.
+- `ReadingInsightRatedBook` transporta autor, portada y review desde el dominio de libros sin acoplar la UI al repositorio.
+- `Curiosidades` incorpora libro mas corto y ritmo medio por dia activo, ademas de los datos existentes.
+- `BookCoverImage` se reutiliza en Insights para portadas remotas, locales y placeholder coherente.
+- Validacion intermedia Sprint 19.6: `dart format lib test` OK y `dart analyze lib test` OK.
+- Sprint 19.7 Accessibility & Responsiveness implementado: rutas de Home, Biblioteca, Progreso, Insights y Perfil conservan la navbar mediante `MainNavigationScreen`.
+- Navbar expone roles de boton, labels y estado seleccionado; adapta altura a escalado de texto.
+- `CurrentReadingCard`, portadas compartidas, dias del calendario y card principal del diario incorporan labels/hints semanticos.
+- Controles solo-icono de header/calendario incorporan tooltip/contexto y targets tactiles ampliados.
+- Current Reading e Insights adaptan alturas/columnas al ancho y escalado tipografico para reducir overflow y contenido amontonado.
+- Tests ampliados para metadata premium de mejores lecturas y labels semanticos del carrusel de cuatro lecturas.
+- Validacion final 19.6-19.7: `dart format lib test` OK, `dart analyze lib test` OK y `git diff --check` OK.
+- Limitacion de validacion final: `flutter analyze` y `flutter test` volvieron a quedar esperando antes de crear proceso o producir salida; se cerraron ambas sesiones y no se consideran validados.
+
 ## Parcial / en seguimiento
 
 - Estado vigente tras Branding Final: ReadPp v1.0 RC Complete.
@@ -272,6 +347,13 @@
 - Estado vigente tras Sprint 15: Stats Premium Redesign aplicado; pendiente validacion local por el usuario.
 - Estado vigente tras Sprint 17.x: perfil lector local, logo real, headers consistentes y Home visual polish aplicados; pendiente validacion local por el usuario.
 - Estado vigente tras Sprint 17.7: Home premium, carrusel de lecturas en curso, onboarding refrescado, assets visuales nuevos y pase de consistencia UI aplicado; pendiente validacion local por el usuario.
+- Estado vigente tras Sprint 18.17: Alpha QA y Multi-Source Book Search aplicados; validacion automatizada vigente OK (`flutter analyze`, `flutter test` 55/55).
+- Estado vigente tras Sprint 19.2: Motion & Delight y Premium Statistics aplicados; validacion automatizada vigente OK (`flutter analyze`, `flutter test` 55/55).
+- Estado vigente tras Sprint 19.3: Empty States & First Run completado y validado.
+- Estado vigente tras Sprint 19.4: Design System Consolidation completado y validado.
+- Estado vigente tras Sprint 19.5: Reading Experience Polish implementado; pendiente repetir validacion Flutter cuando el SDK local deje de bloquearse.
+- Estado vigente tras Sprint 19.6: Insights Premium implementado y analisis estatico limpio.
+- Estado vigente tras Sprint 19.7: Accessibility & Responsiveness implementado; pendiente validacion Flutter/visual por bloqueo del SDK local.
 - Las notas pendientes de validacion de sprints anteriores quedan como historial superado por la validacion vigente de Sprint 13.
 
 - Actualizacion Sprint 12: ReadPp se considera feature-complete para v1, pendiente de release readiness.
@@ -293,11 +375,12 @@
 
 ## Pendiente inmediato
 
-- Estado vigente: continuar Publication Preparation para publicar ReadPp v1.0.
+- Estado vigente: continuar Alpha QA y preparar Beta Readiness para ReadPp.
 - Ejecutar validacion local de Sprint 14 en VS Code: `dart format`, `flutter analyze` y `flutter test`.
 - Ejecutar validacion local de Sprint 15 en VS Code: `dart format`, `flutter analyze` y `flutter test`.
 - Ejecutar validacion local de Sprint 17.x en VS Code: `dart format .`, `flutter pub get`, `flutter analyze`, `flutter test` y `git status`.
-- Pendientes reales: final splash branding pass, Android adaptive icon review, verificacion de icono en dispositivo real, Play Store screenshots, store listing copy, privacy policy publica, firma de release, AAB firmado y Play Store submission.
+- Validar manualmente Sprint 18.x en Android Emulator/dispositivo: carrusel con 4+ lecturas, calendario con 1/2/3+ sesiones, escaneo ISBN, portada local y persistencia tras reinicio.
+- Pendientes Beta: Android/Web/Windows QA, final splash branding pass, Android adaptive icon review, verificacion de icono en dispositivo real, Play Store screenshots, store listing copy, privacy policy publica, firma de release, AAB/AAB Beta y Play Store preparation.
 
 - Revision final de assets de tienda, privacidad, versionado y release.
 

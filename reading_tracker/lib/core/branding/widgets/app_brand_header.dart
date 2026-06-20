@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../design_system/design_system.dart';
 import '../../preferences/reader_profile_controller.dart';
@@ -96,13 +95,11 @@ class AppBrandHeader extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             RichText(
               text: TextSpan(
-                style: GoogleFonts.cormorantGaramond(
-                  textStyle: theme.textTheme.headlineSmall?.copyWith(
-                    color: colorScheme.onSurface.withValues(alpha: 0.88),
-                    fontSize: 28,
-                    fontWeight: FontWeight.w600,
-                    height: 1.05,
-                  ),
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.88),
+                  fontSize: 27,
+                  fontWeight: FontWeight.w700,
+                  height: 1.08,
                 ),
                 children: [
                   TextSpan(
@@ -113,13 +110,11 @@ class AppBrandHeader extends StatelessWidget {
                   if (greetingName.isNotEmpty)
                     TextSpan(
                       text: '$greetingName \u{1F44B}',
-                      style: GoogleFonts.cormorantGaramond(
-                        textStyle: theme.textTheme.displaySmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontSize: 38,
-                          fontWeight: FontWeight.w700,
-                          height: 1,
-                        ),
+                      style: theme.textTheme.displaySmall?.copyWith(
+                        color: colorScheme.primary,
+                        fontSize: 36,
+                        fontWeight: FontWeight.w800,
+                        height: 1.02,
                       ),
                     ),
                 ],
@@ -278,30 +273,34 @@ class _BrandHeaderIconButton extends StatelessWidget {
 
     return Tooltip(
       message: tooltip,
-      child: Material(
-        color: theme.colorScheme.surface.withValues(alpha: 0.72),
-        shape: const CircleBorder(),
-        child: AppPressable(
-          borderRadius: BorderRadius.circular(999),
-          onTap: onTap,
-          child: Container(
-            width: 44,
-            height: 44,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: theme.colorScheme.primary.withValues(alpha: 0.10),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.07),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
+      child: Semantics(
+        button: true,
+        label: tooltip,
+        child: Material(
+          color: theme.colorScheme.surface.withValues(alpha: 0.72),
+          shape: const CircleBorder(),
+          child: AppPressable(
+            borderRadius: BorderRadius.circular(999),
+            onTap: onTap,
+            child: Container(
+              width: 48,
+              height: 48,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.10),
                 ),
-              ],
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.07),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: theme.colorScheme.primary, size: 22),
             ),
-            child: Icon(icon, color: theme.colorScheme.primary, size: 22),
           ),
         ),
       ),

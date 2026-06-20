@@ -22,6 +22,10 @@ El proyecto ya contiene una app funcional en `reading_tracker/` con:
 - Hito 5 Sprint 2 implementado: Design System base con temas Burgundy/Forest, tokens visuales y componentes reutilizables.
 - Hito 5 Sprint 2.5 implementado: Branding & Visual Identity para ReadPp.
 - Hito 5 Sprint 3 implementado: Home Premium Redesign como biblioteca personal moderna.
+- Hito 6 Sprint 18.x implementado: Alpha Testing & Polish con Android QA, shared header/card, calendario/diario refinados, reto lector pulido, busqueda multi-fuente, deduplicacion, alta manual, escaneo ISBN y portada local.
+- Busqueda de libros actual: `BookSearchRepository` coordina Open Library como proveedor primario, Google Books como fallback y alta manual como ultima opcion.
+- Persistencia actual de libros incluye identificadores externos `externalSource` y `externalId` para deduplicacion entre proveedores.
+- Estado actual: Alpha QA / Beta Readiness preparation, manteniendo enfoque local-first con Drift/SQLite.
 
 ## Principios de documentacion
 

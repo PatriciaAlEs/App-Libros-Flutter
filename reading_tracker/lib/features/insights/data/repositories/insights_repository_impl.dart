@@ -138,6 +138,8 @@ class InsightsRepositoryImpl implements InsightsRepository {
       topRatedBooks: topReadsOfYear.topRatedBooks,
       longestBookTitle: topReadsOfYear.longestBook?.title,
       longestBookPages: topReadsOfYear.longestBook?.totalPages,
+      shortestBookTitle: topReadsOfYear.shortestBook?.title,
+      shortestBookPages: topReadsOfYear.shortestBook?.totalPages,
       mostTimeBookTitle: topReadsOfYear.mostTimeBook?.title,
       mostTimeBookMinutes: topReadsOfYear.mostTimeMinutes,
       mostSessionsBookTitle: topReadsOfYear.mostSessionsBook?.title,
@@ -354,6 +356,7 @@ class InsightsRepositoryImpl implements InsightsRepository {
       topRatedBook: _topRatedBook(completedThisYear),
       topRatedBooks: _topRatedBooks(completedThisYear),
       longestBook: _longestBook(completedThisYear),
+      shortestBook: _shortestBook(completedThisYear),
       mostTimeBook: mostTimeEntry == null ? null : booksById[mostTimeEntry.key],
       mostTimeMinutes: mostTimeEntry?.value,
       mostSessionsBook: mostSessionsEntry == null
@@ -392,8 +395,13 @@ class InsightsRepositoryImpl implements InsightsRepository {
     return ratedBooks
         .take(3)
         .map(
-          (book) =>
-              ReadingInsightRatedBook(title: book.title, rating: book.rating!),
+          (book) => ReadingInsightRatedBook(
+            title: book.title,
+            rating: book.rating!,
+            author: book.author,
+            coverUrl: book.coverUrl,
+            review: book.notes,
+          ),
         )
         .toList();
   }
@@ -406,6 +414,20 @@ class InsightsRepositoryImpl implements InsightsRepository {
 
     booksWithPages.sort((a, b) {
       final pagesComparison = b.totalPages!.compareTo(a.totalPages!);
+      if (pagesComparison != 0) return pagesComparison;
+      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+    });
+    return booksWithPages.first;
+  }
+
+  Book? _shortestBook(List<Book> completedBooks) {
+    final booksWithPages = completedBooks
+        .where((book) => book.totalPages != null && book.totalPages! > 0)
+        .toList();
+    if (booksWithPages.isEmpty) return null;
+
+    booksWithPages.sort((a, b) {
+      final pagesComparison = a.totalPages!.compareTo(b.totalPages!);
       if (pagesComparison != 0) return pagesComparison;
       return a.title.toLowerCase().compareTo(b.title.toLowerCase());
     });
@@ -628,6 +650,7 @@ class _TopReadsOfYear {
     this.topRatedBook,
     this.topRatedBooks = const [],
     this.longestBook,
+    this.shortestBook,
     this.mostTimeBook,
     this.mostTimeMinutes,
     this.mostSessionsBook,
@@ -637,6 +660,7 @@ class _TopReadsOfYear {
   final Book? topRatedBook;
   final List<ReadingInsightRatedBook> topRatedBooks;
   final Book? longestBook;
+  final Book? shortestBook;
   final Book? mostTimeBook;
   final int? mostTimeMinutes;
   final Book? mostSessionsBook;

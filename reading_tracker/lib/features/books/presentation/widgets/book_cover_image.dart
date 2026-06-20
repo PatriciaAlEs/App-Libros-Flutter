@@ -12,6 +12,7 @@ class BookCoverImage extends StatelessWidget {
     required this.height,
     this.radius = 4,
     this.icon,
+    this.semanticLabel,
   });
 
   final String? url;
@@ -19,11 +20,23 @@ class BookCoverImage extends StatelessWidget {
   final double height;
   final double radius;
   final IconData? icon;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     final placeholder = _placeholder(context);
     final value = url;
+    final image = _imageFor(value, placeholder);
+
+    if (semanticLabel == null) return image;
+    return Semantics(
+      image: true,
+      label: semanticLabel,
+      child: ExcludeSemantics(child: image),
+    );
+  }
+
+  Widget _imageFor(String? value, Widget placeholder) {
     if (value == null || value.isEmpty) return placeholder;
 
     final uri = Uri.tryParse(value);

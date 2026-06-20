@@ -1,6 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
@@ -10,6 +11,8 @@ import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/entities/book_search_result.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
+import '../../../reading_sessions/domain/entities/reading_session.dart';
+import '../../../reading_sessions/presentation/providers/reading_sessions_provider.dart';
 import '../../domain/entities/statistics_summary.dart';
 import '../providers/annual_goal_cover_controller.dart';
 import '../providers/statistics_summary_provider.dart';
@@ -24,6 +27,9 @@ class StatsScreen extends ConsumerWidget {
     final summaryAsync = ref.watch(statisticsSummaryProvider);
     final annualGoalCover = ref.watch(annualGoalCoverControllerProvider);
     final books = ref.watch(booksProvider).valueOrNull ?? const <Book>[];
+    final sessionsAsync = ref.watch(
+      readingSessionsForRangeProvider(_statsActivityRange()),
+    );
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -59,6 +65,11 @@ class StatsScreen extends ConsumerWidget {
                 children: [
                   _StatsHeader(readerProfile: readerProfile),
                   const SizedBox(height: AppSpacing.xxl),
+                  if (summary.totalBooks == 0 &&
+                      summary.totalPagesRead == 0) ...[
+                    const _StatsEmptyState(),
+                    const SizedBox(height: AppSpacing.xl),
+                  ],
                   SectionHeader(
                     title: 'Objetivo anual',
                     actionLabel: 'Editar',
@@ -85,6 +96,13 @@ class StatsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   _StatsHero(summary: summary),
+                  const SizedBox(height: AppSpacing.xl),
+                  _PremiumStatsVisuals(
+                    summary: summary,
+                    books: books,
+                    sessions: sessionsAsync.valueOrNull ?? const [],
+                    isLoadingSessions: sessionsAsync.isLoading,
+                  ),
                   const SizedBox(height: AppSpacing.xl),
                   _StatsSection(
                     title: 'Lectura',
@@ -282,6 +300,13 @@ AnnualGoalCover? _latestCompletedBookCover(List<Book> books) {
   );
 }
 
+DateRange _statsActivityRange() {
+  final now = DateTime.now();
+  final start = DateTime(now.year - 1, now.month, 1);
+  final end = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+  return DateRange(start: start, end: end);
+}
+
 class _StatsHeader extends StatelessWidget {
   const _StatsHeader({required this.readerProfile});
 
@@ -294,7 +319,7 @@ class _StatsHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppBrandHeader(
+        ReadPpPageHeader(
           readerProfile: readerProfile,
           onTap: () =>
               Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false),
@@ -436,13 +461,11 @@ class _HeroMetric extends StatelessWidget {
           child: Text(
             value,
             maxLines: 1,
-            style: GoogleFonts.cormorantGaramond(
-              textStyle: theme.textTheme.headlineSmall?.copyWith(
-                color: theme.colorScheme.onPrimary,
-                fontSize: 40,
-                fontWeight: FontWeight.w800,
-                height: 0.92,
-              ),
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.onPrimary,
+              fontSize: 40,
+              fontWeight: FontWeight.w900,
+              height: 0.92,
             ),
           ),
         ),
@@ -487,6 +510,17 @@ class _AnnualGoalSection extends StatelessWidget {
     final progress = (rawProgress / 100).clamp(0.0, 1.0).toDouble();
     final percent = rawProgress.clamp(0, 100).round();
 
+    if (!hasGoal) {
+      return ReadPpEmptyState(
+        icon: AppIcons.chart,
+        title: 'Configura tu reto lector',
+        description:
+            'Define cuántos libros quieres leer este año y ReadPp te mostrará el avance del reto con claridad.',
+        actionLabel: 'Configurar reto',
+        onAction: onEditGoal,
+      );
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
@@ -514,13 +548,11 @@ class _AnnualGoalSection extends StatelessWidget {
                       hasGoal
                           ? '$completedThisYear / $annualReadingGoal libros'
                           : 'Define tu reto lector',
-                      style: GoogleFonts.cormorantGaramond(
-                        textStyle: theme.textTheme.headlineSmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontSize: 31,
-                          fontWeight: FontWeight.w700,
-                          height: 1.04,
-                        ),
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontSize: 31,
+                        fontWeight: FontWeight.w900,
+                        height: 1.04,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
@@ -546,6 +578,11 @@ class _AnnualGoalSection extends StatelessWidget {
                     ],
                   ],
                 ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              _GoalProgressRing(
+                progress: hasGoal ? progress : 0,
+                label: hasGoal ? '$percent%' : '-',
               ),
             ],
           ),
@@ -619,6 +656,98 @@ class _AnnualGoalSection extends StatelessWidget {
       return 'Objetivo alcanzado. Buen ritmo.';
     }
     return 'Vas por $completedThisYear de $annualReadingGoal libros.';
+  }
+}
+
+class _GoalProgressRing extends StatelessWidget {
+  const _GoalProgressRing({required this.progress, required this.label});
+
+  final double progress;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      width: 82,
+      height: 82,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: progress.clamp(0, 1).toDouble()),
+            duration: AppMotion.slow,
+            curve: AppMotion.standard,
+            builder: (context, value, child) {
+              return CustomPaint(
+                size: const Size.square(82),
+                painter: _RingPainter(
+                  progress: value,
+                  trackColor: theme.colorScheme.primaryContainer.withValues(
+                    alpha: 0.28,
+                  ),
+                  progressColor: theme.colorScheme.secondary,
+                ),
+              );
+            },
+          ),
+          Text(
+            label,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RingPainter extends CustomPainter {
+  const _RingPainter({
+    required this.progress,
+    required this.trackColor,
+    required this.progressColor,
+  });
+
+  final double progress;
+  final Color trackColor;
+  final Color progressColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stroke = size.shortestSide * 0.11;
+    final rect =
+        Offset(stroke / 2, stroke / 2) &
+        Size(size.width - stroke, size.height - stroke);
+    final trackPaint = Paint()
+      ..color = trackColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.round;
+    final progressPaint = Paint()
+      ..color = progressColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(rect, -1.5708, 6.2832, false, trackPaint);
+    canvas.drawArc(
+      rect,
+      -1.5708,
+      6.2832 * progress.clamp(0, 1),
+      false,
+      progressPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RingPainter oldDelegate) {
+    return progress != oldDelegate.progress ||
+        trackColor != oldDelegate.trackColor ||
+        progressColor != oldDelegate.progressColor;
   }
 }
 
@@ -701,13 +830,11 @@ class _GoalMetric extends StatelessWidget {
             child: Text(
               value,
               maxLines: 1,
-              style: GoogleFonts.cormorantGaramond(
-                textStyle: theme.textTheme.titleLarge?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  height: 0.95,
-                ),
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: theme.colorScheme.primary,
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+                height: 0.95,
               ),
             ),
           ),
@@ -1081,6 +1208,654 @@ class _SearchCoverThumb extends StatelessWidget {
   }
 }
 
+class _PremiumStatsVisuals extends StatelessWidget {
+  const _PremiumStatsVisuals({
+    required this.summary,
+    required this.books,
+    required this.sessions,
+    required this.isLoadingSessions,
+  });
+
+  final StatisticsSummary summary;
+  final List<Book> books;
+  final List<ReadingSession> sessions;
+  final bool isLoadingSessions;
+
+  @override
+  Widget build(BuildContext context) {
+    final statusSegments = _statusSegments(context, summary);
+    final genreSegments = _genreSegments(context, books);
+    final weeklyMinutes = _weeklyMinutes(sessions);
+    final monthlyMinutes = _monthlyMinutes(sessions);
+    final monthlyPages = _monthlyPages(sessions);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionHeader(title: 'Mapa lector'),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final twoColumns = constraints.maxWidth >= 720;
+            final width = twoColumns
+                ? (constraints.maxWidth - AppSpacing.md) / 2
+                : constraints.maxWidth;
+
+            return Wrap(
+              spacing: AppSpacing.md,
+              runSpacing: AppSpacing.md,
+              children: [
+                SizedBox(
+                  width: width,
+                  child: _DonutDistributionCard(
+                    title: 'Estado de biblioteca',
+                    subtitle: '${summary.totalBooks} libros registrados',
+                    segments: statusSegments,
+                    emptyMessage: 'Añade libros para ver tu mapa lector.',
+                  ),
+                ),
+                SizedBox(
+                  width: width,
+                  child: _DonutDistributionCard(
+                    title: 'Géneros',
+                    subtitle: 'Distribución por libros con género',
+                    segments: genreSegments,
+                    emptyMessage: 'Aún no hay géneros suficientes.',
+                  ),
+                ),
+                SizedBox(
+                  width: width,
+                  child: _ActivityBarCard(
+                    title: 'Tiempo reciente',
+                    subtitle: isLoadingSessions
+                        ? 'Cargando sesiones...'
+                        : 'Minutos por semana',
+                    bars: weeklyMinutes,
+                    unit: 'min',
+                    emptyMessage:
+                        'Registra sesiones para ver tu ritmo semanal.',
+                  ),
+                ),
+                SizedBox(
+                  width: width,
+                  child: _ActivityBarCard(
+                    title: 'Páginas por mes',
+                    subtitle: monthlyMinutes.isEmpty
+                        ? 'Últimos meses'
+                        : '${_formatMinutesCompact(monthlyMinutes.last.value)} este mes',
+                    bars: monthlyPages,
+                    unit: 'pág.',
+                    emptyMessage:
+                        'Cuando registres páginas, aparecerá tu curva mensual.',
+                  ),
+                ),
+                SizedBox(width: width, child: const _FormatDistributionCard()),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _DonutDistributionCard extends StatelessWidget {
+  const _DonutDistributionCard({
+    required this.title,
+    required this.subtitle,
+    required this.segments,
+    required this.emptyMessage,
+  });
+
+  final String title;
+  final String subtitle;
+  final List<_ChartSegment> segments;
+  final String emptyMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final total = segments.fold<int>(0, (sum, segment) => sum + segment.value);
+
+    return _PremiumChartCard(
+      title: title,
+      subtitle: subtitle,
+      child: total == 0
+          ? _ChartEmptyMessage(message: emptyMessage)
+          : Row(
+              children: [
+                SizedBox(
+                  width: 132,
+                  height: 132,
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: 1),
+                    duration: AppMotion.slow,
+                    curve: AppMotion.standard,
+                    builder: (context, value, child) {
+                      return CustomPaint(
+                        painter: _DonutPainter(
+                          segments: segments,
+                          animationValue: value,
+                        ),
+                        child: Center(
+                          child: Text(
+                            '$total',
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontSize: 34,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.lg),
+                Expanded(child: _ChartLegend(segments: segments)),
+              ],
+            ),
+    );
+  }
+}
+
+class _ActivityBarCard extends StatelessWidget {
+  const _ActivityBarCard({
+    required this.title,
+    required this.subtitle,
+    required this.bars,
+    required this.unit,
+    required this.emptyMessage,
+  });
+
+  final String title;
+  final String subtitle;
+  final List<_ChartPoint> bars;
+  final String unit;
+  final String emptyMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = bars.fold<int>(0, (sum, point) => sum + point.value);
+
+    return _PremiumChartCard(
+      title: title,
+      subtitle: subtitle,
+      child: total == 0
+          ? _ChartEmptyMessage(message: emptyMessage)
+          : SizedBox(
+              height: 178,
+              child: _BarChart(points: bars, unit: unit),
+            ),
+    );
+  }
+}
+
+class _FormatDistributionCard extends StatelessWidget {
+  const _FormatDistributionCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return const _PremiumChartCard(
+      title: 'Formatos',
+      subtitle: 'Metadata pendiente',
+      child: _ChartEmptyMessage(
+        message:
+            'ReadPp todavía no guarda formato de lectura. La visualización queda preparada.',
+      ),
+    );
+  }
+}
+
+class _PremiumChartCard extends StatelessWidget {
+  const _PremiumChartCard({
+    required this.title,
+    required this.subtitle,
+    required this.child,
+  });
+
+  final String title;
+  final String subtitle;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.12),
+        ),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _ChartLegend extends StatelessWidget {
+  const _ChartLegend({required this.segments});
+
+  final List<_ChartSegment> segments;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final total = segments.fold<int>(0, (sum, segment) => sum + segment.value);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final segment in segments.where((segment) => segment.value > 0))
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Row(
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: segment.color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    segment.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  total == 0
+                      ? '${segment.value}'
+                      : '${((segment.value / total) * 100).round()}%',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _ChartEmptyMessage extends StatelessWidget {
+  const _ChartEmptyMessage({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        message,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _BarChart extends StatelessWidget {
+  const _BarChart({required this.points, required this.unit});
+
+  final List<_ChartPoint> points;
+  final String unit;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final maxValue = points.fold<int>(
+      1,
+      (max, point) => point.value > max ? point.value : max,
+    );
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        for (final point in points)
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 3),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: FractionallySizedBox(
+                        heightFactor: (point.value / maxValue).clamp(0.04, 1.0),
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0, end: 1),
+                          duration: AppMotion.slow,
+                          curve: AppMotion.standard,
+                          builder: (context, value, child) {
+                            return FractionallySizedBox(
+                              heightFactor: value,
+                              alignment: Alignment.bottomCenter,
+                              child: child,
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: point.color,
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(999),
+                                bottom: Radius.circular(999),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    point.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelSmall,
+                  ),
+                  Text(
+                    point.value <= 0 ? '-' : '${point.value} $unit',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _DonutPainter extends CustomPainter {
+  const _DonutPainter({required this.segments, required this.animationValue});
+
+  final List<_ChartSegment> segments;
+  final double animationValue;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final total = segments.fold<int>(0, (sum, segment) => sum + segment.value);
+    if (total <= 0) return;
+
+    final stroke = size.shortestSide * 0.16;
+    final rect =
+        Offset(stroke / 2, stroke / 2) &
+        Size(size.width - stroke, size.height - stroke);
+    var start = -math.pi / 2;
+    for (final segment in segments.where((segment) => segment.value > 0)) {
+      final sweep = (segment.value / total) * math.pi * 2 * animationValue;
+      final paint = Paint()
+        ..color = segment.color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = stroke
+        ..strokeCap = StrokeCap.round;
+      canvas.drawArc(rect, start, sweep, false, paint);
+      start += sweep;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DonutPainter oldDelegate) {
+    return segments != oldDelegate.segments ||
+        animationValue != oldDelegate.animationValue;
+  }
+}
+
+class _ChartSegment {
+  const _ChartSegment({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final String label;
+  final int value;
+  final Color color;
+}
+
+class _ChartPoint {
+  const _ChartPoint({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final String label;
+  final int value;
+  final Color color;
+}
+
+List<_ChartSegment> _statusSegments(
+  BuildContext context,
+  StatisticsSummary summary,
+) {
+  final scheme = Theme.of(context).colorScheme;
+  final primary = scheme.primary;
+  final secondary = scheme.secondary;
+  final dark = Color.lerp(primary, Colors.black, 0.30)!;
+
+  return [
+    _ChartSegment(
+      label: 'Pendientes',
+      value: summary.toReadBooks,
+      color: scheme.primaryContainer.withValues(alpha: 0.82),
+    ),
+    _ChartSegment(
+      label: 'Leyendo',
+      value: summary.readingBooks,
+      color: secondary,
+    ),
+    _ChartSegment(
+      label: 'Completados',
+      value: summary.completedBooks,
+      color: primary,
+    ),
+    _ChartSegment(
+      label: 'Abandonados',
+      value: summary.abandonedBooks,
+      color: dark,
+    ),
+  ];
+}
+
+List<_ChartSegment> _genreSegments(BuildContext context, List<Book> books) {
+  final scheme = Theme.of(context).colorScheme;
+  final counts = <String, int>{};
+  for (final book in books) {
+    final genre = book.genre?.trim();
+    if (genre == null || genre.isEmpty) continue;
+    counts[genre] = (counts[genre] ?? 0) + 1;
+  }
+
+  final entries = counts.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
+  final palette = [
+    scheme.primary,
+    scheme.secondary,
+    Color.lerp(scheme.primary, Colors.black, 0.24)!,
+    Color.lerp(scheme.secondary, Colors.white, 0.22)!,
+    scheme.tertiary,
+  ];
+
+  final visible = entries.take(4).toList();
+  final remaining = entries
+      .skip(4)
+      .fold<int>(0, (sum, item) => sum + item.value);
+
+  return [
+    for (var index = 0; index < visible.length; index++)
+      _ChartSegment(
+        label: visible[index].key,
+        value: visible[index].value,
+        color: palette[index % palette.length],
+      ),
+    if (remaining > 0)
+      _ChartSegment(label: 'Otros', value: remaining, color: scheme.outline),
+  ];
+}
+
+List<_ChartPoint> _weeklyMinutes(List<ReadingSession> sessions) {
+  final now = DateTime.now();
+  final startOfThisWeek = _startOfWeek(now);
+  final points = <_ChartPoint>[];
+  final colors = _chartPointColors();
+
+  for (var offset = 5; offset >= 0; offset--) {
+    final start = startOfThisWeek.subtract(Duration(days: offset * 7));
+    final end = start.add(const Duration(days: 6));
+    final value = sessions
+        .where((session) {
+          final day = _dateOnly(session.date);
+          return !day.isBefore(start) && !day.isAfter(end);
+        })
+        .fold<int>(0, (sum, session) => sum + session.minutes);
+    points.add(
+      _ChartPoint(
+        label: offset == 0 ? 'Ahora' : '${start.day}/${start.month}',
+        value: value,
+        color: colors[(5 - offset) % colors.length],
+      ),
+    );
+  }
+
+  return points;
+}
+
+List<_ChartPoint> _monthlyMinutes(List<ReadingSession> sessions) {
+  return _monthlySessionPoints(
+    sessions,
+    valueForSession: (session) => session.minutes,
+  );
+}
+
+List<_ChartPoint> _monthlyPages(List<ReadingSession> sessions) {
+  return _monthlySessionPoints(
+    sessions,
+    valueForSession: (session) => session.pagesRead,
+  );
+}
+
+List<_ChartPoint> _monthlySessionPoints(
+  List<ReadingSession> sessions, {
+  required int Function(ReadingSession session) valueForSession,
+}) {
+  final now = DateTime.now();
+  final colors = _chartPointColors();
+  final points = <_ChartPoint>[];
+
+  for (var offset = 5; offset >= 0; offset--) {
+    final month = DateTime(now.year, now.month - offset);
+    final value = sessions
+        .where((session) {
+          final date = session.date;
+          return date.year == month.year && date.month == month.month;
+        })
+        .fold<int>(0, (sum, session) => sum + valueForSession(session));
+    points.add(
+      _ChartPoint(
+        label: _shortMonth(month),
+        value: value,
+        color: colors[(5 - offset) % colors.length],
+      ),
+    );
+  }
+
+  return points;
+}
+
+List<Color> _chartPointColors() {
+  return const [
+    Color(0xFFB98292),
+    Color(0xFF9F6477),
+    Color(0xFF84445B),
+    Color(0xFF6E1F35),
+    Color(0xFF5A182B),
+    Color(0xFF3F6B43),
+  ];
+}
+
+DateTime _startOfWeek(DateTime date) {
+  final day = _dateOnly(date);
+  return day.subtract(Duration(days: day.weekday - DateTime.monday));
+}
+
+DateTime _dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
+
+String _shortMonth(DateTime date) {
+  const months = [
+    'Ene',
+    'Feb',
+    'Mar',
+    'Abr',
+    'May',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dic',
+  ];
+  return months[date.month - 1];
+}
+
+String _formatMinutesCompact(int minutes) {
+  if (minutes < 60) return '$minutes min';
+  final hours = minutes ~/ 60;
+  final rest = minutes % 60;
+  return rest == 0 ? '${hours}h' : '${hours}h ${rest}min';
+}
+
 class _StatsSection extends StatelessWidget {
   const _StatsSection({required this.title, required this.children});
 
@@ -1172,9 +1947,9 @@ class _StatsEmptyState extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               FilledButton.icon(
-                onPressed: () => Navigator.pushNamed(context, '/book/add'),
+                onPressed: () => Navigator.pushNamed(context, '/session/add'),
                 icon: const Icon(AppIcons.add),
-                label: const Text('Añadir primer libro'),
+                label: const Text('Registrar primera sesión'),
               ),
             ],
           ),

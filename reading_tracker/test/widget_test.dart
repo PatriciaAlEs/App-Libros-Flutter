@@ -305,6 +305,12 @@ void main() {
 
     expect(find.text('1 / 4'), findsOneWidget);
     expect(find.text('Lectura principal'), findsWidgets);
+    expect(find.text('LECTURA PRINCIPAL'), findsOneWidget);
+    expect(find.text('160 restantes'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Lectura principal: Lectura principal'),
+      findsOneWidget,
+    );
 
     final carousel = find.byKey(const Key('current_reading_cards_page_view'));
 
@@ -313,6 +319,12 @@ void main() {
 
     expect(find.text('2 / 4'), findsOneWidget);
     expect(find.text('Segunda lectura'), findsWidgets);
+    expect(find.text('LECTURA EN CURSO'), findsOneWidget);
+    expect(find.text('110 restantes'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Lectura en curso: Segunda lectura'),
+      findsOneWidget,
+    );
 
     await tester.drag(carousel, const Offset(-500, 0));
     await tester.pumpAndSettle();

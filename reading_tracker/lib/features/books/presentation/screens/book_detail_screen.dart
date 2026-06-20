@@ -989,7 +989,12 @@ class _ReadingTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visible = [...sessions]..sort((a, b) => b.date.compareTo(a.date));
+    final visible = [...sessions]
+      ..sort((a, b) {
+        final byDate = b.date.compareTo(a.date);
+        if (byDate != 0) return byDate;
+        return b.createdAt.compareTo(a.createdAt);
+      });
     final recent = visible.take(4).toList();
     final theme = Theme.of(context);
 
@@ -997,11 +1002,25 @@ class _ReadingTimeline extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Sesiones recientes',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Historial de progreso',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              if (sessions.isNotEmpty)
+                Text(
+                  '${sessions.length} sesiones',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: AppSpacing.md),
           if (recent.isEmpty)
@@ -1011,7 +1030,10 @@ class _ReadingTimeline extends StatelessWidget {
             )
           else
             for (var index = 0; index < recent.length; index++) ...[
-              _TimelineRow(session: recent[index]),
+              _ProgressTimelineRow(
+                session: recent[index],
+                isLatest: index == 0,
+              ),
               if (index < recent.length - 1)
                 Divider(
                   height: 22,
@@ -1024,10 +1046,13 @@ class _ReadingTimeline extends StatelessWidget {
   }
 }
 
+// Legacy row kept until the remaining mojibake copy in this file is normalized.
+// ignore: unused_element
 class _TimelineRow extends StatelessWidget {
-  const _TimelineRow({required this.session});
+  const _TimelineRow({required this.session, required this.isLatest});
 
   final ReadingSession session;
+  final bool isLatest;
 
   @override
   Widget build(BuildContext context) {
@@ -1077,6 +1102,106 @@ class _TimelineRow extends StatelessWidget {
                   letterSpacing: 1.2,
                 ),
               ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProgressTimelineRow extends StatelessWidget {
+  const _ProgressTimelineRow({required this.session, required this.isLatest});
+
+  final ReadingSession session;
+  final bool isLatest;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final details = [
+      if (session.pagesRead > 0) '${session.pagesRead} pág.',
+      if (session.minutes > 0) '${session.minutes} min',
+    ].join(' · ');
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.secondary,
+                shape: BoxShape.circle,
+              ),
+            ),
+            Container(
+              width: 1,
+              height: session.note?.trim().isNotEmpty == true ? 54 : 32,
+              margin: const EdgeInsets.only(top: 4),
+              color: theme.colorScheme.primary.withValues(alpha: 0.10),
+            ),
+          ],
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      details.isEmpty ? 'Sesión registrada' : details,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  if (isLatest)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.secondary.withValues(
+                          alpha: 0.20,
+                        ),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        'Último avance',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                _humanDate(session.date),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.72),
+                  letterSpacing: 1.2,
+                ),
+              ),
+              if (session.note?.trim().isNotEmpty == true) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  session.note!.trim(),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.35,
+                  ),
+                ),
+              ],
             ],
           ),
         ),

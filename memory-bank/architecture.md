@@ -245,6 +245,92 @@ reading_tracker/lib/
 - Motivo observado: facilitar desarrollo sin mezclar seed con pantallas ni duplicar datos.
 - Evidencia: `DatabaseSeeder.seedIfNeeded()` usa `kDebugMode`, consulta libros existentes e inserta libros/sesiones iniciales.
 
+### Shared UI components Hito 6 Sprint 18.x
+
+- `ReadPpPageHeader` / header compartido centraliza la composicion visual superior basada en Biblioteca.
+- El header compartido soporta logo ReadPp, perfil opcional, titulo/saludo, subtitulo opcional, acciones principales, SafeArea, padding y spacing comunes.
+- Home y Biblioteca son las primeras pantallas alineadas al header compartido.
+- `CurrentReadingCard` / card destacada de lectura actual se usa como implementacion visual unica para lectura actual destacada.
+- La card compartida evita CTA interno y expone la navegacion desde la card completa.
+- La card compartida debe tolerar titulo largo con maximo 3 lineas y ellipsis, autor con ellipsis, portada remota/local o placeholder, una o varias lecturas activas y Android/Web/Desktop.
+- El carrusel de lecturas activas vive fuera del concepto de seleccion principal: PageView/swipe permite revisar lecturas y la accion de cambiar principal actualiza explicitamente la preferencia.
+
+### Calendar y Reading Journal sync Hito 6 Sprint 18.x
+
+- `CalendarScreen`, `ReadingJournalScreen`, `ReadingSessionRepository` y providers de fecha seleccionada deben compartir una unica fuente coherente de sesiones por dia.
+- Crear, editar o borrar una sesion debe invalidar/refrescar los providers necesarios para que calendario y diario reflejen cambios sin reiniciar.
+- El diario mantiene estado local de sesion/libro seleccionado para el dia activo.
+- Las cards pequenas de sesion modifican la seleccion local; la card principal concentra la navegacion al detalle.
+- La UI del calendario no debe codificar detalle textual dentro de la celda; usa portadas pequenas y contador `+N` como representacion compacta.
+
+### Book Search multi-source Hito 6 Sprint 18.15-18.17
+
+- `BookSearchRepository` es la fachada unica de busqueda remota para la presentacion.
+- La presentacion no debe conocer si el resultado viene de Open Library, Google Books u otro proveedor futuro.
+- Open Library se mantiene como datasource primario.
+- `GoogleBooksDatasource` se incorpora como datasource secundario.
+- Estrategia de fallback: Open Library con resultados detiene la busqueda; Open Library sin resultados/error/timeout activa Google Books; Google Books sin resultados/error activa alta manual.
+- Los resultados de proveedores se normalizan al mismo modelo de dominio usado por el formulario de alta: titulo, autor, portada, ISBN, paginas, `externalSource` y `externalId`.
+- `externalSource` usa valores explicitos como `open_library` y `google_books`.
+- `externalId` debe guardarse normalizado, sin acoplar la UI a claves crudas de proveedor.
+- Los errores de busqueda se clasifican para UX: sin conexion, timeout, API no disponible, respuesta invalida y sin resultados.
+- Los detalles tecnicos y nombres de proveedores se registran solo en debug.
+
+### Book deduplication Hito 6 Sprint 18.15-18.17
+
+- `BookDuplicateMatcher` centraliza la deteccion de duplicados antes de guardar libros de API o manuales.
+- Orden de comparacion: ISBN normalizado, `externalSource + externalId`, titulo+autor normalizados.
+- La normalizacion de titulo/autor elimina diferencias de casing, espacios duplicados, diacriticos y puntuacion basica.
+- La deduplicacion entre proveedores permite evitar casos como Open Library y Google Books devolviendo variantes del mismo libro.
+- La deduplicacion tambien prepara el enriquecimiento futuro de libros manuales con datos remotos sin crear duplicados.
+- La UX ante duplicado no persiste un nuevo libro y ofrece ver libro, cambiar estado o cancelar.
+
+### Drift schema Hito 6 Sprint 18.15b
+
+- La tabla de libros incorpora columnas nullable `externalSource` y `externalId`.
+- La migracion de Drift es segura para usuarios existentes: libros previos mantienen datos aunque esos campos queden null.
+- La version de esquema vigente tras este cambio queda documentada como schemaVersion 5.
+- Los mappers de libro deben conservar `externalSource` y `externalId` entre entidad, companion y filas Drift.
+- Libros creados desde Open Library deben persistir `externalSource = open_library`.
+- Libros creados desde Google Books deben persistir `externalSource = google_books`.
+
+### Manual book entry, ISBN scanner y local cover Hito 6 Sprint 18.16
+
+- El alta manual es un fallback posterior a busqueda remota fallida o sin resultados.
+- Campos manuales: titulo obligatorio, autor recomendado, total de paginas opcional, ISBN opcional, estado inicial y portada opcional.
+- El escaneo ISBN se implementa como ayuda opcional mediante camara; si se rechaza permiso o falla el escaneo, el flujo manual continua.
+- Tras escanear ISBN, se intenta completar datos mediante `BookSearchRepository`; si no hay resultado, se permite guardar manualmente con ISBN rellenado.
+- La portada local se obtiene desde camara/galeria cuando sea viable, se copia a documentos de la app y se persiste como ruta local.
+- Las portadas locales no se suben a backend.
+- `BookCoverImage` debe soportar `file://`, URLs remotas y placeholder editorial ReadPp.
+- Datos de usuario como estado, progreso, sesiones, rating y review tienen prioridad y no deben perderse en futuros enriquecimientos.
+
+### Roadmap backend y sincronizacion
+
+- La arquitectura vigente sigue local-first con Drift/SQLite.
+- Supabase queda como siguiente paso tecnico post-Alpha para Auth, backend cloud y sincronizacion multi-dispositivo.
+- La sincronizacion futura debe cubrir biblioteca, sesiones, progreso, estadisticas y perfil lector.
+- La persistencia local debe mantenerse incluso cuando exista backend para funcionamiento sin conexion o con conectividad limitada.
+
+### Preparacion futura de relecturas Hito 7 Sprint 19.5
+
+- Sprint 19.5 no activa relecturas ni modifica el modelo `Book`.
+- Una relectura futura no debe duplicar el libro ni sobrescribir el historial de la lectura anterior.
+- La evolucion recomendada es introducir una entidad separada `ReadingCycle` o `BookReading` relacionada con `Book`.
+- Cada ciclo podria almacenar inicio, fin, estado, pagina actual y numero de relectura.
+- `ReadingSession` podria incorporar en una migracion futura un `readingCycleId` nullable para asociar sesiones a un ciclo concreto.
+- La biblioteca, metadata, portada, ISBN, rating y review general seguirian perteneciendo a `Book`; progreso y sesiones por intento pertenecerian al ciclo.
+- La migracion futura debe asignar las sesiones existentes a un primer ciclo sin perder datos ni cambiar el comportamiento actual.
+- No crear columnas o tablas de relectura hasta que exista un sprint funcional especifico y casos de uso definidos.
+
+### Accessibility y navegacion principal Hito 7 Sprint 19.7
+
+- `MainNavigationScreen` es el shell de todas las tabs principales y recibe `initialIndex` para deep links/rutas internas.
+- Las rutas principales no deben construir directamente Home, Biblioteca, Insights o Settings fuera de ese shell.
+- Componentes visuales compartidos deben exponer semantica opcional en su propia API cuando conocen el contexto, como `BookCoverImage.semanticLabel`.
+- Responsive debe resolverse en presentacion mediante `LayoutBuilder`, `Wrap`, constraints y `MediaQuery.textScalerOf`, sin contaminar dominio o persistencia.
+- La informacion comunicada por color debe tener equivalente textual o semantico.
+
 ## Mantenimiento continuo
 
 Al actualizar esta documentacion:

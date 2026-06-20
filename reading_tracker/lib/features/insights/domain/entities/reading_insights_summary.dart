@@ -21,6 +21,8 @@ class ReadingInsightsSummary {
     this.topRatedBookRating,
     this.longestBookTitle,
     this.longestBookPages,
+    this.shortestBookTitle,
+    this.shortestBookPages,
     this.mostTimeBookTitle,
     this.mostTimeBookMinutes,
     this.mostSessionsBookTitle,
@@ -62,6 +64,8 @@ class ReadingInsightsSummary {
       topRatedBookRating = null,
       longestBookTitle = null,
       longestBookPages = null,
+      shortestBookTitle = null,
+      shortestBookPages = null,
       mostTimeBookTitle = null,
       mostTimeBookMinutes = null,
       mostSessionsBookTitle = null,
@@ -101,6 +105,8 @@ class ReadingInsightsSummary {
   final double? topRatedBookRating;
   final String? longestBookTitle;
   final int? longestBookPages;
+  final String? shortestBookTitle;
+  final int? shortestBookPages;
   final String? mostTimeBookTitle;
   final int? mostTimeBookMinutes;
   final String? mostSessionsBookTitle;
@@ -141,6 +147,7 @@ class ReadingInsightsSummary {
       topRatedBookTitle != null ||
       topRatedBooks.isNotEmpty ||
       longestBookTitle != null ||
+      shortestBookTitle != null ||
       mostTimeBookTitle != null ||
       mostSessionsBookTitle != null;
 
@@ -151,6 +158,7 @@ class ReadingInsightsSummary {
 
   bool get hasCuriosities =>
       longestBookTitle != null ||
+      shortestBookTitle != null ||
       mostActiveMonth != null ||
       usualReadingTimeSlot != null ||
       mostActiveDay != null;
@@ -173,10 +181,19 @@ class ReadingInsightRankingItem {
 }
 
 class ReadingInsightRatedBook {
-  const ReadingInsightRatedBook({required this.title, required this.rating});
+  const ReadingInsightRatedBook({
+    required this.title,
+    required this.rating,
+    this.author,
+    this.coverUrl,
+    this.review,
+  });
 
   final String title;
   final double rating;
+  final String? author;
+  final String? coverUrl;
+  final String? review;
 }
 
 class ReadingInsightBookPreview {

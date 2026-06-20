@@ -2,6 +2,8 @@ export 'components/empty_state_card.dart';
 export 'components/insight_card.dart';
 export 'components/metric_card.dart';
 export 'components/progress_card.dart';
+export 'components/readpp_empty_state.dart';
+export 'components/readpp_surface.dart';
 export 'components/section_header.dart';
 export 'icons/app_icons.dart';
 export 'motion/app_motion.dart';

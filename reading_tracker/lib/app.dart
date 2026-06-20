@@ -6,9 +6,6 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/app_theme_controller.dart';
 import 'features/books/presentation/screens/book_detail_screen.dart';
 import 'features/books/presentation/screens/book_form_screen.dart';
-import 'features/books/presentation/screens/books_list_screen.dart';
-import 'features/home/presentation/screens/home_screen.dart';
-import 'features/insights/presentation/screens/insights_screen.dart';
 import 'features/navigation/presentation/screens/main_navigation_screen.dart';
 import 'features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -16,7 +13,6 @@ import 'features/reading_sessions/presentation/screens/calendar_screen.dart';
 import 'features/reading_sessions/presentation/screens/day_detail_screen.dart';
 import 'features/reading_sessions/presentation/screens/session_form_screen.dart';
 import 'features/reading_sessions/domain/entities/reading_session.dart';
-import 'features/settings/presentation/screens/settings_screen.dart';
 import 'features/stats/presentation/screens/stats_screen.dart';
 
 class App extends ConsumerWidget {
@@ -51,10 +47,13 @@ class App extends ConsumerWidget {
         return _route(settings, (_) => const MainNavigationScreen());
 
       case '/home':
-        return _route(settings, (_) => const HomeScreen());
+        return _route(settings, (_) => const MainNavigationScreen());
 
       case '/books':
-        return _route(settings, (_) => const BooksListScreen());
+        return _route(
+          settings,
+          (_) => const MainNavigationScreen(initialIndex: 1),
+        );
 
       case '/book/add':
         return _route(settings, (_) => const BookFormScreen());
@@ -98,10 +97,16 @@ class App extends ConsumerWidget {
         );
 
       case '/insights':
-        return _route(settings, (_) => const InsightsScreen());
+        return _route(
+          settings,
+          (_) => const MainNavigationScreen(initialIndex: 3),
+        );
 
       case '/settings':
-        return _route(settings, (_) => const SettingsScreen());
+        return _route(
+          settings,
+          (_) => const MainNavigationScreen(initialIndex: 4),
+        );
 
       default:
         return _notFoundRoute();

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/preferences/reader_profile_controller.dart';
+import '../../../books/presentation/widgets/book_cover_image.dart';
 import '../../domain/entities/reading_insights_summary.dart';
 import '../providers/reading_insights_summary_provider.dart';
 
@@ -40,7 +40,7 @@ class InsightsScreen extends ConsumerWidget {
             ),
             data: (summary) {
               if (!summary.hasAnyInsight) {
-                return const _InsightsEmptyState();
+                return const _InsightsFirstRunState();
               }
 
               return ListView(
@@ -50,7 +50,7 @@ class InsightsScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.xl),
                   _InsightsHero(summary: summary),
                   const SizedBox(height: AppSpacing.lg),
-                  _InsightMetrics(summary: summary),
+                  _ResponsiveInsightMetrics(summary: summary),
                   const SizedBox(height: AppSpacing.lg),
                   _PrimaryInsightPanel(summary: summary),
                   const SizedBox(height: AppSpacing.xxl),
@@ -86,6 +86,22 @@ class InsightsScreen extends ConsumerWidget {
                         subtitle: summary.longestBookPages == null
                             ? 'Sin libros completados con páginas'
                             : '${summary.longestBookPages} pag.',
+                      ),
+                      _InsightCard(
+                        icon: AppIcons.bookmark,
+                        title: 'Libro más corto',
+                        value: summary.shortestBookTitle ?? 'Sin datos',
+                        subtitle: summary.shortestBookPages == null
+                            ? 'Sin libros completados con páginas'
+                            : '${summary.shortestBookPages} pág.',
+                      ),
+                      _InsightCard(
+                        icon: AppIcons.insightsNav,
+                        title: 'Ritmo medio',
+                        value: summary.averagePagesPerActiveDay == null
+                            ? 'Sin datos'
+                            : '${summary.averagePagesPerActiveDay!.round()} pág.',
+                        subtitle: 'Por día activo',
                       ),
                       _InsightCard(
                         icon: AppIcons.calendar,
@@ -139,7 +155,7 @@ class _InsightsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBrandHeader(
+    return ReadPpPageHeader(
       readerProfile: readerProfile,
       onTap: () =>
           Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false),
@@ -201,13 +217,11 @@ class _InsightsHero extends StatelessWidget {
         children: [
           Text(
             'Insights',
-            style: GoogleFonts.cormorantGaramond(
-              textStyle: theme.textTheme.displaySmall?.copyWith(
-                color: Colors.white,
-                fontSize: 39,
-                fontWeight: FontWeight.w700,
-                height: 1.02,
-              ),
+            style: theme.textTheme.displaySmall?.copyWith(
+              color: Colors.white,
+              fontSize: 39,
+              fontWeight: FontWeight.w800,
+              height: 1.02,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -238,13 +252,11 @@ class _InsightsHero extends StatelessWidget {
                         headline,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.cormorantGaramond(
-                          textStyle: theme.textTheme.titleLarge?.copyWith(
-                            color: Colors.white,
-                            fontSize: 27,
-                            fontWeight: FontWeight.w700,
-                            height: 1.05,
-                          ),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontSize: 27,
+                          fontWeight: FontWeight.w800,
+                          height: 1.05,
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -268,6 +280,59 @@ class _InsightsHero extends StatelessWidget {
   }
 }
 
+class _ResponsiveInsightMetrics extends StatelessWidget {
+  const _ResponsiveInsightMetrics({required this.summary});
+
+  final ReadingInsightsSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final metrics = [
+      _MetricPill(
+        icon: AppIcons.book,
+        value: '${summary.completedBooksThisYear}',
+        label: 'Terminados',
+      ),
+      _MetricPill(
+        icon: AppIcons.fire,
+        value: '${summary.bestStreakDays}',
+        label: 'Mejor racha',
+      ),
+      _MetricPill(
+        icon: AppIcons.pages,
+        value: summary.averagePagesPerSession == null
+            ? '-'
+            : summary.averagePagesPerSession!.round().toString(),
+        label: 'Pág./sesión',
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final textScale = MediaQuery.textScalerOf(context).scale(1);
+        final columns = constraints.maxWidth >= 560 && textScale <= 1.3
+            ? 3
+            : constraints.maxWidth >= 300
+            ? 2
+            : 1;
+        final itemWidth =
+            (constraints.maxWidth - (AppSpacing.sm * (columns - 1))) / columns;
+
+        return Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            for (final metric in metrics)
+              SizedBox(width: itemWidth, child: metric),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// Legacy fixed-row metrics kept until the remaining mojibake copy is cleaned.
+// ignore: unused_element
 class _InsightMetrics extends StatelessWidget {
   const _InsightMetrics({required this.summary});
 
@@ -458,13 +523,11 @@ class _MetricPill extends StatelessWidget {
             child: Text(
               value,
               maxLines: 1,
-              style: GoogleFonts.cormorantGaramond(
-                textStyle: theme.textTheme.titleLarge?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w800,
-                  height: 0.95,
-                ),
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: theme.colorScheme.primary,
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+                height: 0.95,
               ),
             ),
           ),
@@ -496,13 +559,11 @@ class _SectionTitle extends StatelessWidget {
       children: [
         Text(
           title,
-          style: GoogleFonts.cormorantGaramond(
-            textStyle: theme.textTheme.headlineSmall?.copyWith(
-              color: theme.colorScheme.primary,
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              height: 1,
-            ),
+          style: theme.textTheme.headlineSmall?.copyWith(
+            color: theme.colorScheme.primary,
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+            height: 1,
           ),
         ),
       ],
@@ -544,12 +605,10 @@ class _FavoriteAuthorCard extends StatelessWidget {
                   children: [
                     Text(
                       'Autor favorito',
-                      style: GoogleFonts.cormorantGaramond(
-                        textStyle: theme.textTheme.titleLarge?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w800,
-                          height: 1,
-                        ),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w900,
+                        height: 1,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -578,7 +637,13 @@ class _FavoriteAuthorCard extends StatelessWidget {
           if (books.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.md),
             SizedBox(
-              height: 132,
+              height:
+                  132 +
+                  ((MediaQuery.textScalerOf(context).scale(1) - 1).clamp(
+                        0.0,
+                        1.0,
+                      ) *
+                      28),
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: books.length,
@@ -610,7 +675,12 @@ class _AuthorBookCover extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _InsightBookCover(url: book.coverUrl, width: 62, height: 88),
+          _InsightBookCover(
+            url: book.coverUrl,
+            width: 62,
+            height: 88,
+            semanticLabel: 'Portada de ${book.title}',
+          ),
           const SizedBox(height: 6),
           Text(
             book.title,
@@ -632,41 +702,23 @@ class _InsightBookCover extends StatelessWidget {
     required this.url,
     required this.width,
     required this.height,
+    this.semanticLabel,
   });
 
   final String? url;
   final double width;
   final double height;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final placeholder = Container(
+    return BookCoverImage(
+      url: url,
       width: width,
       height: height,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Icon(
-        AppIcons.book,
-        color: theme.colorScheme.primary.withValues(alpha: 0.62),
-        size: 18,
-      ),
-    );
-
-    if (url == null || url!.isEmpty) return placeholder;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: Image.network(
-        url!,
-        width: width,
-        height: height,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => placeholder,
-      ),
+      radius: 10,
+      icon: AppIcons.book,
+      semanticLabel: semanticLabel,
     );
   }
 }
@@ -733,12 +785,10 @@ class _InsightCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             title,
-            style: GoogleFonts.cormorantGaramond(
-              textStyle: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w800,
-                height: 1,
-              ),
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w900,
+              height: 1,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -775,6 +825,185 @@ class _RatedBooksCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    if (books.isEmpty) {
+      return ReadPpSurface(
+        child: Text(
+          'Aún no hay libros valorados este año.',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final textScale = MediaQuery.textScalerOf(context).scale(1);
+        final height =
+            276.0 + ((textScale - 1).clamp(0.0, 1.0).toDouble() * 64);
+        final itemWidth = (constraints.maxWidth * 0.82)
+            .clamp(236.0, 300.0)
+            .toDouble();
+
+        return SizedBox(
+          height: height,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            itemCount: books.length,
+            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
+            itemBuilder: (context, index) => _RatedBookCard(
+              width: itemWidth,
+              position: index + 1,
+              book: books[index],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _RatedBookCard extends StatelessWidget {
+  const _RatedBookCard({
+    required this.width,
+    required this.position,
+    required this.book,
+  });
+
+  final double width;
+  final int position;
+  final ReadingInsightRatedBook book;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final review = book.review?.trim();
+
+    return SizedBox(
+      width: width,
+      child: ReadPpSurface(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        borderRadius: 22,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                BookCoverImage(
+                  url: book.coverUrl,
+                  width: 82,
+                  height: 124,
+                  radius: 12,
+                  icon: AppIcons.book,
+                  semanticLabel: 'Portada de ${book.title}',
+                ),
+                Positioned(
+                  left: -7,
+                  top: -7,
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: theme.colorScheme.surface,
+                        width: 2,
+                      ),
+                    ),
+                    child: Text(
+                      '$position',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onPrimary,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    book.title,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w900,
+                      height: 1.08,
+                    ),
+                  ),
+                  if (book.author?.trim().isNotEmpty == true) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      book.author!.trim(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.sm),
+                  Semantics(
+                    label: 'Valoración ${book.rating} de 5',
+                    child: Row(
+                      children: [
+                        Icon(
+                          AppIcons.star,
+                          size: 17,
+                          color: theme.colorScheme.secondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${book.rating.toStringAsFixed(1)} / 5',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (review?.isNotEmpty == true) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      review!,
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ignore: unused_element
+class _LegacyRatedBooksCard extends StatelessWidget {
+  const _LegacyRatedBooksCard({required this.books});
+
+  final List<ReadingInsightRatedBook> books;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -794,12 +1023,10 @@ class _RatedBooksCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'Top 3 del año',
-                style: GoogleFonts.cormorantGaramond(
-                  textStyle: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w800,
-                    height: 1,
-                  ),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w900,
+                  height: 1,
                 ),
               ),
             ],
@@ -814,7 +1041,7 @@ class _RatedBooksCard extends StatelessWidget {
             )
           else
             for (var index = 0; index < books.length; index++) ...[
-              _RatedBookRow(position: index + 1, book: books[index]),
+              _LegacyRatedBookRow(position: index + 1, book: books[index]),
               if (index < books.length - 1) const Divider(height: 18),
             ],
         ],
@@ -823,8 +1050,8 @@ class _RatedBooksCard extends StatelessWidget {
   }
 }
 
-class _RatedBookRow extends StatelessWidget {
-  const _RatedBookRow({required this.position, required this.book});
+class _LegacyRatedBookRow extends StatelessWidget {
+  const _LegacyRatedBookRow({required this.position, required this.book});
 
   final int position;
   final ReadingInsightRatedBook book;
@@ -875,6 +1102,32 @@ class _RatedBookRow extends StatelessWidget {
   }
 }
 
+class _InsightsFirstRunState extends ConsumerWidget {
+  const _InsightsFirstRunState();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final readerProfile = ref.watch(readerProfileControllerProvider);
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 132),
+      children: [
+        _InsightsHeader(readerProfile: readerProfile),
+        const SizedBox(height: AppSpacing.xl),
+        ReadPpEmptyState(
+          icon: AppIcons.insightsNav,
+          title: 'Tus insights necesitan lecturas',
+          description:
+              'Cuando añadas libros y registres sesiones, aquí aparecerán tu perfil lector, mejores lecturas y curiosidades.',
+          actionLabel: 'Añadir lectura',
+          onAction: () => Navigator.pushNamed(context, '/book/add'),
+        ),
+      ],
+    );
+  }
+}
+
+// ignore: unused_element
 class _InsightsEmptyState extends ConsumerWidget {
   const _InsightsEmptyState();
 
@@ -918,12 +1171,10 @@ class _InsightsEmptyState extends ConsumerWidget {
               Text(
                 '¡Añade tu primer libro!',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.cormorantGaramond(
-                  textStyle: theme.textTheme.headlineSmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w800,
-                    height: 1,
-                  ),
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w900,
+                  height: 1,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),

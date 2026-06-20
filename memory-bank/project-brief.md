@@ -22,6 +22,8 @@
 - Design System: temas Burgundy/Forest, tokens visuales y componentes reutilizables.
 - Branding: identidad ReadPp, tipografia Playfair/Inter, iconografia centralizada y motion base.
 - Home Premium: lectura actual protagonista, metricas compactas, objetivo anual y actividad reciente.
+- Alpha QA: shared header basado en Biblioteca, card compartida de lectura actual, carrusel de multiples lecturas activas, calendario/diario sincronizados y polish de reto lector/insights.
+- Busqueda de libros: Open Library como proveedor primario, Google Books como fallback, alta manual como ultima opcion y deduplicacion por ISBN, proveedor+externalId o titulo+autor normalizados.
 
 ## Fuera de alcance por ahora
 
@@ -29,3 +31,9 @@
 - Login, JWT o sincronizacion entre usuarios.
 - Social, recomendaciones avanzadas o gamificacion compleja.
 - Arquitecturas pesadas que no aporten valor inmediato al MVP.
+
+## Roadmap vigente
+
+- Continuar Alpha QA Android/Web/Desktop.
+- Preparar Beta Readiness: APK/AAB, store assets, privacy policy y QA de release.
+- Post-Alpha: integrar Supabase para Auth, backend cloud y sincronizacion multi-dispositivo manteniendo persistencia local.

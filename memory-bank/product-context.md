@@ -10,7 +10,9 @@ Usuario individual que quiere registrar su biblioteca personal y entender cuanto
 
 ## Casos de uso principales
 
-- Buscar un libro y guardarlo con metadatos de Open Library.
+- Buscar un libro y guardarlo con metadatos remotos, usando Open Library como fuente primaria y Google Books como fallback.
+- Anadir un libro manualmente como ultima opcion cuando la busqueda no responde o no encuentra resultados.
+- Evitar duplicados aunque el libro venga de API, alta manual o una fuente futura.
 - Marcar libros como `pending`, `reading`, `completed`, `paused` o `abandoned`.
 - Registrar una sesion de lectura con fecha, minutos, paginas leidas y nota opcional.
 - Ver en calendario que dias tuvo actividad.
@@ -26,3 +28,5 @@ Usuario individual que quiere registrar su biblioteca personal y entender cuanto
 - Calendario compacto en mes y mas detallado en semana/dia.
 - Navegacion principal clara y accesible.
 - Estados vacios utiles, con llamadas a la accion cuando proceda.
+- Visualmente consistente con Biblioteca como pantalla de referencia.
+- Local-first: debe seguir funcionando con datos locales aunque la conectividad sea limitada.

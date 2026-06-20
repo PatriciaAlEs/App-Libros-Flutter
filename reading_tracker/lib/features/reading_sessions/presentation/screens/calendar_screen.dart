@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../domain/entities/reading_session.dart';
@@ -62,12 +61,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             final theme = Theme.of(context);
             return Text(
               'Book Journal',
-              style: GoogleFonts.cormorantGaramond(
-                textStyle: theme.textTheme.headlineSmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w800,
-                  height: 1,
-                ),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w900,
+                height: 1,
               ),
             );
           },
@@ -77,14 +74,21 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(42, 42),
-                padding: EdgeInsets.zero,
-                shape: const CircleBorder(),
+            child: Tooltip(
+              message: 'Añadir sesión de lectura',
+              child: Semantics(
+                button: true,
+                label: 'Añadir sesión de lectura',
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                    padding: EdgeInsets.zero,
+                    shape: const CircleBorder(),
+                  ),
+                  onPressed: () => Navigator.pushNamed(context, '/session/add'),
+                  child: const Icon(Icons.add_rounded),
+                ),
               ),
-              onPressed: () => Navigator.pushNamed(context, '/session/add'),
-              child: const Icon(Icons.add_rounded),
             ),
           ),
         ],
@@ -236,21 +240,27 @@ class _CalendarHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
       child: Row(
         children: [
-          _RoundNavButton(icon: Icons.chevron_left, onTap: onPrevious),
+          _RoundNavButton(
+            icon: Icons.chevron_left,
+            tooltip: 'Periodo anterior',
+            onTap: onPrevious,
+          ),
           Expanded(
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: GoogleFonts.cormorantGaramond(
-                textStyle: theme.textTheme.headlineSmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w800,
-                  height: 1,
-                ),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w900,
+                height: 1,
               ),
             ),
           ),
-          _RoundNavButton(icon: Icons.chevron_right, onTap: onNext),
+          _RoundNavButton(
+            icon: Icons.chevron_right,
+            tooltip: 'Periodo siguiente',
+            onTap: onNext,
+          ),
         ],
       ),
     );
@@ -258,25 +268,37 @@ class _CalendarHeader extends StatelessWidget {
 }
 
 class _RoundNavButton extends StatelessWidget {
-  const _RoundNavButton({required this.icon, required this.onTap});
+  const _RoundNavButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
 
   final IconData icon;
+  final String tooltip;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Material(
-      color: theme.colorScheme.surface.withValues(alpha: 0.72),
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: SizedBox(
-          width: 42,
-          height: 42,
-          child: Icon(icon, color: theme.colorScheme.primary),
+    return Tooltip(
+      message: tooltip,
+      child: Semantics(
+        button: true,
+        label: tooltip,
+        child: Material(
+          color: theme.colorScheme.surface.withValues(alpha: 0.72),
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onTap,
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: Icon(icon, color: theme.colorScheme.primary),
+            ),
+          ),
         ),
       ),
     );
@@ -296,7 +318,7 @@ class _CalendarModeSelector extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
       child: Container(
-        height: 44,
+        height: 52,
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface.withValues(alpha: 0.78),
@@ -344,21 +366,26 @@ class _CalendarModePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Material(
-      color: selected ? theme.colorScheme.primary : Colors.transparent,
-      borderRadius: BorderRadius.circular(999),
-      child: InkWell(
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: 'Vista $label',
+      child: Material(
+        color: selected ? theme.colorScheme.primary : Colors.transparent,
         borderRadius: BorderRadius.circular(999),
-        onTap: onTap,
-        child: Center(
-          child: Text(
-            label,
-            maxLines: 1,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: selected
-                  ? theme.colorScheme.onPrimary
-                  : theme.colorScheme.primary,
-              fontWeight: FontWeight.w800,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(999),
+          onTap: onTap,
+          child: Center(
+            child: Text(
+              label,
+              maxLines: 1,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: selected
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.primary,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ),
@@ -623,36 +650,15 @@ class _WeekEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.08),
-        ),
-      ),
-      child: Column(
-        children: [
-          Icon(AppIcons.calendar, color: theme.colorScheme.primary),
-          const SizedBox(height: 10),
-          Text(
-            'Semana sin sesiones',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Registra una lectura para encender el calendario.',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall,
-          ),
-        ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: ReadPpEmptyState(
+        icon: AppIcons.calendar,
+        title: 'Semana sin sesiones',
+        description:
+            'Registra una lectura para que tus sesiones aparezcan en el calendario.',
+        actionLabel: 'Registrar lectura',
+        onAction: () => Navigator.pushNamed(context, '/session/add'),
       ),
     );
   }
@@ -741,64 +747,69 @@ class _WeekDaySection extends StatelessWidget {
     final activityColor = _activityColor(context, intensity);
     final hasActivity = sessions.isNotEmpty;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.96),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: hasActivity
-              ? activityColor.withValues(alpha: 0.58)
-              : theme.colorScheme.primary.withValues(alpha: 0.12),
-          width: hasActivity ? 1.35 : 1.05,
-        ),
-        boxShadow: hasActivity
-            ? [
-                BoxShadow(
-                  color: activityColor.withValues(alpha: 0.12),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
-                ),
-              ]
-            : null,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          key: Key(_calendarDayKey(day)),
+    return Semantics(
+      button: true,
+      label: '${_dayTitle(day)}, ${sessions.length} sesiones',
+      hint: 'Abre el diario de lectura del día',
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface.withValues(alpha: 0.96),
           borderRadius: BorderRadius.circular(22),
-          onTap: () => Navigator.pushNamed(
-            context,
-            '/calendar/day',
-            arguments: _dateOnly(day),
+          border: Border.all(
+            color: hasActivity
+                ? activityColor.withValues(alpha: 0.58)
+                : theme.colorScheme.primary.withValues(alpha: 0.12),
+            width: hasActivity ? 1.35 : 1.05,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _dayTitle(day),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
+          boxShadow: hasActivity
+              ? [
+                  BoxShadow(
+                    color: activityColor.withValues(alpha: 0.12),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : null,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            key: Key(_calendarDayKey(day)),
+            borderRadius: BorderRadius.circular(22),
+            onTap: () => Navigator.pushNamed(
+              context,
+              '/calendar/day',
+              arguments: _dateOnly(day),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _dayTitle(day),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                if (sessions.isEmpty)
-                  Text('Sin sesiones', style: theme.textTheme.bodySmall)
-                else
-                  for (final session in sessions)
-                    _WeekSessionRow(
-                      session: session,
-                      book: booksById[session.bookId],
-                    ),
-              ],
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  if (sessions.isEmpty)
+                    Text('Sin sesiones', style: theme.textTheme.bodySmall)
+                  else
+                    for (final session in sessions)
+                      _WeekSessionRow(
+                        session: session,
+                        book: booksById[session.bookId],
+                      ),
+                ],
+              ),
             ),
           ),
         ),
@@ -930,85 +941,94 @@ class _CalendarDayCell extends StatelessWidget {
         ? theme.colorScheme.primary
         : theme.colorScheme.onSurface;
 
-    return InkWell(
-      key: Key(_calendarDayKey(day)),
-      borderRadius: BorderRadius.circular(compact ? 14 : 18),
-      onTap: () => Navigator.pushNamed(
-        context,
-        '/calendar/day',
-        arguments: _dateOnly(day),
-      ),
-      child: AnimatedContainer(
-        duration: AppMotion.fast,
-        curve: AppMotion.standard,
-        padding: EdgeInsets.all(compact ? 5 : 7),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface.withValues(alpha: 0.98),
-          border: Border.all(
-            color: isToday
-                ? theme.colorScheme.primary
-                : hasActivity
-                ? activityColor.withValues(alpha: 0.62)
-                : theme.colorScheme.primary.withValues(alpha: 0.13),
-            width: isToday
-                ? 1.8
-                : hasActivity
-                ? 1.25
-                : 1.0,
-          ),
-          borderRadius: BorderRadius.circular(compact ? 14 : 18),
-          boxShadow: hasActivity && !compact
-              ? [
-                  BoxShadow(
-                    color: activityColor.withValues(alpha: 0.14),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8),
-                  ),
-                ]
-              : null,
+    final activityLabel = sessions.isEmpty
+        ? 'sin sesiones'
+        : '${sessions.length} sesiones, $totalPages páginas, $totalMinutes minutos';
+
+    return Semantics(
+      button: true,
+      label: '${day.day}/${day.month}/${day.year}, $activityLabel',
+      hint: 'Abre el diario de lectura del día',
+      child: InkWell(
+        key: Key(_calendarDayKey(day)),
+        borderRadius: BorderRadius.circular(compact ? 14 : 18),
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/calendar/day',
+          arguments: _dateOnly(day),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: compact ? 18 : 22,
-              child: Text(
-                '${day.day}',
-                maxLines: 1,
-                style: TextStyle(
-                  color: dayTextColor,
-                  fontSize: compact ? 12 : null,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
+        child: AnimatedContainer(
+          duration: AppMotion.fast,
+          curve: AppMotion.standard,
+          padding: EdgeInsets.all(compact ? 5 : 7),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.98),
+            border: Border.all(
+              color: isToday
+                  ? theme.colorScheme.primary
+                  : hasActivity
+                  ? activityColor.withValues(alpha: 0.62)
+                  : theme.colorScheme.primary.withValues(alpha: 0.13),
+              width: isToday
+                  ? 1.8
+                  : hasActivity
+                  ? 1.25
+                  : 1.0,
             ),
-            if (hasActivity) ...[
-              Container(
-                width: compact ? 18 : 28,
-                height: compact ? 2 : 3,
-                decoration: BoxDecoration(
-                  color: activityColor.withValues(alpha: 0.86),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-              const SizedBox(height: 2),
-            ] else
-              const SizedBox(height: 2),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _MiniCoverRow(
-                    books: visibleBooks,
-                    extraCount: extraCount,
-                    coverWidth: coverWidth,
-                    coverHeight: coverHeight,
-                    compact: compact,
+            borderRadius: BorderRadius.circular(compact ? 14 : 18),
+            boxShadow: hasActivity && !compact
+                ? [
+                    BoxShadow(
+                      color: activityColor.withValues(alpha: 0.14),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: compact ? 18 : 22,
+                child: Text(
+                  '${day.day}',
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: dayTextColor,
+                    fontSize: compact ? 12 : null,
+                    fontWeight: FontWeight.w900,
                   ),
-                ],
+                ),
               ),
-            ),
-          ],
+              if (hasActivity) ...[
+                Container(
+                  width: compact ? 18 : 28,
+                  height: compact ? 2 : 3,
+                  decoration: BoxDecoration(
+                    color: activityColor.withValues(alpha: 0.86),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                const SizedBox(height: 2),
+              ] else
+                const SizedBox(height: 2),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _MiniCoverRow(
+                      books: visibleBooks,
+                      extraCount: extraCount,
+                      coverWidth: coverWidth,
+                      coverHeight: coverHeight,
+                      compact: compact,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

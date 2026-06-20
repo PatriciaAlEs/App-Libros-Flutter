@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
@@ -113,7 +112,7 @@ class _BooksListScreenState extends ConsumerState<BooksListScreen> {
                         112,
                       ),
                       sliver: SliverToBoxAdapter(
-                        child: _BooksEmptyState(
+                        child: _LibraryEmptyState(
                           hasBooks: books.isNotEmpty,
                           hasSearch: _query.trim().isNotEmpty,
                           onAddBook: _openAddBook,
@@ -460,13 +459,11 @@ class _CollectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             'Colección',
-            style: GoogleFonts.cormorantGaramond(
-              textStyle: theme.textTheme.headlineSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-                height: 1,
-              ),
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.primary,
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              height: 1,
             ),
           ),
         ),
@@ -623,6 +620,41 @@ class _BookShelfCard extends StatelessWidget {
   }
 }
 
+class _LibraryEmptyState extends StatelessWidget {
+  const _LibraryEmptyState({
+    required this.hasBooks,
+    required this.hasSearch,
+    required this.onAddBook,
+  });
+
+  final bool hasBooks;
+  final bool hasSearch;
+  final VoidCallback onAddBook;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = hasSearch
+        ? 'No encontramos ese libro'
+        : hasBooks
+        ? 'Esta estantería está tranquila'
+        : 'Tu biblioteca empieza aquí';
+    final description = hasSearch
+        ? 'Prueba con otro título, autora o género.'
+        : hasBooks
+        ? 'Cambia el filtro o añade una nueva lectura.'
+        : 'Aquí aparecerá tu biblioteca personal: pendientes, lecturas en curso y libros completados.';
+
+    return ReadPpEmptyState(
+      icon: hasSearch ? AppIcons.search : AppIcons.library,
+      title: title,
+      description: description,
+      actionLabel: !hasBooks ? '+ Añadir libro' : null,
+      onAction: !hasBooks ? onAddBook : null,
+    );
+  }
+}
+
+// ignore: unused_element
 class _BooksEmptyState extends StatelessWidget {
   const _BooksEmptyState({
     required this.hasBooks,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
@@ -145,7 +144,15 @@ class HomeScreen extends ConsumerWidget {
                           ),
                           if (otherCurrentBooks.isNotEmpty) ...[
                             const SizedBox(height: AppSpacing.lg),
-                            _CurrentReadingStrip(books: otherCurrentBooks),
+                            _CurrentReadingStrip(
+                              books: otherCurrentBooks,
+                              onBookTap: (book) => _openQuickProgress(
+                                context,
+                                ref,
+                                book,
+                                recentActivityRange,
+                              ),
+                            ),
                           ],
                           const SizedBox(height: 28),
                           _TodaySummaryCard(sessions: todaySessions),
@@ -483,27 +490,23 @@ class _HomeHeader extends StatelessWidget {
 
                   final greeting = RichText(
                     text: TextSpan(
-                      style: GoogleFonts.cormorantGaramond(
-                        textStyle: theme.textTheme.headlineSmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.88,
-                          ),
-                          fontSize: 28,
-                          fontWeight: FontWeight.w600,
-                          height: 1.05,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.88,
                         ),
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        height: 1.05,
                       ),
                       children: [
                         TextSpan(text: '$greetingLead\n'),
                         TextSpan(
                           text: '$greetingName 👋',
-                          style: GoogleFonts.cormorantGaramond(
-                            textStyle: theme.textTheme.displaySmall?.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontSize: 38,
-                              fontWeight: FontWeight.w700,
-                              height: 1,
-                            ),
+                          style: theme.textTheme.displaySmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontSize: 38,
+                            fontWeight: FontWeight.w800,
+                            height: 1,
                           ),
                         ),
                       ],
@@ -666,11 +669,9 @@ class _JournalHeader extends StatelessWidget {
 
     return Text(
       'Actividad reciente',
-      style: GoogleFonts.cormorantGaramond(
-        textStyle: theme.textTheme.headlineSmall?.copyWith(
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.88),
-          fontWeight: FontWeight.w700,
-        ),
+      style: theme.textTheme.headlineSmall?.copyWith(
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.88),
+        fontWeight: FontWeight.w900,
       ),
     );
   }
@@ -1031,6 +1032,10 @@ class _CurrentReadingCardsState extends State<_CurrentReadingCards> {
 
   @override
   Widget build(BuildContext context) {
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final cardHeight =
+        334.0 + ((textScale - 1).clamp(0.0, 1.0).toDouble() * 72);
+
     if (widget.books.isEmpty) {
       return _EmptyCurrentReadingCard(
         pendingBooks: widget.pendingBooks,
@@ -1042,7 +1047,7 @@ class _CurrentReadingCardsState extends State<_CurrentReadingCards> {
     if (widget.books.length == 1) {
       final primaryBook = widget.books.first;
       return SizedBox(
-        height: 334,
+        height: cardHeight,
         child: AppAnimatedPageSwitch(
           child: CurrentReadingCard(
             key: ValueKey('current-reading-${primaryBook.id}'),
@@ -1061,7 +1066,7 @@ class _CurrentReadingCardsState extends State<_CurrentReadingCards> {
           builder: (context, constraints) {
             final isNarrow = constraints.maxWidth < 350;
             return SizedBox(
-              height: isNarrow ? 332 : 334,
+              height: cardHeight - (isNarrow ? 2 : 0),
               child: PageView.builder(
                 key: const Key('current_reading_cards_page_view'),
                 controller: _pageController,
@@ -1078,6 +1083,7 @@ class _CurrentReadingCardsState extends State<_CurrentReadingCards> {
                     child: CurrentReadingCard(
                       key: ValueKey('current-reading-${book.id}'),
                       book: book,
+                      isPrimaryReading: book.id == widget.currentReadingBookId,
                       currentIndex: index + 1,
                       totalReadings: widget.books.length,
                       onChangeCurrentReading: widget.onChangeCurrentReading,
@@ -1193,9 +1199,10 @@ class _EmptyCurrentReadingCard extends StatelessWidget {
 }
 
 class _CurrentReadingStrip extends StatefulWidget {
-  const _CurrentReadingStrip({required this.books});
+  const _CurrentReadingStrip({required this.books, required this.onBookTap});
 
   final List<Book> books;
+  final ValueChanged<Book> onBookTap;
 
   @override
   State<_CurrentReadingStrip> createState() => _CurrentReadingStripState();
@@ -1272,14 +1279,12 @@ class _CurrentReadingStripState extends State<_CurrentReadingStrip> {
         children: [
           Text(
             'Otras lecturas',
-            style: GoogleFonts.cormorantGaramond(
-              textStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.88),
-                fontWeight: FontWeight.w700,
-                height: 1,
-              ),
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.88),
+              fontWeight: FontWeight.w900,
+              height: 1,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -1303,7 +1308,10 @@ class _CurrentReadingStripState extends State<_CurrentReadingStrip> {
                   child: _CurrentReadingChip(
                     book: book,
                     isSelected: index == _currentPage,
-                    onTap: () => _showPage(index, animate: true),
+                    onTap: () {
+                      _showPage(index, animate: true);
+                      widget.onBookTap(book);
+                    },
                   ),
                 );
               },
@@ -1542,13 +1550,11 @@ class _TodayMetric extends StatelessWidget {
             child: Text(
               value,
               maxLines: 1,
-              style: GoogleFonts.cormorantGaramond(
-                textStyle: theme.textTheme.headlineSmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontSize: 42,
-                  fontWeight: FontWeight.w800,
-                  height: 0.92,
-                ),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontSize: 42,
+                fontWeight: FontWeight.w900,
+                height: 0.92,
               ),
             ),
           ),
@@ -1768,7 +1774,7 @@ class _HomeSectionTitle extends StatelessWidget {
       height: 1.1,
     );
 
-    return Text(title, style: GoogleFonts.cormorantGaramond(textStyle: style));
+    return Text(title, style: style);
   }
 }
 
@@ -1919,13 +1925,11 @@ class _CompactMetricCard extends StatelessWidget {
                             Text(
                               value,
                               maxLines: 1,
-                              style: GoogleFonts.cormorantGaramond(
-                                textStyle: theme.textTheme.titleLarge?.copyWith(
-                                  color: foregroundColor,
-                                  fontSize: 34,
-                                  fontWeight: FontWeight.w800,
-                                  height: 0.92,
-                                ),
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: foregroundColor,
+                                fontSize: 34,
+                                fontWeight: FontWeight.w900,
+                                height: 0.92,
                               ),
                             ),
                             if (unit.isNotEmpty) ...[
@@ -2019,13 +2023,10 @@ class _AnnualGoalCard extends StatelessWidget {
                               const SizedBox(width: AppSpacing.sm),
                               Text(
                                 'Reto anual',
-                                style: GoogleFonts.cormorantGaramond(
-                                  textStyle: theme.textTheme.headlineSmall
-                                      ?.copyWith(
-                                        color: theme.colorScheme.primary,
-                                        fontWeight: FontWeight.w700,
-                                        height: 1,
-                                      ),
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.w900,
+                                  height: 1,
                                 ),
                               ),
                             ],
@@ -2036,14 +2037,11 @@ class _AnnualGoalCard extends StatelessWidget {
                             children: [
                               Text(
                                 '${(safeProgress * 100).round()}%',
-                                style: GoogleFonts.cormorantGaramond(
-                                  textStyle: theme.textTheme.displaySmall
-                                      ?.copyWith(
-                                        color: theme.colorScheme.primary,
-                                        fontSize: 42,
-                                        fontWeight: FontWeight.w700,
-                                        height: 0.92,
-                                      ),
+                                style: theme.textTheme.displaySmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontSize: 42,
+                                  fontWeight: FontWeight.w900,
+                                  height: 0.92,
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.sm),

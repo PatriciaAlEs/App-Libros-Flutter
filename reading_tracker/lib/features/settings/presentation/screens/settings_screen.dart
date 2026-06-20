@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/preferences/reader_profile_controller.dart';
@@ -42,7 +40,7 @@ class SettingsScreen extends ConsumerWidget {
               132,
             ),
             children: [
-              AppBrandHeader(
+              ReadPpPageHeader(
                 readerProfile: profile,
                 onTap: () => Navigator.pushNamedAndRemoveUntil(
                   context,
@@ -82,16 +80,10 @@ class _ProfileHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
+    return ReadPpSurface(
       padding: const EdgeInsets.fromLTRB(24, 26, 24, 24),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.16),
-        ),
-        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
-      ),
+      borderRadius: 30,
+      opacity: 0.92,
       child: Row(
         children: [
           Container(
@@ -118,13 +110,11 @@ class _ProfileHero extends StatelessWidget {
               children: [
                 Text(
                   'Perfil y preferencias',
-                  style: GoogleFonts.cormorantGaramond(
-                    textStyle: theme.textTheme.headlineSmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontSize: 31,
-                      fontWeight: FontWeight.w700,
-                      height: 1.05,
-                    ),
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontSize: 31,
+                    fontWeight: FontWeight.w800,
+                    height: 1.05,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),

@@ -78,7 +78,9 @@ class _DayDetailScreenState extends ConsumerState<DayDetailScreen> {
               ),
               const SizedBox(height: 16),
               if (sessions.isEmpty)
-                const _EmptyState()
+                _ReadingDayEmptyState(
+                  onRegister: () => _openSessionForm(context),
+                )
               else
                 for (var index = 0; index < sessions.length; index++) ...[
                   _AnimatedSessionTile(
@@ -203,91 +205,103 @@ class _DayEditorialHeader extends StatelessWidget {
     final totalMinutes = session?.minutes ?? 0;
     final focusBook = book;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              theme.colorScheme.primary,
-              Color.lerp(theme.colorScheme.primary, Colors.black, 0.28)!,
-            ],
-          ),
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: AppShadows.soft(theme.colorScheme.primary),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              _humanDay(day),
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.secondary,
-                fontFamily: AppTypography.displayFontFamily,
-                fontFamilyFallback: AppTypography.displayFallback,
-                letterSpacing: 0,
-                fontWeight: FontWeight.w800,
-              ),
+    final semanticTitle = focusBook?.title ?? 'Sin lectura seleccionada';
+
+    return Semantics(
+      button: onTap != null,
+      label:
+          '$semanticTitle, $totalPages páginas, $totalMinutes minutos, $sessionCount sesiones',
+      hint: onTap == null ? null : 'Abre el detalle del libro',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                theme.colorScheme.primary,
+                Color.lerp(theme.colorScheme.primary, Colors.black, 0.28)!,
+              ],
             ),
-            const SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _Cover(url: focusBook?.coverUrl),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        focusBook?.title ?? 'Sin lectura seleccionada',
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          color: theme.colorScheme.onPrimary,
-                          fontFamily: AppTypography.displayFontFamily,
-                          fontFamilyFallback: AppTypography.displayFallback,
-                          fontWeight: FontWeight.w800,
-                          height: 1.04,
-                        ),
-                      ),
-                      if (focusBook?.author != null) ...[
-                        const SizedBox(height: 4),
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: AppShadows.soft(theme.colorScheme.primary),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _humanDay(day),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.secondary,
+                  fontFamily: AppTypography.displayFontFamily,
+                  fontFamilyFallback: AppTypography.displayFallback,
+                  letterSpacing: 0,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _Cover(url: focusBook?.coverUrl),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          focusBook!.author!,
-                          maxLines: 1,
+                          focusBook?.title ?? 'Sin lectura seleccionada',
+                          maxLines: 3,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onPrimary.withValues(
-                              alpha: 0.72,
-                            ),
-                            fontStyle: FontStyle.italic,
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            color: theme.colorScheme.onPrimary,
+                            fontFamily: AppTypography.displayFontFamily,
+                            fontFamilyFallback: AppTypography.displayFallback,
+                            fontWeight: FontWeight.w800,
+                            height: 1.04,
                           ),
                         ),
+                        if (focusBook?.author != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            focusBook!.author!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onPrimary.withValues(
+                                alpha: 0.72,
+                              ),
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            Row(
-              children: [
-                Expanded(
-                  child: _DayMetric(value: '$totalPages', label: 'pág.'),
-                ),
-                Expanded(
-                  child: _DayMetric(value: '$totalMinutes', label: 'min'),
-                ),
-                Expanded(
-                  child: _DayMetric(value: '$sessionCount', label: 'sesiones'),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: _DayMetric(value: '$totalPages', label: 'pág.'),
+                  ),
+                  Expanded(
+                    child: _DayMetric(value: '$totalMinutes', label: 'min'),
+                  ),
+                  Expanded(
+                    child: _DayMetric(
+                      value: '$sessionCount',
+                      label: 'sesiones',
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -360,8 +374,29 @@ class _AddSessionButton extends StatelessWidget {
   }
 }
 
+class _ReadingDayEmptyState extends StatelessWidget {
+  const _ReadingDayEmptyState({required this.onRegister});
+
+  final VoidCallback onRegister;
+
+  @override
+  Widget build(BuildContext context) {
+    return ReadPpEmptyState(
+      icon: AppIcons.time,
+      title: 'Este día aún está en blanco',
+      description:
+          'Registra una lectura para que tus páginas, minutos y notas aparezcan en el calendario.',
+      actionLabel: 'Registrar lectura',
+      onAction: onRegister,
+    );
+  }
+}
+
+// ignore: unused_element
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  const _EmptyState({required this.onRegister});
+
+  final VoidCallback onRegister;
 
   @override
   Widget build(BuildContext context) {

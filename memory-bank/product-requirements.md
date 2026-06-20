@@ -8,6 +8,8 @@
 
 App Flutter mobile-first para seguimiento personal de lectura. Permite registrar libros, sesiones de lectura, visualizar actividad en calendario, consultar estadisticas e insights de lectura.
 
+Estado actual tras Hito 6 Sprint 18.x: Alpha Testing & Polish, con Android QA, consistencia UX/UI, busqueda multi-fuente, deduplicacion y preparacion Beta como foco.
+
 ## Problema
 
 Una persona lectora puede tener varios libros pendientes, en curso o completados, y necesita una forma simple de registrar progreso y habitos de lectura por dia.
@@ -25,6 +27,11 @@ Una persona lectora puede tener varios libros pendientes, en curso o completados
 - Listado de libros.
 - Filtro por estado.
 - Alta desde busqueda en Open Library.
+- Alta desde busqueda remota mediante `BookSearchRepository`, con Open Library como proveedor primario y Google Books como fallback.
+- Alta manual como fallback cuando no hay resultados o falla la busqueda remota.
+- Escaneo ISBN opcional como ayuda para completar datos.
+- Portada local opcional guardada solo en el dispositivo.
+- Deduplicacion antes de guardar por ISBN, `externalSource + externalId` y titulo+autor normalizados.
 - Detalle de libro.
 - Cambio de estado: `pending`, `reading`, `completed`, `paused`, `abandoned`.
 - Eliminacion de libros.
@@ -43,6 +50,8 @@ Una persona lectora puede tener varios libros pendientes, en curso o completados
 - Vista semanal tipo agenda.
 - Navegacion por mes/semana.
 - Detalle de dia con total de minutos y sesiones.
+- Dias con actividad muestran portadas pequenas y contador `+N` cuando hay mas de 3 libros.
+- Seleccionar un dia muestra sesiones de ese dia y se refresca tras crear/editar sesiones.
 - Empty states para dias/semanas sin sesiones.
 
 ### Stats
@@ -109,6 +118,17 @@ Una persona lectora puede tener varios libros pendientes, en curso o completados
 - Anadir libro se accede desde FAB.
 - No redisenia Biblioteca, Estadisticas, Insights ni Detalle Libro.
 
+### Alpha QA & Shared Components
+
+- Hito 6 Sprint 18.x implementado.
+- Biblioteca es la referencia visual principal para header, fondo, spacing y jerarquia.
+- Header compartido (`ReadPpPageHeader` / header de pantalla) reutilizable en pantallas principales.
+- Card compartida de lectura actual (`CurrentReadingCard` / card destacada) con diseno burgundy editorial y toda la card clicable.
+- Home soporta multiples lecturas activas con indicador `1 / N` y swipe horizontal.
+- La seleccion de lectura principal se mantiene separada del swipe del carrusel.
+- Reading Challenge usa `Buscar libro` / `Cambiar libro` y puede usar portada de ultimo libro completado.
+- Insights queda como perfil lector con mejores lecturas, autor favorito con portadas y curiosidades.
+
 ## Fuera del MVP actual
 
 - Backend.
@@ -123,7 +143,7 @@ Una persona lectora puede tener varios libros pendientes, en curso o completados
 
 ### Book
 
-Campos principales: `id`, `title`, `author`, `publisher`, `coverUrl`, `isbn`, `firstPublishYear`, `genre`, `language`, `status`, `totalPages`, `currentPage`, `rating`, `notes`, `startDate`, `completedDate`, `createdAt`, `updatedAt`.
+Campos principales: `id`, `title`, `author`, `publisher`, `coverUrl`, `isbn`, `externalSource`, `externalId`, `firstPublishYear`, `genre`, `language`, `status`, `totalPages`, `currentPage`, `rating`, `notes`, `startDate`, `completedDate`, `createdAt`, `updatedAt`.
 
 ### ReadingSession
 
@@ -148,6 +168,9 @@ Relaciones:
 ## Criterios de aceptacion actuales
 
 - Se puede buscar y guardar un libro desde Open Library.
+- Si Open Library falla o no devuelve resultados, se consulta Google Books antes de ofrecer alta manual.
+- Si un libro ya existe, no se crea duplicado y se informa con `Este libro ya esta en tu biblioteca.`.
+- Se puede crear libro manual como fallback, con ISBN y portada opcionales.
 - Se puede cambiar estado y eliminar libros.
 - Se puede registrar una sesion para libros en lectura.
 - El calendario refleja sesiones guardadas.

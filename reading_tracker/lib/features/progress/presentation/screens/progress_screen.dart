@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
@@ -474,7 +473,7 @@ class _ProgressHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppBrandHeader(
+        ReadPpPageHeader(
           readerProfile: readerProfile,
           onTap: () {
             Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
@@ -732,13 +731,11 @@ class _HeroMetric extends StatelessWidget {
           child: Text(
             value,
             maxLines: 1,
-            style: GoogleFonts.cormorantGaramond(
-              textStyle: theme.textTheme.headlineSmall?.copyWith(
-                color: theme.colorScheme.onPrimary,
-                fontSize: 40,
-                fontWeight: FontWeight.w800,
-                height: 0.92,
-              ),
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.onPrimary,
+              fontSize: 40,
+              fontWeight: FontWeight.w900,
+              height: 0.92,
             ),
           ),
         ),
@@ -791,13 +788,11 @@ class _ReadingChallengeCard extends StatelessWidget {
                   children: [
                     Text(
                       'Objetivo del reto',
-                      style: GoogleFonts.cormorantGaramond(
-                        textStyle: theme.textTheme.headlineSmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontSize: 28,
-                          fontWeight: FontWeight.w700,
-                          height: 1,
-                        ),
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        height: 1,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
@@ -986,7 +981,12 @@ class _ReadingActivityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final recent = [...sessions]..sort((a, b) => b.date.compareTo(a.date));
+    final recent = [...sessions]
+      ..sort((a, b) {
+        final byDate = b.date.compareTo(a.date);
+        if (byDate != 0) return byDate;
+        return b.createdAt.compareTo(a.createdAt);
+      });
 
     return _EditorialSurface(
       child: Column(
@@ -994,13 +994,11 @@ class _ReadingActivityCard extends StatelessWidget {
         children: [
           Text(
             'Actividad lectora',
-            style: GoogleFonts.cormorantGaramond(
-              textStyle: theme.textTheme.headlineSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-                height: 1,
-              ),
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.primary,
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              height: 1,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -1174,13 +1172,11 @@ class _QuickAccessSection extends StatelessWidget {
       children: [
         Text(
           'Accesos rápidos',
-          style: GoogleFonts.cormorantGaramond(
-            textStyle: theme.textTheme.headlineSmall?.copyWith(
-              color: theme.colorScheme.primary,
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              height: 1,
-            ),
+          style: theme.textTheme.headlineSmall?.copyWith(
+            color: theme.colorScheme.primary,
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+            height: 1,
           ),
         ),
         const SizedBox(height: AppSpacing.md),

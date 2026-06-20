@@ -2,6 +2,58 @@
 
 ## Foco actual
 
+Hito 6: Alpha Testing & Polish.
+
+ReadPp entro en fase Alpha QA. El foco vigente ya no es feature development general, sino estabilizacion Android, consistencia UX/UI, robustez de busqueda y preparacion Beta.
+
+Sprint 18.x completado hasta Sprint 18.17:
+
+- Home Android QA: multiples lecturas activas, carrusel completo, indicador `1 / N` y seleccion de lectura principal separada conceptualmente del swipe.
+- Calendar / Reading Journal QA: seleccion de dia, refresco de sesiones, detalle del dia y seleccion de sesion dentro del diario.
+- Android layout fixes: overflows corregidos en tarjeta de lectura actual y edicion de sesiones con titulos largos.
+- UX cleanup: eliminadas acciones duplicadas donde correspondia y simplificado el flujo Calendario -> Diario -> Crear/Editar sesion.
+- Visual polish: Biblioteca queda como fuente de verdad visual; Home y pantallas principales se alinean con ella.
+- Shared Header: `ReadPpPageHeader` / header compartido basado en Biblioteca.
+- Shared Current Reading Card: card burgundy editorial, sin CTA interno, toda la card clicable.
+- Reading Challenge polish: copy `Buscar libro`, portada por ultimo libro completado y seleccion de portada desde libros del usuario.
+- Insights polish: `Tu perfil lector`, autor favorito con libros/portadas y secciones `Mejores lecturas` / `Curiosidades`.
+- Book Search Reliability: busqueda robusta, errores diferenciados, retry/timeout y fallback manual.
+- Duplicate Protection: `BookDuplicateMatcher` centraliza deduplicacion por ISBN, proveedor+externalId y titulo+autor normalizados.
+- Persistencia de IDs externos: `externalSource` / `externalId` persistidos en Drift con migracion segura.
+- Manual Book Entry / ISBN Scanner / Local Cover: alta manual como fallback, escaneo ISBN, portada local opcional y render de `file://`.
+- Multi-Source Book Search: `BookSearchRepository` coordina Open Library como proveedor primario y Google Books como fallback secundario.
+
+Validacion vigente Sprint 18.17:
+
+- `flutter analyze` OK.
+- `flutter test` OK, 55/55 tests passed.
+
+Limitaciones conocidas vigentes:
+
+- La prueba manual completa de escaneo ISBN y portada local requiere dispositivo/emulador con camara/galeria operativas.
+- El flujo Android compila y arranca cuando `JAVA_HOME` apunta al JBR de Android Studio.
+- Google Books no usa API key en esta fase; queda como proveedor publico secundario.
+- Los logs de proveedor/fallback son solo debug y no deben mostrarse al usuario final.
+
+Roadmap inmediato:
+
+- Sprint 19.1 Motion & Delight implementado como primera capa de experiencia premium calmada: confeti breve al completar libro, transiciones suaves, microinteracciones, skeletons y empty states animados.
+- Sprint 19.2 Premium Statistics implementado: ring del reto lector, donut de estados, distribucion de generos, tiempo semanal y paginas por mes con visualizaciones editoriales ReadPp.
+- Sprint 19.3 Empty States & First Run implementado: `ReadPpEmptyState`, Biblioteca vacia, Calendario/Diario vacio, Estadisticas vacias, Insights vacios y Reto lector sin configurar.
+- Continuar Alpha QA Android/Web/Desktop.
+- Preparar Beta Readiness: APK/AAB, store assets, privacy policy publica y QA de release.
+- Hito 7 queda orientado a Premium Experience: motion, microinteracciones, skeleton loaders, empty states y estadisticas visuales premium.
+
+Design Decisions - Do Not Regress:
+
+- Biblioteca es la referencia visual principal.
+- La card de lectura actual es clicable completa y no tiene boton interno `Ver lectura`.
+- Space Grotesk se usa para titulos; Roboto se usa para cuerpo/UI.
+- Reading Challenge usa `Buscar libro` / `Cambiar libro`, nunca `Buscar portada`.
+- En Calendario los dias son clicables y no debe mostrarse el CTA `Abrir calendario`.
+
+## Contexto historico reciente
+
 Hito 5: UX/UI Premium Redesign.
 
 Sprint 13 completado: Release Candidate & Store Readiness.
@@ -406,6 +458,52 @@ El sistema visual base ahora incluye:
 ## Validaciones
 
 El usuario ejecuta las validaciones en su terminal de VS Code. No ejecutarlas desde Codex salvo que lo pida explicitamente.
+
+Actualizacion Hito 7 Sprint 19.4:
+
+- Codex ejecuto `dart format lib test` por peticion de continuidad del sprint.
+- Codex ejecuto `flutter analyze`: OK, sin issues.
+- Codex ejecuto `flutter test`: OK, 55/55 tests.
+
+## Hito 7 Sprint 19.4 - Design System Consolidation
+
+- Consolidado `ReadPpSurface` como superficie editorial compartida.
+- `ReadPpPageHeader` queda aplicado en pantallas principales; `AppBrandHeader` se conserva como base interna del componente compartido.
+- `MetricCard`, `ReadPpEmptyState`, `CurrentReadingCard` y hero de Settings quedan alineados con tokens/tema compartidos.
+- Pantallas principales dejan de usar Cormorant/GoogleFonts directo para titulos y datos destacados.
+- Space Grotesk via `Theme.textTheme` queda como fuente de titulos; Roboto via tema queda para cuerpo/UI.
+
+## Hito 7 Sprint 19.5 - Reading Experience Polish
+
+- `CurrentReadingCard` diferencia `LECTURA PRINCIPAL` y `LECTURA EN CURSO` mediante `isPrimaryReading`.
+- Swipe y PageView no escriben la preferencia de lectura principal; el selector explicito sigue siendo la unica accion que la cambia.
+- La card muestra porcentaje, paginas actuales/totales y paginas restantes; la portada se ajusta a la altura disponible.
+- `Otras lecturas` abre el flujo de progreso del libro seleccionado sin cambiar la principal.
+- El detalle de libro muestra `Historial de progreso`, orden reciente estable, badge `Ultimo avance` y nota de sesion cuando existe.
+- Relecturas quedan documentadas como futura entidad de ciclo separada, sin cambios actuales en `Book` o Drift.
+- Validacion ejecutada: `dart format lib test` OK, `dart analyze lib test` OK y `git diff --check` OK.
+- `flutter analyze` y `flutter test` no completaron porque el SDK local quedo esperando antes de crear proceso/salida; repetir en una terminal Flutter funcional.
+
+## Hito 7 Sprint 19.6 - Insights Premium
+
+- `ReadingInsightRatedBook` incorpora autor, `coverUrl` y review/notas.
+- `Mejores lecturas` usa carrusel horizontal de cards con portada protagonista, rating y review opcional.
+- Autor favorito conserva nombre y todos los libros leidos con portadas en lista horizontal.
+- `Curiosidades` incorpora libro mas corto y ritmo medio por dia activo.
+- `BookCoverImage` es la implementacion compartida para portadas en Insights.
+- Validacion intermedia: `dart format lib test` y `dart analyze lib test` OK.
+
+## Hito 7 Sprint 19.7 - Accessibility & Responsiveness
+
+- Rutas `/home`, `/books`, `/progress`, `/insights` y `/settings` mantienen navbar mediante `MainNavigationScreen` e indice inicial.
+- Navbar anuncia label, rol y estado seleccionado y adapta altura al escalado de texto.
+- `BookCoverImage` soporta `semanticLabel` opcional.
+- `CurrentReadingCard` anuncia principal/en curso y accion; adapta altura desde Home al text scale.
+- Dias de calendario anuncian fecha, sesiones, paginas y minutos; controles de periodo y alta tienen tooltip y target ampliado.
+- Card principal del diario anuncia libro, metricas y accion de apertura.
+- Insights usa metricas responsive, cards horizontales adaptativas y alturas sensibles a fuente grande.
+- Validacion final: `dart format lib test`, `dart analyze lib test` y `git diff --check` OK.
+- `flutter analyze` y `flutter test` fueron intentados, quedaron bloqueados antes de crear proceso/salida y se cerraron; no asumirlos validados.
 
 Estado confirmado para Hito 5 Sprint 13:
 

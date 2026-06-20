@@ -74,13 +74,16 @@ class _MainBottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final navigationHeight =
+        82.0 + ((textScale - 1).clamp(0.0, 1.0).toDouble() * 22);
 
     return SafeArea(
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(18, 0, 18, 14),
         child: Container(
-          height: 82,
+          height: navigationHeight,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
             color: theme.colorScheme.surface.withValues(alpha: 0.96),
@@ -165,39 +168,47 @@ class _NavItem extends StatelessWidget {
         : theme.colorScheme.secondary.withValues(alpha: 0.78);
 
     return Expanded(
-      child: InkResponse(
-        radius: 28,
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: AppMotion.fast,
-          curve: AppMotion.standard,
-          padding: const EdgeInsets.symmetric(vertical: 5),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isSelected)
-                Container(
-                  width: 4,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 5),
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
+      child: Semantics(
+        button: true,
+        selected: isSelected,
+        label: label,
+        child: ExcludeSemantics(
+          child: InkResponse(
+            radius: 28,
+            onTap: onTap,
+            child: AnimatedContainer(
+              duration: AppMotion.fast,
+              curve: AppMotion.standard,
+              constraints: const BoxConstraints(minHeight: 56),
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isSelected)
+                    Container(
+                      width: 4,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 5),
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                    )
+                  else
+                    const SizedBox(height: 9),
+                  Icon(icon, color: color, size: 23),
+                  const SizedBox(height: 4),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      style: theme.textTheme.labelSmall?.copyWith(color: color),
+                    ),
                   ),
-                )
-              else
-                const SizedBox(height: 9),
-              Icon(icon, color: color, size: 23),
-              const SizedBox(height: 4),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  style: theme.textTheme.labelSmall?.copyWith(color: color),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
