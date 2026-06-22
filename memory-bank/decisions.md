@@ -363,3 +363,13 @@
 - Alturas sensibles de navbar, Current Reading e Insights deben responder al escalado de texto.
 - Grupos de metricas deben usar Wrap/columnas adaptativas cuando tres elementos no quepan con legibilidad.
 - No introducir cambios de negocio para resolver accesibilidad o responsive.
+
+## Release gate posterior a Sprint 19
+
+- Una suite roja bloquea cualquier declaracion de Sprint 19 como listo para release, aunque `flutter analyze` este limpio.
+- La semantica accesible debe validarse con tests y TalkBack; no basta con anadir un widget `Semantics` si el nodo final fusiona labels de forma distinta.
+- La navbar de tabs debe vivir en un unico shell. La correccion futura debe evitar `Navigator.pushNamed` hacia rutas que construyen otro `MainNavigationScreen` cuando el destino es solo otro tab.
+- Las visualizaciones con `CustomPaint` deben tener un resumen textual/semantico equivalente.
+- Datos y copy de una grafica deben compartir la misma unidad; `Paginas por mes` no puede resumirse con minutos.
+- Antes de crear el tag `v0.2.0-alpha`, decidir si se cambia `pubspec.yaml` desde `1.0.0+1` o si se mantiene la linea de versionado 1.0.
+- El commit `9af2843` mezcla Motion & Delight con Google Books; futuras entregas deben separar commits por sprint para mejorar trazabilidad.

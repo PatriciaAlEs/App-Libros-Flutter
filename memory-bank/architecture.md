@@ -331,6 +331,13 @@ reading_tracker/lib/
 - Responsive debe resolverse en presentacion mediante `LayoutBuilder`, `Wrap`, constraints y `MediaQuery.textScalerOf`, sin contaminar dominio o persistencia.
 - La informacion comunicada por color debe tener equivalente textual o semantico.
 
+### Hallazgos arquitectonicos revision Sprint 19
+
+- `MainNavigationScreen` debe ser un shell unico por flujo principal; navegar entre tabs requiere coordinacion de indice, no apilar nuevas instancias del shell.
+- `CurrentReadingCard` contiene una accion de apertura de card y otra accion interna de cambio de principal; su arbol semantico debe conservar ambas acciones como nodos distinguibles.
+- Charts dibujados con `CustomPainter` necesitan un wrapper `Semantics` o resumen accesible con total, categorias y valores.
+- Los calculos de series temporales deben exponer copy derivado de la misma serie/unidad para evitar divergencias entre grafica y subtitulo.
+
 ## Mantenimiento continuo
 
 Al actualizar esta documentacion:

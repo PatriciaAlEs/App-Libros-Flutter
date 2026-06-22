@@ -505,6 +505,23 @@ Actualizacion Hito 7 Sprint 19.4:
 - Validacion final: `dart format lib test`, `dart analyze lib test` y `git diff --check` OK.
 - `flutter analyze` y `flutter test` fueron intentados, quedaron bloqueados antes de crear proceso/salida y se cerraron; no asumirlos validados.
 
+## Revision tecnica Sprint 19 - 2026-06-22
+
+- Rango Git revisado: `57a8e2c..HEAD` (`9af2843` y `d71d452`).
+- El worktree estaba limpio durante la revision.
+- Validacion vigente: `dart format --output=none --set-exit-if-changed lib test` OK.
+- Validacion vigente: `dart analyze lib test` OK y `flutter analyze --no-pub` OK, sin issues.
+- `flutter test --no-pub` completa la suite pero queda roja: 54 tests pasan y 1 falla.
+- Fallo actual: `home swipes between multiple active readings` no encuentra la etiqueta semantica exacta `Lectura principal: Lectura principal`.
+- Bloqueante P1: alinear la semantica real de `CurrentReadingCard` con el test y TalkBack; el nodo puede estar fusionando label y textos hijos.
+- Riesgo P1: rutas internas de tabs crean nuevos `MainNavigationScreen` mediante `Navigator.pushNamed`, pudiendo apilar shells/navbar y producir Back/estado de tabs confuso.
+- Riesgo P2: la card `Paginas por mes` usa barras de paginas pero subtitulo calculado desde minutos.
+- Riesgo P2: progress ring y donut de Estadisticas usan `CustomPaint` sin resumen semantico explicito.
+- Deuda P3: permanecen widgets legacy marcados con `unused_element`, especialmente en Insights, Stats, Home y estados vacios.
+- QA manual pendiente: Android pequeno/grande, Web/Desktop, TalkBack, navegacion Back, 4+ lecturas, finalizacion/confeti y graficas.
+- Estado de release: Sprint 19 implementado pero no listo para etiquetar/publicar hasta resolver test y bloqueantes P1.
+- Versionado pendiente: `pubspec.yaml` declara `1.0.0+1`; confirmar antes de proponer/taggear `v0.2.0-alpha`.
+
 Estado confirmado para Hito 5 Sprint 13:
 
 - `flutter analyze` OK.

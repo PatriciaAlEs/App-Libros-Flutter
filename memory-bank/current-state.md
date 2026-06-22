@@ -469,6 +469,18 @@ Estado confirmado por el usuario:
 - Responsive actual: alturas sensibles al text scale, metricas de Insights en Wrap y cards premium horizontales con ancho adaptable.
 - Validacion final disponible: format, `dart analyze` y `git diff --check` OK; `flutter analyze/test` pendientes por bloqueo del SDK local.
 
+## Estado vigente tras revision Sprint 19
+
+- Fecha de revision: 2026-06-22.
+- Sprint 19.1-19.7 permanece implementado en `master` y sincronizado con `origin/master`.
+- `dart format` OK, `dart analyze` OK y `flutter analyze` OK.
+- Suite actual: 54/55 tests; falla el test de semantica del carrusel de lecturas activas.
+- ReadPp no debe considerarse release-ready mientras la suite este roja.
+- Bloqueantes: semantica de `CurrentReadingCard` y revision del apilado de `MainNavigationScreen` en rutas internas.
+- Riesgos no bloqueantes: subtitulo incorrecto en Paginas por mes, graficas sin resumen semantico y widgets legacy sin eliminar.
+- Validacion visual final de Sprint 19.5-19.7 sigue pendiente en Android, Web/Desktop y TalkBack.
+- Version declarada actual: `1.0.0+1`; `v0.2.0-alpha` es solo una propuesta hasta resolver estrategia de versionado.
+
 ## Estadisticas MVP
 
 Estado actual implementado:

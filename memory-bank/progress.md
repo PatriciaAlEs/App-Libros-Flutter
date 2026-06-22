@@ -338,6 +338,19 @@
 - Validacion final 19.6-19.7: `dart format lib test` OK, `dart analyze lib test` OK y `git diff --check` OK.
 - Limitacion de validacion final: `flutter analyze` y `flutter test` volvieron a quedar esperando antes de crear proceso o producir salida; se cerraron ambas sesiones y no se consideran validados.
 
+### Revision posterior Sprint 19 - 2026-06-22
+
+- Se revisaron los commits `9af2843` y `d71d452` sobre el rango `57a8e2c..HEAD`.
+- El rango contiene 44 archivos modificados, 3818 inserciones y 886 eliminaciones.
+- Nota de trazabilidad: los commits mezclan cambios de Sprint 18.17/Google Books con Sprint 19; no atribuir busqueda multi-source exclusivamente a Hito 7.
+- Format actual: OK, 115 archivos sin cambios requeridos.
+- `dart analyze lib test`: OK.
+- `flutter analyze --no-pub`: OK, sin issues.
+- `flutter test --no-pub`: FAIL; 54 tests pasan y 1 falla en la semantica de `CurrentReadingCard` dentro del test de cuatro lecturas.
+- Sprint 19 queda funcionalmente implementado pero con release gate abierto.
+- Prioridad inmediata: corregir test/semantica, revisar navegacion entre tabs sin apilar shells y repetir suite completa.
+- Segunda prioridad: corregir subtitulo de Paginas por mes, anadir semantica a graficas y retirar widgets legacy.
+
 ## Parcial / en seguimiento
 
 - Estado vigente tras Branding Final: ReadPp v1.0 RC Complete.
