@@ -116,12 +116,19 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final booksAsync = ref.watch(booksProvider);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(_isEditing ? 'Editar sesión' : 'Registrar lectura'),
+        title: Text(
+          _isEditing ? 'Editar sesión' : 'Registrar lectura',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         actions: [
           IconButton(
             tooltip: 'Guardar',

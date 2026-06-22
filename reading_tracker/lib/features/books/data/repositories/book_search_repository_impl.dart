@@ -17,11 +17,15 @@ class BookSearchRepositoryImpl implements BookSearchRepository {
 
   @override
   Future<List<BookSearchResult>> searchBooks(String query) async {
+    var primaryResponded = false;
+    BookSearchException? primaryError;
+
     try {
       _log('Searching primary provider: Open Library');
       final openLibraryResults = await _openLibraryDatasource.searchBooks(
         query,
       );
+      primaryResponded = true;
       _log('Open Library returned ${openLibraryResults.length} results');
       if (openLibraryResults.isNotEmpty) {
         _log('Using Open Library results');
@@ -29,13 +33,27 @@ class BookSearchRepositoryImpl implements BookSearchRepository {
       }
       _log('Fallback activated: Open Library returned no results');
     } on BookSearchException catch (error) {
+      primaryError = error;
       _log('Fallback activated: Open Library failed with ${error.kind}');
     }
 
-    _log('Searching secondary provider: Google Books');
-    final googleBooksResults = await _googleBooksDatasource.searchBooks(query);
-    _log('Google Books returned ${googleBooksResults.length} results');
-    return googleBooksResults;
+    try {
+      _log('Searching secondary provider: Google Books');
+      final googleBooksResults = await _googleBooksDatasource.searchBooks(
+        query,
+      );
+      _log('Google Books returned ${googleBooksResults.length} results');
+      return googleBooksResults;
+    } on BookSearchException catch (error) {
+      if (primaryResponded) {
+        _log(
+          'Secondary provider failed after primary returned no results; '
+          'keeping no-results outcome',
+        );
+        return const [];
+      }
+      throw primaryError ?? error;
+    }
   }
 
   void _log(String message) {

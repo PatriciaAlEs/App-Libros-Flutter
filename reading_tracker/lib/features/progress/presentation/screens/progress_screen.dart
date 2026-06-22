@@ -662,7 +662,7 @@ class _ProgressHero extends StatelessWidget {
               ),
               Expanded(
                 child: _HeroMetric(
-                  value: _formatMinutes(totalMinutes),
+                  value: _compactNumber(totalMinutes),
                   label: 'minutos',
                 ),
               ),
@@ -1373,12 +1373,6 @@ String _compactNumber(int value) {
     return '${compact.toStringAsFixed(compact >= 10 ? 0 : 1)}k';
   }
   return '$value';
-}
-
-String _formatMinutes(int minutes) {
-  if (minutes < 1000) return '$minutes';
-  final compact = minutes / 1000;
-  return '${compact.toStringAsFixed(compact >= 10 ? 0 : 1)}k';
 }
 
 String _humanDate(DateTime date) {

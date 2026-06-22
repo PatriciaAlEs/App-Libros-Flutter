@@ -1543,8 +1543,8 @@ class _TodayMetric extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      height: 112,
-      padding: const EdgeInsets.fromLTRB(12, 13, 12, 12),
+      height: 96,
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 9),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.90),
         borderRadius: BorderRadius.circular(22),
@@ -1563,7 +1563,7 @@ class _TodayMetric extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, color: theme.colorScheme.primary, size: 23),
+          Icon(icon, color: theme.colorScheme.primary, size: 21),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
@@ -1571,7 +1571,7 @@ class _TodayMetric extends StatelessWidget {
               maxLines: 1,
               style: theme.textTheme.headlineSmall?.copyWith(
                 color: theme.colorScheme.primary,
-                fontSize: 42,
+                fontSize: 36,
                 fontWeight: FontWeight.w900,
                 height: 0.92,
               ),

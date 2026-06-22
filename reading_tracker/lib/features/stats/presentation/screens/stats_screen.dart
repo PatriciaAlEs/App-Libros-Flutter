@@ -358,7 +358,7 @@ class _StatsHero extends StatelessWidget {
     final year = DateTime.now().year;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
+      padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -384,13 +384,13 @@ class _StatsHero extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'PULSO LECTOR',
+            'RESUMEN LECTOR',
             style: theme.textTheme.labelSmall?.copyWith(
               color: accent.withValues(alpha: 0.96),
               letterSpacing: 2.6,
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
           Row(
             children: [
               Expanded(
@@ -413,10 +413,13 @@ class _StatsHero extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(20),
@@ -457,17 +460,17 @@ class _HeroMetric extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         FittedBox(
           fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
+          alignment: Alignment.center,
           child: Text(
             value,
             maxLines: 1,
             style: theme.textTheme.headlineSmall?.copyWith(
               color: theme.colorScheme.onPrimary,
-              fontSize: 40,
+              fontSize: 36,
               fontWeight: FontWeight.w900,
               height: 0.92,
             ),
@@ -476,6 +479,8 @@ class _HeroMetric extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
+          maxLines: 2,
+          textAlign: TextAlign.center,
           style: theme.textTheme.labelSmall?.copyWith(
             color: theme.colorScheme.onPrimary.withValues(alpha: 0.74),
           ),
@@ -527,7 +532,7 @@ class _AnnualGoalSection extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.90),
         borderRadius: BorderRadius.circular(28),
@@ -590,7 +595,7 @@ class _AnnualGoalSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
           Wrap(
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.sm,
@@ -607,7 +612,7 @@ class _AnnualGoalSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
             child: LinearProgressIndicator(
@@ -621,8 +626,8 @@ class _AnnualGoalSection extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.md,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
               _GoalMetric(label: 'Avance', value: hasGoal ? '$percent%' : '-'),
               _GoalMetric(label: 'Completados', value: '$completedThisYear'),
@@ -640,7 +645,7 @@ class _AnnualGoalSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             _subtitle,
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -813,9 +818,9 @@ class _GoalMetric extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      width: 132,
-      height: 92,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      width: 116,
+      height: 76,
+      padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(18),
@@ -833,7 +838,7 @@ class _GoalMetric extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: AppSpacing.xs),
+          const SizedBox(height: 2),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
@@ -842,7 +847,7 @@ class _GoalMetric extends StatelessWidget {
               maxLines: 1,
               style: theme.textTheme.headlineSmall?.copyWith(
                 color: theme.colorScheme.primary,
-                fontSize: 28,
+                fontSize: 25,
                 fontWeight: FontWeight.w900,
                 height: 0.95,
               ),
@@ -1336,8 +1341,8 @@ class _DonutDistributionCard extends StatelessWidget {
                 child: Row(
                   children: [
                     SizedBox(
-                      width: 132,
-                      height: 132,
+                      width: 116,
+                      height: 116,
                       child: TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0, end: 1),
                         duration: AppMotion.slow,
@@ -1353,7 +1358,7 @@ class _DonutDistributionCard extends StatelessWidget {
                                 '$total',
                                 style: theme.textTheme.headlineSmall?.copyWith(
                                   color: theme.colorScheme.primary,
-                                  fontSize: 34,
+                                  fontSize: 30,
                                   fontWeight: FontWeight.w900,
                                 ),
                               ),
@@ -1362,7 +1367,7 @@ class _DonutDistributionCard extends StatelessWidget {
                         },
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.lg),
+                    const SizedBox(width: AppSpacing.md),
                     Expanded(child: _ChartLegend(segments: segments)),
                   ],
                 ),
@@ -1400,7 +1405,7 @@ class _ActivityBarCard extends StatelessWidget {
               label: _chartPointsSemanticLabel(title, bars, unit),
               child: ExcludeSemantics(
                 child: SizedBox(
-                  height: 178,
+                  height: 154,
                   child: _BarChart(points: bars, unit: unit),
                 ),
               ),
@@ -1441,7 +1446,7 @@ class _PremiumChartCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(28),
@@ -1455,8 +1460,11 @@ class _PremiumChartCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: theme.textTheme.titleLarge?.copyWith(
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.primary,
+              fontSize: 22,
               fontWeight: FontWeight.w900,
+              height: 1.05,
             ),
           ),
           const SizedBox(height: 4),
@@ -1466,7 +1474,7 @@ class _PremiumChartCard extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
           child,
         ],
       ),

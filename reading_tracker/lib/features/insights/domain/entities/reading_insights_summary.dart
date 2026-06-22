@@ -21,8 +21,10 @@ class ReadingInsightsSummary {
     this.topRatedBookRating,
     this.longestBookTitle,
     this.longestBookPages,
+    this.longestBookCoverUrl,
     this.shortestBookTitle,
     this.shortestBookPages,
+    this.shortestBookCoverUrl,
     this.mostTimeBookTitle,
     this.mostTimeBookMinutes,
     this.mostSessionsBookTitle,
@@ -64,8 +66,10 @@ class ReadingInsightsSummary {
       topRatedBookRating = null,
       longestBookTitle = null,
       longestBookPages = null,
+      longestBookCoverUrl = null,
       shortestBookTitle = null,
       shortestBookPages = null,
+      shortestBookCoverUrl = null,
       mostTimeBookTitle = null,
       mostTimeBookMinutes = null,
       mostSessionsBookTitle = null,
@@ -105,8 +109,10 @@ class ReadingInsightsSummary {
   final double? topRatedBookRating;
   final String? longestBookTitle;
   final int? longestBookPages;
+  final String? longestBookCoverUrl;
   final String? shortestBookTitle;
   final int? shortestBookPages;
+  final String? shortestBookCoverUrl;
   final String? mostTimeBookTitle;
   final int? mostTimeBookMinutes;
   final String? mostSessionsBookTitle;

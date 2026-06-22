@@ -258,6 +258,7 @@ void main() {
         Book(
           id: 'book-2',
           title: 'Longest Book',
+          coverUrl: 'https://example.com/longest.jpg',
           createdAt: today,
           status: BookStatus.completed,
           totalPages: 450,
@@ -319,8 +320,10 @@ void main() {
     expect(summary.topRatedBooks.first.review, 'Una lectura inolvidable.');
     expect(summary.longestBookTitle, 'Longest Book');
     expect(summary.longestBookPages, 450);
+    expect(summary.longestBookCoverUrl, 'https://example.com/longest.jpg');
     expect(summary.shortestBookTitle, 'Best Rated');
     expect(summary.shortestBookPages, 200);
+    expect(summary.shortestBookCoverUrl, 'https://example.com/best-rated.jpg');
     expect(summary.mostTimeBookTitle, 'Most Time');
     expect(summary.mostTimeBookMinutes, 150);
     expect(summary.mostSessionsBookTitle, 'Most Sessions');

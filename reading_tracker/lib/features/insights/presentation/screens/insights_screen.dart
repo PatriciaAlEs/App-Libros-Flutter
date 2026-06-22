@@ -83,6 +83,8 @@ class InsightsScreen extends ConsumerWidget {
                         icon: AppIcons.book,
                         title: 'Libro más largo',
                         value: summary.longestBookTitle ?? 'Sin datos',
+                        coverUrl: summary.longestBookCoverUrl,
+                        showBookCover: summary.longestBookTitle != null,
                         subtitle: summary.longestBookPages == null
                             ? 'Sin libros completados con páginas'
                             : '${summary.longestBookPages} pag.',
@@ -91,6 +93,8 @@ class InsightsScreen extends ConsumerWidget {
                         icon: AppIcons.bookmark,
                         title: 'Libro más corto',
                         value: summary.shortestBookTitle ?? 'Sin datos',
+                        coverUrl: summary.shortestBookCoverUrl,
+                        showBookCover: summary.shortestBookTitle != null,
                         subtitle: summary.shortestBookPages == null
                             ? 'Sin libros completados con páginas'
                             : '${summary.shortestBookPages} pág.',
@@ -184,7 +188,7 @@ class _InsightsHero extends StatelessWidget {
         : 'Cada sesión empieza a dibujar tu mapa lector';
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 26, 24, 24),
+      padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -233,9 +237,9 @@ class _InsightsHero extends StatelessWidget {
               height: 1.35,
             ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.lg),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(22),
@@ -253,9 +257,9 @@ class _InsightsHero extends StatelessWidget {
                         headline,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleLarge?.copyWith(
+                        style: theme.textTheme.headlineSmall?.copyWith(
                           color: Colors.white,
-                          fontSize: 27,
+                          fontSize: 25,
                           fontWeight: FontWeight.w800,
                           height: 1.05,
                         ),
@@ -504,7 +508,7 @@ class _MetricPill extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(22),
@@ -517,7 +521,7 @@ class _MetricPill extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, color: theme.colorScheme.primary, size: 20),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.xs),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
@@ -526,7 +530,7 @@ class _MetricPill extends StatelessWidget {
               maxLines: 1,
               style: theme.textTheme.headlineSmall?.copyWith(
                 color: theme.colorScheme.primary,
-                fontSize: 32,
+                fontSize: 28,
                 fontWeight: FontWeight.w900,
                 height: 0.95,
               ),
@@ -606,8 +610,9 @@ class _FavoriteAuthorCard extends StatelessWidget {
                   children: [
                     Text(
                       'Autor favorito',
-                      style: theme.textTheme.titleLarge?.copyWith(
+                      style: theme.textTheme.headlineSmall?.copyWith(
                         color: theme.colorScheme.primary,
+                        fontSize: 22,
                         fontWeight: FontWeight.w900,
                         height: 1,
                       ),
@@ -757,20 +762,24 @@ class _InsightCard extends StatelessWidget {
     required this.title,
     required this.value,
     required this.subtitle,
+    this.coverUrl,
+    this.showBookCover = false,
   });
 
   final IconData icon;
   final String title;
   final String value;
   final String subtitle;
+  final String? coverUrl;
+  final bool showBookCover;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Container(
-      constraints: const BoxConstraints(minHeight: 168),
-      padding: const EdgeInsets.all(16),
+      constraints: BoxConstraints(minHeight: showBookCover ? 116 : 132),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(24),
@@ -779,36 +788,54 @@ class _InsightCard extends StatelessWidget {
         ),
         boxShadow: AppShadows.editorial(theme.colorScheme.primary),
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: theme.colorScheme.primary, size: 23),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w900,
-              height: 1,
+          if (showBookCover) ...[
+            _InsightBookCover(
+              url: coverUrl,
+              width: 54,
+              height: 78,
+              semanticLabel: 'Portada de $value',
             ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            value,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onSurface,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            subtitle,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            const SizedBox(width: AppSpacing.md),
+          ] else ...[
+            Icon(icon, color: theme.colorScheme.primary, size: 22),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    height: 1,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  value,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -841,7 +868,7 @@ class _RatedBooksCard extends StatelessWidget {
       builder: (context, constraints) {
         final textScale = MediaQuery.textScalerOf(context).scale(1);
         final height =
-            276.0 + ((textScale - 1).clamp(0.0, 1.0).toDouble() * 64);
+            198.0 + ((textScale - 1).clamp(0.0, 1.0).toDouble() * 48);
         final itemWidth = (constraints.maxWidth * 0.82)
             .clamp(236.0, 300.0)
             .toDouble();
@@ -904,8 +931,8 @@ class _RatedBookCard extends StatelessWidget {
                   left: -7,
                   top: -7,
                   child: Container(
-                    width: 28,
-                    height: 28,
+                    width: 34,
+                    height: 34,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primary,
@@ -917,7 +944,7 @@ class _RatedBookCard extends StatelessWidget {
                     ),
                     child: Text(
                       '$position',
-                      style: theme.textTheme.labelSmall?.copyWith(
+                      style: theme.textTheme.labelMedium?.copyWith(
                         color: theme.colorScheme.onPrimary,
                         fontWeight: FontWeight.w900,
                       ),
@@ -935,8 +962,9 @@ class _RatedBookCard extends StatelessWidget {
                     book.title,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium?.copyWith(
+                    style: theme.textTheme.headlineSmall?.copyWith(
                       color: theme.colorScheme.primary,
+                      fontSize: 21,
                       fontWeight: FontWeight.w900,
                       height: 1.08,
                     ),
@@ -977,7 +1005,7 @@ class _RatedBookCard extends StatelessWidget {
                     const SizedBox(height: AppSpacing.sm),
                     Text(
                       review!,
-                      maxLines: 4,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,

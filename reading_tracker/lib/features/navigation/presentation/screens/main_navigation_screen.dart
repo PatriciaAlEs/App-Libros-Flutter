@@ -1,54 +1,142 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/design_system/design_system.dart';
+import '../../../books/presentation/screens/book_detail_screen.dart';
+import '../../../books/presentation/screens/book_form_screen.dart';
 import '../../../books/presentation/screens/books_list_screen.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../insights/presentation/screens/insights_screen.dart';
 import '../../../progress/presentation/screens/progress_screen.dart';
+import '../../../reading_sessions/domain/entities/reading_session.dart';
+import '../../../reading_sessions/presentation/screens/calendar_screen.dart';
+import '../../../reading_sessions/presentation/screens/day_detail_screen.dart';
+import '../../../reading_sessions/presentation/screens/session_form_screen.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
+import '../../../stats/presentation/screens/stats_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({super.key, this.initialIndex = 0});
+  const MainNavigationScreen({
+    super.key,
+    this.initialIndex = 0,
+    this.initialRoute = '/',
+    this.initialArguments,
+  });
 
   final int initialIndex;
+  final String initialRoute;
+  final Object? initialArguments;
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  late int _selectedIndex;
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  late final ValueNotifier<int> _selectedIndex;
   final List<int> _tabVersions = List.filled(5, 0);
 
   @override
   void initState() {
     super.initState();
-    _selectedIndex = widget.initialIndex.clamp(0, 4);
+    _selectedIndex = ValueNotifier(widget.initialIndex.clamp(0, 4));
+  }
+
+  @override
+  void dispose() {
+    _selectedIndex.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: AppAnimatedPageSwitch(
-        child: KeyedSubtree(
-          key: ValueKey('tab-$_selectedIndex-${_tabVersions[_selectedIndex]}'),
-          child: _screenForIndex(_selectedIndex),
+      body: NavigatorPopHandler(
+        onPopWithResult: (result) => _navigatorKey.currentState?.pop(result),
+        child: Navigator(
+          key: _navigatorKey,
+          initialRoute: widget.initialRoute,
+          onGenerateInitialRoutes: (_, initialRoute) => [
+            _onGenerateRoute(
+              RouteSettings(
+                name: initialRoute,
+                arguments: widget.initialArguments,
+              ),
+            ),
+          ],
+          onGenerateRoute: _onGenerateRoute,
         ),
       ),
-      bottomNavigationBar: _MainBottomNavigation(
-        selectedIndex: _selectedIndex,
-        onSelect: _selectTab,
+      bottomNavigationBar: ValueListenableBuilder<int>(
+        valueListenable: _selectedIndex,
+        builder: (context, selectedIndex, _) => ReadPpBottomNavigation(
+          selectedIndex: selectedIndex,
+          onSelect: _selectTab,
+        ),
       ),
     );
   }
 
   void _selectTab(int index) {
-    if (index == _selectedIndex) return;
-    setState(() {
-      _selectedIndex = index;
-      _tabVersions[index]++;
-    });
+    _navigatorKey.currentState?.popUntil((route) => route.isFirst);
+    if (index == _selectedIndex.value) return;
+    _tabVersions[index]++;
+    _selectedIndex.value = index;
+  }
+
+  Route<dynamic> _onGenerateRoute(RouteSettings settings) {
+    final mainIndex = switch (settings.name) {
+      '/home' => 0,
+      '/books' => 1,
+      '/progress' => 2,
+      '/insights' => 3,
+      '/settings' => 4,
+      _ => null,
+    };
+    if (mainIndex != null) {
+      _selectedIndex.value = mainIndex;
+    }
+
+    final builder = switch (settings.name) {
+      '/' ||
+      '/home' ||
+      '/books' ||
+      '/progress' ||
+      '/insights' ||
+      '/settings' => (_) => _mainTabBody(),
+      '/book/add' => (_) => const BookFormScreen(),
+      '/book/detail' => (_) => BookDetailScreen(
+        bookId: settings.arguments! as String,
+      ),
+      '/calendar' => (_) => const CalendarScreen(),
+      '/calendar/day' => (_) => DayDetailScreen(
+        day: settings.arguments! as DateTime,
+      ),
+      '/session/add' => (_) => SessionFormScreen(
+        initialDate: settings.arguments as DateTime?,
+      ),
+      '/session/edit' => (_) => SessionFormScreen(
+        session: settings.arguments! as ReadingSession,
+      ),
+      '/stats' => (_) => const StatsScreen(),
+      _ => (_) => const Scaffold(
+        body: Center(child: Text('Pantalla no encontrada.')),
+      ),
+    };
+
+    return AppFadeThroughPageRoute(settings: settings, builder: builder);
+  }
+
+  Widget _mainTabBody() {
+    return ValueListenableBuilder<int>(
+      valueListenable: _selectedIndex,
+      builder: (context, selectedIndex, _) => AppAnimatedPageSwitch(
+        child: KeyedSubtree(
+          key: ValueKey('tab-$selectedIndex-${_tabVersions[selectedIndex]}'),
+          child: _screenForIndex(selectedIndex),
+        ),
+      ),
+    );
   }
 
   Widget _screenForIndex(int index) {
@@ -62,13 +150,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 }
 
-class _MainBottomNavigation extends StatelessWidget {
-  const _MainBottomNavigation({
+class ReadPpBottomNavigation extends StatelessWidget {
+  const ReadPpBottomNavigation({
+    super.key,
     required this.selectedIndex,
     required this.onSelect,
   });
 
-  final int selectedIndex;
+  final int? selectedIndex;
   final ValueChanged<int> onSelect;
 
   @override
@@ -180,7 +269,7 @@ class _NavItem extends StatelessWidget {
               duration: AppMotion.fast,
               curve: AppMotion.standard,
               constraints: const BoxConstraints(minHeight: 56),
-              padding: const EdgeInsets.symmetric(vertical: 5),
+              padding: const EdgeInsets.symmetric(vertical: 3),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -188,16 +277,16 @@ class _NavItem extends StatelessWidget {
                     Container(
                       width: 4,
                       height: 4,
-                      margin: const EdgeInsets.only(bottom: 5),
+                      margin: const EdgeInsets.only(bottom: 3),
                       decoration: BoxDecoration(
                         color: color,
                         shape: BoxShape.circle,
                       ),
                     )
                   else
-                    const SizedBox(height: 9),
-                  Icon(icon, color: color, size: 23),
-                  const SizedBox(height: 4),
+                    const SizedBox(height: 7),
+                  Icon(icon, color: color, size: 22),
+                  const SizedBox(height: 2),
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(

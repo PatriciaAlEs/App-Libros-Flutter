@@ -315,7 +315,8 @@ void main() {
       220,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(dayCell);
+    final visibleCellPoint = tester.getTopLeft(dayCell) + const Offset(10, 10);
+    await tester.tapAt(visibleCellPoint);
     await tester.pumpAndSettle();
 
     expect(openedDay, selectedDay);

@@ -8,6 +8,7 @@ import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:reading_tracker/features/books/data/datasources/book_api_datasource.dart';
+import 'package:reading_tracker/features/books/data/datasources/google_books_datasource.dart';
 import 'package:reading_tracker/features/books/data/repositories/book_repository_provider.dart';
 import 'package:reading_tracker/features/books/domain/entities/book.dart';
 import 'package:reading_tracker/features/books/domain/enums/book_status.dart';
@@ -15,6 +16,7 @@ import 'package:reading_tracker/features/books/domain/repositories/book_reposito
 import 'package:reading_tracker/features/books/presentation/screens/book_form_screen.dart';
 import 'package:reading_tracker/features/books/presentation/screens/books_list_screen.dart';
 import 'package:reading_tracker/features/home/presentation/screens/home_screen.dart';
+import 'package:reading_tracker/features/navigation/presentation/screens/main_navigation_screen.dart';
 import 'package:reading_tracker/features/reading_sessions/data/repositories/reading_session_repository_provider.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/entities/reading_session.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/repositories/reading_session_repository.dart';
@@ -32,6 +34,56 @@ void main() {
     expect(BookStatus.pending.label, 'Pendiente');
     expect(BookStatus.reading.label, 'Leyendo');
     expect(BookStatus.completed.label, 'Completado');
+  });
+
+  testWidgets('shared navbar exposes every main destination', (tester) async {
+    int? selectedIndex;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: ReadPpBottomNavigation(
+            selectedIndex: null,
+            onSelect: (index) => selectedIndex = index,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Inicio'), findsOneWidget);
+    expect(find.text('Biblioteca'), findsOneWidget);
+    expect(find.text('Progreso'), findsOneWidget);
+    expect(find.text('Insights'), findsOneWidget);
+    expect(find.text('Perfil'), findsOneWidget);
+
+    await tester.tap(find.text('Biblioteca'));
+    expect(selectedIndex, 1);
+  });
+
+  testWidgets('main shell keeps navbar while a child route is open', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookRepositoryProvider.overrideWithValue(_EmptyBookRepository()),
+        ],
+        child: const MaterialApp(home: MainNavigationScreen(initialIndex: 1)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final booksContext = tester.element(find.byType(BooksListScreen));
+    Navigator.of(booksContext).pushNamed('/book/add');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Añadir libro'), findsWidgets);
+    expect(find.byType(ReadPpBottomNavigation), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BooksListScreen), findsOneWidget);
+    expect(find.byType(ReadPpBottomNavigation), findsOneWidget);
   });
 
   testWidgets('shows the books screen', (WidgetTester tester) async {
@@ -217,6 +269,11 @@ void main() {
               }),
             ),
           ),
+          googleBooksDatasourceProvider.overrideWithValue(
+            GoogleBooksDatasource(
+              MockClient((request) async => http.Response('Unavailable', 503)),
+            ),
+          ),
         ],
         child: const MaterialApp(home: BookFormScreen()),
       ),
@@ -234,6 +291,11 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
+    expect(
+      find.text('No hemos encontrado resultados para tu búsqueda.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('No hemos podido conectar'), findsNothing);
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -120));
     await tester.pumpAndSettle();
     await tester.tap(manualButton);
@@ -253,6 +315,43 @@ void main() {
     expect(repository.addedBook, isNotNull);
     expect(repository.addedBook!.title, 'Libro sin portada');
     expect(repository.addedBook!.coverUrl, isNull);
+  });
+
+  testWidgets('book form distinguishes provider errors from no results', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookRepositoryProvider.overrideWithValue(_CapturingBookRepository()),
+          bookApiDatasourceProvider.overrideWithValue(
+            BookApiDatasource(
+              MockClient((request) async => http.Response('Unavailable', 503)),
+            ),
+          ),
+          googleBooksDatasourceProvider.overrideWithValue(
+            GoogleBooksDatasource(
+              MockClient((request) async => http.Response('Unavailable', 503)),
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: BookFormScreen()),
+      ),
+    );
+
+    await tester.enterText(_searchField(), 'dsladhflhlhf');
+    await tester.tap(find.byKey(const Key('book_search_button')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('No hemos podido conectar con Open Library.'),
+      findsOneWidget,
+    );
+    expect(find.text('Añadir manualmente'), findsOneWidget);
+    expect(
+      find.text('No hemos encontrado resultados para tu búsqueda.'),
+      findsNothing,
+    );
   });
 
   testWidgets('home swipes between multiple active readings', (tester) async {
@@ -317,6 +416,7 @@ void main() {
     await tester.drag(carousel, const Offset(-500, 0));
     await tester.pumpAndSettle();
 
+    expect(find.text('Registrar avance'), findsNothing);
     expect(find.text('2 / 4'), findsOneWidget);
     expect(find.text('Segunda lectura'), findsWidgets);
     expect(find.text('LECTURA EN CURSO'), findsOneWidget);

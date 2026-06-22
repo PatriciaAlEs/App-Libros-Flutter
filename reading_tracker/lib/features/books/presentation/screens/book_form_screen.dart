@@ -10,7 +10,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/design_system/design_system.dart';
-import '../../data/datasources/book_api_datasource.dart';
 import '../../data/repositories/book_repository_provider.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/entities/book_search_result.dart';
@@ -555,7 +554,15 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(title: const Text('Añadir libro')),
+      appBar: AppBar(
+        title: Text(
+          'Añadir libro',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
       body: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -735,20 +742,10 @@ class _AddBookHero extends StatelessWidget {
   }
 }
 
-String _bookSearchErrorMessage(Object error) {
-  if (error is BookSearchException) {
-    return switch (error.kind) {
-      BookSearchFailureKind.connection => 'Parece que no hay conexión.',
-      BookSearchFailureKind.timeout =>
-        'La búsqueda está tardando más de lo normal. Reintenta.',
-      BookSearchFailureKind.invalidResponse =>
-        'Open Library devolvió una respuesta inesperada. Puedes reintentar o añadirlo manualmente.',
-      BookSearchFailureKind.api =>
-        'Open Library no respondió. Puedes reintentar o añadirlo manualmente.',
-    };
-  }
-
-  return 'Open Library no respondió. Puedes reintentar o añadirlo manualmente.';
+String _bookSearchErrorMessage(Object _) {
+  return 'No hemos podido conectar con Open Library.\n'
+      'Comprueba tu conexión e inténtalo de nuevo.\n'
+      'También puedes añadir el libro manualmente.';
 }
 
 class _FormSection extends StatelessWidget {
@@ -1178,8 +1175,9 @@ class _ResultsList extends StatelessWidget {
       if (!hasSearched) return const SizedBox.shrink();
       return _SearchFeedbackCard(
         icon: AppIcons.book,
-        title: 'No encontramos resultados para esa búsqueda',
-        message: 'Prueba con otro título, autor o ISBN más específico.',
+        title: 'No hemos encontrado resultados para tu búsqueda.',
+        message:
+            'Prueba con otro título, autor o ISBN.\nTambién puedes añadir el libro manualmente.',
         actionLabel: 'Añadir manualmente',
         onAction: onManualAdd,
       );

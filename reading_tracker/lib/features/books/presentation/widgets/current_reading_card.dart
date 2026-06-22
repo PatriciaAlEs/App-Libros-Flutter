@@ -68,7 +68,7 @@ class CurrentReadingCard extends StatelessWidget {
         ),
         child: Material(
           color: Colors.transparent,
-          child: InkWell(
+          child: _HorizontalSwipeSafeInkWell(
             borderRadius: BorderRadius.circular(30),
             onTap: onTap,
             child: Padding(
@@ -145,6 +145,54 @@ class CurrentReadingCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _HorizontalSwipeSafeInkWell extends StatefulWidget {
+  const _HorizontalSwipeSafeInkWell({
+    required this.borderRadius,
+    required this.onTap,
+    required this.child,
+  });
+
+  final BorderRadius borderRadius;
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  State<_HorizontalSwipeSafeInkWell> createState() =>
+      _HorizontalSwipeSafeInkWellState();
+}
+
+class _HorizontalSwipeSafeInkWellState
+    extends State<_HorizontalSwipeSafeInkWell> {
+  static const _dragThreshold = 8.0;
+
+  Offset? _pointerOrigin;
+  bool _wasHorizontalDrag = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: (event) {
+        _pointerOrigin = event.position;
+        _wasHorizontalDrag = false;
+      },
+      onPointerMove: (event) {
+        final origin = _pointerOrigin;
+        if (origin == null) return;
+        if ((event.position.dx - origin.dx).abs() >= _dragThreshold) {
+          _wasHorizontalDrag = true;
+        }
+      },
+      child: InkWell(
+        borderRadius: widget.borderRadius,
+        onTap: () {
+          if (!_wasHorizontalDrag) widget.onTap();
+        },
+        child: widget.child,
       ),
     );
   }

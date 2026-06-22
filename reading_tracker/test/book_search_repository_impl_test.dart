@@ -62,6 +62,42 @@ void main() {
     expect(results.single.title, 'Google result');
     expect(results.single.externalSource, 'google_books');
   });
+
+  test(
+    'keeps no-results outcome when primary is empty and fallback fails',
+    () async {
+      final repository = BookSearchRepositoryImpl(
+        openLibraryDatasource: BookApiDatasource(
+          MockClient(
+            (request) async => http.Response(jsonEncode({'docs': []}), 200),
+          ),
+        ),
+        googleBooksDatasource: GoogleBooksDatasource(
+          MockClient((request) async => http.Response('Unavailable', 503)),
+        ),
+      );
+
+      final results = await repository.searchBooks('dsladhflhlhf');
+
+      expect(results, isEmpty);
+    },
+  );
+
+  test('throws when every provider fails', () async {
+    final repository = BookSearchRepositoryImpl(
+      openLibraryDatasource: BookApiDatasource(
+        MockClient((request) async => http.Response('Unavailable', 503)),
+      ),
+      googleBooksDatasource: GoogleBooksDatasource(
+        MockClient((request) async => http.Response('Unavailable', 503)),
+      ),
+    );
+
+    expect(
+      () => repository.searchBooks('book'),
+      throwsA(isA<BookSearchException>()),
+    );
+  });
 }
 
 http.Response _openLibraryResponse(String title) {
