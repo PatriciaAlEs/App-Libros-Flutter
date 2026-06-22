@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:reading_tracker/core/design_system/design_system.dart';
+import 'package:reading_tracker/core/theme/app_theme.dart';
 import 'package:reading_tracker/features/books/data/datasources/book_api_datasource.dart';
 import 'package:reading_tracker/features/books/data/datasources/google_books_datasource.dart';
 import 'package:reading_tracker/features/books/data/repositories/book_repository_provider.dart';
@@ -34,6 +36,48 @@ void main() {
     expect(BookStatus.pending.label, 'Pendiente');
     expect(BookStatus.reading.label, 'Leyendo');
     expect(BookStatus.completed.label, 'Completado');
+  });
+
+  testWidgets('editorial titles keep the display font family', (tester) async {
+    final theme = AppTheme.light();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Column(
+            children: [
+              const SectionHeader(title: 'Objetivo anual'),
+              Text('Texto funcional', style: theme.textTheme.bodyMedium),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final sectionTitle = tester.widget<Text>(find.text('Objetivo anual'));
+    final bodyText = tester.widget<Text>(find.text('Texto funcional'));
+    expect(
+      sectionTitle.style?.fontFamily,
+      theme.textTheme.headlineSmall?.fontFamily,
+    );
+    expect(bodyText.style?.fontFamily, theme.textTheme.bodyMedium?.fontFamily);
+    expect(sectionTitle.style?.fontFamily, isNot(bodyText.style?.fontFamily));
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookRepositoryProvider.overrideWithValue(_EmptyBookRepository()),
+        ],
+        child: MaterialApp(theme: theme, home: const BookFormScreen()),
+      ),
+    );
+
+    final addBookTitle = tester.widget<Text>(find.text('Añadir libro').first);
+    expect(
+      addBookTitle.style?.fontFamily,
+      theme.textTheme.headlineSmall?.fontFamily,
+    );
   });
 
   testWidgets('shared navbar exposes every main destination', (tester) async {

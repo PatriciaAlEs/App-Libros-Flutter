@@ -1070,7 +1070,8 @@ class _SearchField extends StatelessWidget {
         children: [
           Text(
             'Busca tu próximo libro',
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontSize: 17,
               fontWeight: FontWeight.w800,
             ),
           ),

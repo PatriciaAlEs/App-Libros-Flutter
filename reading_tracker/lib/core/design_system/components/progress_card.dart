@@ -40,7 +40,12 @@ class ProgressCard extends StatelessWidget {
                   Icon(icon, color: theme.colorScheme.primary),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
-                    child: Text(title, style: theme.textTheme.titleMedium),
+                    child: Text(
+                      title,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontSize: 17,
+                      ),
+                    ),
                   ),
                   Text(value, style: theme.textTheme.labelLarge),
                 ],

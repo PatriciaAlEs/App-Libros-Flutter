@@ -341,7 +341,8 @@ class _HeaderLogo extends StatelessWidget {
               ),
               child: Text(
                 AppBrand.symbol,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontSize: 17,
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w800,
                 ),

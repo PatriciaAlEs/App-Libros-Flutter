@@ -472,7 +472,8 @@ class _SummaryMetric extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           value,
-          style: theme.textTheme.titleLarge?.copyWith(
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontSize: 21,
             fontWeight: FontWeight.w800,
           ),
         ),

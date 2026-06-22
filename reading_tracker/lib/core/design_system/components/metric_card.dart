@@ -22,12 +22,13 @@ class MetricCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return ReadPpSurface(
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: theme.colorScheme.primary, size: 24),
-          const SizedBox(height: AppSpacing.sm),
+          Icon(icon, color: theme.colorScheme.primary, size: 22),
+          const SizedBox(height: AppSpacing.xs),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
@@ -36,7 +37,7 @@ class MetricCard extends StatelessWidget {
               maxLines: 1,
               style: theme.textTheme.headlineSmall?.copyWith(
                 color: theme.colorScheme.primary,
-                fontSize: 36,
+                fontSize: 32,
                 fontWeight: FontWeight.w900,
                 height: 0.96,
               ),

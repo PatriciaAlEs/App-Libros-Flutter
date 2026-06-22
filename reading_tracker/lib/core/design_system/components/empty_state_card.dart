@@ -43,7 +43,7 @@ class EmptyStateCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               Text(
                 title,
-                style: theme.textTheme.titleMedium,
+                style: theme.textTheme.headlineSmall?.copyWith(fontSize: 17),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.sm),

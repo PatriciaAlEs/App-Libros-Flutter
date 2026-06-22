@@ -419,7 +419,8 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             'Este día aún está en blanco',
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontSize: 17,
               fontWeight: FontWeight.w800,
             ),
             textAlign: TextAlign.center,

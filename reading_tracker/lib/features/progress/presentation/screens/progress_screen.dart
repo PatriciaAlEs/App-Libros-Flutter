@@ -574,7 +574,8 @@ class _ProgressErrorState extends StatelessWidget {
               Text(
                 'No pudimos cargar tu progreso',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontSize: 21,
                   fontWeight: FontWeight.w800,
                 ),
               ),

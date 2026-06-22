@@ -87,7 +87,7 @@ class InsightsScreen extends ConsumerWidget {
                         showBookCover: summary.longestBookTitle != null,
                         subtitle: summary.longestBookPages == null
                             ? 'Sin libros completados con páginas'
-                            : '${summary.longestBookPages} pag.',
+                            : '${summary.longestBookPages} pág.',
                       ),
                       _InsightCard(
                         icon: AppIcons.bookmark,
@@ -315,7 +315,7 @@ class _ResponsiveInsightMetrics extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final textScale = MediaQuery.textScalerOf(context).scale(1);
-        final columns = constraints.maxWidth >= 560 && textScale <= 1.3
+        final columns = constraints.maxWidth >= 330 && textScale <= 1.15
             ? 3
             : constraints.maxWidth >= 300
             ? 2
@@ -427,7 +427,8 @@ class _PrimaryInsightPanel extends StatelessWidget {
                   insight.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontSize: 17,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -536,12 +537,15 @@ class _MetricPill extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              label,
+              maxLines: 1,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ],
@@ -778,7 +782,7 @@ class _InsightCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      constraints: BoxConstraints(minHeight: showBookCover ? 116 : 132),
+      constraints: BoxConstraints(minHeight: showBookCover ? 116 : 104),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.92),
@@ -800,7 +804,16 @@ class _InsightCard extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.md),
           ] else ...[
-            Icon(icon, color: theme.colorScheme.primary, size: 22),
+            Container(
+              width: 38,
+              height: 38,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.secondary.withValues(alpha: 0.20),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: theme.colorScheme.primary, size: 20),
+            ),
             const SizedBox(width: AppSpacing.sm),
           ],
           Expanded(
@@ -821,10 +834,16 @@ class _InsightCard extends StatelessWidget {
                   value,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onSurface,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style:
+                      (showBookCover
+                              ? theme.textTheme.headlineSmall?.copyWith(
+                                  fontSize: 18,
+                                )
+                              : theme.textTheme.titleMedium)
+                          ?.copyWith(
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w700,
+                          ),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -1323,7 +1342,8 @@ class _InsightsErrorState extends ConsumerWidget {
               Text(
                 'No pudimos cargar tus insights',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontSize: 21,
                   fontWeight: FontWeight.w800,
                 ),
               ),

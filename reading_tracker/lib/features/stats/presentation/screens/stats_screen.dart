@@ -111,7 +111,6 @@ class StatsScreen extends ConsumerWidget {
                         icon: AppIcons.library,
                         label: 'Biblioteca',
                         value: '${summary.totalBooks}',
-                        subtitle: 'libros guardados',
                       ),
                       MetricCard(
                         icon: AppIcons.bookmark,
@@ -625,23 +624,35 @@ class _AnnualGoalSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
+          Row(
             children: [
-              _GoalMetric(label: 'Avance', value: hasGoal ? '$percent%' : '-'),
-              _GoalMetric(label: 'Completados', value: '$completedThisYear'),
-              _GoalMetric(
-                label: hasGoal
-                    ? isAnnualGoalReached
-                          ? 'Meta'
-                          : 'Restan'
-                    : 'Objetivo',
-                value: hasGoal
-                    ? isAnnualGoalReached
-                          ? 'Alcanzada'
-                          : '${booksRemainingForAnnualGoal ?? 0}'
-                    : 'Sin definir',
+              Expanded(
+                child: _GoalMetric(
+                  label: 'Avance',
+                  value: hasGoal ? '$percent%' : '-',
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _GoalMetric(
+                  label: 'Completados',
+                  value: '$completedThisYear',
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _GoalMetric(
+                  label: hasGoal
+                      ? isAnnualGoalReached
+                            ? 'Meta'
+                            : 'Restan'
+                      : 'Objetivo',
+                  value: hasGoal
+                      ? isAnnualGoalReached
+                            ? 'Alcanzada'
+                            : '${booksRemainingForAnnualGoal ?? 0}'
+                      : 'Sin definir',
+                ),
               ),
             ],
           ),
@@ -707,7 +718,8 @@ class _GoalProgressRing extends StatelessWidget {
               ),
               Text(
                 label,
-                style: theme.textTheme.titleMedium?.copyWith(
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontSize: 17,
                   color: theme.colorScheme.primary,
                   fontWeight: FontWeight.w900,
                 ),
@@ -818,7 +830,7 @@ class _GoalMetric extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      width: 116,
+      width: double.infinity,
       height: 76,
       padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
@@ -832,10 +844,15 @@ class _GoalMetric extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              label,
+              maxLines: 1,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
           const SizedBox(height: 2),
@@ -1971,7 +1988,8 @@ class _StatsEmptyState extends StatelessWidget {
               Text(
                 'Tus estadísticas están por estrenarse',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontSize: 21,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -2026,7 +2044,8 @@ class _StatsErrorState extends StatelessWidget {
               Text(
                 'No pudimos preparar tus estadísticas',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontSize: 21,
                   fontWeight: FontWeight.w800,
                 ),
               ),

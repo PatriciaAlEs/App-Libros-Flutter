@@ -430,7 +430,8 @@ class _BookDetailUnavailableState extends StatelessWidget {
                 Text(
                   title,
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.titleLarge?.copyWith(
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontSize: 21,
                     fontWeight: FontWeight.w800,
                   ),
                 ),

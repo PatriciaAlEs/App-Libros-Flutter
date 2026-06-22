@@ -368,7 +368,8 @@ class _SessionFormIntro extends StatelessWidget {
               children: [
                 Text(
                   'Diario de lectura',
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontSize: 17,
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
                   ),
@@ -542,7 +543,8 @@ class _NoReadingBooksMessage extends StatelessWidget {
               Text(
                 'No hay lecturas activas',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.titleMedium?.copyWith(
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontSize: 17,
                   fontWeight: FontWeight.w800,
                 ),
               ),

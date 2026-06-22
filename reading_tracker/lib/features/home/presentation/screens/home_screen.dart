@@ -428,7 +428,8 @@ class _HomeErrorState extends StatelessWidget {
               Text(
                 'No pudimos preparar tu inicio',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontSize: 21,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -569,7 +570,8 @@ class _HomeBrandLogo extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text(
               AppBrand.name,
-              style: theme.textTheme.titleLarge?.copyWith(
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontSize: 21,
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.w900,
               ),
