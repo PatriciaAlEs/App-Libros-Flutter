@@ -1944,7 +1944,7 @@ class _CompactMetricCard extends StatelessWidget {
                             Text(
                               value,
                               maxLines: 1,
-                              style: theme.textTheme.titleLarge?.copyWith(
+                              style: theme.textTheme.headlineSmall?.copyWith(
                                 color: foregroundColor,
                                 fontSize: 34,
                                 fontWeight: FontWeight.w900,

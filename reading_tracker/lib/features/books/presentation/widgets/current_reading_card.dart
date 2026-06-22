@@ -338,7 +338,7 @@ class _ProgressFooter extends StatelessWidget {
             Text(
               '$percent%',
               maxLines: 1,
-              style: theme.textTheme.titleLarge?.copyWith(
+              style: theme.textTheme.headlineSmall?.copyWith(
                 color: onDark,
                 fontSize: 26,
                 fontWeight: FontWeight.w900,

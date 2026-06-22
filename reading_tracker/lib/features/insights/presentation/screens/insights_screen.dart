@@ -524,7 +524,7 @@ class _MetricPill extends StatelessWidget {
             child: Text(
               value,
               maxLines: 1,
-              style: theme.textTheme.titleLarge?.copyWith(
+              style: theme.textTheme.headlineSmall?.copyWith(
                 color: theme.colorScheme.primary,
                 fontSize: 32,
                 fontWeight: FontWeight.w900,

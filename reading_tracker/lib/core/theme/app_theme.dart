@@ -190,13 +190,13 @@ class AppTheme {
 
   static TextTheme _textTheme(ColorScheme colorScheme) {
     return TextTheme(
-      displaySmall: GoogleFonts.spaceGrotesk(
+      displaySmall: GoogleFonts.cormorantGaramond(
         color: colorScheme.onSurface,
         fontSize: 34,
         fontWeight: FontWeight.w700,
         height: 1.14,
       ),
-      headlineSmall: GoogleFonts.spaceGrotesk(
+      headlineSmall: GoogleFonts.cormorantGaramond(
         color: colorScheme.onSurface,
         fontSize: 26,
         fontWeight: FontWeight.w700,

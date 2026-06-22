@@ -840,7 +840,7 @@ class _GoalMetric extends StatelessWidget {
             child: Text(
               value,
               maxLines: 1,
-              style: theme.textTheme.titleLarge?.copyWith(
+              style: theme.textTheme.headlineSmall?.copyWith(
                 color: theme.colorScheme.primary,
                 fontSize: 28,
                 fontWeight: FontWeight.w900,
