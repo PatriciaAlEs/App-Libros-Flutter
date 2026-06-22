@@ -9,11 +9,16 @@ class DatabaseSeeder {
   final AppDatabase _database;
   bool _hasRun = false;
 
+  static const bool enableDemoLibrary = false;
+
   Future<void> seedIfNeeded() async {
-    if (!kDebugMode || _hasRun) return;
+    if (_hasRun) return;
 
     _hasRun = true;
     await _database.readingSessionDao.deleteLegacySeedSessions();
+    await _database.bookDao.deleteLegacySeedBooks();
+
+    if (!kDebugMode || !enableDemoLibrary) return;
 
     final existingBooks = await _database.bookDao.getAllBooks();
     if (existingBooks.isNotEmpty) return;

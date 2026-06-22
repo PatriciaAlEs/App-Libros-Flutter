@@ -28,9 +28,10 @@ class BookRepositoryImpl implements BookRepository {
 
   @override
   Stream<List<Book>> watchBooks() {
-    _seeder.seedIfNeeded();
-    return _dao.watchAllBooks().map(
-      (rows) => rows.map((row) => row.toDomain()).toList(),
+    return Stream.fromFuture(_seeder.seedIfNeeded()).asyncExpand(
+      (_) => _dao.watchAllBooks().map(
+        (rows) => rows.map((row) => row.toDomain()).toList(),
+      ),
     );
   }
 

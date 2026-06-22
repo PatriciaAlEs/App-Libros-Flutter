@@ -65,4 +65,15 @@ class BookDao extends DatabaseAccessor<AppDatabase> with _$BookDaoMixin {
   Future<int> deleteAllBooks() {
     return (delete(booksTable)).go();
   }
+
+  Future<int> deleteLegacySeedBooks() {
+    return (delete(booksTable)..where(
+          (table) => table.id.isIn(const [
+            'seed-dune',
+            'seed-earthsea',
+            'seed-left-hand-darkness',
+          ]),
+        ))
+        .go();
+  }
 }

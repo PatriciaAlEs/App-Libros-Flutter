@@ -60,9 +60,10 @@ class ReadingSessionRepositoryImpl implements ReadingSessionRepository {
     DateTime start,
     DateTime end,
   ) {
-    _seeder.seedIfNeeded();
-    return _dao
-        .watchSessionsInRange(start, end)
-        .map((rows) => rows.map((row) => row.toDomain()).toList());
+    return Stream.fromFuture(_seeder.seedIfNeeded()).asyncExpand(
+      (_) => _dao
+          .watchSessionsInRange(start, end)
+          .map((rows) => rows.map((row) => row.toDomain()).toList()),
+    );
   }
 }
