@@ -159,7 +159,8 @@ class _InsightsHeader extends StatelessWidget {
       readerProfile: readerProfile,
       onTap: () =>
           Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false),
-      onProfileTap: () => Navigator.pushNamed(context, '/settings'),
+      onProfileTap: () =>
+          Navigator.pushNamedAndRemoveUntil(context, '/settings', (_) => false),
       onAddBookTap: () => Navigator.pushNamed(context, '/book/add'),
       onCalendarTap: () => Navigator.pushNamed(context, '/calendar'),
     );

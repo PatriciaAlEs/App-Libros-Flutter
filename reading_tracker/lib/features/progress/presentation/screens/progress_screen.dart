@@ -478,7 +478,11 @@ class _ProgressHeader extends StatelessWidget {
           onTap: () {
             Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
           },
-          onProfileTap: () => Navigator.pushNamed(context, '/settings'),
+          onProfileTap: () => Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/settings',
+            (_) => false,
+          ),
           onAddBookTap: () => Navigator.pushNamed(context, '/book/add'),
           onCalendarTap: () => Navigator.pushNamed(context, '/calendar'),
         ),

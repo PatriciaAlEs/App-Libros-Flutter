@@ -253,7 +253,11 @@ class _LibraryHeader extends StatelessWidget {
           onTap: () {
             Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
           },
-          onProfileTap: () => Navigator.pushNamed(context, '/settings'),
+          onProfileTap: () => Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/settings',
+            (_) => false,
+          ),
           onAddBookTap: onAddBook,
           onCalendarTap: () => Navigator.pushNamed(context, '/calendar'),
         ),

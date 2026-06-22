@@ -47,7 +47,6 @@ class SettingsScreen extends ConsumerWidget {
                   '/',
                   (_) => false,
                 ),
-                onProfileTap: () => Navigator.pushNamed(context, '/settings'),
                 onAddBookTap: () => Navigator.pushNamed(context, '/book/add'),
                 onCalendarTap: () => Navigator.pushNamed(context, '/calendar'),
               ),

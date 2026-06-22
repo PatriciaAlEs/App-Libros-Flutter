@@ -547,7 +547,11 @@ class _NoReadingBooksMessage extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               FilledButton.icon(
-                onPressed: () => Navigator.pushNamed(context, '/books'),
+                onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/books',
+                  (_) => false,
+                ),
                 icon: const Icon(AppIcons.library),
                 label: const Text('Ir a Biblioteca'),
               ),

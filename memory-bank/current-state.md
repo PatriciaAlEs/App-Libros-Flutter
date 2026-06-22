@@ -481,6 +481,15 @@ Estado confirmado por el usuario:
 - Validacion visual final de Sprint 19.5-19.7 sigue pendiente en Android, Web/Desktop y TalkBack.
 - Version declarada actual: `1.0.0+1`; `v0.2.0-alpha` es solo una propuesta hasta resolver estrategia de versionado.
 
+## Estado vigente de release hardening
+
+- Los bloqueantes P1 detectados en la revision de Sprint 19 quedan corregidos en codigo.
+- Suite restaurada a 55/55 y `flutter analyze` sin issues.
+- Navegacion interna entre tabs reemplaza/limpia la shell en lugar de apilar otra navbar.
+- Riesgos rapidos de Stats corregidos: unidad mensual coherente y resumen semantico para graficas.
+- ReadPp queda listo para QA manual de v0.2.0-alpha.
+- Aun pendientes antes del build/tag final: validar Back en dispositivo, TalkBack, Android/Web/Desktop y decidir version de `pubspec.yaml`.
+
 ## Estadisticas MVP
 
 Estado actual implementado:

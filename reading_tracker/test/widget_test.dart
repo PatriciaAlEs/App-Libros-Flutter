@@ -308,7 +308,7 @@ void main() {
     expect(find.text('LECTURA PRINCIPAL'), findsOneWidget);
     expect(find.text('160 restantes'), findsOneWidget);
     expect(
-      find.bySemanticsLabel('Lectura principal: Lectura principal'),
+      _semanticsWithLabel('Lectura principal: Lectura principal'),
       findsOneWidget,
     );
 
@@ -322,7 +322,7 @@ void main() {
     expect(find.text('LECTURA EN CURSO'), findsOneWidget);
     expect(find.text('110 restantes'), findsOneWidget);
     expect(
-      find.bySemanticsLabel('Lectura en curso: Segunda lectura'),
+      _semanticsWithLabel('Lectura en curso: Segunda lectura'),
       findsOneWidget,
     );
 
@@ -486,6 +486,13 @@ void main() {
 }
 
 Finder _searchField() => find.byType(TextField).first;
+
+Finder _semanticsWithLabel(String label) {
+  return find.byWidgetPredicate(
+    (widget) => widget is Semantics && widget.properties.label == label,
+    description: 'Semantics with label "$label"',
+  );
+}
 
 DateTime _dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
 

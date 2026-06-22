@@ -115,7 +115,11 @@ class HomeScreen extends ConsumerWidget {
                               );
                             },
                             onProfileTap: () =>
-                                Navigator.pushNamed(context, '/settings'),
+                                Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  '/settings',
+                                  (_) => false,
+                                ),
                             onAddBookTap: () =>
                                 Navigator.pushNamed(context, '/book/add'),
                             onCalendarTap: () =>
@@ -162,15 +166,26 @@ class HomeScreen extends ConsumerWidget {
                             onOpenCalendar: () =>
                                 Navigator.pushNamed(context, '/calendar'),
                             onOpenLibrary: () =>
-                                Navigator.pushNamed(context, '/books'),
+                                Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  '/books',
+                                  (_) => false,
+                                ),
                             onOpenProgress: () =>
-                                Navigator.pushNamed(context, '/progress'),
+                                Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  '/progress',
+                                  (_) => false,
+                                ),
                           ),
                           const SizedBox(height: 28),
                           _AnnualGoalCard(
                             summary: summary,
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/progress'),
+                            onTap: () => Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              '/progress',
+                              (_) => false,
+                            ),
                           ),
                           const SizedBox(height: 32),
                           _WeeklyCalendarPreview(
@@ -464,7 +479,11 @@ class _HomeHeader extends StatelessWidget {
                   _HeaderActionButton(
                     icon: AppIcons.profile,
                     tooltip: 'Perfil',
-                    onTap: () => Navigator.pushNamed(context, '/settings'),
+                    onTap: () => Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/settings',
+                      (_) => false,
+                    ),
                   ),
                 ],
               ),

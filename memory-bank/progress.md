@@ -351,6 +351,18 @@
 - Prioridad inmediata: corregir test/semantica, revisar navegacion entre tabs sin apilar shells y repetir suite completa.
 - Segunda prioridad: corregir subtitulo de Paginas por mes, anadir semantica a graficas y retirar widgets legacy.
 
+### Release hardening v0.2.0-alpha
+
+- Corregido el test rojo de semantica del carrusel sin acoplarlo al nodo fusionado de Flutter.
+- Corregido el apilado de shells en accesos internos a tabs principales.
+- Corregida la incoherencia minutos/paginas en la grafica mensual.
+- Anadidos resumenes semanticos al ring del reto, donuts y barras.
+- `dart format lib test`: OK; comprobacion posterior con `--set-exit-if-changed`: 0 cambios.
+- `dart analyze lib test`: OK.
+- `flutter analyze --no-pub`: OK.
+- `flutter test --no-pub`: OK, 55/55.
+- Gate automatizado cerrado; siguiente paso obligatorio: QA manual multiplataforma y accesible.
+
 ## Parcial / en seguimiento
 
 - Estado vigente tras Branding Final: ReadPp v1.0 RC Complete.

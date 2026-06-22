@@ -323,7 +323,11 @@ class _StatsHeader extends StatelessWidget {
           readerProfile: readerProfile,
           onTap: () =>
               Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false),
-          onProfileTap: () => Navigator.pushNamed(context, '/settings'),
+          onProfileTap: () => Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/settings',
+            (_) => false,
+          ),
           onAddBookTap: () => Navigator.pushNamed(context, '/book/add'),
           onCalendarTap: () => Navigator.pushNamed(context, '/calendar'),
         ),
@@ -669,37 +673,43 @@ class _GoalProgressRing extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return SizedBox(
-      width: 82,
-      height: 82,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: progress.clamp(0, 1).toDouble()),
-            duration: AppMotion.slow,
-            curve: AppMotion.standard,
-            builder: (context, value, child) {
-              return CustomPaint(
-                size: const Size.square(82),
-                painter: _RingPainter(
-                  progress: value,
-                  trackColor: theme.colorScheme.primaryContainer.withValues(
-                    alpha: 0.28,
-                  ),
-                  progressColor: theme.colorScheme.secondary,
+    return Semantics(
+      label: 'Progreso del reto lector',
+      value: label,
+      child: ExcludeSemantics(
+        child: SizedBox(
+          width: 82,
+          height: 82,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: progress.clamp(0, 1).toDouble()),
+                duration: AppMotion.slow,
+                curve: AppMotion.standard,
+                builder: (context, value, child) {
+                  return CustomPaint(
+                    size: const Size.square(82),
+                    painter: _RingPainter(
+                      progress: value,
+                      trackColor: theme.colorScheme.primaryContainer.withValues(
+                        alpha: 0.28,
+                      ),
+                      progressColor: theme.colorScheme.secondary,
+                    ),
+                  );
+                },
+              ),
+              Text(
+                label,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w900,
                 ),
-              );
-            },
+              ),
+            ],
           ),
-          Text(
-            label,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -1226,7 +1236,6 @@ class _PremiumStatsVisuals extends StatelessWidget {
     final statusSegments = _statusSegments(context, summary);
     final genreSegments = _genreSegments(context, books);
     final weeklyMinutes = _weeklyMinutes(sessions);
-    final monthlyMinutes = _monthlyMinutes(sessions);
     final monthlyPages = _monthlyPages(sessions);
 
     return Column(
@@ -1279,9 +1288,9 @@ class _PremiumStatsVisuals extends StatelessWidget {
                   width: width,
                   child: _ActivityBarCard(
                     title: 'Páginas por mes',
-                    subtitle: monthlyMinutes.isEmpty
+                    subtitle: monthlyPages.last.value <= 0
                         ? 'Últimos meses'
-                        : '${_formatMinutesCompact(monthlyMinutes.last.value)} este mes',
+                        : '${monthlyPages.last.value} pág. este mes',
                     bars: monthlyPages,
                     unit: 'pág.',
                     emptyMessage:
@@ -1321,38 +1330,43 @@ class _DonutDistributionCard extends StatelessWidget {
       subtitle: subtitle,
       child: total == 0
           ? _ChartEmptyMessage(message: emptyMessage)
-          : Row(
-              children: [
-                SizedBox(
-                  width: 132,
-                  height: 132,
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween(begin: 0, end: 1),
-                    duration: AppMotion.slow,
-                    curve: AppMotion.standard,
-                    builder: (context, value, child) {
-                      return CustomPaint(
-                        painter: _DonutPainter(
-                          segments: segments,
-                          animationValue: value,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '$total',
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontSize: 34,
-                              fontWeight: FontWeight.w900,
+          : Semantics(
+              label: _chartSegmentsSemanticLabel(title, total, segments),
+              child: ExcludeSemantics(
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 132,
+                      height: 132,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: 1),
+                        duration: AppMotion.slow,
+                        curve: AppMotion.standard,
+                        builder: (context, value, child) {
+                          return CustomPaint(
+                            painter: _DonutPainter(
+                              segments: segments,
+                              animationValue: value,
                             ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                            child: Center(
+                              child: Text(
+                                '$total',
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontSize: 34,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.lg),
+                    Expanded(child: _ChartLegend(segments: segments)),
+                  ],
                 ),
-                const SizedBox(width: AppSpacing.lg),
-                Expanded(child: _ChartLegend(segments: segments)),
-              ],
+              ),
             ),
     );
   }
@@ -1382,9 +1396,14 @@ class _ActivityBarCard extends StatelessWidget {
       subtitle: subtitle,
       child: total == 0
           ? _ChartEmptyMessage(message: emptyMessage)
-          : SizedBox(
-              height: 178,
-              child: _BarChart(points: bars, unit: unit),
+          : Semantics(
+              label: _chartPointsSemanticLabel(title, bars, unit),
+              child: ExcludeSemantics(
+                child: SizedBox(
+                  height: 178,
+                  child: _BarChart(points: bars, unit: unit),
+                ),
+              ),
             ),
     );
   }
@@ -1675,6 +1694,29 @@ class _ChartPoint {
   final Color color;
 }
 
+String _chartSegmentsSemanticLabel(
+  String title,
+  int total,
+  List<_ChartSegment> segments,
+) {
+  final values = segments
+      .where((segment) => segment.value > 0)
+      .map((segment) => '${segment.label}: ${segment.value}')
+      .join(', ');
+  return '$title. Total: $total. $values.';
+}
+
+String _chartPointsSemanticLabel(
+  String title,
+  List<_ChartPoint> points,
+  String unit,
+) {
+  final values = points
+      .map((point) => '${point.label}: ${point.value} $unit')
+      .join(', ');
+  return '$title. $values.';
+}
+
 List<_ChartSegment> _statusSegments(
   BuildContext context,
   StatisticsSummary summary,
@@ -1771,13 +1813,6 @@ List<_ChartPoint> _weeklyMinutes(List<ReadingSession> sessions) {
   return points;
 }
 
-List<_ChartPoint> _monthlyMinutes(List<ReadingSession> sessions) {
-  return _monthlySessionPoints(
-    sessions,
-    valueForSession: (session) => session.minutes,
-  );
-}
-
 List<_ChartPoint> _monthlyPages(List<ReadingSession> sessions) {
   return _monthlySessionPoints(
     sessions,
@@ -1847,13 +1882,6 @@ String _shortMonth(DateTime date) {
     'Dic',
   ];
   return months[date.month - 1];
-}
-
-String _formatMinutesCompact(int minutes) {
-  if (minutes < 60) return '$minutes min';
-  final hours = minutes ~/ 60;
-  final rest = minutes % 60;
-  return rest == 0 ? '${hours}h' : '${hours}h ${rest}min';
 }
 
 class _StatsSection extends StatelessWidget {

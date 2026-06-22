@@ -522,6 +522,17 @@ Actualizacion Hito 7 Sprint 19.4:
 - Estado de release: Sprint 19 implementado pero no listo para etiquetar/publicar hasta resolver test y bloqueantes P1.
 - Versionado pendiente: `pubspec.yaml` declara `1.0.0+1`; confirmar antes de proponer/taggear `v0.2.0-alpha`.
 
+## Release hardening v0.2.0-alpha - 2026-06-22
+
+- Test semantico del carrusel robustecido: valida la propiedad declarada del widget `Semantics` sin depender de la fusion final de nodos.
+- Accesos internos a Biblioteca, Progreso y Perfil usan `pushNamedAndRemoveUntil`; no quedan `pushNamed` directos hacia tabs principales.
+- La pantalla de Perfil no vuelve a navegar hacia si misma desde su header.
+- `Paginas por mes` usa `monthlyPages` tanto en barras como en subtitulo.
+- Ring, donuts y barras de Estadisticas incorporan resumen semantico basico.
+- Validacion vigente: format de `lib test` OK, `dart analyze` OK, `flutter analyze` OK y `flutter test` OK con 55/55.
+- El comando global `dart format --set-exit-if-changed .` sigue bloqueado por una ruta obsoleta dentro de `build`; las fuentes se validaron con `lib test`.
+- Estado: bloqueantes automatizados cerrados; listo para QA manual de v0.2.0-alpha, no todavia para publicacion final.
+
 Estado confirmado para Hito 5 Sprint 13:
 
 - `flutter analyze` OK.
