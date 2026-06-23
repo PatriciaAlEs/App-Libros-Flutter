@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../core/observability/readpp_sentry.dart';
 import '../../domain/entities/book_search_result.dart';
 
 final bookApiDatasourceProvider = Provider<BookApiDatasource>((ref) {
@@ -41,10 +42,21 @@ class BookApiDatasource {
         'number_of_pages_median',
       ].join(','),
     });
+    final stopwatch = Stopwatch()..start();
+    int? lastStatusCode;
+
+    unawaited(
+      ReadPpSentry.addBookSearchBreadcrumb(
+        event: 'search_started',
+        provider: 'open_library',
+        query: trimmedQuery,
+      ),
+    );
 
     for (var attempt = 1; attempt <= _maxAttempts; attempt++) {
       try {
         final response = await _client.get(uri).timeout(_requestTimeout);
+        lastStatusCode = response.statusCode;
         if (response.statusCode != 200) {
           throw BookSearchException.api(
             'Open Library returned ${response.statusCode}',
@@ -66,34 +78,95 @@ class BookApiDatasource {
         }
         final docs = rawDocs as List<dynamic>? ?? const [];
 
-        return docs
+        final results = docs
             .whereType<Map<String, dynamic>>()
             .map(_toSearchResult)
             .where((book) => book.title.trim().isNotEmpty)
             .toList();
+        unawaited(
+          ReadPpSentry.addBookSearchBreadcrumb(
+            event: 'search_completed',
+            provider: 'open_library',
+            query: trimmedQuery,
+            duration: stopwatch.elapsed,
+            resultCount: results.length,
+            statusCode: lastStatusCode,
+          ),
+        );
+        return results;
       } on TimeoutException catch (error, stackTrace) {
         if (attempt == _maxAttempts) {
           _logSearchFailure(error, stackTrace);
+          unawaited(
+            _reportSearchFailure(
+              error,
+              stackTrace,
+              query: trimmedQuery,
+              duration: stopwatch.elapsed,
+              failureKind: BookSearchFailureKind.timeout.name,
+              statusCode: lastStatusCode,
+            ),
+          );
           throw BookSearchException.timeout(error);
         }
       } on SocketException catch (error, stackTrace) {
         if (attempt == _maxAttempts) {
           _logSearchFailure(error, stackTrace);
+          unawaited(
+            _reportSearchFailure(
+              error,
+              stackTrace,
+              query: trimmedQuery,
+              duration: stopwatch.elapsed,
+              failureKind: BookSearchFailureKind.connection.name,
+              statusCode: lastStatusCode,
+            ),
+          );
           throw BookSearchException.connection(error);
         }
       } on http.ClientException catch (error, stackTrace) {
         if (attempt == _maxAttempts) {
           _logSearchFailure(error, stackTrace);
+          unawaited(
+            _reportSearchFailure(
+              error,
+              stackTrace,
+              query: trimmedQuery,
+              duration: stopwatch.elapsed,
+              failureKind: BookSearchFailureKind.connection.name,
+              statusCode: lastStatusCode,
+            ),
+          );
           throw BookSearchException.connection(error);
         }
       } on FormatException catch (error, stackTrace) {
         _logSearchFailure(error, stackTrace);
+        unawaited(
+          _reportSearchFailure(
+            error,
+            stackTrace,
+            query: trimmedQuery,
+            duration: stopwatch.elapsed,
+            failureKind: BookSearchFailureKind.invalidResponse.name,
+            statusCode: lastStatusCode,
+          ),
+        );
         throw BookSearchException.invalidResponse(error);
       } on BookSearchException catch (error, stackTrace) {
         if (attempt == _maxAttempts ||
             error.kind == BookSearchFailureKind.api ||
             error.kind == BookSearchFailureKind.invalidResponse) {
           _logSearchFailure(error, stackTrace);
+          unawaited(
+            _reportSearchFailure(
+              error,
+              stackTrace,
+              query: trimmedQuery,
+              duration: stopwatch.elapsed,
+              failureKind: error.kind.name,
+              statusCode: lastStatusCode,
+            ),
+          );
           rethrow;
         }
       }
@@ -162,6 +235,32 @@ class BookApiDatasource {
     if (!kDebugMode) return;
     debugPrint('Open Library search failed: $error');
     debugPrintStack(stackTrace: stackTrace);
+  }
+
+  Future<void> _reportSearchFailure(
+    Object error,
+    StackTrace stackTrace, {
+    required String query,
+    required Duration duration,
+    required String failureKind,
+    int? statusCode,
+  }) async {
+    await ReadPpSentry.addBookSearchBreadcrumb(
+      event: 'search_failed',
+      provider: 'open_library',
+      query: query,
+      duration: duration,
+      failureKind: failureKind,
+      statusCode: statusCode,
+    );
+    await ReadPpSentry.captureOpenLibraryException(
+      exception: error,
+      stackTrace: stackTrace,
+      query: query,
+      duration: duration,
+      failureKind: failureKind,
+      statusCode: statusCode,
+    );
   }
 }
 

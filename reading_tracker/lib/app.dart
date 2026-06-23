@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/design_system/design_system.dart';
+import 'core/observability/readpp_sentry.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_theme_controller.dart';
 import 'features/navigation/presentation/screens/main_navigation_screen.dart';
@@ -31,6 +32,7 @@ class App extends ConsumerWidget {
                 : const OnboardingScreen(),
           ),
       onGenerateRoute: _onGenerateRoute,
+      navigatorObservers: ReadPpSentry.navigatorObservers(),
     );
   }
 

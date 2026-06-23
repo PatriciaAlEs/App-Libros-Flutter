@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/design_system/design_system.dart';
+import '../../../../core/observability/readpp_sentry.dart';
 import '../../../books/presentation/screens/book_detail_screen.dart';
 import '../../../books/presentation/screens/book_form_screen.dart';
 import '../../../books/presentation/screens/books_list_screen.dart';
@@ -65,6 +66,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             ),
           ],
           onGenerateRoute: _onGenerateRoute,
+          observers: ReadPpSentry.navigatorObservers(),
         ),
       ),
       bottomNavigationBar: ValueListenableBuilder<int>(
