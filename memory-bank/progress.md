@@ -363,6 +363,24 @@
 - `flutter test --no-pub`: OK, 55/55.
 - Gate automatizado cerrado; siguiente paso obligatorio: QA manual multiplataforma y accesible.
 
+## ReadPp v0.2.0-alpha - Release completada
+
+- Estado confirmado 2026-06-23: ReadPp v0.2.0-alpha queda completada y entregada a testers externos.
+- APK Release generada.
+- Build Web generado y desplegado en Vercel.
+- Testers externos activos sobre la version alpha.
+- QA manual completo del bloque previo a release.
+- Validacion automatizada vigente: `flutter analyze` OK y `flutter test` OK con 67/67 tests.
+- Datos demo/base eliminados o desactivados en modo normal: una instalacion limpia no crea libros precargados.
+- Empty states reales disponibles para probar onboarding y flujo de primer libro como usuario nuevo.
+- Perfil lector endurecido: nombre/saludo personalizado con minimo 2 caracteres, maximo 15, trim, capitalizacion inicial, caracteres permitidos y bloqueo basico de terminos ofensivos.
+- Busqueda Open Library endurecida para release: copy de fallo no definitivo, accion `Reintentar` y fallback `Anadir manualmente` mantenido.
+- Insights/Curiosidades queda mas visual: las curiosidades asociadas a libros muestran portada si existe y fallback editorial si no hay portada.
+- Navegacion y navbar principal quedan estabilizadas para flujos principales; no debe apilar shells ni ocultar navbar en pantallas principales/hijas del flujo.
+- Carrusel de lecturas activas queda separado de la seleccion explicita de lectura principal.
+- Pendientes QA post-alpha: QA-018, QA-019, QA-020, QA-021 y QA-022.
+- Roadmap actualizado: v0.3 Observabilidad, v0.4 Google Books fallback robustecido, v0.5 Supabase.
+
 ## Parcial / en seguimiento
 
 - Estado vigente tras Branding Final: ReadPp v1.0 RC Complete.
@@ -372,13 +390,14 @@
 - Estado vigente tras Sprint 15: Stats Premium Redesign aplicado; pendiente validacion local por el usuario.
 - Estado vigente tras Sprint 17.x: perfil lector local, logo real, headers consistentes y Home visual polish aplicados; pendiente validacion local por el usuario.
 - Estado vigente tras Sprint 17.7: Home premium, carrusel de lecturas en curso, onboarding refrescado, assets visuales nuevos y pase de consistencia UI aplicado; pendiente validacion local por el usuario.
-- Estado vigente tras Sprint 18.17: Alpha QA y Multi-Source Book Search aplicados; validacion automatizada vigente OK (`flutter analyze`, `flutter test` 55/55).
+- Estado vigente tras Sprint 18.17: Alpha QA y Multi-Source Book Search aplicados; validacion automatizada historica OK (`flutter analyze`, `flutter test` 55/55).
 - Estado vigente tras Sprint 19.2: Motion & Delight y Premium Statistics aplicados; validacion automatizada vigente OK (`flutter analyze`, `flutter test` 55/55).
 - Estado vigente tras Sprint 19.3: Empty States & First Run completado y validado.
 - Estado vigente tras Sprint 19.4: Design System Consolidation completado y validado.
 - Estado vigente tras Sprint 19.5: Reading Experience Polish implementado; pendiente repetir validacion Flutter cuando el SDK local deje de bloquearse.
 - Estado vigente tras Sprint 19.6: Insights Premium implementado y analisis estatico limpio.
-- Estado vigente tras Sprint 19.7: Accessibility & Responsiveness implementado; pendiente validacion Flutter/visual por bloqueo del SDK local.
+- Estado vigente tras Sprint 19.7: Accessibility & Responsiveness implementado; validacion posterior de release alpha superada.
+- Estado vigente v0.2.0-alpha: release generada, web desplegada en Vercel, testers externos activos, 67/67 tests y `flutter analyze` OK.
 - Las notas pendientes de validacion de sprints anteriores quedan como historial superado por la validacion vigente de Sprint 13.
 
 - Actualizacion Sprint 12: ReadPp se considera feature-complete para v1, pendiente de release readiness.
@@ -400,12 +419,14 @@
 
 ## Pendiente inmediato
 
-- Estado vigente: continuar Alpha QA y preparar Beta Readiness para ReadPp.
+- Estado vigente: continuar QA post-alpha sobre ReadPp v0.2.0-alpha ya distribuida.
 - Ejecutar validacion local de Sprint 14 en VS Code: `dart format`, `flutter analyze` y `flutter test`.
 - Ejecutar validacion local de Sprint 15 en VS Code: `dart format`, `flutter analyze` y `flutter test`.
 - Ejecutar validacion local de Sprint 17.x en VS Code: `dart format .`, `flutter pub get`, `flutter analyze`, `flutter test` y `git status`.
-- Validar manualmente Sprint 18.x en Android Emulator/dispositivo: carrusel con 4+ lecturas, calendario con 1/2/3+ sesiones, escaneo ISBN, portada local y persistencia tras reinicio.
-- Pendientes Beta: Android/Web/Windows QA, final splash branding pass, Android adaptive icon review, verificacion de icono en dispositivo real, Play Store screenshots, store listing copy, privacy policy publica, firma de release, AAB/AAB Beta y Play Store preparation.
+- Resolver QA-018, QA-019, QA-020, QA-021 y QA-022.
+- Preparar v0.3 Observabilidad.
+- Preparar v0.4 Google Books fallback robustecido.
+- Preparar v0.5 Supabase para Auth, backend cloud y sincronizacion.
 
 - Revision final de assets de tienda, privacidad, versionado y release.
 

@@ -2,6 +2,43 @@
 
 ## Foco actual
 
+ReadPp v0.2.0-alpha: release alpha completada y en QA externo.
+
+Estado confirmado 2026-06-23:
+
+- APK Release generada.
+- Web desplegada en Vercel.
+- Testers externos activos.
+- Validacion automatizada vigente: 67/67 tests.
+- `flutter analyze` OK.
+- QA manual completo para el bloque previo a release alpha.
+
+Hitos cerrados para v0.2.0-alpha:
+
+- Eliminacion/desactivacion de datos demo en modo normal: una instalacion limpia arranca sin libros precargados y muestra empty states reales.
+- QA manual de release ejecutado sobre Android/Web.
+- Validacion de perfil lector: nombre/saludo personalizado con limites, normalizacion y bloqueo basico de terminos ofensivos.
+- Open Library: copy de error ajustado, accion `Reintentar` verificada y fallback manual mantenido.
+- Curiosidades de Insights visuales con portadas cuando la curiosidad se refiere a un libro.
+- Build Android release generado.
+- Build Web generado y desplegado en Vercel.
+
+Pendientes abiertos de QA post-alpha:
+
+- QA-018.
+- QA-019.
+- QA-020.
+- QA-021.
+- QA-022.
+
+Roadmap vigente:
+
+- v0.3 Observabilidad.
+- v0.4 Google Books fallback robustecido como segunda fuente.
+- v0.5 Supabase para Auth, backend cloud y sincronizacion multi-dispositivo.
+
+## Contexto Alpha previo
+
 Hito 6: Alpha Testing & Polish.
 
 ReadPp entro en fase Alpha QA. El foco vigente ya no es feature development general, sino estabilizacion Android, consistencia UX/UI, robustez de busqueda y preparacion Beta.
@@ -37,12 +74,10 @@ Limitaciones conocidas vigentes:
 
 Roadmap inmediato:
 
-- Sprint 19.1 Motion & Delight implementado como primera capa de experiencia premium calmada: confeti breve al completar libro, transiciones suaves, microinteracciones, skeletons y empty states animados.
-- Sprint 19.2 Premium Statistics implementado: ring del reto lector, donut de estados, distribucion de generos, tiempo semanal y paginas por mes con visualizaciones editoriales ReadPp.
-- Sprint 19.3 Empty States & First Run implementado: `ReadPpEmptyState`, Biblioteca vacia, Calendario/Diario vacio, Estadisticas vacias, Insights vacios y Reto lector sin configurar.
-- Continuar Alpha QA Android/Web/Desktop.
-- Preparar Beta Readiness: APK/AAB, store assets, privacy policy publica y QA de release.
-- Hito 7 queda orientado a Premium Experience: motion, microinteracciones, skeleton loaders, empty states y estadisticas visuales premium.
+- Resolver QA-018 a QA-022 con cambios acotados de hardening.
+- Preparar v0.3 Observabilidad.
+- Preparar v0.4 Google Books fallback robustecido.
+- Preparar v0.5 Supabase.
 
 Design Decisions - Do Not Regress:
 

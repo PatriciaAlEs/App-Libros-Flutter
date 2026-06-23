@@ -6,7 +6,7 @@
 
 `reading_tracker` es una app Flutter para registrar libros, seguir el estado de lectura y visualizar sesiones de lectura en calendario.
 
-Arquitectura actual:
+Arquitectura actual:   
 
 - `lib/core`: infraestructura compartida, tema, Drift, providers de base de datos y utilidades.
 - `lib/features/books`: busqueda/alta de libros, listado, detalle y estado de lectura.

@@ -25,7 +25,10 @@ El proyecto ya contiene una app funcional en `reading_tracker/` con:
 - Hito 6 Sprint 18.x implementado: Alpha Testing & Polish con Android QA, shared header/card, calendario/diario refinados, reto lector pulido, busqueda multi-fuente, deduplicacion, alta manual, escaneo ISBN y portada local.
 - Busqueda de libros actual: `BookSearchRepository` coordina Open Library como proveedor primario, Google Books como fallback y alta manual como ultima opcion.
 - Persistencia actual de libros incluye identificadores externos `externalSource` y `externalId` para deduplicacion entre proveedores.
-- Estado actual: Alpha QA / Beta Readiness preparation, manteniendo enfoque local-first con Drift/SQLite.
+- Estado actual: ReadPp v0.2.0-alpha completada, APK Release generada, Web desplegada en Vercel y testers externos activos, manteniendo enfoque local-first con Drift/SQLite.
+- Validacion vigente de v0.2.0-alpha: 67/67 tests y `flutter analyze` OK.
+- Pendientes post-alpha: QA-018, QA-019, QA-020, QA-021 y QA-022.
+- Roadmap: v0.3 Observabilidad, v0.4 Google Books fallback robustecido y v0.5 Supabase.
 
 ## Principios de documentacion
 

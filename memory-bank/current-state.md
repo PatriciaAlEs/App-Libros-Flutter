@@ -481,14 +481,31 @@ Estado confirmado por el usuario:
 - Validacion visual final de Sprint 19.5-19.7 sigue pendiente en Android, Web/Desktop y TalkBack.
 - Version declarada actual: `1.0.0+1`; `v0.2.0-alpha` es solo una propuesta hasta resolver estrategia de versionado.
 
-## Estado vigente de release hardening
+## Estado historico de release hardening
 
 - Los bloqueantes P1 detectados en la revision de Sprint 19 quedan corregidos en codigo.
 - Suite restaurada a 55/55 y `flutter analyze` sin issues.
 - Navegacion interna entre tabs reemplaza/limpia la shell en lugar de apilar otra navbar.
 - Riesgos rapidos de Stats corregidos: unidad mensual coherente y resumen semantico para graficas.
-- ReadPp queda listo para QA manual de v0.2.0-alpha.
-- Aun pendientes antes del build/tag final: validar Back en dispositivo, TalkBack, Android/Web/Desktop y decidir version de `pubspec.yaml`.
+- ReadPp quedo listo para QA manual de v0.2.0-alpha.
+- Este estado queda superado por la release alpha completada y distribuida.
+
+## Estado vigente v0.2.0-alpha
+
+- ReadPp v0.2.0-alpha esta completada y distribuida para QA externo.
+- APK Release generada.
+- Web desplegada en Vercel.
+- Testers externos activos.
+- QA manual previo a release completado.
+- Validacion automatizada vigente: 67/67 tests.
+- `flutter analyze` OK.
+- La instalacion limpia ya no debe mostrar libros demo/base; los datos demo quedan fuera del modo normal.
+- Empty states reales son parte del flujo esperado de usuario nuevo.
+- Perfil lector incluye validacion y normalizacion basica de nombre/saludo personalizado.
+- La busqueda Open Library mantiene `Reintentar` y alta manual como fallback cuando falla la conexion.
+- Insights/Curiosidades usa portadas o placeholder editorial cuando una curiosidad se refiere a un libro concreto.
+- Pendientes actuales: QA-018, QA-019, QA-020, QA-021 y QA-022.
+- Roadmap vigente: v0.3 Observabilidad, v0.4 Google Books fallback robustecido, v0.5 Supabase.
 
 ## Estadisticas MVP
 

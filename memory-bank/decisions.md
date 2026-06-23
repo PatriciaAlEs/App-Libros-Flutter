@@ -373,3 +373,16 @@
 - Datos y copy de una grafica deben compartir la misma unidad; `Paginas por mes` no puede resumirse con minutos.
 - Antes de crear el tag `v0.2.0-alpha`, decidir si se cambia `pubspec.yaml` desde `1.0.0+1` o si se mantiene la linea de versionado 1.0.
 - El commit `9af2843` mezcla Motion & Delight con Google Books; futuras entregas deben separar commits por sprint para mejorar trazabilidad.
+
+## Release alpha v0.2.0 - Decisiones cerradas
+
+- ReadPp v0.2.0-alpha se considera completada cuando existen APK Release, Web desplegada en Vercel, testers externos activos, `flutter analyze` OK y suite completa en verde.
+- Estado confirmado de release alpha: 67/67 tests.
+- Los datos demo/base no deben crearse en modo normal ni en release alpha. Solo pueden existir detras de un modo debug/demo explicito y desactivado por defecto.
+- Una instalacion limpia debe mostrar empty states reales y permitir probar onboarding/primer libro como usuario nuevo.
+- Perfil lector movil valida nombre/saludo personalizado con minimo 2, maximo 15, trim, capitalizacion inicial, caracteres permitidos y bloqueo basico de terminos ofensivos. Web/Desktop queda como deuda responsive posterior.
+- Open Library puede fallar temporalmente; el copy no debe sonar definitivo. Debe mantener `Reintentar` y `Anadir manualmente`.
+- Google Books queda en roadmap como fallback robustecido para v0.4, no como garantia de producto de v0.2 si no esta suficientemente observado/validado.
+- Insights/Curiosidades debe priorizar portadas o placeholder editorial cuando el dato este asociado a un libro concreto.
+- Pendientes post-alpha quedan identificados como QA-018, QA-019, QA-020, QA-021 y QA-022.
+- Roadmap aprobado: v0.3 Observabilidad, v0.4 Google Books fallback, v0.5 Supabase.
