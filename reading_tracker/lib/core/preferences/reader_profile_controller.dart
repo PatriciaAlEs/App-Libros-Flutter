@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'reader_profile_text_validator.dart';
+
 enum ReaderGreetingPreference {
   female(label: 'Lectora'),
   male(label: 'Lector'),
@@ -49,11 +51,11 @@ class ReaderProfile {
     );
   }
 
-  String get displayName => name.trim();
+  String get displayName => ReaderProfileTextValidator.normalize(name);
 
   String get fallbackGreeting {
     if (greetingPreference == ReaderGreetingPreference.custom) {
-      final cleanCustom = customGreeting.trim();
+      final cleanCustom = ReaderProfileTextValidator.normalize(customGreeting);
       return cleanCustom.isEmpty
           ? ReaderGreetingPreference.female.label
           : cleanCustom;
@@ -89,20 +91,28 @@ class ReaderProfileController extends StateNotifier<ReaderProfile> {
 
   Future<void> load() async {
     final preferences = await SharedPreferences.getInstance();
+    final storedName = preferences.getString(_nameKey) ?? '';
+    final storedCustomGreeting =
+        preferences.getString(_customGreetingKey) ?? '';
     state = ReaderProfile(
-      name: preferences.getString(_nameKey) ?? '',
+      name: ReaderProfileTextValidator.normalize(storedName),
       greetingPreference: ReaderGreetingPreference.fromName(
         preferences.getString(_greetingKey),
       ),
-      customGreeting: preferences.getString(_customGreetingKey) ?? '',
+      customGreeting: ReaderProfileTextValidator.normalize(
+        storedCustomGreeting,
+      ),
       currentReadingBookId: preferences.getString(_currentReadingBookIdKey),
     );
   }
 
-  Future<void> updateName(String name) async {
-    state = state.copyWith(name: name);
+  Future<String?> updateName(String name) async {
+    final validation = ReaderProfileTextValidator.validate(name);
+    if (!validation.isValid) return validation.error;
+    state = state.copyWith(name: validation.value);
     final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(_nameKey, name);
+    await preferences.setString(_nameKey, validation.value);
+    return null;
   }
 
   Future<void> updateGreetingPreference(
@@ -113,10 +123,19 @@ class ReaderProfileController extends StateNotifier<ReaderProfile> {
     await preferences.setString(_greetingKey, preference.name);
   }
 
-  Future<void> updateCustomGreeting(String greeting) async {
-    state = state.copyWith(customGreeting: greeting);
+  Future<String?> updateCustomGreeting(String greeting) async {
+    final normalized = ReaderProfileTextValidator.normalize(greeting);
+    if (normalized.isNotEmpty) {
+      final validation = ReaderProfileTextValidator.validate(
+        normalized,
+        fieldLabel: 'El saludo',
+      );
+      if (!validation.isValid) return validation.error;
+    }
+    state = state.copyWith(customGreeting: normalized);
     final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(_customGreetingKey, greeting);
+    await preferences.setString(_customGreetingKey, normalized);
+    return null;
   }
 
   Future<void> updateCurrentReadingBookId(String bookId) async {

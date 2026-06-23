@@ -364,13 +364,31 @@ void main() {
   testWidgets('book form distinguishes provider errors from no results', (
     tester,
   ) async {
+    var openLibraryRequests = 0;
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           bookRepositoryProvider.overrideWithValue(_CapturingBookRepository()),
           bookApiDatasourceProvider.overrideWithValue(
             BookApiDatasource(
-              MockClient((request) async => http.Response('Unavailable', 503)),
+              MockClient((request) async {
+                openLibraryRequests++;
+                if (openLibraryRequests == 1) {
+                  return http.Response('Unavailable', 503);
+                }
+                return http.Response(
+                  jsonEncode({
+                    'docs': [
+                      {
+                        'title': 'Libro recuperado',
+                        'author_name': ['Autora'],
+                        'first_publish_year': 2025,
+                      },
+                    ],
+                  }),
+                  200,
+                );
+              }),
             ),
           ),
           googleBooksDatasourceProvider.overrideWithValue(
@@ -388,14 +406,32 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.textContaining('No hemos podido conectar con Open Library.'),
+      find.textContaining(
+        'No hemos podido conectar con Open Library ahora mismo.',
+      ),
       findsOneWidget,
     );
+    expect(find.text('Reintentar'), findsOneWidget);
     expect(find.text('Añadir manualmente'), findsOneWidget);
     expect(
       find.text('No hemos encontrado resultados para tu búsqueda.'),
       findsNothing,
     );
+
+    await tester.tap(find.text('Reintentar'));
+    await tester.pumpAndSettle();
+
+    expect(openLibraryRequests, 2);
+    final recoveredResult = find.byKey(
+      const Key('book_result_0_Libro recuperado_Autora_2025'),
+    );
+    await tester.scrollUntilVisible(
+      recoveredResult,
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(recoveredResult, findsOneWidget);
+    expect(find.text('Reintentar'), findsNothing);
   });
 
   testWidgets('home swipes between multiple active readings', (tester) async {

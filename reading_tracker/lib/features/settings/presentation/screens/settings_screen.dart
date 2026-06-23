@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/branding/branding.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/preferences/reader_profile_controller.dart';
+import '../../../../core/preferences/reader_profile_text_validator.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_theme_controller.dart';
 
@@ -213,6 +215,8 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
   late final TextEditingController _nameController;
   late final TextEditingController _customGreetingController;
   late ReaderGreetingPreference _draftGreetingPreference;
+  String? _nameError;
+  String? _customGreetingError;
 
   @override
   void initState() {
@@ -288,10 +292,16 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
           TextField(
             controller: _nameController,
             textCapitalization: TextCapitalization.words,
+            maxLength: ReaderProfileTextValidator.maxLength,
+            maxLengthEnforcement: MaxLengthEnforcement.none,
+            onChanged: (_) {
+              if (_nameError != null) setState(() => _nameError = null);
+            },
             decoration: InputDecoration(
               labelText: 'Nombre',
               hintText: 'Patricia',
               prefixIcon: const Icon(AppIcons.profile),
+              errorText: _nameError,
               filled: true,
               fillColor: theme.colorScheme.surface.withValues(alpha: 0.72),
               enabledBorder: OutlineInputBorder(
@@ -356,10 +366,19 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _customGreetingController,
+              textCapitalization: TextCapitalization.sentences,
+              maxLength: ReaderProfileTextValidator.maxLength,
+              maxLengthEnforcement: MaxLengthEnforcement.none,
+              onChanged: (_) {
+                if (_customGreetingError != null) {
+                  setState(() => _customGreetingError = null);
+                }
+              },
               decoration: InputDecoration(
                 labelText: 'Mi propio saludo',
                 hintText: 'Ej. Lectora nocturna',
                 prefixIcon: const Icon(AppIcons.bookmark),
+                errorText: _customGreetingError,
                 filled: true,
                 fillColor: theme.colorScheme.surface.withValues(alpha: 0.72),
                 enabledBorder: OutlineInputBorder(
@@ -399,12 +418,34 @@ class _ReaderProfileSectionState extends ConsumerState<_ReaderProfileSection> {
   }
 
   Future<void> _saveProfile() async {
-    final controller = ref.read(readerProfileControllerProvider.notifier);
-    await controller.updateName(_nameController.text.trim());
-    await controller.updateGreetingPreference(_draftGreetingPreference);
-    await controller.updateCustomGreeting(
-      _customGreetingController.text.trim(),
+    final nameValidation = ReaderProfileTextValidator.validate(
+      _nameController.text,
     );
+    final customGreetingValidation =
+        _draftGreetingPreference == ReaderGreetingPreference.custom
+        ? ReaderProfileTextValidator.validate(
+            _customGreetingController.text,
+            fieldLabel: 'El saludo',
+          )
+        : null;
+    setState(() {
+      _nameError = nameValidation.error;
+      _customGreetingError = customGreetingValidation?.error;
+    });
+    if (!nameValidation.isValid || customGreetingValidation?.isValid == false) {
+      return;
+    }
+
+    final controller = ref.read(readerProfileControllerProvider.notifier);
+    await controller.updateName(nameValidation.value);
+    await controller.updateGreetingPreference(_draftGreetingPreference);
+    if (customGreetingValidation != null) {
+      await controller.updateCustomGreeting(customGreetingValidation.value);
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Perfil guardado.')));
   }
 }
 

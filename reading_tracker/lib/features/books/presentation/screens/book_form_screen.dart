@@ -591,6 +591,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
             if (_error != null) ...[
               _InlineError(
                 message: _error!,
+                onRetry: _search,
                 onManualAdd: _searchController.text.trim().isEmpty
                     ? null
                     : _selectManualBook,
@@ -743,9 +744,8 @@ class _AddBookHero extends StatelessWidget {
 }
 
 String _bookSearchErrorMessage(Object _) {
-  return 'No hemos podido conectar con Open Library.\n'
-      'Comprueba tu conexión e inténtalo de nuevo.\n'
-      'También puedes añadir el libro manualmente.';
+  return 'No hemos podido conectar con Open Library ahora mismo.\n'
+      'Puedes reintentar o añadir el libro manualmente.';
 }
 
 class _FormSection extends StatelessWidget {
@@ -808,9 +808,14 @@ class _FormSection extends StatelessWidget {
 }
 
 class _InlineError extends StatelessWidget {
-  const _InlineError({required this.message, this.onManualAdd});
+  const _InlineError({
+    required this.message,
+    required this.onRetry,
+    this.onManualAdd,
+  });
 
   final String message;
+  final VoidCallback onRetry;
   final VoidCallback? onManualAdd;
 
   @override
@@ -840,14 +845,24 @@ class _InlineError extends StatelessWidget {
               ),
             ],
           ),
-          if (onManualAdd != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            OutlinedButton.icon(
-              onPressed: onManualAdd,
-              icon: const Icon(Icons.edit_note_rounded),
-              label: const Text('Añadir manualmente'),
-            ),
-          ],
+          const SizedBox(height: AppSpacing.sm),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              OutlinedButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('Reintentar'),
+              ),
+              if (onManualAdd != null)
+                OutlinedButton.icon(
+                  onPressed: onManualAdd,
+                  icon: const Icon(Icons.edit_note_rounded),
+                  label: const Text('Añadir manualmente'),
+                ),
+            ],
+          ),
         ],
       ),
     );

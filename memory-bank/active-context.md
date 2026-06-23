@@ -52,6 +52,11 @@ Design Decisions - Do Not Regress:
 - Reading Challenge usa `Buscar libro` / `Cambiar libro`, nunca `Buscar portada`.
 - En Calendario los dias son clicables y no debe mostrarse el CTA `Abrir calendario`.
 
+## Deuda tecnica posterior a v0.2.0-alpha
+
+- Busqueda multi-source: consolidar Google Books como segunda fuente estable y observable en v0.3/v0.4. Orden objetivo: Open Library -> Google Books -> alta manual. La arquitectura y datasource existen, pero requieren QA de fiabilidad, limites y telemetria antes de considerarlos garantia de producto.
+- Perfil Web/Desktop: el perfil personalizado queda validado para el flujo movil de v0.2.0-alpha. La composicion responsive y ergonomia de edicion en Web/Desktop requieren una revision especifica posterior; no forman parte de esta version.
+
 ## Contexto historico reciente
 
 Hito 5: UX/UI Premium Redesign.
