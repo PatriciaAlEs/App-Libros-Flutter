@@ -25,6 +25,7 @@
 - Alpha QA: shared header basado en Biblioteca, card compartida de lectura actual, carrusel de multiples lecturas activas, calendario/diario sincronizados, polish de reto lector/insights y QA manual previo a release completado.
 - Busqueda de libros: Open Library como proveedor primario, Google Books como fallback, alta manual como ultima opcion y deduplicacion por ISBN, proveedor+externalId o titulo+autor normalizados.
 - Release alpha: ReadPp v0.2.0-alpha completada con APK Release generada, Web desplegada en Vercel, testers externos activos, 67/67 tests y `flutter analyze` OK.
+- Observabilidad: Sprint 20.1 completado con Sentry integrado, configuracion por entorno, DSN via `dart-define`, captura global de errores, breadcrumbs/captura para Open Library y validacion real en Web Release.
 
 ## Fuera de alcance por ahora
 
@@ -36,6 +37,7 @@
 ## Roadmap vigente
 
 - Resolver QA-018, QA-019, QA-020, QA-021 y QA-022 detectadas tras la salida alpha.
-- v0.3 Observabilidad.
+- Sprint 20.2 Analytics.
+- Sprint 20.3 Funnel basico.
 - v0.4 Google Books fallback robustecido.
 - v0.5 Supabase para Auth, backend cloud y sincronizacion multi-dispositivo manteniendo persistencia local.

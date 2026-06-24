@@ -379,7 +379,28 @@
 - Navegacion y navbar principal quedan estabilizadas para flujos principales; no debe apilar shells ni ocultar navbar en pantallas principales/hijas del flujo.
 - Carrusel de lecturas activas queda separado de la seleccion explicita de lectura principal.
 - Pendientes QA post-alpha: QA-018, QA-019, QA-020, QA-021 y QA-022.
-- Roadmap actualizado: v0.3 Observabilidad, v0.4 Google Books fallback robustecido, v0.5 Supabase.
+- Roadmap actualizado tras Sprint 20.1: Observabilidad completada; siguientes bloques Sprint 20.2 Analytics, Sprint 20.3 Funnel basico, v0.4 Google Books fallback robustecido y v0.5 Supabase.
+
+## Hito 6 - Observabilidad Sprint 20.1
+
+- Sprint 20.1 Observabilidad completado y validado.
+- Sentry integrado en ReadPp mediante `ReadPpSentry`.
+- Configuracion por entorno disponible con `SENTRY_ENVIRONMENT`.
+- DSN configurado mediante `SENTRY_DSN` via `dart-define`.
+- Release configurable mediante `SENTRY_RELEASE`.
+- Captura global de errores habilitada por `SentryFlutter.init` en modo release con DSN presente.
+- Breadcrumbs agregados para busquedas Open Library.
+- Captura de errores de busqueda Open Library implementada con contexto, tags y metadata de busqueda.
+- Validacion real completada en Web Release.
+- Evento de validacion recibido correctamente en Sentry.
+- Environment validado: `alpha`.
+- Release validada: `0.2.0-alpha`.
+- Infraestructura temporal de validacion manual retirada tras confirmar el evento real en Sentry.
+- Eliminados `sentry_validation_screen.dart`, la ruta `/__readpp/sentry-validation`, `READPP_ENABLE_SENTRY_VALIDATION` y `captureValidationException()`.
+- La integracion real de Sentry se mantiene intacta: init, configuracion, observers, breadcrumbs y captura de errores Open Library.
+- Validacion tras retirar la infraestructura temporal: `flutter analyze` OK y `flutter test` OK con 67/67 tests.
+- Pendiente: Sprint 20.2 Analytics.
+- Pendiente: Sprint 20.3 Funnel basico.
 
 ## Parcial / en seguimiento
 
@@ -398,6 +419,7 @@
 - Estado vigente tras Sprint 19.6: Insights Premium implementado y analisis estatico limpio.
 - Estado vigente tras Sprint 19.7: Accessibility & Responsiveness implementado; validacion posterior de release alpha superada.
 - Estado vigente v0.2.0-alpha: release generada, web desplegada en Vercel, testers externos activos, 67/67 tests y `flutter analyze` OK.
+- Estado vigente tras Sprint 20.1: Observabilidad/Sentry completada y validada en Web Release; evento recibido en Sentry con environment `alpha` y release `0.2.0-alpha`.
 - Las notas pendientes de validacion de sprints anteriores quedan como historial superado por la validacion vigente de Sprint 13.
 
 - Actualizacion Sprint 12: ReadPp se considera feature-complete para v1, pendiente de release readiness.
@@ -424,7 +446,8 @@
 - Ejecutar validacion local de Sprint 15 en VS Code: `dart format`, `flutter analyze` y `flutter test`.
 - Ejecutar validacion local de Sprint 17.x en VS Code: `dart format .`, `flutter pub get`, `flutter analyze`, `flutter test` y `git status`.
 - Resolver QA-018, QA-019, QA-020, QA-021 y QA-022.
-- Preparar v0.3 Observabilidad.
+- Preparar Sprint 20.2 Analytics.
+- Preparar Sprint 20.3 Funnel basico.
 - Preparar v0.4 Google Books fallback robustecido.
 - Preparar v0.5 Supabase para Auth, backend cloud y sincronizacion.
 

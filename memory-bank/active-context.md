@@ -2,9 +2,9 @@
 
 ## Foco actual
 
-ReadPp v0.2.0-alpha: release alpha completada y en QA externo.
+ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1 validada.
 
-Estado confirmado 2026-06-23:
+Estado confirmado 2026-06-24:
 
 - APK Release generada.
 - Web desplegada en Vercel.
@@ -12,6 +12,12 @@ Estado confirmado 2026-06-23:
 - Validacion automatizada vigente: 67/67 tests.
 - `flutter analyze` OK.
 - QA manual completo para el bloque previo a release alpha.
+- Sprint 20.1 Observabilidad completado y validado en Web Release.
+- Sentry integrado con configuracion por entorno, DSN via `dart-define`, captura global de errores, breadcrumbs y captura de errores de busqueda Open Library.
+- Validacion real completada: evento recibido correctamente en Sentry.
+- Environment validado: `alpha`.
+- Release validada: `0.2.0-alpha`.
+- Infraestructura temporal de validacion manual de Sentry retirada tras Sprint 20.1.
 
 Hitos cerrados para v0.2.0-alpha:
 
@@ -33,7 +39,8 @@ Pendientes abiertos de QA post-alpha:
 
 Roadmap vigente:
 
-- v0.3 Observabilidad.
+- Sprint 20.2 Analytics.
+- Sprint 20.3 Funnel basico.
 - v0.4 Google Books fallback robustecido como segunda fuente.
 - v0.5 Supabase para Auth, backend cloud y sincronizacion multi-dispositivo.
 
@@ -75,7 +82,8 @@ Limitaciones conocidas vigentes:
 Roadmap inmediato:
 
 - Resolver QA-018 a QA-022 con cambios acotados de hardening.
-- Preparar v0.3 Observabilidad.
+- Preparar Sprint 20.2 Analytics.
+- Preparar Sprint 20.3 Funnel basico.
 - Preparar v0.4 Google Books fallback robustecido.
 - Preparar v0.5 Supabase.
 

@@ -331,6 +331,18 @@ reading_tracker/lib/
 - Responsive debe resolverse en presentacion mediante `LayoutBuilder`, `Wrap`, constraints y `MediaQuery.textScalerOf`, sin contaminar dominio o persistencia.
 - La informacion comunicada por color debe tener equivalente textual o semantico.
 
+### Observabilidad Hito 6 Sprint 20.1
+
+- `core/observability/readpp_sentry.dart` centraliza la integracion con Sentry.
+- La app inicializa Sentry desde `main.dart` mediante `ReadPpSentry.init`.
+- Sentry se habilita solo en release y con `SENTRY_DSN` definido via `dart-define`.
+- `SENTRY_ENVIRONMENT` y `SENTRY_RELEASE` controlan el entorno y la version reportados sin hardcodear secretos.
+- Los observers de navegacion se obtienen desde `ReadPpSentry.navigatorObservers()` para evitar acoplar pantallas a Sentry.
+- Open Library agrega breadcrumbs y captura excepciones desde helpers especificos de `ReadPpSentry`.
+- Los eventos de busqueda incluyen contexto diagnostico, tags y metadata, pero la UX mantiene mensajes genericos y accionables para usuario final.
+- La infraestructura temporal de validacion manual se retiro tras Sprint 20.1; no debe quedar ruta oculta, flag de validacion ni metodo manual de captura en builds normales.
+- Validacion real confirmada en Web Release: evento recibido en Sentry con environment `alpha` y release `0.2.0-alpha`.
+
 ### Hallazgos arquitectonicos revision Sprint 19
 
 - `MainNavigationScreen` debe ser un shell unico por flujo principal; navegar entre tabs requiere coordinacion de indice, no apilar nuevas instancias del shell.

@@ -4,7 +4,7 @@
 
 `reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario, estadisticas basicas e insights de lectura.
 
-Estado tras Hito 6 Sprint 18.x: ReadPp esta en Alpha Testing & Polish, con foco en Android QA, UX consistency, visual polish, busqueda robusta y preparacion Beta.
+Estado tras Hito 6 Sprint 20.1: ReadPp esta en Alpha Testing & Polish con Observabilidad/Sentry completada y validada en Web Release.
 
 Sprint 18.x Alpha QA implementado:
 
@@ -44,6 +44,8 @@ Estado de roadmap:
 
 - Hito 6 continua con Alpha QA, polish y Beta readiness.
 - Hito 7 ya inicio con Premium Experience: Motion & Delight y Premium Statistics aplicados.
+- Sprint 20.1 Observabilidad esta completado y validado.
+- Siguientes bloques: Sprint 20.2 Analytics y Sprint 20.3 Funnel basico.
 - Proximo paso tecnico mayor post-Alpha: Supabase Auth + backend cloud + sincronizacion multi-dispositivo manteniendo persistencia local.
 - Hito 7: Premium Experience (motion, skeleton loaders, microinteracciones, empty states, estadisticas visuales premium).
 - Hito 8: Beta Readiness (Android/Web/Windows QA, Beta APK/AAB, store assets, privacy policy, Play Store release preparation).
@@ -505,7 +507,27 @@ Estado confirmado por el usuario:
 - La busqueda Open Library mantiene `Reintentar` y alta manual como fallback cuando falla la conexion.
 - Insights/Curiosidades usa portadas o placeholder editorial cuando una curiosidad se refiere a un libro concreto.
 - Pendientes actuales: QA-018, QA-019, QA-020, QA-021 y QA-022.
-- Roadmap vigente: v0.3 Observabilidad, v0.4 Google Books fallback robustecido, v0.5 Supabase.
+- Observabilidad Sprint 20.1 esta completada: Sentry integrado, configurado por entorno, DSN via `dart-define`, captura global de errores, breadcrumbs para Open Library y captura de errores de busqueda.
+- Validacion real de Sentry completada en Web Release: evento recibido correctamente con environment `alpha` y release `0.2.0-alpha`.
+- Roadmap vigente: Sprint 20.2 Analytics, Sprint 20.3 Funnel basico, v0.4 Google Books fallback robustecido, v0.5 Supabase.
+
+## Observabilidad
+
+Estado actual implementado:
+
+- `ReadPpSentry` centraliza la integracion con Sentry.
+- Sentry se habilita solo en release cuando existe `SENTRY_DSN`.
+- `SENTRY_ENVIRONMENT` permite configurar el entorno; si no se define, se deriva de modo de ejecucion.
+- `SENTRY_RELEASE` permite fijar la release reportada.
+- Web Release validado con environment `alpha` y release `0.2.0-alpha`.
+- La app captura errores globales mediante `SentryFlutter.init`.
+- La navegacion agrega `SentryNavigatorObserver` cuando Sentry esta habilitado.
+- Open Library agrega breadcrumbs de busqueda con proveedor, query, plataforma, release, duracion, resultados y tipo de fallo cuando aplica.
+- Los errores de busqueda Open Library se capturan con `Sentry.captureException`, tags y contexto especifico.
+- La infraestructura temporal de validacion manual fue retirada tras confirmar el evento real en Sentry.
+- Ya no existen ruta oculta de validacion, `READPP_ENABLE_SENTRY_VALIDATION` ni `captureValidationException()`.
+- Evento real recibido correctamente en Sentry durante la validacion Web Release.
+- Validacion tras limpieza temporal: `flutter analyze` OK y `flutter test` OK con 67/67 tests.
 
 ## Estadisticas MVP
 

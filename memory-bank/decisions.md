@@ -385,4 +385,20 @@
 - Google Books queda en roadmap como fallback robustecido para v0.4, no como garantia de producto de v0.2 si no esta suficientemente observado/validado.
 - Insights/Curiosidades debe priorizar portadas o placeholder editorial cuando el dato este asociado a un libro concreto.
 - Pendientes post-alpha quedan identificados como QA-018, QA-019, QA-020, QA-021 y QA-022.
-- Roadmap aprobado: v0.3 Observabilidad, v0.4 Google Books fallback, v0.5 Supabase.
+- Roadmap actualizado tras Sprint 20.1: Observabilidad completada; siguientes bloques Sprint 20.2 Analytics, Sprint 20.3 Funnel basico, v0.4 Google Books fallback y v0.5 Supabase.
+
+## Observabilidad Hito 6 Sprint 20.1
+
+- Sentry queda como herramienta de observabilidad de ReadPp para errores de release.
+- La integracion debe centralizarse en `ReadPpSentry`; evitar llamadas dispersas a Sentry desde features salvo a traves de helpers explicitos.
+- Sentry solo se habilita en `kReleaseMode` y con `SENTRY_DSN` no vacio para no afectar tests, debug ni flujo normal.
+- El DSN se configura mediante `--dart-define=SENTRY_DSN=...`; no commitear secretos ni valores reales.
+- `SENTRY_ENVIRONMENT` define el entorno reportado cuando se necesite separar `alpha`, `beta`, `production` u otros.
+- `SENTRY_RELEASE` define la release reportada; para la validacion alpha se uso `0.2.0-alpha`.
+- Open Library debe registrar breadcrumbs y capturar excepciones con contexto suficiente para diagnosticar busquedas, manteniendo los mensajes de usuario desacoplados del proveedor.
+- Los eventos de busqueda pueden incluir proveedor, query, plataforma, release, duracion, resultados, tipo de fallo y status code si existe.
+- La validacion manual de Sentry fue temporal y quedo retirada tras Sprint 20.1.
+- No debe quedar visible ni accesible ninguna accion manual de validacion en builds normales de usuarios finales.
+- Si se necesita revalidar Sentry en el futuro, cualquier infraestructura manual debe ser explicitamente temporal, protegida y retirada al terminar la validacion.
+- Sprint 20.1 se considera validado porque el evento real fue recibido correctamente en Sentry con environment `alpha` y release `0.2.0-alpha`.
+- Pendientes siguientes: Sprint 20.2 Analytics y Sprint 20.3 Funnel basico.

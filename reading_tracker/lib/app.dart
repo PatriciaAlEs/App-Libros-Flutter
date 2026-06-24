@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/design_system/design_system.dart';
 import 'core/observability/readpp_sentry.dart';
-import 'core/observability/sentry_validation_screen.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_theme_controller.dart';
 import 'features/navigation/presentation/screens/main_navigation_screen.dart';
@@ -41,10 +40,6 @@ class App extends ConsumerWidget {
     switch (settings.name) {
       case '/':
         return _route(settings, (_) => const MainNavigationScreen());
-
-      case '/__readpp/sentry-validation':
-        if (!ReadPpSentry.validationActionEnabled) return _notFoundRoute();
-        return _route(settings, (_) => const SentryValidationScreen());
 
       case '/home':
         return _route(settings, (_) => const MainNavigationScreen());

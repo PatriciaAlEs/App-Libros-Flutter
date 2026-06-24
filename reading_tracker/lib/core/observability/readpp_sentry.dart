@@ -17,13 +17,8 @@ class ReadPpSentry {
     'SENTRY_RELEASE',
     defaultValue: 'reading_tracker@1.0.0+1',
   );
-  static const _validationActionEnabled = bool.fromEnvironment(
-    'READPP_ENABLE_SENTRY_VALIDATION',
-  );
 
   static bool get isEnabled => kReleaseMode && _dsn.trim().isNotEmpty;
-  static bool get validationActionEnabled =>
-      kIsWeb && isEnabled && _validationActionEnabled;
 
   static String get environment {
     if (_environmentOverride.trim().isNotEmpty) {
@@ -127,27 +122,6 @@ class ReadPpSentry {
           scope.setTag('http.status_code', '$statusCode');
         }
         scope.setContexts('open_library_search', context);
-      },
-    );
-  }
-
-  static Future<void> captureValidationException() async {
-    if (!validationActionEnabled) return;
-
-    final exception = StateError('ReadPp manual Sentry validation exception');
-    final stackTrace = StackTrace.current;
-
-    await Sentry.captureException(
-      exception,
-      stackTrace: stackTrace,
-      withScope: (scope) {
-        scope.setTag('validation', 'manual_sentry_check');
-        scope.setTag('platform', platformName);
-        scope.setContexts('readpp_sentry_validation', {
-          'release': release,
-          'environment': environment,
-          'platform': platformName,
-        });
       },
     );
   }
