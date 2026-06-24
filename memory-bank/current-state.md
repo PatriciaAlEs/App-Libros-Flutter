@@ -4,7 +4,7 @@
 
 `reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario, estadisticas basicas e insights de lectura.
 
-Estado tras Hito 6 Sprint 20.1: ReadPp esta en Alpha Testing & Polish con Observabilidad/Sentry completada y validada en Web Release.
+Estado tras Hito 6 Sprint 20.2: ReadPp esta en Alpha Testing & Polish con Observabilidad/Sentry completada y Analytics de producto/PostHog completado y validado.
 
 Sprint 18.x Alpha QA implementado:
 
@@ -45,7 +45,8 @@ Estado de roadmap:
 - Hito 6 continua con Alpha QA, polish y Beta readiness.
 - Hito 7 ya inicio con Premium Experience: Motion & Delight y Premium Statistics aplicados.
 - Sprint 20.1 Observabilidad esta completado y validado.
-- Siguientes bloques: Sprint 20.2 Analytics y Sprint 20.3 Funnel basico.
+- Sprint 20.2 Analytics esta completado y validado.
+- Siguiente bloque: Sprint 20.3 Funnel basico.
 - Proximo paso tecnico mayor post-Alpha: Supabase Auth + backend cloud + sincronizacion multi-dispositivo manteniendo persistencia local.
 - Hito 7: Premium Experience (motion, skeleton loaders, microinteracciones, empty states, estadisticas visuales premium).
 - Hito 8: Beta Readiness (Android/Web/Windows QA, Beta APK/AAB, store assets, privacy policy, Play Store release preparation).
@@ -510,7 +511,8 @@ Estado confirmado por el usuario:
 - Pendientes actuales: QA-018, QA-019, QA-020, QA-021 y QA-022.
 - Observabilidad Sprint 20.1 esta completada: Sentry integrado, configurado por entorno, DSN via `dart-define`, captura global de errores, breadcrumbs para Open Library y captura de errores de busqueda.
 - Validacion real de Sentry completada en Web Release: evento recibido correctamente con environment `alpha` y release `0.2.0-alpha`.
-- Roadmap vigente: Sprint 20.2 Analytics, Sprint 20.3 Funnel basico, v0.4 Google Books fallback robustecido, v0.5 Supabase.
+- Analytics Sprint 20.2 completado: PostHog por HTTP detras de `ReadPpAnalytics`, configuracion via `dart-define` y eventos de producto basicos recibidos correctamente.
+- Roadmap vigente: Sprint 20.3 Funnel basico, v0.4 Google Books fallback robustecido, v0.5 Supabase.
 
 ## Observabilidad
 
@@ -529,6 +531,32 @@ Estado actual implementado:
 - Ya no existen ruta oculta de validacion, `READPP_ENABLE_SENTRY_VALIDATION` ni `captureValidationException()`.
 - Evento real recibido correctamente en Sentry durante la validacion Web Release.
 - Validacion tras limpieza temporal: `flutter analyze` OK y `flutter test` OK con 67/67 tests.
+
+## Analytics
+
+Estado actual implementado:
+
+- `ReadPpAnalytics` centraliza analytics de producto en `core/analytics`.
+- PostHog se usa mediante HTTP directo, no SDK acoplado a widgets.
+- Configuracion por `dart-define`: `ANALYTICS_ENABLED`, `POSTHOG_API_KEY`, `POSTHOG_HOST` y `APP_ENV`.
+- Sin configuracion valida, la capa queda en no-op y la app funciona igual.
+- Eventos implementados: onboarding completado, libro agregado, alta manual, libro completado, sesion creada, busqueda iniciada/completada/fallida/sin resultados y reto anual creado/actualizado.
+- Privacidad aplicada: no se envian titulos, autores, notas, resenas, nombres de usuario ni queries exactas.
+- Se envian solo buckets, booleanos, longitudes, contadores, plataforma, `app_env` y release si existe.
+- Los eventos usan `distinct_id` anonimo local y `$process_person_profile=false`.
+- Eventos reales validados en PostHog: `onboarding_completed`, `search_started`, `search_completed`, `search_no_results`, `book_added`, `book_completed` y `reading_session_created`.
+- Visualizacion validada en PostHog: `Activity` y `Trends`; prueba de Trends con `book_added = 2` y `reading_session_created = 1`.
+- Validacion local Sprint 20.2: `flutter analyze` OK y `flutter test` OK con 67/67 tests.
+
+## Estado producto Observabilidad
+
+- ReadPp dispone de APK Android.
+- ReadPp dispone de Web App / PWA desplegada en Vercel.
+- Open Library esta integrado como busqueda principal.
+- Sentry cubre observabilidad de errores: que falla.
+- PostHog cubre analytics de producto: que hacen los usuarios.
+- Metricas disponibles: onboarding completados, libros anadidos, sesiones registradas, busquedas realizadas, busquedas sin resultados y libros completados.
+- Validacion automatizada vigente: 67/67 tests.
 
 ## Estadisticas MVP
 

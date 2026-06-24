@@ -385,7 +385,7 @@
 - Google Books queda en roadmap como fallback robustecido para v0.4, no como garantia de producto de v0.2 si no esta suficientemente observado/validado.
 - Insights/Curiosidades debe priorizar portadas o placeholder editorial cuando el dato este asociado a un libro concreto.
 - Pendientes post-alpha quedan identificados como QA-018, QA-019, QA-020, QA-021 y QA-022.
-- Roadmap actualizado tras Sprint 20.1: Observabilidad completada; siguientes bloques Sprint 20.2 Analytics, Sprint 20.3 Funnel basico, v0.4 Google Books fallback y v0.5 Supabase.
+- Roadmap actualizado tras Sprint 20.2: Observabilidad y Analytics completados; siguientes bloques Sprint 20.3 Funnel basico, v0.4 Google Books fallback y v0.5 Supabase.
 
 ## Web Deployment
 
@@ -407,9 +407,9 @@
 
 - Sentry queda como herramienta de observabilidad de ReadPp para errores de release.
 - La integracion debe centralizarse en `ReadPpSentry`; evitar llamadas dispersas a Sentry desde features salvo a traves de helpers explicitos.
-- Sentry solo se habilita en `kReleaseMode` y con `SENTRY_DSN` no vacio para no afectar tests, debug ni flujo normal.
+- Sentry solo se habilita en release y con `SENTRY_DSN` no vacio para no afectar tests, debug ni flujo normal.
 - El DSN se configura mediante `--dart-define=SENTRY_DSN=...`; no commitear secretos ni valores reales.
-- `SENTRY_ENVIRONMENT` define el entorno reportado cuando se necesite separar `alpha`, `beta`, `production` u otros.
+- `APP_ENV` / entorno alpha se usa para separar eventos de validacion y release segun configuracion vigente del sprint.
 - `SENTRY_RELEASE` define la release reportada; para la validacion alpha se uso `0.2.0-alpha`.
 - Open Library debe registrar breadcrumbs y capturar excepciones con contexto suficiente para diagnosticar busquedas, manteniendo los mensajes de usuario desacoplados del proveedor.
 - Los eventos de busqueda pueden incluir proveedor, query, plataforma, release, duracion, resultados, tipo de fallo y status code si existe.
@@ -417,4 +417,22 @@
 - No debe quedar visible ni accesible ninguna accion manual de validacion en builds normales de usuarios finales.
 - Si se necesita revalidar Sentry en el futuro, cualquier infraestructura manual debe ser explicitamente temporal, protegida y retirada al terminar la validacion.
 - Sprint 20.1 se considera validado porque el evento real fue recibido correctamente en Sentry con environment `alpha` y release `0.2.0-alpha`.
-- Pendientes siguientes: Sprint 20.2 Analytics y Sprint 20.3 Funnel basico.
+- Pendiente siguiente: Sprint 20.3 Funnel basico.
+
+## Analytics Hito 6 Sprint 20.2
+
+- PostHog se usa para analytics de producto; no usar Firebase Analytics en este sprint.
+- No se integra SDK de PostHog directamente en widgets: usar `ReadPpAnalytics`.
+- La clave de PostHog no se hardcodea; siempre entra por `POSTHOG_API_KEY` via `dart-define`.
+- Las claves no deben guardarse en repositorio ni en Memory Bank.
+- `ANALYTICS_ENABLED=true` y `POSTHOG_API_KEY` no vacio son necesarios para enviar eventos.
+- `POSTHOG_HOST` permite apuntar a EU Cloud u otro host compatible; en alpha se usa EU Cloud.
+- `APP_ENV` identifica el entorno de producto, por ejemplo `alpha`.
+- Sin configuracion valida, analytics debe ser no-op y la app debe funcionar igual.
+- Los eventos no deben contener titulos, autores, notas, resenas, nombre de usuario ni query exacta.
+- Las propiedades permitidas son derivadas: buckets, booleanos, longitudes y contadores.
+- Los eventos PostHog se envian como anonimos con `$process_person_profile=false`.
+- Eventos minimos Sprint 20.2: onboarding, alta de libros, alta manual, completado de libro, sesiones, busqueda Open Library y reto anual.
+- Sprint 20.2 queda cerrado porque la app fue ejecutada con analytics activo y eventos reales aparecieron en PostHog.
+- Validacion de producto: `Activity` y `Trends` revisados, con prueba de Trends `book_added = 2` y `reading_session_created = 1`.
+- Validacion tecnica: `flutter analyze` OK y `flutter test` OK con 67/67 tests.

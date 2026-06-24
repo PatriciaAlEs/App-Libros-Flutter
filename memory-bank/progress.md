@@ -381,7 +381,7 @@
 - Navegacion y navbar principal quedan estabilizadas para flujos principales; no debe apilar shells ni ocultar navbar en pantallas principales/hijas del flujo.
 - Carrusel de lecturas activas queda separado de la seleccion explicita de lectura principal.
 - Pendientes QA post-alpha: QA-018, QA-019, QA-020, QA-021 y QA-022.
-- Roadmap actualizado tras Sprint 20.1: Observabilidad completada; siguientes bloques Sprint 20.2 Analytics, Sprint 20.3 Funnel basico, v0.4 Google Books fallback robustecido y v0.5 Supabase.
+- Roadmap actualizado tras Sprint 20.2: Observabilidad y Analytics completados; siguientes bloques Sprint 20.3 Funnel basico, v0.4 Google Books fallback robustecido y v0.5 Supabase.
 
 ## Hito 6 - Observabilidad Sprint 20.1
 
@@ -401,8 +401,27 @@
 - Eliminados `sentry_validation_screen.dart`, la ruta `/__readpp/sentry-validation`, `READPP_ENABLE_SENTRY_VALIDATION` y `captureValidationException()`.
 - La integracion real de Sentry se mantiene intacta: init, configuracion, observers, breadcrumbs y captura de errores Open Library.
 - Validacion tras retirar la infraestructura temporal: `flutter analyze` OK y `flutter test` OK con 67/67 tests.
-- Pendiente: Sprint 20.2 Analytics.
 - Pendiente: Sprint 20.3 Funnel basico.
+
+## Hito 6 - Analytics Sprint 20.2
+
+- Sprint 20.2 Analytics completado y validado.
+- `ReadPpAnalytics` creado en `core/analytics/readpp_analytics.dart`, siguiendo el estilo transversal de `ReadPpSentry`.
+- PostHog queda desacoplado de widgets y pantallas mediante una API propia de eventos de producto.
+- Configuracion por `dart-define`: `ANALYTICS_ENABLED`, `POSTHOG_API_KEY`, `POSTHOG_HOST` y `APP_ENV`.
+- La app funciona sin analytics configurado; si falta API key o `ANALYTICS_ENABLED` no es `true`, la capa queda en no-op.
+- El envio usa HTTP directo al endpoint publico de PostHog `/i/v0/e/`, sin anadir SDK ni Firebase Analytics.
+- `distinct_id` anonimo persistido localmente; los eventos incluyen `$process_person_profile=false`.
+- Eventos implementados: `onboarding_completed`, `book_added`, `manual_book_added`, `book_completed`, `reading_session_created`, `search_started`, `search_completed`, `search_failed`, `search_no_results`, `annual_goal_created` y `annual_goal_updated`.
+- Privacidad: no se envian titulos, autores, notas, resenas, nombre de usuario ni query exacta.
+- Datos enviados: buckets, booleanos, longitudes, contadores, `app_env`, plataforma y release si existe.
+- App ejecutada con Analytics activo y eventos recibidos correctamente en PostHog.
+- Eventos validados en PostHog: `onboarding_completed`, `search_started`, `search_completed`, `search_no_results`, `book_added`, `book_completed` y `reading_session_created`.
+- Visualizacion validada en PostHog: `Activity` y `Trends`.
+- Prueba de Trends validada: `book_added = 2` y `reading_session_created = 1`.
+- Validacion local: `flutter analyze` OK y `flutter test` OK con 67/67 tests.
+- Validacion adicional: test focalizado con analytics activado, API key ficticia y host local no disponible; la app no rompe si PostHog no responde.
+- Archivos relevantes: `readpp_analytics.dart`, `book_api_datasource.dart`, `book_form_screen.dart`, `book_detail_screen.dart`, `onboarding_controller.dart`, `register_reading_session.dart` y `save_annual_reading_goal.dart`.
 
 ## Parcial / en seguimiento
 
@@ -422,6 +441,7 @@
 - Estado vigente tras Sprint 19.7: Accessibility & Responsiveness implementado; validacion posterior de release alpha superada.
 - Estado vigente v0.2.0-alpha: release generada, web desplegada en Vercel, testers externos activos, 67/67 tests y `flutter analyze` OK.
 - Estado vigente tras Sprint 20.1: Observabilidad/Sentry completada y validada en Web Release; evento recibido en Sentry con environment `alpha` y release `0.2.0-alpha`.
+- Estado vigente tras Sprint 20.2: Analytics/PostHog completado y validado; Activity y Trends muestran eventos reales de producto.
 - Las notas pendientes de validacion de sprints anteriores quedan como historial superado por la validacion vigente de Sprint 13.
 
 - Actualizacion Sprint 12: ReadPp se considera feature-complete para v1, pendiente de release readiness.
@@ -448,7 +468,6 @@
 - Ejecutar validacion local de Sprint 15 en VS Code: `dart format`, `flutter analyze` y `flutter test`.
 - Ejecutar validacion local de Sprint 17.x en VS Code: `dart format .`, `flutter pub get`, `flutter analyze`, `flutter test` y `git status`.
 - Resolver QA-018, QA-019, QA-020, QA-021 y QA-022.
-- Preparar Sprint 20.2 Analytics.
 - Preparar Sprint 20.3 Funnel basico.
 - Preparar v0.4 Google Books fallback robustecido.
 - Preparar v0.5 Supabase para Auth, backend cloud y sincronizacion.

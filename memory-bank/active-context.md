@@ -2,7 +2,7 @@
 
 ## Foco actual
 
-ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1 validada.
+ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1 y Analytics Sprint 20.2 validados.
 
 Estado confirmado 2026-06-24:
 
@@ -18,6 +18,8 @@ Estado confirmado 2026-06-24:
 - Environment validado: `alpha`.
 - Release validada: `0.2.0-alpha`.
 - Infraestructura temporal de validacion manual de Sentry retirada tras Sprint 20.1.
+- Sprint 20.2 Analytics completado y validado con `ReadPpAnalytics`, PostHog por HTTP, configuracion via `dart-define` y privacidad por buckets/booleanos/contadores.
+- Eventos recibidos correctamente en PostHog; vistas `Activity` y `Trends` validadas.
 
 Hitos cerrados para v0.2.0-alpha:
 
@@ -40,7 +42,6 @@ Pendientes abiertos de QA post-alpha:
 
 Roadmap vigente:
 
-- Sprint 20.2 Analytics.
 - Sprint 20.3 Funnel basico.
 - v0.4 Google Books fallback robustecido como segunda fuente.
 - v0.5 Supabase para Auth, backend cloud y sincronizacion multi-dispositivo.
@@ -83,7 +84,6 @@ Limitaciones conocidas vigentes:
 Roadmap inmediato:
 
 - Resolver QA-018 a QA-022 con cambios acotados de hardening.
-- Preparar Sprint 20.2 Analytics.
 - Preparar Sprint 20.3 Funnel basico.
 - Preparar v0.4 Google Books fallback robustecido.
 - Preparar v0.5 Supabase.

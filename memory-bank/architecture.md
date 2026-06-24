@@ -343,6 +343,21 @@ reading_tracker/lib/
 - La infraestructura temporal de validacion manual se retiro tras Sprint 20.1; no debe quedar ruta oculta, flag de validacion ni metodo manual de captura en builds normales.
 - Validacion real confirmada en Web Release: evento recibido en Sentry con environment `alpha` y release `0.2.0-alpha`.
 
+### Analytics Hito 6 Sprint 20.2
+
+- `core/analytics/readpp_analytics.dart` centraliza analytics de producto, separado de Sentry.
+- Sentry responde a errores; Analytics responde a comportamiento de usuario.
+- `ReadPpAnalytics` expone metodos semanticos como `trackBookAdded`, `trackSearchStarted` y `trackAnnualGoalUpdated`.
+- PostHog queda detras de la capa propia; widgets y pantallas no deben llamar directamente a PostHog.
+- La configuracion se inyecta por `dart-define` con `ANALYTICS_ENABLED`, `POSTHOG_API_KEY`, `POSTHOG_HOST` y `APP_ENV`.
+- Las claves no se hardcodean, no se guardan en repositorio y no se guardan en Memory Bank.
+- Sin configuracion valida, la capa funciona como no-op y no altera flujos de producto.
+- El envio actual usa HTTP al endpoint PostHog `/i/v0/e/`, con `distinct_id` anonimo persistido en `SharedPreferences`.
+- Los eventos se envian con `$process_person_profile=false`.
+- La privacidad se aplica en origen: no enviar titulos, autores, notas, resenas, nombre de usuario ni query exacta; usar buckets, booleanos, longitudes y contadores.
+- Los puntos de instrumentacion preferidos son use cases/providers/datasources donde ocurre la mutacion o evento real, no widgets puramente visuales.
+- Validacion real completada en PostHog: eventos visibles en `Activity` y `Trends`.
+
 ### Hallazgos arquitectonicos revision Sprint 19
 
 - `MainNavigationScreen` debe ser un shell unico por flujo principal; navegar entre tabs requiere coordinacion de indice, no apilar nuevas instancias del shell.
