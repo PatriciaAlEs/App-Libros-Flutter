@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:reading_tracker/core/analytics/readpp_analytics.dart';
 import 'package:reading_tracker/features/stats/data/repositories/annual_reading_goal_repository_provider.dart';
 import 'package:reading_tracker/features/stats/data/repositories/statistics_repository_provider.dart';
 import 'package:reading_tracker/features/stats/domain/entities/statistics_summary.dart';
@@ -14,5 +15,8 @@ final statisticsSummaryProvider = FutureProvider<StatisticsSummary>((ref) {
 });
 
 final saveAnnualReadingGoalProvider = Provider<SaveAnnualReadingGoal>((ref) {
-  return SaveAnnualReadingGoal(ref.watch(annualReadingGoalRepositoryProvider));
+  return SaveAnnualReadingGoal(
+    ref.watch(annualReadingGoalRepositoryProvider),
+    analytics: ref.watch(readPpAnalyticsProvider),
+  );
 });

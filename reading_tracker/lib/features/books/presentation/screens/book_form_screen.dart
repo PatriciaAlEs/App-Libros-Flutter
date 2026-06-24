@@ -9,6 +9,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/analytics/readpp_analytics.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../data/repositories/book_repository_provider.dart';
 import '../../domain/entities/book.dart';
@@ -420,12 +421,25 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     );
 
     await ref.read(booksProvider.notifier).addBook(book);
+    final analytics = ref.read(readPpAnalyticsProvider);
+    await analytics.trackBookAdded(
+      source: _analyticsBookSource(book),
+      hasCover: book.coverUrl?.trim().isNotEmpty == true,
+      hasTotalPages: book.totalPages != null && book.totalPages! > 0,
+    );
+    if (_isManualEntry) {
+      await analytics.trackManualBookAdded(
+        hasCover: book.coverUrl?.trim().isNotEmpty == true,
+        hasTotalPages: book.totalPages != null && book.totalPages! > 0,
+      );
+    }
     ref.invalidate(statsProvider);
     ref.invalidate(statisticsSummaryProvider);
     ref.invalidate(readingInsightsSummaryProvider);
 
     if (!mounted) return;
 
+    var completedBook = book;
     if (_selectedStatus == BookStatus.completed) {
       final review = await showModalBottomSheet<CompletionReview>(
         context: context,
@@ -435,22 +449,29 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
       );
 
       if (review != null && review.hasContent) {
-        await ref
-            .read(booksProvider.notifier)
-            .updateBook(
-              book.copyWith(
-                rating: review.rating,
-                notes: review.note,
-                updatedAt: DateTime.now(),
-              ),
-            );
+        completedBook = book.copyWith(
+          rating: review.rating,
+          notes: review.note,
+          updatedAt: DateTime.now(),
+        );
+        await ref.read(booksProvider.notifier).updateBook(completedBook);
         ref.invalidate(statsProvider);
         ref.invalidate(statisticsSummaryProvider);
         ref.invalidate(readingInsightsSummaryProvider);
       }
+      await analytics.trackBookCompleted(
+        hasRating: completedBook.rating != null,
+        totalPages: completedBook.totalPages,
+      );
     }
 
     if (mounted) Navigator.pop(context, _selectedStatus);
+  }
+
+  String _analyticsBookSource(Book book) {
+    if (_isManualEntry) return 'manual';
+    if (book.externalSource == 'open_library') return 'open_library';
+    return 'unknown';
   }
 
   Future<void> _showDuplicateBookActions(

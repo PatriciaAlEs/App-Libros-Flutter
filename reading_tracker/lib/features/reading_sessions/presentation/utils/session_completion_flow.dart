@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/analytics/readpp_analytics.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
@@ -60,7 +61,14 @@ Future<void> maybeOfferSessionCompletion({
     ),
   );
 
-  if (review == null || !review.hasContent) return;
+  final analytics = ref.read(readPpAnalyticsProvider);
+  if (review == null || !review.hasContent) {
+    await analytics.trackBookCompleted(
+      hasRating: completedBook.rating != null,
+      totalPages: completedBook.totalPages,
+    );
+    return;
+  }
 
   completedBook = Book(
     id: completedBook.id,
@@ -86,6 +94,10 @@ Future<void> maybeOfferSessionCompletion({
   );
 
   await ref.read(booksProvider.notifier).updateBook(completedBook);
+  await analytics.trackBookCompleted(
+    hasRating: completedBook.rating != null,
+    totalPages: completedBook.totalPages,
+  );
   _invalidateCompletionProviders(ref);
 }
 

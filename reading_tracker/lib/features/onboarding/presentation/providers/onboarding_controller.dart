@@ -1,21 +1,25 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/analytics/readpp_analytics.dart';
+
 final onboardingControllerProvider =
     StateNotifierProvider<OnboardingController, AsyncValue<bool>>(
-      (ref) => OnboardingController(),
+      (ref) => OnboardingController(ref.watch(readPpAnalyticsProvider)),
     );
 
 class OnboardingController extends StateNotifier<AsyncValue<bool>> {
-  OnboardingController() : super(const AsyncValue.loading()) {
+  OnboardingController(this._analytics) : super(const AsyncValue.loading()) {
     _load();
   }
 
   static const _storageKey = 'onboarding_completed';
+  final ReadPpAnalytics _analytics;
 
   Future<void> complete() async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setBool(_storageKey, true);
+    await _analytics.trackOnboardingCompleted();
     state = const AsyncValue.data(true);
   }
 

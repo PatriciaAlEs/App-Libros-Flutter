@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/analytics/readpp_analytics.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
@@ -84,6 +85,15 @@ class _BookDetailView extends ConsumerWidget {
 
     final updated = _updatedBookForStatus(newStatus, completionReview);
     await ref.read(booksProvider.notifier).updateBook(updated);
+    if (book.status != BookStatus.completed &&
+        newStatus == BookStatus.completed) {
+      await ref
+          .read(readPpAnalyticsProvider)
+          .trackBookCompleted(
+            hasRating: updated.rating != null,
+            totalPages: updated.totalPages,
+          );
+    }
     ref.invalidate(statsProvider);
     ref.invalidate(statisticsSummaryProvider);
     ref.invalidate(readingInsightsSummaryProvider);

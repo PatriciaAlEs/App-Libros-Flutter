@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/analytics/readpp_analytics.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/repositories/book_repository.dart';
 import '../entities/reading_session.dart';
@@ -11,13 +12,16 @@ class RegisterReadingSession {
   const RegisterReadingSession({
     required ReadingSessionRepository sessionRepository,
     required BookRepository bookRepository,
+    ReadPpAnalytics analytics = const ReadPpAnalytics.disabled(),
     Uuid uuid = const Uuid(),
   }) : _sessionRepository = sessionRepository,
        _bookRepository = bookRepository,
+       _analytics = analytics,
        _uuid = uuid;
 
   final ReadingSessionRepository _sessionRepository;
   final BookRepository _bookRepository;
+  final ReadPpAnalytics _analytics;
   final Uuid _uuid;
 
   Future<ReadingSession?> call(RegisterReadingSessionInput input) async {
@@ -67,6 +71,10 @@ class RegisterReadingSession {
       updatedAt: now,
     );
     await _sessionRepository.addSession(session);
+    await _analytics.trackReadingSessionCreated(
+      minutes: minutes,
+      pagesRead: pagesRead,
+    );
     return session;
   }
 

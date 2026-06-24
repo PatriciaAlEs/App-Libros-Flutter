@@ -6,26 +6,35 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../core/analytics/readpp_analytics.dart';
 import '../../../../core/observability/readpp_sentry.dart';
 import '../../domain/entities/book_search_result.dart';
 
 final bookApiDatasourceProvider = Provider<BookApiDatasource>((ref) {
   final client = http.Client();
   ref.onDispose(client.close);
-  return BookApiDatasource(client);
+  return BookApiDatasource(
+    client,
+    analytics: ref.watch(readPpAnalyticsProvider),
+  );
 });
 
 class BookApiDatasource {
-  const BookApiDatasource(this._client);
+  const BookApiDatasource(
+    this._client, {
+    ReadPpAnalytics analytics = const ReadPpAnalytics.disabled(),
+  }) : _analytics = analytics;
 
   static const _requestTimeout = Duration(seconds: 8);
   static const _maxAttempts = 2;
 
   final http.Client _client;
+  final ReadPpAnalytics _analytics;
 
   Future<List<BookSearchResult>> searchBooks(String query) async {
     final trimmedQuery = query.trim();
     if (trimmedQuery.isEmpty) return const [];
+    final queryMetrics = analyticsQueryMetrics(trimmedQuery);
 
     final uri = Uri.https('openlibrary.org', '/search.json', {
       'q': trimmedQuery,
@@ -50,6 +59,12 @@ class BookApiDatasource {
         event: 'search_started',
         provider: 'open_library',
         query: trimmedQuery,
+      ),
+    );
+    unawaited(
+      _analytics.trackSearchStarted(
+        queryLength: queryMetrics.length,
+        queryWords: queryMetrics.words,
       ),
     );
 
@@ -93,6 +108,21 @@ class BookApiDatasource {
             statusCode: lastStatusCode,
           ),
         );
+        unawaited(
+          _analytics.trackSearchCompleted(
+            duration: stopwatch.elapsed,
+            resultsCount: results.length,
+          ),
+        );
+        if (results.isEmpty) {
+          unawaited(
+            _analytics.trackSearchNoResults(
+              duration: stopwatch.elapsed,
+              queryLength: queryMetrics.length,
+              queryWords: queryMetrics.words,
+            ),
+          );
+        }
         return results;
       } on TimeoutException catch (error, stackTrace) {
         if (attempt == _maxAttempts) {
@@ -105,6 +135,12 @@ class BookApiDatasource {
               duration: stopwatch.elapsed,
               failureKind: BookSearchFailureKind.timeout.name,
               statusCode: lastStatusCode,
+            ),
+          );
+          unawaited(
+            _analytics.trackSearchFailed(
+              duration: stopwatch.elapsed,
+              errorType: BookSearchFailureKind.timeout.name,
             ),
           );
           throw BookSearchException.timeout(error);
@@ -122,6 +158,12 @@ class BookApiDatasource {
               statusCode: lastStatusCode,
             ),
           );
+          unawaited(
+            _analytics.trackSearchFailed(
+              duration: stopwatch.elapsed,
+              errorType: BookSearchFailureKind.connection.name,
+            ),
+          );
           throw BookSearchException.connection(error);
         }
       } on http.ClientException catch (error, stackTrace) {
@@ -135,6 +177,12 @@ class BookApiDatasource {
               duration: stopwatch.elapsed,
               failureKind: BookSearchFailureKind.connection.name,
               statusCode: lastStatusCode,
+            ),
+          );
+          unawaited(
+            _analytics.trackSearchFailed(
+              duration: stopwatch.elapsed,
+              errorType: BookSearchFailureKind.connection.name,
             ),
           );
           throw BookSearchException.connection(error);
@@ -151,6 +199,12 @@ class BookApiDatasource {
             statusCode: lastStatusCode,
           ),
         );
+        unawaited(
+          _analytics.trackSearchFailed(
+            duration: stopwatch.elapsed,
+            errorType: BookSearchFailureKind.invalidResponse.name,
+          ),
+        );
         throw BookSearchException.invalidResponse(error);
       } on BookSearchException catch (error, stackTrace) {
         if (attempt == _maxAttempts ||
@@ -165,6 +219,12 @@ class BookApiDatasource {
               duration: stopwatch.elapsed,
               failureKind: error.kind.name,
               statusCode: lastStatusCode,
+            ),
+          );
+          unawaited(
+            _analytics.trackSearchFailed(
+              duration: stopwatch.elapsed,
+              errorType: error.kind.name,
             ),
           );
           rethrow;
