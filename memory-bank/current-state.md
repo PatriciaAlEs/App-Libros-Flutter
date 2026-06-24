@@ -497,6 +497,7 @@ Estado confirmado por el usuario:
 - ReadPp v0.2.0-alpha esta completada y distribuida para QA externo.
 - APK Release generada.
 - Web desplegada en Vercel.
+- Web/PWA se despliega oficialmente con `flutter build web --release`, luego `cd build/web` y `vercel --prod` al proyecto `readpp-web-alpha`; verificar `https://readpp-web-alpha.vercel.app` y no desplegar desde la raiz del proyecto.
 - Testers externos activos.
 - QA manual previo a release completado.
 - Validacion automatizada vigente: 67/67 tests.

@@ -368,6 +368,8 @@
 - Estado confirmado 2026-06-23: ReadPp v0.2.0-alpha queda completada y entregada a testers externos.
 - APK Release generada.
 - Build Web generado y desplegado en Vercel.
+- Decision de despliegue Web/PWA: build manual con `flutter build web --release`, despliegue desde `build/web` con `vercel --prod` al proyecto `readpp-web-alpha`, nunca desde la raiz del proyecto.
+- Sintoma de despliegue incorrecto: deploy rapido de 4-8 segundos con estado `Ready` pero URL en `404_NOT_FOUND`, normalmente por haber desplegado la carpeta equivocada.
 - Testers externos activos sobre la version alpha.
 - QA manual completo del bloque previo a release.
 - Validacion automatizada vigente: `flutter analyze` OK y `flutter test` OK con 67/67 tests.

@@ -28,6 +28,7 @@ Hitos cerrados para v0.2.0-alpha:
 - Curiosidades de Insights visuales con portadas cuando la curiosidad se refiere a un libro.
 - Build Android release generado.
 - Build Web generado y desplegado en Vercel.
+- Despliegue Web/PWA oficial: build manual de Flutter Web y despliegue desde `build/web` al proyecto Vercel `readpp-web-alpha`; nunca desplegar desde la raiz del proyecto.
 
 Pendientes abiertos de QA post-alpha:
 

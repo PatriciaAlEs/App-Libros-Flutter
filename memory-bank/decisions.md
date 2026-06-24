@@ -387,6 +387,22 @@
 - Pendientes post-alpha quedan identificados como QA-018, QA-019, QA-020, QA-021 y QA-022.
 - Roadmap actualizado tras Sprint 20.1: Observabilidad completada; siguientes bloques Sprint 20.2 Analytics, Sprint 20.3 Funnel basico, v0.4 Google Books fallback y v0.5 Supabase.
 
+## Web Deployment
+
+- ReadPp es un proyecto Flutter; Vercel no debe desplegar la raiz del proyecto `reading_tracker`.
+- ReadPp Web/PWA se despliega mediante build manual de Flutter Web.
+- Proceso oficial:
+  - Ejecutar `flutter build web --release` desde `reading_tracker`.
+  - Entrar en `build/web`.
+  - Ejecutar `vercel --prod` desde `build/web`.
+  - Seleccionar el proyecto Vercel `readpp-web-alpha`.
+  - Verificar `https://readpp-web-alpha.vercel.app`.
+- No desplegar directamente desde la raiz del proyecto.
+- Vercel debe recibir los artefactos estaticos generados por Flutter, no el workspace fuente.
+- Sintoma de configuracion incorrecta: deploy termina en 4-8 segundos, Vercel muestra `Ready`, pero la URL devuelve `404_NOT_FOUND`.
+- Ese sintoma suele indicar que se desplego la carpeta equivocada.
+- Referencia: procedimiento validado durante Hito 6 Sprint 20.1 Sentry, 2026-06-24.
+
 ## Observabilidad Hito 6 Sprint 20.1
 
 - Sentry queda como herramienta de observabilidad de ReadPp para errores de release.

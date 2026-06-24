@@ -1,0 +1,15 @@
+.dart_tool
+build
+coverage
+android
+ios
+linux
+macos
+windows
+.tool-appdata
+.tool-localappdata
+tempnpm-cache
+*.apk
+*.aab
+*.log
+*.png
