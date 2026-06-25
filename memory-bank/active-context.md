@@ -20,6 +20,7 @@ Estado confirmado 2026-06-24:
 - Infraestructura temporal de validacion manual de Sentry retirada tras Sprint 20.1.
 - Sprint 20.2 Analytics completado y validado con `ReadPpAnalytics`, PostHog por HTTP, configuracion via `dart-define` y privacidad por buckets/booleanos/contadores.
 - Eventos recibidos correctamente en PostHog; vistas `Activity` y `Trends` validadas.
+- Antes de Hito 7, la build Web/PWA alpha debe incluir Sentry y PostHog por `dart-define` con release `readpp@0.2.0-alpha`, sin guardar secretos en repo ni Memory Bank.
 
 Hitos cerrados para v0.2.0-alpha:
 

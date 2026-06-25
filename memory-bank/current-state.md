@@ -512,6 +512,7 @@ Estado confirmado por el usuario:
 - Observabilidad Sprint 20.1 esta completada: Sentry integrado, configurado por entorno, DSN via `dart-define`, captura global de errores, breadcrumbs para Open Library y captura de errores de busqueda.
 - Validacion real de Sentry completada en Web Release: evento recibido correctamente con environment `alpha` y release `0.2.0-alpha`.
 - Analytics Sprint 20.2 completado: PostHog por HTTP detras de `ReadPpAnalytics`, configuracion via `dart-define` y eventos de producto basicos recibidos correctamente.
+- Build Web/PWA previa a Hito 7 preparada con Sentry y PostHog via `dart-define`, release `readpp@0.2.0-alpha` y secretos fuera de repo/Memory Bank.
 - Roadmap vigente: Sprint 20.3 Funnel basico, v0.4 Google Books fallback robustecido, v0.5 Supabase.
 
 ## Observabilidad

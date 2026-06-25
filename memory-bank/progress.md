@@ -442,6 +442,7 @@
 - Estado vigente v0.2.0-alpha: release generada, web desplegada en Vercel, testers externos activos, 67/67 tests y `flutter analyze` OK.
 - Estado vigente tras Sprint 20.1: Observabilidad/Sentry completada y validada en Web Release; evento recibido en Sentry con environment `alpha` y release `0.2.0-alpha`.
 - Estado vigente tras Sprint 20.2: Analytics/PostHog completado y validado; Activity y Trends muestran eventos reales de producto.
+- Pre-Hito 7: build Web/PWA alpha preparada para ejecutarse con `dart-define` de Sentry y PostHog, release `readpp@0.2.0-alpha`, sin persistir secretos.
 - Las notas pendientes de validacion de sprints anteriores quedan como historial superado por la validacion vigente de Sprint 13.
 
 - Actualizacion Sprint 12: ReadPp se considera feature-complete para v1, pendiente de release readiness.

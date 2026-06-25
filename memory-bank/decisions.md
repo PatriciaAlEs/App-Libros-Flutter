@@ -392,7 +392,7 @@
 - ReadPp es un proyecto Flutter; Vercel no debe desplegar la raiz del proyecto `reading_tracker`.
 - ReadPp Web/PWA se despliega mediante build manual de Flutter Web.
 - Proceso oficial:
-  - Ejecutar `flutter build web --release` desde `reading_tracker`.
+  - Ejecutar `flutter build web --release` desde `reading_tracker`, con `dart-define` de Sentry y Analytics cuando aplique.
   - Entrar en `build/web`.
   - Ejecutar `vercel --prod` desde `build/web`.
   - Seleccionar el proyecto Vercel `readpp-web-alpha`.
@@ -402,6 +402,22 @@
 - Sintoma de configuracion incorrecta: deploy termina en 4-8 segundos, Vercel muestra `Ready`, pero la URL devuelve `404_NOT_FOUND`.
 - Ese sintoma suele indicar que se desplego la carpeta equivocada.
 - Referencia: procedimiento validado durante Hito 6 Sprint 20.1 Sentry, 2026-06-24.
+
+## Pre-Hito 7 Build Web/PWA
+
+- La build Web/PWA alpha previa a Hito 7 debe activar Sentry y PostHog por `dart-define`.
+- Usar release `readpp@0.2.0-alpha`.
+- No guardar DSN de Sentry ni API key de PostHog en repositorio ni Memory Bank.
+- Comando Bash base:
+  - `flutter build web --release \`
+  - `  --dart-define=SENTRY_DSN="<SENTRY_DSN>" \`
+  - `  --dart-define=SENTRY_ENVIRONMENT=alpha \`
+  - `  --dart-define=SENTRY_RELEASE=readpp@0.2.0-alpha \`
+  - `  --dart-define=ANALYTICS_ENABLED=true \`
+  - `  --dart-define=POSTHOG_API_KEY="<POSTHOG_API_KEY>" \`
+  - `  --dart-define=POSTHOG_HOST=https://eu.i.posthog.com \`
+  - `  --dart-define=APP_ENV=alpha`
+- Tras la build: `cd build/web` y `vercel --prod`.
 
 ## Observabilidad Hito 6 Sprint 20.1
 
