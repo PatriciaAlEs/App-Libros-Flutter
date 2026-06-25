@@ -589,10 +589,68 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Continuar Publication Preparation para publicar ReadPp v1.0.
-2. Final splash branding pass.
-3. Revisar Android adaptive icon e icono real en dispositivo.
-4. Preparar Play Store screenshots y store listing copy.
-5. Publicar/hostear privacy policy.
-6. Configurar firma de release y generar AAB firmado.
-7. Play Store submission.
+1. Continuar Hito 7 con Sprint 21.4 solo en una nueva sesion.
+2. Integrar un punto de acceso controlado a cuenta/Auth en UI sin obligar login.
+3. Validar Auth con Supabase configurado cuando existan variables reales.
+4. Mantener Drift como fuente de verdad y no iniciar sincronizacion hasta sprint especifico.
+
+## Estado vigente Hito 7 - Backend con Supabase
+
+- Hito 7 esta en fase de backend progresivo con filosofia Offline First / Local First.
+- Drift sigue siendo la fuente de verdad durante el uso normal de la app.
+- Supabase queda como backend progresivo para Auth, recuperacion futura y sincronizacion futura.
+- La app sigue funcionando sin login y sin variables Supabase configuradas.
+- No se ha iniciado sincronizacion ni migracion de datos locales.
+- No se han creado tablas Supabase ni politicas RLS.
+
+### Sprint 21.1 - Infraestructura Supabase
+
+- Completado.
+- Documentacion tecnica creada en `docs/architecture/sprint-21-1-supabase-infrastructure.md`.
+- Definida ubicacion futura de configuracion e inicializacion en `core/backend`.
+- Variables previstas: `SUPABASE_URL` y `SUPABASE_ANON_KEY`.
+- Validacion: `flutter analyze` OK y `flutter test` OK con 67/67.
+
+### Sprint 21.2 - Integracion base Supabase
+
+- Completado.
+- Dependencia agregada: `supabase_flutter: ^2.15.0`.
+- Capa opcional creada en `reading_tracker/lib/core/backend`.
+- Supabase se inicializa solo si existen `SUPABASE_URL` y `SUPABASE_ANON_KEY`.
+- Sin variables configuradas, Supabase queda deshabilitado y la app arranca en modo local.
+- Commit: `4ef9fbb feat: add optional supabase base integration`.
+
+### Sprint 21.3 - Auth base sin sincronizacion
+
+- Completado.
+- `features/auth` creado con separacion `data`, `domain` y `presentation`.
+- Modelo de dominio `AppUser` creado con `id`, `email`, `displayName` y `avatarUrl`.
+- Contrato `AuthRepository` creado.
+- Implementacion con Supabase Auth creada.
+- `AuthController` con Riverpod expone usuario, loading, error y metodos de login/logout preparados.
+- `AuthScreen` minima creada y aislada, sin integrarse todavia en navegacion principal.
+- Si Supabase no esta configurado, Auth queda en estado no autenticado y solo muestra error controlado al intentar login.
+- No se modifico Drift.
+- No se modifico onboarding.
+- No se modifico navegacion principal.
+- Validacion: `flutter analyze` OK y `flutter test` OK con 67/67.
+- Commit: `dfbe715 feat: add auth base without sync`.
+
+### ADR vigentes Hito 7
+
+- `ADR-001-local-first.md`: Drift como fuente de verdad local y Supabase como backend progresivo.
+- `ADR-002-authentication-strategy.md`: Supabase Auth con Google OAuth y email/contrasena para Auth v1.
+
+### Riesgos abiertos Hito 7
+
+- Google OAuth requiere configuracion externa en Supabase y plataformas objetivo.
+- Email/contrasena requiere validar configuracion real de Supabase Auth.
+- El acceso a cuenta debe introducirse sin convertir login en obligatorio.
+- La futura sincronizacion debe asociar datos locales a `user.id` sin perdida de datos.
+- Las futuras capas remotas no deben leer directamente desde Supabase como fuente principal de UI.
+- `AuthScreen` existe pero no esta conectada aun a un flujo de producto.
+
+### Decision de cierre
+
+- No se avanza a Sprint 21.4 en esta sesion.
+- La siguiente sesion debe retomar desde Sprint 21.4 o desde la planificacion que el usuario defina.

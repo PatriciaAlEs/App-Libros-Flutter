@@ -608,3 +608,16 @@ Estado confirmado para Hito 5 Sprint 13:
 - Mantener cambios pequenos y acotados por problema.
 - No tocar Open Library, modelos o persistencia salvo requisito explicito.
 - No hacer commit ni push automaticamente.
+
+## Cierre de sesion Hito 7 - Sprint 21.3
+
+- Sesion cerrada sin iniciar Sprint 21.4 por decision explicita.
+- Hito 7 Backend con Supabase queda iniciado y avanzado hasta Auth base sin sincronizacion.
+- Sprint 21.1 completado: documentacion tecnica de infraestructura Supabase, `flutter analyze` OK y `flutter test` OK con 67/67.
+- Sprint 21.2 completado: `supabase_flutter: ^2.15.0`, integracion opcional en `lib/core/backend`, Supabase deshabilitado si faltan variables y commit `4ef9fbb feat: add optional supabase base integration`.
+- ADR vigentes: `ADR-001-local-first.md` y `ADR-002-authentication-strategy.md`.
+- Sprint 21.3 completado: `features/auth` por capas, `AppUser`, `AuthRepository`, implementacion con Supabase Auth, `AuthController` con Riverpod y `AuthScreen` minima aislada.
+- Sprint 21.3 no implementa sincronizacion, migraciones Drift, tablas Supabase, perfiles remotos, RLS, recuperacion de contrasena, verificacion email ni cambios en navegacion principal.
+- Validacion Sprint 21.3: `flutter analyze` OK y `flutter test` OK con 67/67.
+- Commit Sprint 21.3: `dfbe715 feat: add auth base without sync`.
+- Proximo paso recomendado para la siguiente sesion: planificar Sprint 21.4 como acceso controlado a cuenta/Auth en la UI, sin login obligatorio y sin sincronizacion.

@@ -358,6 +358,36 @@ reading_tracker/lib/
 - Los puntos de instrumentacion preferidos son use cases/providers/datasources donde ocurre la mutacion o evento real, no widgets puramente visuales.
 - Validacion real completada en PostHog: eventos visibles en `Activity` y `Trends`.
 
+### Backend Supabase Hito 7 Sprint 21.1-21.3
+
+- La decision base esta registrada en `docs/adr/ADR-001-local-first.md`: ReadPp mantiene arquitectura Offline First / Local First.
+- Drift sigue siendo la fuente de verdad durante el uso normal de la app.
+- Supabase no sustituye a Drift; se usa como backend progresivo para Auth, recuperacion y sincronizacion futura.
+- La estrategia de autenticacion esta registrada en `docs/adr/ADR-002-authentication-strategy.md`.
+- Auth v1 queda limitado a Google OAuth y email/contrasena.
+- `supabase_flutter: ^2.15.0` queda agregado como dependencia oficial.
+- `core/backend` centraliza la infraestructura transversal de Supabase:
+  - `supabase_config.dart`
+  - `supabase_initializer.dart`
+  - `supabase_client_provider.dart`
+- La configuracion se lee por `String.fromEnvironment` usando `SUPABASE_URL` y `SUPABASE_ANON_KEY`.
+- Si faltan variables, Supabase queda deshabilitado y la app sigue arrancando en modo local.
+- `features/auth` queda creado por capas:
+  - `domain/app_user.dart`
+  - `domain/auth_repository.dart`
+  - `data/auth_repository_impl.dart`
+  - `presentation/controllers/auth_controller.dart`
+  - `presentation/screens/auth_screen.dart`
+- `AppUser` contiene solo datos seguros y necesarios: `id`, `email`, `displayName` y `avatarUrl`.
+- `AuthRepository` prepara usuario actual, stream de sesion, email/password, registro, Google OAuth y logout.
+- `AuthController` expone estado de sesion, loading, error y acciones preparadas mediante Riverpod.
+- `AuthScreen` existe como pantalla minima aislada; no esta integrada aun en navegacion principal.
+- Auth no debe bloquear el uso local: sin Supabase configurado el estado es no autenticado y el error aparece solo si el usuario intenta iniciar sesion.
+- No existe sincronizacion todavia.
+- No existen migraciones Drift de Hito 7 todavia.
+- No existen tablas Supabase, perfiles remotos ni RLS todavia.
+- No hay asociacion de datos locales al `user.id` todavia.
+
 ### Hallazgos arquitectonicos revision Sprint 19
 
 - `MainNavigationScreen` debe ser un shell unico por flujo principal; navegar entre tabs requiere coordinacion de indice, no apilar nuevas instancias del shell.

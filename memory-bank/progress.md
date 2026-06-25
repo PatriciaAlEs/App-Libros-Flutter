@@ -464,14 +464,11 @@
 
 ## Pendiente inmediato
 
-- Estado vigente: continuar QA post-alpha sobre ReadPp v0.2.0-alpha ya distribuida.
-- Ejecutar validacion local de Sprint 14 en VS Code: `dart format`, `flutter analyze` y `flutter test`.
-- Ejecutar validacion local de Sprint 15 en VS Code: `dart format`, `flutter analyze` y `flutter test`.
-- Ejecutar validacion local de Sprint 17.x en VS Code: `dart format .`, `flutter pub get`, `flutter analyze`, `flutter test` y `git status`.
-- Resolver QA-018, QA-019, QA-020, QA-021 y QA-022.
-- Preparar Sprint 20.3 Funnel basico.
-- Preparar v0.4 Google Books fallback robustecido.
-- Preparar v0.5 Supabase para Auth, backend cloud y sincronizacion.
+- Estado vigente: Hito 7 Backend con Supabase avanzado hasta Sprint 21.3.
+- No iniciar Sprint 21.4 en la sesion cerrada el 2026-06-25.
+- Preparar Sprint 21.4 en la proxima sesion: acceso controlado a cuenta/Auth en UI, sin login obligatorio y sin sincronizacion.
+- Validar Auth con Supabase configurado cuando existan variables reales.
+- Mantener Drift como fuente de verdad local y no iniciar sync hasta sprint especifico.
 
 - Revision final de assets de tienda, privacidad, versionado y release.
 
@@ -487,3 +484,24 @@
 - Investigar Open Library para mejorar resultados en espanol.
 - Revisar consistencia tipografica y visual global antes de cerrar Hito 5.
 - Ampliar tests de flujos criticos si el alcance del siguiente sprint lo requiere.
+
+## Hito 7 - Backend con Supabase Sprint 21.1-21.3
+
+- Sprint 21.1 completado: documentacion de infraestructura Supabase creada.
+- Sprint 21.1 validado con `flutter analyze` OK y `flutter test` OK con 67/67.
+- Sprint 21.2 completado: dependencia `supabase_flutter: ^2.15.0` agregada.
+- Sprint 21.2 completado: integracion opcional en `lib/core/backend`.
+- Sprint 21.2 garantiza que Supabase no rompe la app si no hay variables configuradas.
+- Commit Sprint 21.2: `4ef9fbb feat: add optional supabase base integration`.
+- ADR creados y vigentes:
+  - `ADR-001-local-first.md`
+  - `ADR-002-authentication-strategy.md`
+- Sprint 21.3 completado: `features/auth` por capas.
+- Sprint 21.3 implementa `AppUser`, `AuthRepository`, implementacion con Supabase Auth, `AuthController` con Riverpod y `AuthScreen` minima aislada.
+- Sprint 21.3 no implementa sincronizacion.
+- Sprint 21.3 no modifica Drift.
+- Sprint 21.3 no modifica navegacion principal.
+- Sprint 21.3 validado con `flutter analyze` OK y `flutter test` OK con 67/67.
+- Commit Sprint 21.3: `dfbe715 feat: add auth base without sync`.
+- Riesgos abiertos: configurar Google OAuth, validar email/contrasena real, conectar acceso a cuenta sin obligar login y disenar asociacion local -> `user.id` antes de sync.
+- Decision de cierre: no avanzar a Sprint 21.4 en esta sesion.
