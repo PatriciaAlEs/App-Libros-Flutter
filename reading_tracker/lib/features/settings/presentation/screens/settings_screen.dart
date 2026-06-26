@@ -7,6 +7,7 @@ import '../../../../core/preferences/reader_profile_controller.dart';
 import '../../../../core/preferences/reader_profile_text_validator.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_theme_controller.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -16,6 +17,7 @@ class SettingsScreen extends ConsumerWidget {
     final selectedTheme = ref.watch(appThemeControllerProvider);
     final controller = ref.read(appThemeControllerProvider.notifier);
     final profile = ref.watch(readerProfileControllerProvider);
+    final authState = ref.watch(authControllerProvider);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
@@ -55,6 +57,11 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.xl),
               const _ProfileHero(),
               const SizedBox(height: AppSpacing.lg),
+              _AccountAccessCard(
+                isAuthenticated: authState.isAuthenticated,
+                email: authState.user?.email,
+              ),
+              const SizedBox(height: AppSpacing.lg),
               _ReaderProfileSection(
                 profile: profile,
                 selectedTheme: selectedTheme,
@@ -66,6 +73,100 @@ class SettingsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
               const _PreferencesAction(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountAccessCard extends StatelessWidget {
+  const _AccountAccessCard({
+    required this.isAuthenticated,
+    required this.email,
+  });
+
+  final bool isAuthenticated;
+  final String? email;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = isAuthenticated ? 'Sesion iniciada' : 'Modo local';
+    final detail = isAuthenticated
+        ? email ?? 'Cuenta conectada'
+        : 'Tus datos siguen guardados en este dispositivo.';
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: () => Navigator.pushNamed(context, '/account'),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.16),
+            ),
+            boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.colorScheme.secondary.withValues(alpha: 0.24),
+                ),
+                child: Icon(
+                  isAuthenticated
+                      ? Icons.verified_user_outlined
+                      : Icons.phone_android_rounded,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Cuenta',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      status,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: isAuthenticated
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.secondary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      detail,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: theme.colorScheme.primary,
+              ),
             ],
           ),
         ),

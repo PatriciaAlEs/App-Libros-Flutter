@@ -98,6 +98,11 @@ class App extends ConsumerWidget {
           (_) => const MainNavigationScreen(initialIndex: 4),
         );
 
+      case '/account':
+      case '/account/transition':
+      case '/account/auth':
+        return _shellRoute(settings, initialIndex: 4);
+
       default:
         return _notFoundRoute();
     }

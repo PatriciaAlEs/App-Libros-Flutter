@@ -5,7 +5,9 @@ import '../../../../core/design_system/design_system.dart';
 import '../controllers/auth_controller.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
-  const AuthScreen({super.key});
+  const AuthScreen({super.key, this.initialRegisterMode = false});
+
+  final bool initialRegisterMode;
 
   @override
   ConsumerState<AuthScreen> createState() => _AuthScreenState();
@@ -21,6 +23,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _isRegisterMode = widget.initialRegisterMode;
   }
 
   Future<void> _submitEmailPassword() async {

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/observability/readpp_sentry.dart';
+import '../../../auth/presentation/screens/account_screen.dart';
+import '../../../auth/presentation/screens/account_transition_screen.dart';
+import '../../../auth/presentation/screens/auth_screen.dart';
 import '../../../books/presentation/screens/book_detail_screen.dart';
 import '../../../books/presentation/screens/book_form_screen.dart';
 import '../../../books/presentation/screens/books_list_screen.dart';
@@ -121,6 +124,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         session: settings.arguments! as ReadingSession,
       ),
       '/stats' => (_) => const StatsScreen(),
+      '/account' => (_) => const AccountScreen(),
+      '/account/transition' => (_) => const AccountTransitionScreen(),
+      '/account/auth' => (_) => AuthScreen(
+        initialRegisterMode: settings.arguments == true,
+      ),
       _ => (_) => const Scaffold(
         body: Center(child: Text('Pantalla no encontrada.')),
       ),
