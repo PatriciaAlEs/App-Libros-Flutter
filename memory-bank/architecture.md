@@ -2,19 +2,24 @@
 
 ## Resumen real
 
-La app usa una arquitectura Flutter simple por features. No hay backend, autenticacion ni servicios remotos propios. La persistencia es local con Drift + SQLite/IndexedDB y el estado se gestiona con Riverpod.
+La app usa una arquitectura Flutter por features. La persistencia de producto sigue siendo local con Drift + SQLite/IndexedDB y el estado se gestiona con Riverpod. Supabase existe como backend progresivo opcional para Auth y futura sincronizacion, pero no sustituye a Drift ni bloquea el modo local.
 
 ## Estructura
 
 ```text
 reading_tracker/lib/
   core/
+    backend/
     branding/
     database/
     design_system/
     theme/
     utils/
   features/
+    auth/
+      data/
+      domain/
+      presentation/
     books/
       data/
       domain/
@@ -35,6 +40,7 @@ reading_tracker/lib/
 
 ## Core
 
+- `core/backend`: configuracion, inicializacion y provider opcional de Supabase.
 - `core/database`: Drift, tablas, DAOs, conexion por plataforma y seed data.
 - `core/branding`: constantes de marca, rutas de assets y widgets de wordmark.
 - `core/theme`: tema Material compartido, tokens visuales y controlador de tema.
@@ -43,6 +49,7 @@ reading_tracker/lib/
 
 ## Features
 
+- `auth`: usuario de dominio, contrato de autenticacion, implementacion Supabase Auth, controlador Riverpod y pantallas de Cuenta/Auth.
 - `books`: busqueda Open Library, repositorio, entidad `Book`, estado de libro y UI de listado/detalle/formulario.
 - `reading_sessions`: entidad `ReadingSession`, repositorio, calendario, detalle de dia y formulario de sesion.
 - `stats`: calculos, provider y pantalla.
@@ -71,7 +78,8 @@ reading_tracker/lib/
 
 - Open Library Search API: `https://openlibrary.org/search.json`.
 - Open Library Covers: `https://covers.openlibrary.org/b/id/{coverId}-M.jpg`.
-- No hay Firebase, Stripe, backend propio, login ni sincronizacion remota.
+- Supabase Auth opcional para cuenta/login cuando `SUPABASE_URL` y `SUPABASE_ANON_KEY` estan configurados.
+- No hay Firebase, Stripe, backend propio ni sincronizacion remota.
 
 ## Herramientas externas relevantes
 
@@ -358,7 +366,7 @@ reading_tracker/lib/
 - Los puntos de instrumentacion preferidos son use cases/providers/datasources donde ocurre la mutacion o evento real, no widgets puramente visuales.
 - Validacion real completada en PostHog: eventos visibles en `Activity` y `Trends`.
 
-### Backend Supabase Hito 7 Sprint 21.1-21.3
+### Backend Supabase Hito 7 Sprint 21.1-21.4
 
 - La decision base esta registrada en `docs/adr/ADR-001-local-first.md`: ReadPp mantiene arquitectura Offline First / Local First.
 - Drift sigue siendo la fuente de verdad durante el uso normal de la app.
@@ -378,15 +386,22 @@ reading_tracker/lib/
   - `data/auth_repository_impl.dart`
   - `presentation/controllers/auth_controller.dart`
   - `presentation/screens/auth_screen.dart`
+  - `presentation/screens/account_screen.dart`
+  - `presentation/screens/account_transition_screen.dart`
 - `AppUser` contiene solo datos seguros y necesarios: `id`, `email`, `displayName` y `avatarUrl`.
 - `AuthRepository` prepara usuario actual, stream de sesion, email/password, registro, Google OAuth y logout.
 - `AuthController` expone estado de sesion, loading, error y acciones preparadas mediante Riverpod.
-- `AuthScreen` existe como pantalla minima aislada; no esta integrada aun en navegacion principal.
+- `AccountScreen` es la entrada de producto para Cuenta: muestra `Modo local` sin sesion y `Sesion iniciada` con email/logout cuando hay usuario.
+- `AccountTransitionScreen` explica la transicion desde almacenamiento local hacia cuenta cloud antes de registro/login.
+- `AuthScreen` esta integrada en el flujo `/account/auth` y puede abrir en modo registro o inicio de sesion.
+- La navegacion integra `/account`, `/account/transition` y `/account/auth` dentro de `MainNavigationScreen`, conservando el shell y la bottom navigation.
+- Perfil/Ajustes (`SettingsScreen`) muestra una card visible `Cuenta` con resumen del estado de autenticacion.
 - Auth no debe bloquear el uso local: sin Supabase configurado el estado es no autenticado y el error aparece solo si el usuario intenta iniciar sesion.
 - No existe sincronizacion todavia.
 - No existen migraciones Drift de Hito 7 todavia.
 - No existen tablas Supabase, perfiles remotos ni RLS todavia.
 - No hay asociacion de datos locales al `user.id` todavia.
+- Decision Sprint 21.4: preparar UX de cuenta y transicion cloud sin tocar biblioteca, progreso, sesiones, estadisticas, preferencias ni persistencia local.
 
 ### Hallazgos arquitectonicos revision Sprint 19
 

@@ -2,7 +2,7 @@
 
 ## Foco actual
 
-ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1 y Analytics Sprint 20.2 validados.
+ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1, Analytics Sprint 20.2 y Backend/Auth Sprint 21.4 validados.
 
 Estado confirmado 2026-06-24:
 
@@ -620,4 +620,7 @@ Estado confirmado para Hito 5 Sprint 13:
 - Sprint 21.3 no implementa sincronizacion, migraciones Drift, tablas Supabase, perfiles remotos, RLS, recuperacion de contrasena, verificacion email ni cambios en navegacion principal.
 - Validacion Sprint 21.3: `flutter analyze` OK y `flutter test` OK con 67/67.
 - Commit Sprint 21.3: `dfbe715 feat: add auth base without sync`.
-- Proximo paso recomendado para la siguiente sesion: planificar Sprint 21.4 como acceso controlado a cuenta/Auth en la UI, sin login obligatorio y sin sincronizacion.
+- Sprint 21.4 completado: acceso visible a Cuenta desde Perfil, pantalla de Cuenta con estados `Modo local` y `Sesion iniciada`, pantalla informativa de transicion y `AuthScreen` integrada en rutas internas.
+- Sprint 21.4 mantiene Drift como fuente de verdad local y no implementa sincronizacion, subida/descarga de datos, migraciones, RLS ni perfiles remotos.
+- Validacion Sprint 21.4: `flutter analyze` OK y `flutter test` OK con 67/67.
+- Proximo paso recomendado: Sprint 21.5 migracion/asociacion inicial local -> cuenta, definiendo primero estrategia de transferencia segura antes de cualquier sync remota.

@@ -464,9 +464,9 @@
 
 ## Pendiente inmediato
 
-- Estado vigente: Hito 7 Backend con Supabase avanzado hasta Sprint 21.3.
-- No iniciar Sprint 21.4 en la sesion cerrada el 2026-06-25.
-- Preparar Sprint 21.4 en la proxima sesion: acceso controlado a cuenta/Auth en UI, sin login obligatorio y sin sincronizacion.
+- Estado vigente: Hito 7 Backend con Supabase avanzado hasta Sprint 21.4.
+- Sprint 21.4 queda cerrado: acceso controlado a Cuenta/Auth en UI, sin login obligatorio y sin sincronizacion.
+- Preparar Sprint 21.5: asociacion/migracion inicial de datos locales a cuenta, con estrategia de transferencia segura antes de sync remota.
 - Validar Auth con Supabase configurado cuando existan variables reales.
 - Mantener Drift como fuente de verdad local y no iniciar sync hasta sprint especifico.
 
@@ -503,5 +503,13 @@
 - Sprint 21.3 no modifica navegacion principal.
 - Sprint 21.3 validado con `flutter analyze` OK y `flutter test` OK con 67/67.
 - Commit Sprint 21.3: `dfbe715 feat: add auth base without sync`.
-- Riesgos abiertos: configurar Google OAuth, validar email/contrasena real, conectar acceso a cuenta sin obligar login y disenar asociacion local -> `user.id` antes de sync.
-- Decision de cierre: no avanzar a Sprint 21.4 en esta sesion.
+- Sprint 21.4 completado: Cuenta/Auth integrada en UI sin login obligatorio.
+- Perfil/Ajustes muestra una card visible `Cuenta` con estado `Modo local` o `Sesion iniciada`.
+- Nueva pantalla `AccountScreen` muestra explicacion de modo local, email autenticado cuando existe sesion y cierre de sesion.
+- Nueva pantalla `AccountTransitionScreen` explica la transicion a cuenta cloud antes de registro/login.
+- `AuthScreen` queda accesible por `/account/auth` y puede abrir en modo crear cuenta o iniciar sesion.
+- Sprint 21.4 no modifica Drift, biblioteca, progreso, estadisticas, sesiones ni preferencias locales.
+- Sprint 21.4 no implementa sincronizacion, migracion, subida/descarga de datos, RLS ni perfiles remotos.
+- Sprint 21.4 validado con `flutter analyze` OK y `flutter test` OK con 67/67.
+- Riesgos abiertos: configurar Google OAuth, validar email/contrasena real y disenar asociacion local -> `user.id` antes de sync.
+- Decision de cierre: proximo sprint recomendado 21.5 para transferencia segura de datos locales a cuenta.

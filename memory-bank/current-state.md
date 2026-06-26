@@ -589,10 +589,10 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Continuar Hito 7 con Sprint 21.4 solo en una nueva sesion.
-2. Integrar un punto de acceso controlado a cuenta/Auth en UI sin obligar login.
+1. Planificar Sprint 21.5 para migracion/asociacion inicial de datos locales a cuenta.
+2. Definir la estrategia de transferencia segura biblioteca/progreso/sesiones/estadisticas/preferencias antes de escribir datos remotos.
 3. Validar Auth con Supabase configurado cuando existan variables reales.
-4. Mantener Drift como fuente de verdad y no iniciar sincronizacion hasta sprint especifico.
+4. Mantener Drift como fuente de verdad y no iniciar sincronizacion bidireccional hasta sprint especifico.
 
 ## Estado vigente Hito 7 - Backend con Supabase
 
@@ -636,6 +636,21 @@ Estado actual implementado:
 - Validacion: `flutter analyze` OK y `flutter test` OK con 67/67.
 - Commit: `dfbe715 feat: add auth base without sync`.
 
+### Sprint 21.4 - Cuenta/Auth en UI sin sincronizacion
+
+- Completado.
+- La pantalla de Perfil/Ajustes incluye una card visible `Cuenta`.
+- La card de Cuenta muestra estado resumido: `Modo local` cuando no hay sesion y `Sesion iniciada` cuando existe usuario autenticado.
+- Nueva pantalla `AccountScreen` integrada en la navegacion con ruta `/account`.
+- Estado sin sesion: explica que biblioteca, progreso, sesiones, estadisticas y preferencias siguen almacenados solo en el dispositivo.
+- Estado autenticado: muestra email disponible, estado de sesion iniciada y accion para cerrar sesion.
+- Nueva pantalla informativa `AccountTransitionScreen` en `/account/transition` antes del formulario de login/registro.
+- La pantalla informativa explica la futura sincronizacion y ofrece `Crear cuenta`, `Ya tengo una cuenta` y `Mas tarde`.
+- `AuthScreen` queda integrada en `/account/auth` y puede abrirse en modo registro o inicio de sesion segun el flujo elegido.
+- Drift, biblioteca, progreso, estadisticas, sesiones, onboarding y preferencias locales no cambian.
+- No se implementa sincronizacion, migracion local-remota, subida/descarga de datos, resolucion de conflictos, tablas Supabase, RLS ni perfiles remotos.
+- Validacion: `flutter analyze` OK y `flutter test` OK con 67/67.
+
 ### ADR vigentes Hito 7
 
 - `ADR-001-local-first.md`: Drift como fuente de verdad local y Supabase como backend progresivo.
@@ -645,12 +660,12 @@ Estado actual implementado:
 
 - Google OAuth requiere configuracion externa en Supabase y plataformas objetivo.
 - Email/contrasena requiere validar configuracion real de Supabase Auth.
-- El acceso a cuenta debe introducirse sin convertir login en obligatorio.
 - La futura sincronizacion debe asociar datos locales a `user.id` sin perdida de datos.
 - Las futuras capas remotas no deben leer directamente desde Supabase como fuente principal de UI.
-- `AuthScreen` existe pero no esta conectada aun a un flujo de producto.
+- Google OAuth y email/contrasena aun requieren validacion real con proyecto Supabase configurado.
+- La UI de Cuenta esta preparada, pero la transferencia de datos locales a una cuenta sigue pendiente.
 
 ### Decision de cierre
 
-- No se avanza a Sprint 21.4 en esta sesion.
-- La siguiente sesion debe retomar desde Sprint 21.4 o desde la planificacion que el usuario defina.
+- Sprint 21.4 queda cerrado sin sync.
+- La siguiente sesion debe retomar desde Sprint 21.5 o desde la planificacion que el usuario defina.
