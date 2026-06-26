@@ -512,4 +512,7 @@
 - Sprint 21.4 no implementa sincronizacion, migracion, subida/descarga de datos, RLS ni perfiles remotos.
 - Sprint 21.4 validado con `flutter analyze` OK y `flutter test` OK con 67/67.
 - Riesgos abiertos: configurar Google OAuth, validar email/contrasena real y disenar asociacion local -> `user.id` antes de sync.
+- Revision tecnica Sprint 21.4: no se detecta deuda bloqueante; existe duplicacion visual menor entre `AccountScreen`, `AccountTransitionScreen` y `AuthScreen` en scaffold, gradiente, `SafeArea`, padding, boton de volver y superficie principal.
+- Oportunidad de refactorizacion futura: extraer un layout compartido de pantallas de cuenta/auth si el flujo crece en recuperacion de contrasena, verificacion de email o migracion local -> cuenta.
+- Oportunidad arquitectonica futura: antes de Sprint 21.5 definir un servicio/caso de uso explicito para preparar transferencia de datos locales a `user.id`, manteniendo dominio libre de Supabase y Drift como fuente principal.
 - Decision de cierre: proximo sprint recomendado 21.5 para transferencia segura de datos locales a cuenta.
