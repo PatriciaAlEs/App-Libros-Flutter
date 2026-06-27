@@ -2,7 +2,7 @@
 
 ## Foco actual
 
-ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1, Analytics Sprint 20.2 y Backend/Auth Sprint 21.4 validados.
+ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1, Analytics Sprint 20.2 y Backend/Auth/Supabase Sprint 21.7 validados.
 
 Estado confirmado 2026-06-24:
 
@@ -623,4 +623,26 @@ Estado confirmado para Hito 5 Sprint 13:
 - Sprint 21.4 completado: acceso visible a Cuenta desde Perfil, pantalla de Cuenta con estados `Modo local` y `Sesion iniciada`, pantalla informativa de transicion y `AuthScreen` integrada en rutas internas.
 - Sprint 21.4 mantiene Drift como fuente de verdad local y no implementa sincronizacion, subida/descarga de datos, migraciones, RLS ni perfiles remotos.
 - Validacion Sprint 21.4: `flutter analyze` OK y `flutter test` OK con 67/67.
-- Proximo paso recomendado: Sprint 21.5 migracion/asociacion inicial local -> cuenta, definiendo primero estrategia de transferencia segura antes de cualquier sync remota.
+- Sprint 21.5 completado: creado `PrepareAccountMigration`, resultado de preparacion de migracion, `AccountMigrationController` separado de `AuthController` y resumen informativo en Cuenta cuando hay sesion.
+- Sprint 21.5 detecta datos locales mediante repositorios existentes: libros, sesiones por libro, objetivo anual y preferencias ya cargadas; no escribe datos ni llama a Supabase.
+- ADR nuevo: `ADR-003-account-migration-preparation.md`.
+- Sprint 21.5 mantiene Drift como fuente de verdad local y no implementa sincronizacion, subida/descarga, migraciones Drift, tablas Supabase, RLS ni resolucion de conflictos.
+- Validacion Sprint 21.5: `flutter analyze` OK y `flutter test` OK.
+- Sprint 21.6 completado: schema remoto Supabase preparado en SQL, tablas `profiles`, `books`, `reading_sessions` y `annual_goals`, auditoria `created_at`/`updated_at`/`deleted_at`, UUID remoto e identificadores locales separados.
+- Sprint 21.6 configura RLS en SQL para `SELECT`, `INSERT`, `UPDATE` y `DELETE` por usuario: `auth.uid() = user_id` y `auth.uid() = id` en `profiles`.
+- Sprint 21.6 crea `features/sync` con entidades remotas, DTOs, mappers, contratos de repositorios remotos y datasource remoto abstracto; no hay llamadas desde UI ni sincronizacion.
+- ADR nuevo: `ADR-004-remote-data-model-and-rls.md`.
+- Limitacion Sprint 21.6: la migracion SQL queda en repositorio pero no fue aplicada ni validada contra un proyecto Supabase real desde esta ejecucion.
+- Validacion Sprint 21.6: `flutter analyze` OK y `flutter test` OK.
+- Sprint 21.7 completado: persistencia local del estado de sincronizacion mediante tabla Drift `sync_metadata`, DAO, repositorio local y enums de dominio para entidades, estados y operaciones pendientes.
+- Sprint 21.7 incrementa Drift a `schemaVersion = 6` con migracion segura `from < 6` para crear `sync_metadata` sin perdida de datos.
+- Sprint 21.7 mantiene Drift como fuente de verdad local y no implementa llamadas Supabase, subida/descarga, merge, resolucion de conflictos ni cambios de UI.
+- ADR nuevo: `ADR-005-local-sync-metadata.md`.
+- Documentacion tecnica nueva: `docs/architecture/sprint-21-7-local-sync-metadata.md`.
+- Validacion Sprint 21.7: `dart format lib test` OK, `flutter analyze` OK y `flutter test` OK con 81/81 tests.
+- Limitacion Sprint 21.7: la metadata local aun no se marca automaticamente desde mutaciones de libros/sesiones/objetivo/perfil.
+- Sprint 21.8 iniciado/preparado: se reviso la migracion Supabase y se agregaron triggers `set_updated_at` para mantener `updated_at` en updates.
+- Documentacion tecnica nueva: `docs/architecture/sprint-21-8-supabase-rls-validation.md`, con checklist y SQL de validacion RLS para dos usuarios reales.
+- Bloqueo Sprint 21.8: desde esta ejecucion no se pudo aplicar ni validar contra Supabase real porque no hay `supabase` CLI, no hay `psql`, no hay proyecto CLI enlazado ni credenciales/conexion remota disponible.
+- Sprint 21.8 no queda cerrado todavia: falta ejecutar la migracion en Supabase real y completar la validacion RLS con usuarios reales.
+- Proximo paso recomendado: aplicar `supabase/migrations/202606270001_remote_data_model.sql` en Supabase SQL Editor o CLI, ejecutar la guia de validacion RLS y documentar resultados obtenidos.

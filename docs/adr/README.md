@@ -64,3 +64,6 @@ El siguiente numero se asigna unicamente cuando se aprueba una nueva decision ar
 | --- | --- | --- | --- |
 | [ADR-001 - Arquitectura Offline First / Local First](ADR-001-local-first.md) | Aceptado | 2026-06-25 | Drift se mantiene como fuente de verdad durante el uso de la app y Supabase se incorpora como backend progresivo para autenticacion, sincronizacion y catalogo futuro. |
 | [ADR-002 - Authentication Strategy](ADR-002-authentication-strategy.md) | Aceptado | 2026-06-25 | Supabase Auth sera el sistema de autenticacion de ReadPp con Google OAuth y email/contrasena como metodos iniciales. |
+| [ADR-003 - Preparacion de migracion local a cuenta](ADR-003-account-migration-preparation.md) | Aceptado | 2026-06-27 | La asociacion futura de datos locales a cuenta se prepara con un caso de uso dedicado, sin sync remota y sin acoplar dominio a Supabase. |
+| [ADR-004 - Modelo remoto Supabase y RLS](ADR-004-remote-data-model-and-rls.md) | Aceptado | 2026-06-27 | El modelo remoto usa UUID propio, identificadores locales separados, auditoria obligatoria y RLS por usuario desde el schema inicial. |
+| [ADR-005 - Metadata local de sincronizacion](ADR-005-local-sync-metadata.md) | Aceptado | 2026-06-27 | El estado local de sincronizacion se guarda en una tabla Drift dedicada, con enums de dominio y repositorio desacoplado de Supabase. |

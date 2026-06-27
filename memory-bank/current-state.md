@@ -589,8 +589,8 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Planificar Sprint 21.5 para migracion/asociacion inicial de datos locales a cuenta.
-2. Definir la estrategia de transferencia segura biblioteca/progreso/sesiones/estadisticas/preferencias antes de escribir datos remotos.
+1. Completar Sprint 21.8 aplicando la migracion SQL en Supabase real y ejecutando la guia de validacion RLS con dos usuarios reales.
+2. Documentar resultados obtenidos en `docs/architecture/sprint-21-8-supabase-rls-validation.md`.
 3. Validar Auth con Supabase configurado cuando existan variables reales.
 4. Mantener Drift como fuente de verdad y no iniciar sincronizacion bidireccional hasta sprint especifico.
 5. Mantener en backlog el onboarding de `Sincronizacion disponible` para activarlo solo cuando la sync real exista.
@@ -602,7 +602,8 @@ Estado actual implementado:
 - Supabase queda como backend progresivo para Auth, recuperacion futura y sincronizacion futura.
 - La app sigue funcionando sin login y sin variables Supabase configuradas.
 - No se ha iniciado sincronizacion ni migracion de datos locales.
-- No se han creado tablas Supabase ni politicas RLS.
+- Existe schema Supabase y RLS definidos en repositorio, pendiente de aplicar y validar contra un proyecto real.
+- Existe metadata local de sincronizacion en Drift, pero no se marca automaticamente desde las mutaciones de producto.
 
 ### Sprint 21.1 - Infraestructura Supabase
 
@@ -652,10 +653,83 @@ Estado actual implementado:
 - No se implementa sincronizacion, migracion local-remota, subida/descarga de datos, resolucion de conflictos, tablas Supabase, RLS ni perfiles remotos.
 - Validacion: `flutter analyze` OK y `flutter test` OK con 67/67.
 
+### Sprint 21.5 - Preparacion de migracion local a cuenta
+
+- Completado.
+- Caso de uso `PrepareAccountMigration` creado para preparar la futura asociacion de datos locales a una cuenta autenticada.
+- Entidad de resultado `AccountMigrationPreparation` creada con estado, `userId` y resumen local.
+- Estados soportados: `unauthenticated`, `noLocalData` y `readyForFutureSync`.
+- Resumen local preparado: numero de libros, numero de sesiones, existencia de objetivo anual y existencia de preferencias de perfil lector.
+- `AccountMigrationController` creado como controlador separado; `AuthController` mantiene responsabilidad exclusiva sobre sesion/login/logout.
+- Pantalla de Cuenta muestra un bloque informativo de `Preparacion local` cuando hay usuario autenticado.
+- La preparacion usa repositorios existentes (`BookRepository`, `ReadingSessionRepository`, `AnnualReadingGoalRepository`) y valores locales ya cargados de perfil lector.
+- El dominio no importa Supabase ni SDK remoto.
+- No se escribe en Drift.
+- No se llama a Supabase.
+- No se implementan tablas remotas, RLS, subida, descarga, resolucion de conflictos ni sincronizacion automatica.
+- Tests unitarios agregados para usuario no autenticado, usuario sin datos locales y usuario con datos listos para futura sync.
+- ADR nuevo: `ADR-003 - Preparacion de migracion local a cuenta`.
+- Validacion: `flutter analyze` OK y `flutter test` OK.
+
+### Sprint 21.6 - Modelo remoto Supabase + RLS
+
+- Completado en repositorio.
+- Migracion SQL creada en `supabase/migrations/202606270001_remote_data_model.sql`.
+- Tablas remotas definidas: `profiles`, `books`, `reading_sessions` y `annual_goals`.
+- Todas las tablas incluyen `created_at`, `updated_at` y `deleted_at`.
+- Las entidades sincronizables usan UUID remoto propio como `id`.
+- Los identificadores locales se conservan como columnas separadas: `local_book_id`, `local_session_id`, `local_goal_id` cuando aplica.
+- `profiles.id` coincide con `auth.users.id`.
+- RLS habilitado en todas las tablas.
+- Politicas SQL definidas para `SELECT`, `INSERT`, `UPDATE` y `DELETE`.
+- Regla de propiedad: `auth.uid() = user_id`; en `profiles`, `auth.uid() = id`.
+- Nueva feature `features/sync` creada con entidades remotas, DTOs, mappers, contratos de repositorios remotos y datasource remoto abstracto.
+- No se implementa repositorio concreto de Supabase.
+- No se realizan llamadas desde UI.
+- No se modifica Drift ni su comportamiento.
+- No se implementa sync local -> nube, nube -> local, merge, resolucion de conflictos ni background sync.
+- ADR nuevo: `ADR-004 - Modelo remoto Supabase y RLS`.
+- Documentacion tecnica creada en `docs/architecture/sprint-21-6-remote-model-rls.md`.
+- Limitacion: la migracion SQL no fue aplicada ni validada contra un proyecto Supabase real desde esta ejecucion.
+- Validacion: `flutter analyze` OK y `flutter test` OK.
+
+### Sprint 21.7 - Persistencia local del estado de sincronizacion
+
+- Completado.
+- Drift sube a `schemaVersion = 6`.
+- Nueva tabla local `sync_metadata` para asociar `entity_type + local_id` con futuro `remote_id`.
+- La tabla registra `sync_status`, `pending_operation`, timestamps de sync/local/remoto, ultimo error y contador de reintentos.
+- Nueva DAO `SyncMetadataDao` creada en `core/database`.
+- La feature `features/sync` incorpora `SyncMetadata`, `SyncEntityType`, `SyncStatus` y `PendingSyncOperation`.
+- Contrato `SyncMetadataRepository` e implementacion `LocalSyncMetadataRepository` creados para ocultar Drift.
+- Provider Riverpod `syncMetadataRepositoryProvider` disponible para futuros use cases.
+- Operaciones soportadas: guardar metadata, leer por entidad/local id, listar pendientes, asociar remoto, marcar synced, marcar pending upload/update/delete y registrar fallo.
+- No hay llamadas a Supabase.
+- No hay cambios de UI.
+- No se modifica el comportamiento local de biblioteca, progreso, sesiones, estadisticas ni preferencias.
+- ADR nuevo: `ADR-005 - Metadata local de sincronizacion`.
+- Documentacion tecnica creada en `docs/architecture/sprint-21-7-local-sync-metadata.md`.
+- Validacion: `dart format lib test` OK, `flutter analyze` OK y `flutter test` OK con 81/81 tests.
+- Limitacion: las mutaciones locales todavia no crean ni actualizan metadata automaticamente.
+
+### Sprint 21.8 - Aplicar migracion Supabase + validar RLS real
+
+- Iniciado/preparado, no cerrado.
+- La migracion SQL `supabase/migrations/202606270001_remote_data_model.sql` fue revisada.
+- Ajuste aplicado: funcion y triggers `set_updated_at` para actualizar `updated_at` automaticamente en `profiles`, `books`, `reading_sessions` y `annual_goals`.
+- Documentacion de validacion creada en `docs/architecture/sprint-21-8-supabase-rls-validation.md`.
+- La guia incluye metodo de aplicacion por SQL Editor o Supabase CLI, verificacion de esquema, verificacion de RLS activo, verificacion de politicas y pruebas con dos usuarios reales.
+- No se aplico la migracion desde esta ejecucion porque no hay `supabase` CLI, no hay `psql`, no hay proyecto CLI enlazado ni credenciales/conexion remota disponible.
+- RLS no queda validado aun contra usuarios reales desde esta ejecucion.
+- No se implemento sincronizacion, no se conecto la app con Supabase y no hubo cambios de UI.
+
 ### ADR vigentes Hito 7
 
 - `ADR-001-local-first.md`: Drift como fuente de verdad local y Supabase como backend progresivo.
 - `ADR-002-authentication-strategy.md`: Supabase Auth con Google OAuth y email/contrasena para Auth v1.
+- `ADR-003-account-migration-preparation.md`: preparacion de migracion mediante caso de uso dedicado sin sync remota ni Supabase en dominio.
+- `ADR-004-remote-data-model-and-rls.md`: modelo remoto con UUID propio, IDs locales separados, auditoria obligatoria y RLS por usuario.
+- `ADR-005-local-sync-metadata.md`: estado local de sincronizacion en Drift mediante tabla dedicada, enums de dominio y repositorio desacoplado.
 
 ### Riesgos abiertos Hito 7
 
@@ -664,9 +738,12 @@ Estado actual implementado:
 - La futura sincronizacion debe asociar datos locales a `user.id` sin perdida de datos.
 - Las futuras capas remotas no deben leer directamente desde Supabase como fuente principal de UI.
 - Google OAuth y email/contrasena aun requieren validacion real con proyecto Supabase configurado.
-- La UI de Cuenta esta preparada, pero la transferencia de datos locales a una cuenta sigue pendiente.
+- La UI y el caso de uso de Cuenta preparan la asociacion, el schema remoto esta definido en repositorio y existe metadata local de sync, pero la transferencia real de datos a cuenta sigue pendiente.
+- La metadata local no se marca aun automaticamente en altas, ediciones o borrados de entidades sincronizables.
+- Sprint 21.8 esta bloqueado hasta ejecutar la migracion y las pruebas RLS en Supabase real.
 
 ### Decision de cierre
 
-- Sprint 21.4 queda cerrado sin sync.
-- La siguiente sesion debe retomar desde Sprint 21.5 o desde la planificacion que el usuario defina.
+- Sprint 21.7 queda cerrado sin sync remota.
+- Sprint 21.8 queda preparado pero no cerrado: falta aplicacion/validacion real en Supabase.
+- La siguiente sesion debe retomar la ejecucion real de Sprint 21.8 o continuar con la planificacion que el usuario defina.

@@ -464,9 +464,9 @@
 
 ## Pendiente inmediato
 
-- Estado vigente: Hito 7 Backend con Supabase avanzado hasta Sprint 21.4.
-- Sprint 21.4 queda cerrado: acceso controlado a Cuenta/Auth en UI, sin login obligatorio y sin sincronizacion.
-- Preparar Sprint 21.5: asociacion/migracion inicial de datos locales a cuenta, con estrategia de transferencia segura antes de sync remota.
+- Estado vigente: Hito 7 Backend con Supabase avanzado hasta Sprint 21.7 cerrado y Sprint 21.8 preparado/no cerrado.
+- Sprint 21.7 queda cerrado: metadata local de sincronizacion persistida en Drift, sin sincronizacion remota.
+- Completar Sprint 21.8: aplicar migracion en Supabase real y validar RLS con usuarios reales siguiendo la guia documentada.
 - Validar Auth con Supabase configurado cuando existan variables reales.
 - Mantener Drift como fuente de verdad local y no iniciar sync hasta sprint especifico.
 
@@ -518,4 +518,44 @@
 - Revision tecnica Sprint 21.4: no se detecta deuda bloqueante; existe duplicacion visual menor entre `AccountScreen`, `AccountTransitionScreen` y `AuthScreen` en scaffold, gradiente, `SafeArea`, padding, boton de volver y superficie principal.
 - Oportunidad de refactorizacion futura: extraer un layout compartido de pantallas de cuenta/auth si el flujo crece en recuperacion de contrasena, verificacion de email o migracion local -> cuenta.
 - Oportunidad arquitectonica futura: antes de Sprint 21.5 definir un servicio/caso de uso explicito para preparar transferencia de datos locales a `user.id`, manteniendo dominio libre de Supabase y Drift como fuente principal.
-- Decision de cierre: proximo sprint recomendado 21.5 para transferencia segura de datos locales a cuenta.
+- Sprint 21.5 completado: `PrepareAccountMigration` prepara la futura asociacion de datos locales a cuenta autenticada sin escribir datos.
+- Sprint 21.5 agrega `AccountMigrationPreparation`, `AccountMigrationLocalDataSummary` y scopes de datos locales para biblioteca, progreso, sesiones, estadisticas y preferencias.
+- Sprint 21.5 agrega `AccountMigrationController` separado de `AuthController`; Auth mantiene responsabilidad unica de sesion/login/logout.
+- Sprint 21.5 muestra en Cuenta un resumen informativo `Preparacion local` cuando hay usuario autenticado.
+- Sprint 21.5 usa repositorios existentes para detectar libros, sesiones por libro y objetivo anual; preferencias se detectan desde el perfil lector ya cargado en presentacion.
+- Sprint 21.5 no modifica Drift, no crea migraciones, no llama a Supabase, no sube/descarga datos, no crea tablas remotas, no implementa RLS ni resuelve conflictos.
+- Sprint 21.5 agrega tests unitarios del caso de uso para estados sin usuario, sin datos locales y listo para futura sync.
+- Sprint 21.5 documenta ADR-003: preparacion de migracion local a cuenta con caso de uso dedicado.
+- Sprint 21.5 validado con `flutter analyze` OK y `flutter test` OK.
+- Revision tecnica Sprint 21.5: no hay deuda bloqueante; la deteccion de sesiones se hace por libro existente y no cubre sesiones huerfanas teoricas.
+- Oportunidad de refactorizacion futura: si crece la migracion, mover deteccion de preferencias locales a un repositorio/servicio de preferencias en vez de calcularla en presentacion.
+- Sprint 21.6 completado: migracion SQL remota creada en `supabase/migrations/202606270001_remote_data_model.sql`.
+- Sprint 21.6 crea tablas remotas `profiles`, `books`, `reading_sessions` y `annual_goals`.
+- Sprint 21.6 incluye auditoria obligatoria `created_at`, `updated_at` y `deleted_at` en todas las tablas.
+- Sprint 21.6 usa UUID remoto propio como clave primaria y conserva IDs locales mediante `local_*_id`.
+- Sprint 21.6 habilita RLS y define politicas `SELECT`, `INSERT`, `UPDATE` y `DELETE` por usuario.
+- Sprint 21.6 crea `features/sync` con entidades remotas, DTOs, mappers, contratos de repositorios remotos, datasource remoto abstracto y constantes de tablas.
+- Sprint 21.6 no implementa repositorios concretos de Supabase, no llama a UI, no modifica Drift y no sincroniza datos.
+- Sprint 21.6 agrega tests de DTO/mappers remotos.
+- Sprint 21.6 documenta ADR-004: modelo remoto Supabase y RLS.
+- Sprint 21.6 documenta `docs/architecture/sprint-21-6-remote-model-rls.md`.
+- Sprint 21.6 validado con `flutter analyze` OK y `flutter test` OK.
+- Revision tecnica Sprint 21.6: no hay deuda bloqueante; queda pendiente aplicar la migracion contra Supabase real y probar RLS con usuarios reales.
+- Oportunidad de refactorizacion futura: cuando existan repositorios concretos, centralizar filtros `updatedAfter`/`includeDeleted` para evitar duplicacion entre tablas.
+- Sprint 21.7 completado: tabla Drift `sync_metadata` agregada para persistir estado local de sincronizacion.
+- Sprint 21.7 incrementa `AppDatabase.schemaVersion` a 6 y agrega migracion segura `from < 6`.
+- Sprint 21.7 agrega `SyncMetadataDao`, entidad de dominio `SyncMetadata`, enums `SyncEntityType`, `SyncStatus` y `PendingSyncOperation`.
+- Sprint 21.7 agrega contrato `SyncMetadataRepository`, implementacion `LocalSyncMetadataRepository`, mapper Drift <-> dominio y provider Riverpod.
+- Sprint 21.7 soporta guardar metadata, leer por entidad/local id, listar pendientes, asociar remoto, marcar synced, marcar pending upload/update/delete y registrar fallos con reintentos.
+- Sprint 21.7 no implementa llamadas a Supabase, cambios de UI, subida/descarga, merge ni resolucion de conflictos.
+- Sprint 21.7 agrega tests de repositorio local y serializacion de enums.
+- Sprint 21.7 documenta ADR-005: metadata local de sincronizacion.
+- Sprint 21.7 documenta `docs/architecture/sprint-21-7-local-sync-metadata.md`.
+- Sprint 21.7 validado con `dart format lib test` OK, `flutter analyze` OK y `flutter test` OK con 81/81 tests.
+- Revision tecnica Sprint 21.7: no hay deuda bloqueante; la metadata local aun no se marca automaticamente desde altas/ediciones/borrados de entidades sincronizables.
+- Oportunidad de refactorizacion futura: crear use cases de sync por entidad antes de conectar los repositorios de producto para evitar duplicar llamadas a `markPending*`.
+- Sprint 21.8 iniciado/preparado: migracion remota revisada y ajustada con triggers `set_updated_at` para `updated_at`.
+- Sprint 21.8 documenta `docs/architecture/sprint-21-8-supabase-rls-validation.md` con checklist y SQL de validacion RLS.
+- Sprint 21.8 no se pudo aplicar ni validar desde Codex por falta de `supabase` CLI, `psql`, proyecto CLI enlazado y credenciales/conexion remota.
+- Sprint 21.8 no implementa sync, no conecta UI y no toca comportamiento local.
+- Decision de cierre: Sprint 21.8 no queda cerrado hasta ejecutar la migracion y validar RLS en Supabase real.

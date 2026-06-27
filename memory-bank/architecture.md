@@ -36,6 +36,9 @@ reading_tracker/lib/
       data/
       domain/
       presentation/
+    sync/
+      data/
+      domain/
 ```
 
 ## Core
@@ -54,12 +57,14 @@ reading_tracker/lib/
 - `reading_sessions`: entidad `ReadingSession`, repositorio, calendario, detalle de dia y formulario de sesion.
 - `stats`: calculos, provider y pantalla.
 - `insights`: perfil lector calculado desde libros y sesiones, con preferencias, mejores lecturas y curiosidades.
+- `sync`: modelo remoto preparado para Supabase y metadata local de sincronizacion. Incluye DTOs/mappers remotos, contratos de repositorios remotos y repositorio local de estado sync. No sincroniza datos todavia.
 
 ## Persistencia
 
-- `AppDatabase` tiene `schemaVersion = 4`.
-- Tablas: `books`, `reading_sessions`.
+- `AppDatabase` tiene `schemaVersion = 6`.
+- Tablas: `books`, `reading_sessions`, `sync_metadata`.
 - Tabla manual adicional: `app_settings` para configuracion simple como `annualReadingGoal`.
+- `sync_metadata` guarda estado operativo de sincronizacion por `entity_type + local_id`, separado de los datos de producto.
 - IO: `NativeDatabase` sobre `reading_tracker.sqlite`.
 - Web: `WebDatabase` con IndexedDB (`reading_tracker`).
 - Seed debug en `DatabaseSeeder`, solo si la base esta vacia.
@@ -79,6 +84,7 @@ reading_tracker/lib/
 - Open Library Search API: `https://openlibrary.org/search.json`.
 - Open Library Covers: `https://covers.openlibrary.org/b/id/{coverId}-M.jpg`.
 - Supabase Auth opcional para cuenta/login cuando `SUPABASE_URL` y `SUPABASE_ANON_KEY` estan configurados.
+- Supabase Database schema preparado en SQL para futura sincronizacion, pendiente de aplicar y validar en proyecto real.
 - No hay Firebase, Stripe, backend propio ni sincronizacion remota.
 
 ## Herramientas externas relevantes
@@ -366,7 +372,7 @@ reading_tracker/lib/
 - Los puntos de instrumentacion preferidos son use cases/providers/datasources donde ocurre la mutacion o evento real, no widgets puramente visuales.
 - Validacion real completada en PostHog: eventos visibles en `Activity` y `Trends`.
 
-### Backend Supabase Hito 7 Sprint 21.1-21.4
+### Backend Supabase Hito 7 Sprint 21.1-21.7
 
 - La decision base esta registrada en `docs/adr/ADR-001-local-first.md`: ReadPp mantiene arquitectura Offline First / Local First.
 - Drift sigue siendo la fuente de verdad durante el uso normal de la app.
@@ -396,12 +402,67 @@ reading_tracker/lib/
 - `AuthScreen` esta integrada en el flujo `/account/auth` y puede abrir en modo registro o inicio de sesion.
 - La navegacion integra `/account`, `/account/transition` y `/account/auth` dentro de `MainNavigationScreen`, conservando el shell y la bottom navigation.
 - Perfil/Ajustes (`SettingsScreen`) muestra una card visible `Cuenta` con resumen del estado de autenticacion.
+- Sprint 21.5 agrega preparacion de migracion local a cuenta:
+  - `domain/entities/account_migration_preparation.dart`
+  - `domain/usecases/prepare_account_migration.dart`
+  - `presentation/controllers/account_migration_controller.dart`
+- `PrepareAccountMigration` consulta unicamente repositorios locales existentes para construir un resumen de datos preparado para futura sync.
+- `AccountMigrationController` orquesta esta preparacion desde presentacion y mantiene `AuthController` centrado en autenticacion.
+- La pantalla de Cuenta puede mostrar el resultado de preparacion local cuando hay usuario autenticado.
 - Auth no debe bloquear el uso local: sin Supabase configurado el estado es no autenticado y el error aparece solo si el usuario intenta iniciar sesion.
 - No existe sincronizacion todavia.
-- No existen migraciones Drift de Hito 7 todavia.
-- No existen tablas Supabase, perfiles remotos ni RLS todavia.
-- No hay asociacion de datos locales al `user.id` todavia.
+- Existe migracion Drift de Hito 7 para `sync_metadata`.
+- Existe migracion SQL de tablas Supabase y RLS en repositorio, pero no aplicada ni validada contra Supabase real desde esta ejecucion.
+- Existe metadata local preparada para asociar datos locales con futuros IDs remotos; no hay transferencia real de datos al `user.id` todavia.
 - Decision Sprint 21.4: preparar UX de cuenta y transicion cloud sin tocar biblioteca, progreso, sesiones, estadisticas, preferencias ni persistencia local.
+- Decision Sprint 21.5: preparar un resultado en memoria para asociacion futura a `user.id`, sin escribir en Drift ni llamar a Supabase.
+- ADR relacionado: `ADR-003-account-migration-preparation.md`.
+
+### Modelo remoto Supabase y RLS Sprint 21.6
+
+- La estructura remota queda definida en `supabase/migrations/202606270001_remote_data_model.sql`.
+- Tablas remotas iniciales:
+  - `profiles`
+  - `books`
+  - `reading_sessions`
+  - `annual_goals`
+- Todas las tablas remotas incluyen `created_at`, `updated_at` y `deleted_at`.
+- `deleted_at` queda reservado para soft delete e incremental sync futura; la app no lo usa todavia.
+- Las entidades sincronizables usan UUID remoto propio como `id`.
+- Los identificadores locales se conservan en columnas separadas como `local_book_id`, `local_session_id` y `local_goal_id`.
+- `profiles.id` se corresponde con `auth.users.id`.
+- RLS queda habilitado en SQL para todas las tablas.
+- Politicas minimas definidas: `SELECT`, `INSERT`, `UPDATE` y `DELETE`.
+- Regla general de propiedad: `auth.uid() = user_id`.
+- Regla de `profiles`: `auth.uid() = id`.
+- `features/sync` contiene entidades remotas desacopladas de Drift, DTOs remotos serializables, mappers DTO <-> entidad, contratos de repositorios remotos, contrato abstracto de datasource remoto y constantes de tablas remotas.
+- No hay repositorios concretos de Supabase en este sprint.
+- No hay llamadas desde UI.
+- No hay sync local -> nube ni nube -> local.
+- ADR relacionado: `ADR-004-remote-data-model-and-rls.md`.
+
+### Validacion Supabase real Sprint 21.8
+
+- La migracion SQL remota fue revisada antes de aplicarse en un entorno real.
+- Se agrego `public.set_updated_at()` y triggers por tabla para mantener `updated_at` en operaciones `UPDATE`.
+- La validacion real de RLS queda documentada en `docs/architecture/sprint-21-8-supabase-rls-validation.md`.
+- La guia usa dos usuarios reales de Auth para verificar aislamiento de `SELECT`, `INSERT`, `UPDATE` y `DELETE`.
+- Desde esta ejecucion no se aplico la migracion al proyecto real porque no hay CLI Supabase/psql ni conexion autenticada disponible.
+- No cambia la decision arquitectonica de ADR-004; por eso no se crea ADR nuevo.
+
+### Metadata local de sincronizacion Sprint 21.7
+
+- Drift incorpora `sync_metadata` como tabla local unica para estado de sincronizacion.
+- `sync_metadata` usa `id` como clave primaria y una restriccion unica sobre `entity_type + local_id`.
+- Campos de asociacion: `entity_type`, `local_id` y `remote_id`.
+- Campos de estado: `sync_status`, `pending_operation`, `last_synced_at`, `last_local_update`, `last_remote_update`, `error_message` y `retry_count`.
+- Campos de auditoria local: `created_at` y `updated_at`.
+- Los tipos se exponen en dominio mediante enums: `SyncEntityType`, `SyncStatus` y `PendingSyncOperation`.
+- `SyncMetadataRepository` define el contrato de dominio para crear, consultar pendientes, asociar remoto, marcar synced/pending y registrar fallos.
+- `LocalSyncMetadataRepository` y `SyncMetadataDao` encapsulan Drift y evitan que los futuros use cases dependan de tablas.
+- `syncMetadataRepositoryProvider` queda preparado para inyeccion Riverpod.
+- No hay llamadas Supabase, no hay UI y no hay mutaciones automaticas de metadata desde los repositorios de producto en este sprint.
+- ADR relacionado: `ADR-005-local-sync-metadata.md`.
 
 ### Hallazgos arquitectonicos revision Sprint 19
 
