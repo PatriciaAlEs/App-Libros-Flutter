@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/sync/data/repositories/local_sync_tracker_provider.dart';
+import '../../features/sync/domain/services/local_sync_tracker.dart';
 import 'reader_profile_text_validator.dart';
 
 enum ReaderGreetingPreference {
@@ -78,11 +80,17 @@ class ReaderProfile {
 
 final readerProfileControllerProvider =
     StateNotifierProvider<ReaderProfileController, ReaderProfile>(
-      (ref) => ReaderProfileController()..load(),
+      (ref) => ReaderProfileController(
+        syncTracker: ref.watch(localSyncTrackerProvider),
+      )..load(),
     );
 
 class ReaderProfileController extends StateNotifier<ReaderProfile> {
-  ReaderProfileController() : super(const ReaderProfile());
+  ReaderProfileController({LocalSyncTracker? syncTracker})
+    : _syncTracker = syncTracker,
+      super(const ReaderProfile());
+
+  final LocalSyncTracker? _syncTracker;
 
   static const _nameKey = 'reader_profile_name';
   static const _greetingKey = 'reader_profile_greeting';
@@ -112,6 +120,7 @@ class ReaderProfileController extends StateNotifier<ReaderProfile> {
     state = state.copyWith(name: validation.value);
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString(_nameKey, validation.value);
+    await _syncTracker?.trackProfileUpdated();
     return null;
   }
 
@@ -121,6 +130,7 @@ class ReaderProfileController extends StateNotifier<ReaderProfile> {
     state = state.copyWith(greetingPreference: preference);
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString(_greetingKey, preference.name);
+    await _syncTracker?.trackProfileUpdated();
   }
 
   Future<String?> updateCustomGreeting(String greeting) async {
@@ -135,6 +145,7 @@ class ReaderProfileController extends StateNotifier<ReaderProfile> {
     state = state.copyWith(customGreeting: normalized);
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString(_customGreetingKey, normalized);
+    await _syncTracker?.trackProfileUpdated();
     return null;
   }
 
@@ -142,11 +153,13 @@ class ReaderProfileController extends StateNotifier<ReaderProfile> {
     state = state.copyWith(currentReadingBookId: bookId);
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString(_currentReadingBookIdKey, bookId);
+    await _syncTracker?.trackProfileUpdated();
   }
 
   Future<void> clearCurrentReadingBookId() async {
     state = state.copyWith(clearCurrentReadingBookId: true);
     final preferences = await SharedPreferences.getInstance();
     await preferences.remove(_currentReadingBookIdKey);
+    await _syncTracker?.trackProfileUpdated();
   }
 }

@@ -2,7 +2,7 @@
 
 ## Foco actual
 
-ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1, Analytics Sprint 20.2 y Backend/Auth/Supabase Sprint 21.7 validados.
+ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1, Analytics Sprint 20.2 y Backend/Auth/Supabase Sprint 21.9 validados.
 
 Estado confirmado 2026-06-24:
 
@@ -646,3 +646,12 @@ Estado confirmado para Hito 5 Sprint 13:
 - Bloqueo Sprint 21.8: desde esta ejecucion no se pudo aplicar ni validar contra Supabase real porque no hay `supabase` CLI, no hay `psql`, no hay proyecto CLI enlazado ni credenciales/conexion remota disponible.
 - Sprint 21.8 no queda cerrado todavia: falta ejecutar la migracion en Supabase real y completar la validacion RLS con usuarios reales.
 - Proximo paso recomendado: aplicar `supabase/migrations/202606270001_remote_data_model.sql` en Supabase SQL Editor o CLI, ejecutar la guia de validacion RLS y documentar resultados obtenidos.
+- Sprint 21.9 completado: mutaciones locales principales conectadas con `SyncMetadataRepository` mediante `LocalSyncTracker`.
+- `LocalSyncTracker` centraliza el marcado de `pendingUpload/create`, `pendingUpdate/update` y `pendingDelete/delete` para libros, sesiones, objetivo anual y perfil lector.
+- Repositorios locales de libros y sesiones marcan metadata tras operaciones exitosas en Drift.
+- `SaveAnnualReadingGoal` marca objetivo anual creado/actualizado tras persistir en `app_settings`.
+- `ReaderProfileController` marca perfil lector actualizado tras persistir cambios en `SharedPreferences`.
+- Sprint 21.9 no implementa llamadas Supabase, subida/descarga, sync incremental, merge, resolucion de conflictos ni cambios visibles de UI.
+- Validacion Sprint 21.9: `dart format lib test` OK, `flutter analyze` OK y `flutter test` OK con 88/88 tests.
+- Limitacion Sprint 21.9: los pendientes quedan registrados localmente, pero no existe aun proceso que los suba o resuelva conflictos.
+- Proximo paso recomendado: Sprint 21.10 implementar un primer push manual/local -> Supabase usando `sync_metadata`, empezando por libros o por un subconjunto controlado.

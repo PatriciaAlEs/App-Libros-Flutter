@@ -464,9 +464,9 @@
 
 ## Pendiente inmediato
 
-- Estado vigente: Hito 7 Backend con Supabase avanzado hasta Sprint 21.7 cerrado y Sprint 21.8 preparado/no cerrado.
+- Estado vigente: Hito 7 Backend con Supabase avanzado hasta Sprint 21.9 cerrado, con Sprint 21.8 preparado/no cerrado desde Codex si falta evidencia real.
 - Sprint 21.7 queda cerrado: metadata local de sincronizacion persistida en Drift, sin sincronizacion remota.
-- Completar Sprint 21.8: aplicar migracion en Supabase real y validar RLS con usuarios reales siguiendo la guia documentada.
+- Preparar Sprint 21.10: consumir `sync_metadata` para un primer push local -> Supabase controlado, sin activar sync automatica completa.
 - Validar Auth con Supabase configurado cuando existan variables reales.
 - Mantener Drift como fuente de verdad local y no iniciar sync hasta sprint especifico.
 
@@ -559,3 +559,14 @@
 - Sprint 21.8 no se pudo aplicar ni validar desde Codex por falta de `supabase` CLI, `psql`, proyecto CLI enlazado y credenciales/conexion remota.
 - Sprint 21.8 no implementa sync, no conecta UI y no toca comportamiento local.
 - Decision de cierre: Sprint 21.8 no queda cerrado hasta ejecutar la migracion y validar RLS en Supabase real.
+- Sprint 21.9 completado: `LocalSyncTracker` centraliza el marcado local de entidades pendientes de sincronizacion.
+- Sprint 21.9 conecta `BookRepositoryImpl` con tracking de create/update/delete.
+- Sprint 21.9 conecta `ReadingSessionRepositoryImpl` con tracking de create/update/delete.
+- Sprint 21.9 conecta `SaveAnnualReadingGoal` con tracking de objetivo anual creado/actualizado.
+- Sprint 21.9 conecta `ReaderProfileController` con tracking de perfil lector actualizado.
+- Sprint 21.9 agrega `localSyncTrackerProvider` para inyeccion Riverpod.
+- Sprint 21.9 agrega tests de tracking local para libro creado/editado/borrado, sesion creada, objetivo anual actualizado, perfil actualizado y ausencia de dependencias remotas.
+- Sprint 21.9 validado con `dart format lib test` OK, `flutter analyze` OK y `flutter test` OK con 88/88 tests.
+- Revision tecnica Sprint 21.9: no hay deuda bloqueante; existe acoplamiento leve desde `core/preferences` hacia `features/sync` para tracking de perfil lector.
+- Oportunidad futura: mover perfil lector a una feature propia o extraer un contrato de preferencias para evitar dependencia desde `core` hacia `features`.
+- Decision de cierre: Sprint 21.9 queda cerrado sin sync remota.

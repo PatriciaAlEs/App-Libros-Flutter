@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/database/database_provider.dart';
+import '../../../sync/data/repositories/local_sync_tracker_provider.dart';
 import '../../domain/repositories/book_repository.dart';
 import '../../domain/repositories/book_search_repository.dart';
 import '../datasources/book_api_datasource.dart';
@@ -9,7 +10,10 @@ import 'book_repository_impl.dart';
 import 'book_search_repository_impl.dart';
 
 final bookRepositoryImplProvider = Provider<BookRepositoryImpl>(
-  (ref) => BookRepositoryImpl(ref.watch(databaseProvider)),
+  (ref) => BookRepositoryImpl(
+    ref.watch(databaseProvider),
+    syncTracker: ref.watch(localSyncTrackerProvider),
+  ),
 );
 
 final bookRepositoryProvider = Provider<BookRepository>(

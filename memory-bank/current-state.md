@@ -589,8 +589,8 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Completar Sprint 21.8 aplicando la migracion SQL en Supabase real y ejecutando la guia de validacion RLS con dos usuarios reales.
-2. Documentar resultados obtenidos en `docs/architecture/sprint-21-8-supabase-rls-validation.md`.
+1. Planificar Sprint 21.10 para consumir `sync_metadata` y ejecutar un primer push local -> Supabase controlado.
+2. Completar/documentar la validacion real de Sprint 21.8 si aun no se ha registrado en `docs/architecture/sprint-21-8-supabase-rls-validation.md`.
 3. Validar Auth con Supabase configurado cuando existan variables reales.
 4. Mantener Drift como fuente de verdad y no iniciar sincronizacion bidireccional hasta sprint especifico.
 5. Mantener en backlog el onboarding de `Sincronizacion disponible` para activarlo solo cuando la sync real exista.
@@ -723,6 +723,25 @@ Estado actual implementado:
 - RLS no queda validado aun contra usuarios reales desde esta ejecucion.
 - No se implemento sincronizacion, no se conecto la app con Supabase y no hubo cambios de UI.
 
+### Sprint 21.9 - Conectar mutaciones locales con SyncMetadata
+
+- Completado.
+- Nueva capa coordinadora `LocalSyncTracker` creada en `features/sync/domain/services`.
+- Provider `localSyncTrackerProvider` creado para inyeccion Riverpod.
+- `BookRepositoryImpl` marca libros creados, actualizados y eliminados como pendientes de sync tras persistir en Drift.
+- `ReadingSessionRepositoryImpl` marca sesiones creadas, actualizadas y eliminadas como pendientes de sync tras persistir en Drift.
+- `SaveAnnualReadingGoal` marca el objetivo anual como `pendingUpload/create` cuando se crea y `pendingUpdate/update` cuando se actualiza.
+- `ReaderProfileController` marca el perfil lector como `pendingUpdate/update` tras cambios de nombre, saludo, saludo personalizado o lectura principal.
+- IDs locales estables para entidades singleton:
+  - objetivo anual: `annualReadingGoal`;
+  - perfil lector: `reader_profile`.
+- No hay llamadas a Supabase.
+- No hay cambios visibles en UI.
+- Drift y `SharedPreferences` siguen siendo la fuente local usada por la app.
+- Tests agregados en `test/local_sync_tracking_test.dart`.
+- Validacion: `dart format lib test` OK, `flutter analyze` OK y `flutter test` OK con 88/88 tests.
+- Limitacion: aun no existe worker/use case remoto que consuma `sync_metadata`.
+
 ### ADR vigentes Hito 7
 
 - `ADR-001-local-first.md`: Drift como fuente de verdad local y Supabase como backend progresivo.
@@ -739,11 +758,13 @@ Estado actual implementado:
 - Las futuras capas remotas no deben leer directamente desde Supabase como fuente principal de UI.
 - Google OAuth y email/contrasena aun requieren validacion real con proyecto Supabase configurado.
 - La UI y el caso de uso de Cuenta preparan la asociacion, el schema remoto esta definido en repositorio y existe metadata local de sync, pero la transferencia real de datos a cuenta sigue pendiente.
-- La metadata local no se marca aun automaticamente en altas, ediciones o borrados de entidades sincronizables.
+- La metadata local ya se marca automaticamente en altas, ediciones y borrados principales de libros/sesiones y en cambios de objetivo anual/perfil.
+- La transferencia real de datos a cuenta sigue pendiente.
 - Sprint 21.8 esta bloqueado hasta ejecutar la migracion y las pruebas RLS en Supabase real.
 
 ### Decision de cierre
 
 - Sprint 21.7 queda cerrado sin sync remota.
-- Sprint 21.8 queda preparado pero no cerrado: falta aplicacion/validacion real en Supabase.
-- La siguiente sesion debe retomar la ejecucion real de Sprint 21.8 o continuar con la planificacion que el usuario defina.
+- Sprint 21.8 queda preparado pero no cerrado desde Codex: falta aplicacion/validacion real en Supabase si no se ejecuto externamente.
+- Sprint 21.9 queda cerrado sin sync remota.
+- La siguiente sesion debe retomar Sprint 21.10, o completar la evidencia real de Sprint 21.8 si falta documentarla.

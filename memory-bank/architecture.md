@@ -372,7 +372,7 @@ reading_tracker/lib/
 - Los puntos de instrumentacion preferidos son use cases/providers/datasources donde ocurre la mutacion o evento real, no widgets puramente visuales.
 - Validacion real completada en PostHog: eventos visibles en `Activity` y `Trends`.
 
-### Backend Supabase Hito 7 Sprint 21.1-21.7
+### Backend Supabase Hito 7 Sprint 21.1-21.9
 
 - La decision base esta registrada en `docs/adr/ADR-001-local-first.md`: ReadPp mantiene arquitectura Offline First / Local First.
 - Drift sigue siendo la fuente de verdad durante el uso normal de la app.
@@ -463,6 +463,20 @@ reading_tracker/lib/
 - `syncMetadataRepositoryProvider` queda preparado para inyeccion Riverpod.
 - No hay llamadas Supabase, no hay UI y no hay mutaciones automaticas de metadata desde los repositorios de producto en este sprint.
 - ADR relacionado: `ADR-005-local-sync-metadata.md`.
+
+### Tracking local de mutaciones Sprint 21.9
+
+- `LocalSyncTracker` es la capa coordinadora para registrar metadata de sync desde mutaciones locales.
+- El tracker traduce operaciones de producto a estados de sync:
+  - create -> `pendingUpload` / `create`;
+  - update -> `pendingUpdate` / `update`;
+  - delete -> `pendingDelete` / `delete`.
+- `BookRepositoryImpl` y `ReadingSessionRepositoryImpl` invocan el tracker solo despues de persistir correctamente en Drift.
+- `SaveAnnualReadingGoal` invoca el tracker despues de guardar el objetivo anual en `app_settings`.
+- `ReaderProfileController` invoca el tracker despues de persistir cambios del perfil lector en `SharedPreferences`.
+- Entidades singleton usan IDs locales estables: `annualReadingGoal` y `reader_profile`.
+- La app no consume Supabase desde estas mutaciones y no cambia comportamiento visual.
+- Riesgo tecnico aceptado: `core/preferences` conoce `features/sync` para marcar perfil lector; si el perfil crece, conviene moverlo a feature propia o extraer un contrato de tracking/preferencias.
 
 ### Hallazgos arquitectonicos revision Sprint 19
 
