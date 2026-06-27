@@ -1630,14 +1630,811 @@ class ReadingSessionsTableCompanion
   }
 }
 
+class $SyncMetadataTableTable extends SyncMetadataTable
+    with TableInfo<$SyncMetadataTableTable, SyncMetadataTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncMetadataTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entityTypeMeta = const VerificationMeta(
+    'entityType',
+  );
+  @override
+  late final GeneratedColumn<String> entityType = GeneratedColumn<String>(
+    'entity_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _localIdMeta = const VerificationMeta(
+    'localId',
+  );
+  @override
+  late final GeneratedColumn<String> localId = GeneratedColumn<String>(
+    'local_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pendingOperationMeta = const VerificationMeta(
+    'pendingOperation',
+  );
+  @override
+  late final GeneratedColumn<String> pendingOperation = GeneratedColumn<String>(
+    'pending_operation',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastSyncedAtMeta = const VerificationMeta(
+    'lastSyncedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastSyncedAt = GeneratedColumn<DateTime>(
+    'last_synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastLocalUpdateMeta = const VerificationMeta(
+    'lastLocalUpdate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastLocalUpdate =
+      GeneratedColumn<DateTime>(
+        'last_local_update',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _lastRemoteUpdateMeta = const VerificationMeta(
+    'lastRemoteUpdate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastRemoteUpdate =
+      GeneratedColumn<DateTime>(
+        'last_remote_update',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _errorMessageMeta = const VerificationMeta(
+    'errorMessage',
+  );
+  @override
+  late final GeneratedColumn<String> errorMessage = GeneratedColumn<String>(
+    'error_message',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _retryCountMeta = const VerificationMeta(
+    'retryCount',
+  );
+  @override
+  late final GeneratedColumn<int> retryCount = GeneratedColumn<int>(
+    'retry_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    entityType,
+    localId,
+    remoteId,
+    syncStatus,
+    pendingOperation,
+    lastSyncedAt,
+    lastLocalUpdate,
+    lastRemoteUpdate,
+    errorMessage,
+    retryCount,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_metadata';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncMetadataTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('entity_type')) {
+      context.handle(
+        _entityTypeMeta,
+        entityType.isAcceptableOrUnknown(data['entity_type']!, _entityTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityTypeMeta);
+    }
+    if (data.containsKey('local_id')) {
+      context.handle(
+        _localIdMeta,
+        localId.isAcceptableOrUnknown(data['local_id']!, _localIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_localIdMeta);
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    if (data.containsKey('pending_operation')) {
+      context.handle(
+        _pendingOperationMeta,
+        pendingOperation.isAcceptableOrUnknown(
+          data['pending_operation']!,
+          _pendingOperationMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_pendingOperationMeta);
+    }
+    if (data.containsKey('last_synced_at')) {
+      context.handle(
+        _lastSyncedAtMeta,
+        lastSyncedAt.isAcceptableOrUnknown(
+          data['last_synced_at']!,
+          _lastSyncedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_local_update')) {
+      context.handle(
+        _lastLocalUpdateMeta,
+        lastLocalUpdate.isAcceptableOrUnknown(
+          data['last_local_update']!,
+          _lastLocalUpdateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_remote_update')) {
+      context.handle(
+        _lastRemoteUpdateMeta,
+        lastRemoteUpdate.isAcceptableOrUnknown(
+          data['last_remote_update']!,
+          _lastRemoteUpdateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('error_message')) {
+      context.handle(
+        _errorMessageMeta,
+        errorMessage.isAcceptableOrUnknown(
+          data['error_message']!,
+          _errorMessageMeta,
+        ),
+      );
+    }
+    if (data.containsKey('retry_count')) {
+      context.handle(
+        _retryCountMeta,
+        retryCount.isAcceptableOrUnknown(data['retry_count']!, _retryCountMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SyncMetadataTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncMetadataTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      entityType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_type'],
+      )!,
+      localId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_id'],
+      )!,
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_id'],
+      ),
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+      pendingOperation: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pending_operation'],
+      )!,
+      lastSyncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_synced_at'],
+      ),
+      lastLocalUpdate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_local_update'],
+      ),
+      lastRemoteUpdate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_remote_update'],
+      ),
+      errorMessage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}error_message'],
+      ),
+      retryCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}retry_count'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SyncMetadataTableTable createAlias(String alias) {
+    return $SyncMetadataTableTable(attachedDatabase, alias);
+  }
+}
+
+class SyncMetadataTableData extends DataClass
+    implements Insertable<SyncMetadataTableData> {
+  final String id;
+  final String entityType;
+  final String localId;
+  final String? remoteId;
+  final String syncStatus;
+  final String pendingOperation;
+  final DateTime? lastSyncedAt;
+  final DateTime? lastLocalUpdate;
+  final DateTime? lastRemoteUpdate;
+  final String? errorMessage;
+  final int retryCount;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const SyncMetadataTableData({
+    required this.id,
+    required this.entityType,
+    required this.localId,
+    this.remoteId,
+    required this.syncStatus,
+    required this.pendingOperation,
+    this.lastSyncedAt,
+    this.lastLocalUpdate,
+    this.lastRemoteUpdate,
+    this.errorMessage,
+    required this.retryCount,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['entity_type'] = Variable<String>(entityType);
+    map['local_id'] = Variable<String>(localId);
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<String>(remoteId);
+    }
+    map['sync_status'] = Variable<String>(syncStatus);
+    map['pending_operation'] = Variable<String>(pendingOperation);
+    if (!nullToAbsent || lastSyncedAt != null) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt);
+    }
+    if (!nullToAbsent || lastLocalUpdate != null) {
+      map['last_local_update'] = Variable<DateTime>(lastLocalUpdate);
+    }
+    if (!nullToAbsent || lastRemoteUpdate != null) {
+      map['last_remote_update'] = Variable<DateTime>(lastRemoteUpdate);
+    }
+    if (!nullToAbsent || errorMessage != null) {
+      map['error_message'] = Variable<String>(errorMessage);
+    }
+    map['retry_count'] = Variable<int>(retryCount);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  SyncMetadataTableCompanion toCompanion(bool nullToAbsent) {
+    return SyncMetadataTableCompanion(
+      id: Value(id),
+      entityType: Value(entityType),
+      localId: Value(localId),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
+      syncStatus: Value(syncStatus),
+      pendingOperation: Value(pendingOperation),
+      lastSyncedAt: lastSyncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncedAt),
+      lastLocalUpdate: lastLocalUpdate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastLocalUpdate),
+      lastRemoteUpdate: lastRemoteUpdate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastRemoteUpdate),
+      errorMessage: errorMessage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(errorMessage),
+      retryCount: Value(retryCount),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory SyncMetadataTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncMetadataTableData(
+      id: serializer.fromJson<String>(json['id']),
+      entityType: serializer.fromJson<String>(json['entityType']),
+      localId: serializer.fromJson<String>(json['localId']),
+      remoteId: serializer.fromJson<String?>(json['remoteId']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      pendingOperation: serializer.fromJson<String>(json['pendingOperation']),
+      lastSyncedAt: serializer.fromJson<DateTime?>(json['lastSyncedAt']),
+      lastLocalUpdate: serializer.fromJson<DateTime?>(json['lastLocalUpdate']),
+      lastRemoteUpdate: serializer.fromJson<DateTime?>(
+        json['lastRemoteUpdate'],
+      ),
+      errorMessage: serializer.fromJson<String?>(json['errorMessage']),
+      retryCount: serializer.fromJson<int>(json['retryCount']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'entityType': serializer.toJson<String>(entityType),
+      'localId': serializer.toJson<String>(localId),
+      'remoteId': serializer.toJson<String?>(remoteId),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'pendingOperation': serializer.toJson<String>(pendingOperation),
+      'lastSyncedAt': serializer.toJson<DateTime?>(lastSyncedAt),
+      'lastLocalUpdate': serializer.toJson<DateTime?>(lastLocalUpdate),
+      'lastRemoteUpdate': serializer.toJson<DateTime?>(lastRemoteUpdate),
+      'errorMessage': serializer.toJson<String?>(errorMessage),
+      'retryCount': serializer.toJson<int>(retryCount),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  SyncMetadataTableData copyWith({
+    String? id,
+    String? entityType,
+    String? localId,
+    Value<String?> remoteId = const Value.absent(),
+    String? syncStatus,
+    String? pendingOperation,
+    Value<DateTime?> lastSyncedAt = const Value.absent(),
+    Value<DateTime?> lastLocalUpdate = const Value.absent(),
+    Value<DateTime?> lastRemoteUpdate = const Value.absent(),
+    Value<String?> errorMessage = const Value.absent(),
+    int? retryCount,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => SyncMetadataTableData(
+    id: id ?? this.id,
+    entityType: entityType ?? this.entityType,
+    localId: localId ?? this.localId,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
+    syncStatus: syncStatus ?? this.syncStatus,
+    pendingOperation: pendingOperation ?? this.pendingOperation,
+    lastSyncedAt: lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
+    lastLocalUpdate: lastLocalUpdate.present
+        ? lastLocalUpdate.value
+        : this.lastLocalUpdate,
+    lastRemoteUpdate: lastRemoteUpdate.present
+        ? lastRemoteUpdate.value
+        : this.lastRemoteUpdate,
+    errorMessage: errorMessage.present ? errorMessage.value : this.errorMessage,
+    retryCount: retryCount ?? this.retryCount,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  SyncMetadataTableData copyWithCompanion(SyncMetadataTableCompanion data) {
+    return SyncMetadataTableData(
+      id: data.id.present ? data.id.value : this.id,
+      entityType: data.entityType.present
+          ? data.entityType.value
+          : this.entityType,
+      localId: data.localId.present ? data.localId.value : this.localId,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      pendingOperation: data.pendingOperation.present
+          ? data.pendingOperation.value
+          : this.pendingOperation,
+      lastSyncedAt: data.lastSyncedAt.present
+          ? data.lastSyncedAt.value
+          : this.lastSyncedAt,
+      lastLocalUpdate: data.lastLocalUpdate.present
+          ? data.lastLocalUpdate.value
+          : this.lastLocalUpdate,
+      lastRemoteUpdate: data.lastRemoteUpdate.present
+          ? data.lastRemoteUpdate.value
+          : this.lastRemoteUpdate,
+      errorMessage: data.errorMessage.present
+          ? data.errorMessage.value
+          : this.errorMessage,
+      retryCount: data.retryCount.present
+          ? data.retryCount.value
+          : this.retryCount,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncMetadataTableData(')
+          ..write('id: $id, ')
+          ..write('entityType: $entityType, ')
+          ..write('localId: $localId, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('pendingOperation: $pendingOperation, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('lastLocalUpdate: $lastLocalUpdate, ')
+          ..write('lastRemoteUpdate: $lastRemoteUpdate, ')
+          ..write('errorMessage: $errorMessage, ')
+          ..write('retryCount: $retryCount, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    entityType,
+    localId,
+    remoteId,
+    syncStatus,
+    pendingOperation,
+    lastSyncedAt,
+    lastLocalUpdate,
+    lastRemoteUpdate,
+    errorMessage,
+    retryCount,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncMetadataTableData &&
+          other.id == this.id &&
+          other.entityType == this.entityType &&
+          other.localId == this.localId &&
+          other.remoteId == this.remoteId &&
+          other.syncStatus == this.syncStatus &&
+          other.pendingOperation == this.pendingOperation &&
+          other.lastSyncedAt == this.lastSyncedAt &&
+          other.lastLocalUpdate == this.lastLocalUpdate &&
+          other.lastRemoteUpdate == this.lastRemoteUpdate &&
+          other.errorMessage == this.errorMessage &&
+          other.retryCount == this.retryCount &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class SyncMetadataTableCompanion
+    extends UpdateCompanion<SyncMetadataTableData> {
+  final Value<String> id;
+  final Value<String> entityType;
+  final Value<String> localId;
+  final Value<String?> remoteId;
+  final Value<String> syncStatus;
+  final Value<String> pendingOperation;
+  final Value<DateTime?> lastSyncedAt;
+  final Value<DateTime?> lastLocalUpdate;
+  final Value<DateTime?> lastRemoteUpdate;
+  final Value<String?> errorMessage;
+  final Value<int> retryCount;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const SyncMetadataTableCompanion({
+    this.id = const Value.absent(),
+    this.entityType = const Value.absent(),
+    this.localId = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.pendingOperation = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.lastLocalUpdate = const Value.absent(),
+    this.lastRemoteUpdate = const Value.absent(),
+    this.errorMessage = const Value.absent(),
+    this.retryCount = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncMetadataTableCompanion.insert({
+    required String id,
+    required String entityType,
+    required String localId,
+    this.remoteId = const Value.absent(),
+    required String syncStatus,
+    required String pendingOperation,
+    this.lastSyncedAt = const Value.absent(),
+    this.lastLocalUpdate = const Value.absent(),
+    this.lastRemoteUpdate = const Value.absent(),
+    this.errorMessage = const Value.absent(),
+    this.retryCount = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       entityType = Value(entityType),
+       localId = Value(localId),
+       syncStatus = Value(syncStatus),
+       pendingOperation = Value(pendingOperation);
+  static Insertable<SyncMetadataTableData> custom({
+    Expression<String>? id,
+    Expression<String>? entityType,
+    Expression<String>? localId,
+    Expression<String>? remoteId,
+    Expression<String>? syncStatus,
+    Expression<String>? pendingOperation,
+    Expression<DateTime>? lastSyncedAt,
+    Expression<DateTime>? lastLocalUpdate,
+    Expression<DateTime>? lastRemoteUpdate,
+    Expression<String>? errorMessage,
+    Expression<int>? retryCount,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (entityType != null) 'entity_type': entityType,
+      if (localId != null) 'local_id': localId,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (pendingOperation != null) 'pending_operation': pendingOperation,
+      if (lastSyncedAt != null) 'last_synced_at': lastSyncedAt,
+      if (lastLocalUpdate != null) 'last_local_update': lastLocalUpdate,
+      if (lastRemoteUpdate != null) 'last_remote_update': lastRemoteUpdate,
+      if (errorMessage != null) 'error_message': errorMessage,
+      if (retryCount != null) 'retry_count': retryCount,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncMetadataTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? entityType,
+    Value<String>? localId,
+    Value<String?>? remoteId,
+    Value<String>? syncStatus,
+    Value<String>? pendingOperation,
+    Value<DateTime?>? lastSyncedAt,
+    Value<DateTime?>? lastLocalUpdate,
+    Value<DateTime?>? lastRemoteUpdate,
+    Value<String?>? errorMessage,
+    Value<int>? retryCount,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return SyncMetadataTableCompanion(
+      id: id ?? this.id,
+      entityType: entityType ?? this.entityType,
+      localId: localId ?? this.localId,
+      remoteId: remoteId ?? this.remoteId,
+      syncStatus: syncStatus ?? this.syncStatus,
+      pendingOperation: pendingOperation ?? this.pendingOperation,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      lastLocalUpdate: lastLocalUpdate ?? this.lastLocalUpdate,
+      lastRemoteUpdate: lastRemoteUpdate ?? this.lastRemoteUpdate,
+      errorMessage: errorMessage ?? this.errorMessage,
+      retryCount: retryCount ?? this.retryCount,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (entityType.present) {
+      map['entity_type'] = Variable<String>(entityType.value);
+    }
+    if (localId.present) {
+      map['local_id'] = Variable<String>(localId.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<String>(remoteId.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (pendingOperation.present) {
+      map['pending_operation'] = Variable<String>(pendingOperation.value);
+    }
+    if (lastSyncedAt.present) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt.value);
+    }
+    if (lastLocalUpdate.present) {
+      map['last_local_update'] = Variable<DateTime>(lastLocalUpdate.value);
+    }
+    if (lastRemoteUpdate.present) {
+      map['last_remote_update'] = Variable<DateTime>(lastRemoteUpdate.value);
+    }
+    if (errorMessage.present) {
+      map['error_message'] = Variable<String>(errorMessage.value);
+    }
+    if (retryCount.present) {
+      map['retry_count'] = Variable<int>(retryCount.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncMetadataTableCompanion(')
+          ..write('id: $id, ')
+          ..write('entityType: $entityType, ')
+          ..write('localId: $localId, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('pendingOperation: $pendingOperation, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('lastLocalUpdate: $lastLocalUpdate, ')
+          ..write('lastRemoteUpdate: $lastRemoteUpdate, ')
+          ..write('errorMessage: $errorMessage, ')
+          ..write('retryCount: $retryCount, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $BooksTableTable booksTable = $BooksTableTable(this);
   late final $ReadingSessionsTableTable readingSessionsTable =
       $ReadingSessionsTableTable(this);
+  late final $SyncMetadataTableTable syncMetadataTable =
+      $SyncMetadataTableTable(this);
   late final BookDao bookDao = BookDao(this as AppDatabase);
   late final ReadingSessionDao readingSessionDao = ReadingSessionDao(
+    this as AppDatabase,
+  );
+  late final SyncMetadataDao syncMetadataDao = SyncMetadataDao(
     this as AppDatabase,
   );
   @override
@@ -1647,6 +2444,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     booksTable,
     readingSessionsTable,
+    syncMetadataTable,
   ];
 }
 
@@ -2656,6 +3454,387 @@ typedef $$ReadingSessionsTableTableProcessedTableManager =
       ReadingSessionsTableData,
       PrefetchHooks Function({bool bookId})
     >;
+typedef $$SyncMetadataTableTableCreateCompanionBuilder =
+    SyncMetadataTableCompanion Function({
+      required String id,
+      required String entityType,
+      required String localId,
+      Value<String?> remoteId,
+      required String syncStatus,
+      required String pendingOperation,
+      Value<DateTime?> lastSyncedAt,
+      Value<DateTime?> lastLocalUpdate,
+      Value<DateTime?> lastRemoteUpdate,
+      Value<String?> errorMessage,
+      Value<int> retryCount,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$SyncMetadataTableTableUpdateCompanionBuilder =
+    SyncMetadataTableCompanion Function({
+      Value<String> id,
+      Value<String> entityType,
+      Value<String> localId,
+      Value<String?> remoteId,
+      Value<String> syncStatus,
+      Value<String> pendingOperation,
+      Value<DateTime?> lastSyncedAt,
+      Value<DateTime?> lastLocalUpdate,
+      Value<DateTime?> lastRemoteUpdate,
+      Value<String?> errorMessage,
+      Value<int> retryCount,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$SyncMetadataTableTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncMetadataTableTable> {
+  $$SyncMetadataTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get localId => $composableBuilder(
+    column: $table.localId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pendingOperation => $composableBuilder(
+    column: $table.pendingOperation,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastLocalUpdate => $composableBuilder(
+    column: $table.lastLocalUpdate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastRemoteUpdate => $composableBuilder(
+    column: $table.lastRemoteUpdate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncMetadataTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncMetadataTableTable> {
+  $$SyncMetadataTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get localId => $composableBuilder(
+    column: $table.localId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pendingOperation => $composableBuilder(
+    column: $table.pendingOperation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastLocalUpdate => $composableBuilder(
+    column: $table.lastLocalUpdate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastRemoteUpdate => $composableBuilder(
+    column: $table.lastRemoteUpdate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncMetadataTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncMetadataTableTable> {
+  $$SyncMetadataTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get localId =>
+      $composableBuilder(column: $table.localId, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get pendingOperation => $composableBuilder(
+    column: $table.pendingOperation,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastLocalUpdate => $composableBuilder(
+    column: $table.lastLocalUpdate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastRemoteUpdate => $composableBuilder(
+    column: $table.lastRemoteUpdate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$SyncMetadataTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncMetadataTableTable,
+          SyncMetadataTableData,
+          $$SyncMetadataTableTableFilterComposer,
+          $$SyncMetadataTableTableOrderingComposer,
+          $$SyncMetadataTableTableAnnotationComposer,
+          $$SyncMetadataTableTableCreateCompanionBuilder,
+          $$SyncMetadataTableTableUpdateCompanionBuilder,
+          (
+            SyncMetadataTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $SyncMetadataTableTable,
+              SyncMetadataTableData
+            >,
+          ),
+          SyncMetadataTableData,
+          PrefetchHooks Function()
+        > {
+  $$SyncMetadataTableTableTableManager(
+    _$AppDatabase db,
+    $SyncMetadataTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncMetadataTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncMetadataTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncMetadataTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> entityType = const Value.absent(),
+                Value<String> localId = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<String> pendingOperation = const Value.absent(),
+                Value<DateTime?> lastSyncedAt = const Value.absent(),
+                Value<DateTime?> lastLocalUpdate = const Value.absent(),
+                Value<DateTime?> lastRemoteUpdate = const Value.absent(),
+                Value<String?> errorMessage = const Value.absent(),
+                Value<int> retryCount = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncMetadataTableCompanion(
+                id: id,
+                entityType: entityType,
+                localId: localId,
+                remoteId: remoteId,
+                syncStatus: syncStatus,
+                pendingOperation: pendingOperation,
+                lastSyncedAt: lastSyncedAt,
+                lastLocalUpdate: lastLocalUpdate,
+                lastRemoteUpdate: lastRemoteUpdate,
+                errorMessage: errorMessage,
+                retryCount: retryCount,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String entityType,
+                required String localId,
+                Value<String?> remoteId = const Value.absent(),
+                required String syncStatus,
+                required String pendingOperation,
+                Value<DateTime?> lastSyncedAt = const Value.absent(),
+                Value<DateTime?> lastLocalUpdate = const Value.absent(),
+                Value<DateTime?> lastRemoteUpdate = const Value.absent(),
+                Value<String?> errorMessage = const Value.absent(),
+                Value<int> retryCount = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncMetadataTableCompanion.insert(
+                id: id,
+                entityType: entityType,
+                localId: localId,
+                remoteId: remoteId,
+                syncStatus: syncStatus,
+                pendingOperation: pendingOperation,
+                lastSyncedAt: lastSyncedAt,
+                lastLocalUpdate: lastLocalUpdate,
+                lastRemoteUpdate: lastRemoteUpdate,
+                errorMessage: errorMessage,
+                retryCount: retryCount,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncMetadataTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncMetadataTableTable,
+      SyncMetadataTableData,
+      $$SyncMetadataTableTableFilterComposer,
+      $$SyncMetadataTableTableOrderingComposer,
+      $$SyncMetadataTableTableAnnotationComposer,
+      $$SyncMetadataTableTableCreateCompanionBuilder,
+      $$SyncMetadataTableTableUpdateCompanionBuilder,
+      (
+        SyncMetadataTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $SyncMetadataTableTable,
+          SyncMetadataTableData
+        >,
+      ),
+      SyncMetadataTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2664,4 +3843,6 @@ class $AppDatabaseManager {
       $$BooksTableTableTableManager(_db, _db.booksTable);
   $$ReadingSessionsTableTableTableManager get readingSessionsTable =>
       $$ReadingSessionsTableTableTableManager(_db, _db.readingSessionsTable);
+  $$SyncMetadataTableTableTableManager get syncMetadataTable =>
+      $$SyncMetadataTableTableTableManager(_db, _db.syncMetadataTable);
 }

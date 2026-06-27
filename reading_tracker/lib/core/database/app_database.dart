@@ -3,14 +3,16 @@ import 'package:drift/drift.dart';
 import 'connection/database_connection.dart';
 import 'daos/book_dao.dart';
 import 'daos/reading_session_dao.dart';
+import 'daos/sync_metadata_dao.dart';
 import 'tables/books_table.dart';
 import 'tables/reading_sessions_table.dart';
+import 'tables/sync_metadata_table.dart';
 
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [BooksTable, ReadingSessionsTable],
-  daos: [BookDao, ReadingSessionDao],
+  tables: [BooksTable, ReadingSessionsTable, SyncMetadataTable],
+  daos: [BookDao, ReadingSessionDao, SyncMetadataDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(openDatabaseConnection());
@@ -18,7 +20,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -49,6 +51,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 5) {
         await migrator.addColumn(booksTable, booksTable.externalSource);
         await migrator.addColumn(booksTable, booksTable.externalId);
+      }
+      if (from < 6) {
+        await migrator.createTable(syncMetadataTable);
       }
     },
   );
