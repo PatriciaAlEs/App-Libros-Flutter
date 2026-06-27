@@ -480,6 +480,9 @@
 
 - Estado vigente Sprint 13: el desarrollo funcional de v1 queda cerrado; futuras mejoras quedan para post-v1.
 
+- UX Backlog para cuando la sincronizacion este disponible: mostrar pantalla `Sincronizacion disponible`, explicar el cambio de almacenamiento local a cuenta y ofrecer CTA `Configurar ahora`.
+- UX Backlog sync: tras aceptar, navegar automaticamente a Perfil, mostrar coach mark sobre `Cuenta` y badge `Nuevo` hasta completar el proceso.
+- UX Backlog sync: ocultar definitivamente el onboarding de sincronizacion tras iniciar sesion o descartarlo.
 - Definir siguiente iteracion de Stats, Insights o Ajustes sin introducir complejidad visual prematura.
 - Investigar Open Library para mejorar resultados en espanol.
 - Revisar consistencia tipografica y visual global antes de cerrar Hito 5.

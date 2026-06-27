@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/backend/supabase_client_provider.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../controllers/auth_controller.dart';
 
@@ -58,6 +59,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final state = ref.watch(authControllerProvider);
+    final isAuthConfigured = ref.watch(isSupabaseEnabledProvider);
+    const authUnavailableMessage =
+        'El inicio de sesion aun no esta configurado en este entorno.';
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -120,7 +124,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      'Inicia sesion para sincronizar tu biblioteca y progreso en varios dispositivos.',
+                      isAuthConfigured
+                          ? 'Inicia sesion para sincronizar tu biblioteca y progreso en varios dispositivos.'
+                          : 'ReadPp sigue funcionando en modo local. La cuenta estara disponible proximamente.',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
@@ -129,17 +135,22 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                     const SizedBox(height: AppSpacing.xl),
                     FilledButton.icon(
-                      onPressed: state.isLoading
+                      onPressed: state.isLoading || !isAuthConfigured
                           ? null
                           : ref
                                 .read(authControllerProvider.notifier)
                                 .signInWithGoogle,
                       icon: const Icon(Icons.login_rounded),
-                      label: const Text('Continuar con Google'),
+                      label: Text(
+                        isAuthConfigured
+                            ? 'Continuar con Google'
+                            : 'Google proximamente',
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     TextField(
                       controller: _emailController,
+                      enabled: isAuthConfigured && !state.isLoading,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       autofillHints: const [AutofillHints.email],
@@ -151,11 +162,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     const SizedBox(height: AppSpacing.md),
                     TextField(
                       controller: _passwordController,
+                      enabled: isAuthConfigured && !state.isLoading,
                       obscureText: true,
                       textInputAction: TextInputAction.done,
                       autofillHints: const [AutofillHints.password],
-                      onSubmitted: (_) =>
-                          state.isLoading ? null : _submitEmailPassword(),
+                      onSubmitted: (_) => state.isLoading || !isAuthConfigured
+                          ? null
+                          : _submitEmailPassword(),
                       decoration: const InputDecoration(
                         labelText: 'Contrasena',
                         prefixIcon: Icon(Icons.lock_outline_rounded),
@@ -163,13 +176,19 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     FilledButton(
-                      onPressed: state.isLoading ? null : _submitEmailPassword,
+                      onPressed: state.isLoading || !isAuthConfigured
+                          ? null
+                          : _submitEmailPassword,
                       child: Text(
-                        _isRegisterMode ? 'Crear cuenta' : 'Iniciar sesion',
+                        isAuthConfigured
+                            ? (_isRegisterMode
+                                  ? 'Crear cuenta'
+                                  : 'Iniciar sesion')
+                            : 'Cuenta proximamente',
                       ),
                     ),
                     TextButton(
-                      onPressed: state.isLoading
+                      onPressed: state.isLoading || !isAuthConfigured
                           ? null
                           : () => setState(
                               () => _isRegisterMode = !_isRegisterMode,
@@ -180,10 +199,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             : 'Crear cuenta con email',
                       ),
                     ),
-                    if (state.errorMessage != null) ...[
+                    if (!isAuthConfigured || state.errorMessage != null) ...[
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        state.errorMessage!,
+                        state.errorMessage ?? authUnavailableMessage,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.error,
@@ -206,7 +225,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              TextButton(
+              FilledButton(
                 onPressed: state.isLoading ? null : _continueWithoutLogin,
                 child: const Text('Continuar sin login'),
               ),

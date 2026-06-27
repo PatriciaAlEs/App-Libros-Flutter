@@ -593,6 +593,7 @@ Estado actual implementado:
 2. Definir la estrategia de transferencia segura biblioteca/progreso/sesiones/estadisticas/preferencias antes de escribir datos remotos.
 3. Validar Auth con Supabase configurado cuando existan variables reales.
 4. Mantener Drift como fuente de verdad y no iniciar sincronizacion bidireccional hasta sprint especifico.
+5. Mantener en backlog el onboarding de `Sincronizacion disponible` para activarlo solo cuando la sync real exista.
 
 ## Estado vigente Hito 7 - Backend con Supabase
 
