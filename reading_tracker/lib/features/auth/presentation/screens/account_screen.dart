@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design_system/design_system.dart';
+import '../../domain/entities/account_migration_preparation.dart';
+import '../controllers/account_migration_controller.dart';
 import '../controllers/auth_controller.dart';
 
 class AccountScreen extends ConsumerWidget {
@@ -12,6 +14,9 @@ class AccountScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final state = ref.watch(authControllerProvider);
     final user = state.user;
+    final migrationPreparation = state.isAuthenticated
+        ? ref.watch(accountMigrationControllerProvider)
+        : null;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -79,6 +84,7 @@ class AccountScreen extends ConsumerWidget {
                       _SignedInContent(
                         email: user.email ?? 'Cuenta sin email visible',
                         isLoading: state.isLoading,
+                        migrationPreparation: migrationPreparation,
                         onSignOut: () async {
                           await ref
                               .read(authControllerProvider.notifier)
@@ -170,11 +176,13 @@ class _SignedInContent extends StatelessWidget {
   const _SignedInContent({
     required this.email,
     required this.isLoading,
+    required this.migrationPreparation,
     required this.onSignOut,
   });
 
   final String email;
   final bool isLoading;
+  final AsyncValue<AccountMigrationPreparation>? migrationPreparation;
   final VoidCallback onSignOut;
 
   @override
@@ -195,6 +203,10 @@ class _SignedInContent extends StatelessWidget {
           label: 'Email',
           value: email,
         ),
+        if (migrationPreparation != null) ...[
+          const SizedBox(height: AppSpacing.md),
+          _MigrationPreparationStatus(preparation: migrationPreparation!),
+        ],
         const SizedBox(height: AppSpacing.lg),
         Text(
           'La sincronizacion de biblioteca y progreso se activara en un '
@@ -212,6 +224,92 @@ class _SignedInContent extends StatelessWidget {
           label: const Text('Cerrar sesion'),
         ),
       ],
+    );
+  }
+}
+
+class _MigrationPreparationStatus extends StatelessWidget {
+  const _MigrationPreparationStatus({required this.preparation});
+
+  final AsyncValue<AccountMigrationPreparation> preparation;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return preparation.when(
+      loading: () => _AccountSummaryItem(
+        icon: Icons.sync_rounded,
+        label: 'Preparacion local',
+        value: 'Comprobando datos locales...',
+      ),
+      error: (_, _) => _AccountSummaryItem(
+        icon: Icons.info_outline_rounded,
+        label: 'Preparacion local',
+        value: 'No se pudo comprobar ahora.',
+      ),
+      data: (result) {
+        final summary = result.summary;
+        final value = switch (result.status) {
+          AccountMigrationPreparationStatus.unauthenticated =>
+            'Inicia sesion para preparar tu biblioteca.',
+          AccountMigrationPreparationStatus.noLocalData =>
+            'No hay datos locales pendientes.',
+          AccountMigrationPreparationStatus.readyForFutureSync =>
+            '${summary.bookCount} libros, ${summary.readingSessionCount} sesiones.',
+        };
+
+        return Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.76),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.10),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.sync_alt_rounded,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Text(
+                      'Preparacion local',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                value,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              if (result.isReadyForFutureSync) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Listo para asociarse a tu cuenta cuando activemos la sincronizacion.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }
