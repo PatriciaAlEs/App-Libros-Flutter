@@ -7,7 +7,8 @@ abstract interface class RemoteBooksRepository {
     bool includeDeleted = false,
   });
 
-  Future<void> upsertBooks(List<RemoteBook> books);
+  Future<List<RemoteBook>> upsertBooks(List<RemoteBook> books);
+
   Future<void> deleteBook({
     required String userId,
     required String remoteBookId,

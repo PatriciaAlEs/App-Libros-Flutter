@@ -12,9 +12,10 @@ abstract interface class RemoteSyncDatasource {
     bool includeDeleted = false,
   });
 
-  Future<void> upsertMany({
+  Future<List<Map<String, dynamic>>> upsertMany({
     required String table,
     required List<Map<String, dynamic>> rows,
+    String? onConflict,
   });
 
   Future<void> deleteOne({
