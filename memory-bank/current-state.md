@@ -589,7 +589,7 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Planificar Sprint 21.10 para consumir `sync_metadata` y ejecutar un primer push local -> Supabase controlado.
+1. Planificar Sprint 22.1 para definir reconciliacion, borrado logico y siguientes pasos de sync tras el primer push manual de Books.
 2. Completar/documentar la validacion real de Sprint 21.8 si aun no se ha registrado en `docs/architecture/sprint-21-8-supabase-rls-validation.md`.
 3. Validar Auth con Supabase configurado cuando existan variables reales.
 4. Mantener Drift como fuente de verdad y no iniciar sincronizacion bidireccional hasta sprint especifico.
@@ -742,6 +742,22 @@ Estado actual implementado:
 - Validacion: `dart format lib test` OK, `flutter analyze` OK y `flutter test` OK con 88/88 tests.
 - Limitacion: aun no existe worker/use case remoto que consuma `sync_metadata`.
 
+### Sprint 22.0 - Primera sincronizacion manual Books local -> Supabase
+
+- Completado.
+- Primera sincronizacion manual local -> Supabase limitada a Books.
+- El flujo consume `sync_metadata`, filtra `entity_type = book` y procesa operaciones pendientes `create`, `update` y `delete`.
+- `create` y `update` cargan el libro local mediante `BookDao.getBookById`, construyen el modelo remoto parcial de Books y lo suben a Supabase.
+- Tras una subida correcta, el flujo conserva/guarda `remoteId` en `sync_metadata` y marca la metadata como `synced`.
+- `delete` con `remoteId` llama al borrado remoto y marca synced; `delete` sin `remoteId` se marca synced sin llamada remota porque no hay registro remoto que borrar.
+- No hay sync automatica.
+- No hay recuperacion nube -> local.
+- No se sincronizan todavia Reading Sessions, perfil lector ni objetivo anual.
+- La UI queda intacta; el caso de uso queda preparado para ejecucion manual.
+- Validacion: `dart format` OK, `flutter analyze` OK y `flutter test` OK con 94/94 tests.
+- Decision tecnica: en Supabase Books, el upsert remoto usa `id` como conflict target porque el indice `user_id + local_book_id` del schema es parcial con `WHERE deleted_at IS NULL`. `local_book_id` sigue viajando en la fila como identidad local, pero no se usa como conflict target directo en este sprint.
+- Impacto futuro: esta decision afecta el diseno de proximos sprints de reconciliacion por `local_book_id`, borrado logico y sync nube -> local.
+
 ### ADR vigentes Hito 7
 
 - `ADR-001-local-first.md`: Drift como fuente de verdad local y Supabase como backend progresivo.
@@ -759,7 +775,7 @@ Estado actual implementado:
 - Google OAuth y email/contrasena aun requieren validacion real con proyecto Supabase configurado.
 - La UI y el caso de uso de Cuenta preparan la asociacion, el schema remoto esta definido en repositorio y existe metadata local de sync, pero la transferencia real de datos a cuenta sigue pendiente.
 - La metadata local ya se marca automaticamente en altas, ediciones y borrados principales de libros/sesiones y en cambios de objetivo anual/perfil.
-- La transferencia real de datos a cuenta sigue pendiente.
+- La transferencia real de Books local -> Supabase ya existe como flujo manual inicial, pero la sincronizacion completa de datos a cuenta sigue pendiente.
 - Sprint 21.8 esta bloqueado hasta ejecutar la migracion y las pruebas RLS en Supabase real.
 
 ### Decision de cierre
@@ -767,4 +783,5 @@ Estado actual implementado:
 - Sprint 21.7 queda cerrado sin sync remota.
 - Sprint 21.8 queda preparado pero no cerrado desde Codex: falta aplicacion/validacion real en Supabase si no se ejecuto externamente.
 - Sprint 21.9 queda cerrado sin sync remota.
-- La siguiente sesion debe retomar Sprint 21.10, o completar la evidencia real de Sprint 21.8 si falta documentarla.
+- Sprint 22.0 queda cerrado con primera sync manual Books local -> Supabase.
+- La siguiente sesion debe retomar Sprint 22.1, o completar la evidencia real de Sprint 21.8 si falta documentarla.

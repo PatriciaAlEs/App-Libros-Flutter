@@ -57,7 +57,7 @@ reading_tracker/lib/
 - `reading_sessions`: entidad `ReadingSession`, repositorio, calendario, detalle de dia y formulario de sesion.
 - `stats`: calculos, provider y pantalla.
 - `insights`: perfil lector calculado desde libros y sesiones, con preferencias, mejores lecturas y curiosidades.
-- `sync`: modelo remoto preparado para Supabase y metadata local de sincronizacion. Incluye DTOs/mappers remotos, contratos de repositorios remotos y repositorio local de estado sync. No sincroniza datos todavia.
+- `sync`: modelo remoto preparado para Supabase, metadata local de sincronizacion y primera sincronizacion manual Books local -> Supabase. Incluye DTOs/mappers remotos, contratos de repositorios remotos, repositorio local de estado sync, datasource Supabase y use case manual de Books.
 
 ## Persistencia
 
@@ -85,7 +85,7 @@ reading_tracker/lib/
 - Open Library Covers: `https://covers.openlibrary.org/b/id/{coverId}-M.jpg`.
 - Supabase Auth opcional para cuenta/login cuando `SUPABASE_URL` y `SUPABASE_ANON_KEY` estan configurados.
 - Supabase Database schema preparado en SQL para futura sincronizacion, pendiente de aplicar y validar en proyecto real.
-- No hay Firebase, Stripe, backend propio ni sincronizacion remota.
+- No hay Firebase, Stripe ni backend propio. Existe una primera sincronizacion remota manual limitada a Books; no hay sync automatica ni recuperacion nube -> local.
 
 ## Herramientas externas relevantes
 
@@ -477,6 +477,23 @@ reading_tracker/lib/
 - Entidades singleton usan IDs locales estables: `annualReadingGoal` y `reader_profile`.
 - La app no consume Supabase desde estas mutaciones y no cambia comportamiento visual.
 - Riesgo tecnico aceptado: `core/preferences` conoce `features/sync` para marcar perfil lector; si el perfil crece, conviene moverlo a feature propia o extraer un contrato de tracking/preferencias.
+
+### Sincronizacion manual Books Sprint 22.0
+
+- Sprint 22.0 implementa la primera sincronizacion manual local -> Supabase, limitada a Books.
+- El caso de uso manual recibe `userId` como parametro explicito para mantener testabilidad y evitar acoplar dominio a Auth/UI.
+- El flujo consume `SyncMetadataRepository.getPendingSync()`, filtra `SyncEntityType.book` y procesa `PendingSyncOperation.create`, `update` y `delete`.
+- Para `create` y `update`, el flujo carga el libro local con `BookDao.getBookById`, construye `RemoteBook` con el modelo remoto parcial existente y llama a `RemoteBooksRepository.upsertBooks`.
+- Tras upsert correcto, la metadata se marca como `synced`, conserva/guarda `remoteId` y actualiza timestamps de sync/remoto cuando estan disponibles.
+- Para `delete`, si existe `remoteId`, se llama a borrado remoto; si no existe `remoteId`, se marca como `synced` sin llamada remota porque no hay registro remoto que borrar.
+- No se sincronizan Reading Sessions, perfil lector ni objetivo anual en Sprint 22.0.
+- No hay recuperacion nube -> local.
+- No hay sincronizacion automatica ni worker/background sync.
+- La UI queda intacta; el use case queda disponible para ejecucion manual desde provider o futuros flujos.
+- En Supabase Books, el upsert remoto usa `id` como conflict target porque el indice `user_id + local_book_id` del schema es parcial con `WHERE deleted_at IS NULL`.
+- `local_book_id` sigue viajando en la fila como identidad local, pero no se usa como conflict target directo en este sprint.
+- Esta decision puede afectar proximos sprints de reconciliacion por `local_book_id`, borrado logico y sync nube -> local.
+- Validacion Sprint 22.0: `flutter analyze` OK y `flutter test` OK con 94/94 tests.
 
 ### Hallazgos arquitectonicos revision Sprint 19
 

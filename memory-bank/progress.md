@@ -570,3 +570,10 @@
 - Revision tecnica Sprint 21.9: no hay deuda bloqueante; existe acoplamiento leve desde `core/preferences` hacia `features/sync` para tracking de perfil lector.
 - Oportunidad futura: mover perfil lector a una feature propia o extraer un contrato de preferencias para evitar dependencia desde `core` hacia `features`.
 - Decision de cierre: Sprint 21.9 queda cerrado sin sync remota.
+- Sprint 22.0 cerrado: primera sincronizacion manual local -> Supabase limitada a Books.
+- Sprint 22.0 agrega un flujo manual que consume `sync_metadata`, filtra `entity_type = book`, procesa `create`, `update` y `delete`, sube Books pendientes a Supabase, guarda `remoteId` y marca synced cuando la operacion remota termina correctamente.
+- Sprint 22.0 mantiene fuera de alcance Reading Sessions, perfil lector y objetivo anual.
+- Sprint 22.0 no implementa sincronizacion automatica ni recuperacion nube -> local.
+- Decision tecnica Sprint 22.0: en Supabase Books, el upsert remoto usa `id` como conflict target porque el indice `user_id + local_book_id` es parcial con `WHERE deleted_at IS NULL`; `local_book_id` sigue viajando como identidad local, pero no se usa como conflict target directo en este sprint.
+- Impacto futuro: revisar esta decision en los proximos sprints de reconciliacion, borrado logico y sync nube -> local.
+- Sprint 22.0 validado con `dart format` OK, `flutter analyze` OK y `flutter test` OK con 94/94 tests.

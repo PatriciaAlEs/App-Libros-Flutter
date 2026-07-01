@@ -654,4 +654,10 @@ Estado confirmado para Hito 5 Sprint 13:
 - Sprint 21.9 no implementa llamadas Supabase, subida/descarga, sync incremental, merge, resolucion de conflictos ni cambios visibles de UI.
 - Validacion Sprint 21.9: `dart format lib test` OK, `flutter analyze` OK y `flutter test` OK con 88/88 tests.
 - Limitacion Sprint 21.9: los pendientes quedan registrados localmente, pero no existe aun proceso que los suba o resuelva conflictos.
-- Proximo paso recomendado: Sprint 21.10 implementar un primer push manual/local -> Supabase usando `sync_metadata`, empezando por libros o por un subconjunto controlado.
+- Sprint 22.0 cerrado: primera sincronizacion manual local -> Supabase limitada a Books.
+- Sprint 22.0 consume `sync_metadata`, filtra `entity_type = book`, procesa `create`, `update` y `delete`, sube libros pendientes a Supabase, guarda `remoteId` en metadata y marca como `synced` lo subido correctamente.
+- Sprint 22.0 no implementa sincronizacion automatica, no implementa recuperacion nube -> local y no sincroniza todavia Reading Sessions, perfil lector ni objetivo anual.
+- Validacion Sprint 22.0: `dart format` OK, `flutter analyze` OK y `flutter test` OK con 94/94 tests.
+- Decision tecnica Sprint 22.0: en Supabase Books, el upsert remoto usa `id` como conflict target porque el indice `user_id + local_book_id` del schema es parcial con `WHERE deleted_at IS NULL`. `local_book_id` sigue viajando en la fila como identidad local, pero no se usa como conflict target directo en este sprint.
+- Impacto futuro de la decision: puede afectar los proximos sprints de reconciliacion, borrado logico y sync nube -> local.
+- Proximo paso recomendado: Sprint 22.1 definir reconciliacion/estrategia de borrado logico y preparar el siguiente tramo de sync sin activar aun una sincronizacion automatica amplia.

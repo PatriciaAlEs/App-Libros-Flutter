@@ -280,6 +280,8 @@
 - Proximo paso tecnico mayor post-Alpha: Supabase para Auth, backend cloud y sincronizacion multi-dispositivo.
 - La sincronizacion futura debe recuperar biblioteca, sesiones, progreso, estadisticas y perfil lector en otro dispositivo.
 - La persistencia local debe mantenerse para que la app no dependa siempre de internet.
+- Sprint 22.0 cerrado: primera sincronizacion manual local -> Supabase limitada a Books usando `sync_metadata` como cola de pendientes; no sincroniza Reading Sessions, perfil lector ni objetivo anual, no descarga nube -> local y no activa sync automatica.
+- Decision tecnica Sprint 22.0: en Supabase Books, el upsert remoto usa `id` como conflict target porque el indice `user_id + local_book_id` del schema es parcial con `WHERE deleted_at IS NULL`. `local_book_id` sigue viajando en la fila como identidad local, pero no se usa como conflict target directo en este sprint. Esta decision puede afectar proximos sprints de reconciliacion, borrado logico y sync nube -> local.
 
 ## Motion & Delight Hito 7 Sprint 19.1
 
