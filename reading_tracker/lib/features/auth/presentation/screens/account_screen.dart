@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design_system/design_system.dart';
+import '../../../sync/presentation/widgets/sync_status_card.dart';
 import '../../domain/entities/account_migration_preparation.dart';
 import '../controllers/account_migration_controller.dart';
 import '../controllers/auth_controller.dart';
@@ -208,15 +209,7 @@ class _SignedInContent extends StatelessWidget {
           _MigrationPreparationStatus(preparation: migrationPreparation!),
         ],
         const SizedBox(height: AppSpacing.lg),
-        Text(
-          'La sincronizacion de biblioteca y progreso se activara en un '
-          'siguiente sprint. Por ahora ReadPp conserva el funcionamiento local.',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-            height: 1.35,
-          ),
-        ),
+        const SyncStatusCard(),
         const SizedBox(height: AppSpacing.xl),
         OutlinedButton.icon(
           onPressed: isLoading ? null : onSignOut,

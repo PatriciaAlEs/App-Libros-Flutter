@@ -35,6 +35,12 @@ class SyncMetadataDao extends DatabaseAccessor<AppDatabase>
         .get();
   }
 
+  Stream<List<SyncMetadataTableData>> watchAllMetadata() {
+    return (select(
+      syncMetadataTable,
+    )..orderBy([(table) => OrderingTerm.desc(table.updatedAt)])).watch();
+  }
+
   Future<int> updateRemoteAssociation({
     required String entityType,
     required String localId,

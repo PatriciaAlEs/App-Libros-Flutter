@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../data/repositories/auto_sync_coordinator_provider.dart';
+import '../controllers/sync_status_controller.dart';
 
 class AutoSyncBootstrap extends ConsumerStatefulWidget {
   const AutoSyncBootstrap({required this.child, super.key});
@@ -38,7 +38,9 @@ class _AutoSyncBootstrapState extends ConsumerState<AutoSyncBootstrap> {
 
     scheduleMicrotask(() {
       if (!mounted) return;
-      unawaited(ref.read(autoSyncCoordinatorProvider)?.run(userId: userId));
+      unawaited(
+        ref.read(syncStatusControllerProvider.notifier).syncNow(userId: userId),
+      );
     });
   }
 }
