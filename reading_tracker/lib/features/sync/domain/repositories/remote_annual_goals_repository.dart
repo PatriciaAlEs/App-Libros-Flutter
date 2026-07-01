@@ -7,7 +7,9 @@ abstract interface class RemoteAnnualGoalsRepository {
     bool includeDeleted = false,
   });
 
-  Future<void> upsertAnnualGoals(List<RemoteAnnualGoal> goals);
+  Future<List<RemoteAnnualGoal>> upsertAnnualGoals(
+    List<RemoteAnnualGoal> goals,
+  );
   Future<void> deleteAnnualGoal({
     required String userId,
     required String goalId,

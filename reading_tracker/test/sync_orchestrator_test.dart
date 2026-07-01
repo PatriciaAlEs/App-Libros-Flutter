@@ -3,19 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reading_tracker/core/preferences/reader_profile_controller.dart';
 import 'package:reading_tracker/features/books/domain/entities/book.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/entities/reading_session.dart';
+import 'package:reading_tracker/features/sync/data/repositories/manual_annual_goal_sync_provider.dart';
 import 'package:reading_tracker/features/sync/data/repositories/manual_books_sync_provider.dart';
 import 'package:reading_tracker/features/sync/data/repositories/manual_reader_profile_sync_provider.dart';
 import 'package:reading_tracker/features/sync/data/repositories/manual_reading_sessions_sync_provider.dart';
 import 'package:reading_tracker/features/sync/data/repositories/sync_orchestrator_provider.dart';
+import 'package:reading_tracker/features/sync/domain/entities/remote_annual_goal.dart';
 import 'package:reading_tracker/features/sync/domain/entities/remote_book.dart';
 import 'package:reading_tracker/features/sync/domain/entities/remote_profile.dart';
 import 'package:reading_tracker/features/sync/domain/entities/remote_reading_session.dart';
 import 'package:reading_tracker/features/sync/domain/entities/sync_metadata.dart';
+import 'package:reading_tracker/features/sync/domain/repositories/remote_annual_goals_repository.dart';
 import 'package:reading_tracker/features/sync/domain/repositories/remote_books_repository.dart';
 import 'package:reading_tracker/features/sync/domain/repositories/remote_profile_repository.dart';
 import 'package:reading_tracker/features/sync/domain/repositories/remote_reading_sessions_repository.dart';
 import 'package:reading_tracker/features/sync/domain/repositories/sync_metadata_repository.dart';
 import 'package:reading_tracker/features/sync/domain/services/sync_orchestrator.dart';
+import 'package:reading_tracker/features/sync/domain/usecases/sync_pending_annual_goal_to_supabase.dart';
 import 'package:reading_tracker/features/sync/domain/usecases/sync_pending_books_to_supabase.dart';
 import 'package:reading_tracker/features/sync/domain/usecases/sync_pending_reader_profile_to_supabase.dart';
 import 'package:reading_tracker/features/sync/domain/usecases/sync_pending_reading_sessions_to_supabase.dart';
@@ -36,6 +40,7 @@ void main() {
       syncBooks: syncBooks,
       syncReadingSessions: _emptyReadingSessionsSync(),
       syncReaderProfile: _emptyReaderProfileSync(),
+      syncAnnualGoal: _emptyAnnualGoalSync(),
     );
 
     final result = await orchestrator.runManualSync(userId: 'user-1');
@@ -55,6 +60,10 @@ void main() {
         localId: 'session-1',
       ),
       _metadata(entityType: SyncEntityType.profile, localId: 'reader_profile'),
+      _metadata(
+        entityType: SyncEntityType.annualGoal,
+        localId: 'annualReadingGoal',
+      ),
     ]);
     final remoteRepository = FakeRemoteBooksRepository();
     final syncBooks = SyncPendingBooksToSupabase(
@@ -77,22 +86,32 @@ void main() {
         remoteProfileRepository: FakeRemoteProfileRepository(),
         loadProfile: () async => const ReaderProfile(),
       ),
+      syncAnnualGoal: SyncPendingAnnualGoalToSupabase(
+        metadataRepository: metadataRepository,
+        remoteAnnualGoalsRepository: FakeRemoteAnnualGoalsRepository(),
+        loadAnnualGoal: () async => 24,
+        remoteIdGenerator: () => 'remote-goal-1',
+        clock: () => DateTime(2026, 7),
+      ),
     );
 
     final result = await orchestrator.runManualSync(userId: 'user-1');
 
     expect(result.books.synced, 1);
     expect(result.books.failed, 0);
-    expect(result.books.ignored, 2);
+    expect(result.books.ignored, 3);
     expect(result.readingSessions.synced, 1);
     expect(result.readingSessions.failed, 0);
-    expect(result.readingSessions.ignored, 2);
+    expect(result.readingSessions.ignored, 3);
     expect(result.readerProfile.synced, 1);
     expect(result.readerProfile.failed, 0);
-    expect(result.readerProfile.ignored, 2);
-    expect(result.synced, 3);
+    expect(result.readerProfile.ignored, 3);
+    expect(result.annualGoal.synced, 1);
+    expect(result.annualGoal.failed, 0);
+    expect(result.annualGoal.ignored, 3);
+    expect(result.synced, 4);
     expect(result.failed, 0);
-    expect(result.ignored, 6);
+    expect(result.ignored, 12);
   });
 
   test('propagates a full books sync failure', () async {
@@ -105,6 +124,7 @@ void main() {
       syncBooks: syncBooks,
       syncReadingSessions: _emptyReadingSessionsSync(),
       syncReaderProfile: _emptyReaderProfileSync(),
+      syncAnnualGoal: _emptyAnnualGoalSync(),
     );
 
     await expectLater(
@@ -122,6 +142,10 @@ void main() {
         localId: 'session-1',
       ),
       _metadata(entityType: SyncEntityType.profile, localId: 'reader_profile'),
+      _metadata(
+        entityType: SyncEntityType.annualGoal,
+        localId: 'annualReadingGoal',
+      ),
     ]);
     final syncBooks = SyncPendingBooksToSupabase(
       metadataRepository: metadataRepository,
@@ -147,11 +171,25 @@ void main() {
         ),
         loadProfile: () async => const ReaderProfile(),
       ),
+      syncAnnualGoal: SyncPendingAnnualGoalToSupabase(
+        metadataRepository: metadataRepository,
+        remoteAnnualGoalsRepository: FakeRemoteAnnualGoalsRepository(
+          operations: operations,
+        ),
+        loadAnnualGoal: () async => 24,
+        remoteIdGenerator: () => 'remote-goal-1',
+        clock: () => DateTime(2026, 7),
+      ),
     );
 
     await orchestrator.runManualSync(userId: 'user-1');
 
-    expect(operations, ['books', 'reading-sessions', 'reader-profile']);
+    expect(operations, [
+      'books',
+      'reading-sessions',
+      'reader-profile',
+      'annual-goal',
+    ]);
   });
 
   test('provider returns null when books sync is unavailable', () {
@@ -163,6 +201,9 @@ void main() {
         ),
         syncPendingReaderProfileToSupabaseProvider.overrideWith(
           (ref) => _emptyReaderProfileSync(),
+        ),
+        syncPendingAnnualGoalToSupabaseProvider.overrideWith(
+          (ref) => _emptyAnnualGoalSync(),
         ),
       ],
     );
@@ -183,6 +224,9 @@ void main() {
         syncPendingReaderProfileToSupabaseProvider.overrideWith(
           (ref) => _emptyReaderProfileSync(),
         ),
+        syncPendingAnnualGoalToSupabaseProvider.overrideWith(
+          (ref) => _emptyAnnualGoalSync(),
+        ),
       ],
     );
     addTearDown(container.dispose);
@@ -200,6 +244,29 @@ void main() {
           (ref) => _emptyReadingSessionsSync(),
         ),
         syncPendingReaderProfileToSupabaseProvider.overrideWith((ref) => null),
+        syncPendingAnnualGoalToSupabaseProvider.overrideWith(
+          (ref) => _emptyAnnualGoalSync(),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    expect(container.read(syncOrchestratorProvider), isNull);
+  });
+
+  test('provider returns null when annual goal sync is unavailable', () {
+    final container = ProviderContainer(
+      overrides: [
+        syncPendingBooksToSupabaseProvider.overrideWith(
+          (ref) => _emptyBooksSync(),
+        ),
+        syncPendingReadingSessionsToSupabaseProvider.overrideWith(
+          (ref) => _emptyReadingSessionsSync(),
+        ),
+        syncPendingReaderProfileToSupabaseProvider.overrideWith(
+          (ref) => _emptyReaderProfileSync(),
+        ),
+        syncPendingAnnualGoalToSupabaseProvider.overrideWith((ref) => null),
       ],
     );
     addTearDown(container.dispose);
@@ -321,6 +388,35 @@ class FakeRemoteProfileRepository implements RemoteProfileRepository {
   }
 }
 
+class FakeRemoteAnnualGoalsRepository implements RemoteAnnualGoalsRepository {
+  FakeRemoteAnnualGoalsRepository({this.operations});
+
+  final List<String>? operations;
+
+  @override
+  Future<void> deleteAnnualGoal({
+    required String userId,
+    required String goalId,
+  }) async {}
+
+  @override
+  Future<List<RemoteAnnualGoal>> getAnnualGoals({
+    required String userId,
+    DateTime? updatedAfter,
+    bool includeDeleted = false,
+  }) async {
+    return const [];
+  }
+
+  @override
+  Future<List<RemoteAnnualGoal>> upsertAnnualGoals(
+    List<RemoteAnnualGoal> goals,
+  ) async {
+    operations?.add('annual-goal');
+    return goals;
+  }
+}
+
 class FakeSyncMetadataRepository implements SyncMetadataRepository {
   FakeSyncMetadataRepository(this.pending);
 
@@ -411,6 +507,14 @@ SyncPendingReaderProfileToSupabase _emptyReaderProfileSync() {
     metadataRepository: FakeSyncMetadataRepository(const []),
     remoteProfileRepository: FakeRemoteProfileRepository(),
     loadProfile: () async => const ReaderProfile(),
+  );
+}
+
+SyncPendingAnnualGoalToSupabase _emptyAnnualGoalSync() {
+  return SyncPendingAnnualGoalToSupabase(
+    metadataRepository: FakeSyncMetadataRepository(const []),
+    remoteAnnualGoalsRepository: FakeRemoteAnnualGoalsRepository(),
+    loadAnnualGoal: () async => null,
   );
 }
 
