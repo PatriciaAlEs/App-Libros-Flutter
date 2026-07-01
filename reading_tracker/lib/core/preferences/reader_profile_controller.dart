@@ -101,6 +101,16 @@ class ReaderProfilePreferences {
       currentReadingBookId: preferences.getString(currentReadingBookIdKey),
     );
   }
+
+  static Future<void> saveSyncedProfile(ReaderProfile profile) async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setString(nameKey, profile.displayName);
+    await preferences.setString(greetingKey, profile.greetingPreference.name);
+    await preferences.setString(
+      customGreetingKey,
+      ReaderProfileTextValidator.normalize(profile.customGreeting),
+    );
+  }
 }
 
 final readerProfileControllerProvider =

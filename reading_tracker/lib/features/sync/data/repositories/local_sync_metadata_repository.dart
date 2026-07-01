@@ -1,12 +1,16 @@
+import 'package:uuid/uuid.dart';
+
 import '../../../../core/database/daos/sync_metadata_dao.dart';
 import '../../domain/entities/sync_metadata.dart';
 import '../../domain/repositories/sync_metadata_repository.dart';
 import '../mappers/sync_metadata_mapper.dart';
 
 class LocalSyncMetadataRepository implements SyncMetadataRepository {
-  const LocalSyncMetadataRepository(this._dao);
+  LocalSyncMetadataRepository(this._dao, {String Function()? idGenerator})
+    : _idGenerator = idGenerator ?? const Uuid().v4;
 
   final SyncMetadataDao _dao;
+  final String Function() _idGenerator;
 
   @override
   Future<void> save(SyncMetadata metadata) {
@@ -55,7 +59,7 @@ class LocalSyncMetadataRepository implements SyncMetadataRepository {
     DateTime? lastRemoteUpdate,
   }) async {
     final now = DateTime.now();
-    await _dao.markSynced(
+    final updatedRows = await _dao.markSynced(
       entityType: entityType.value,
       localId: localId,
       remoteId: remoteId,
@@ -64,6 +68,22 @@ class LocalSyncMetadataRepository implements SyncMetadataRepository {
       pendingOperation: PendingSyncOperation.none.value,
       syncedAt: now,
       updatedAt: now,
+    );
+    if (updatedRows > 0) return;
+
+    await save(
+      SyncMetadata(
+        id: _idGenerator(),
+        entityType: entityType,
+        localId: localId,
+        remoteId: remoteId,
+        syncStatus: SyncStatus.synced,
+        pendingOperation: PendingSyncOperation.none,
+        lastSyncedAt: now,
+        lastRemoteUpdate: lastRemoteUpdate,
+        createdAt: now,
+        updatedAt: now,
+      ),
     );
   }
 

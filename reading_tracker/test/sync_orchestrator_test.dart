@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reading_tracker/core/preferences/reader_profile_controller.dart';
 import 'package:reading_tracker/features/books/domain/entities/book.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/entities/reading_session.dart';
+import 'package:reading_tracker/features/sync/data/repositories/download_annual_goal_provider.dart';
+import 'package:reading_tracker/features/sync/data/repositories/download_books_provider.dart';
+import 'package:reading_tracker/features/sync/data/repositories/download_reader_profile_provider.dart';
+import 'package:reading_tracker/features/sync/data/repositories/download_reading_sessions_provider.dart';
 import 'package:reading_tracker/features/sync/data/repositories/manual_annual_goal_sync_provider.dart';
 import 'package:reading_tracker/features/sync/data/repositories/manual_books_sync_provider.dart';
 import 'package:reading_tracker/features/sync/data/repositories/manual_reader_profile_sync_provider.dart';
@@ -19,6 +23,10 @@ import 'package:reading_tracker/features/sync/domain/repositories/remote_profile
 import 'package:reading_tracker/features/sync/domain/repositories/remote_reading_sessions_repository.dart';
 import 'package:reading_tracker/features/sync/domain/repositories/sync_metadata_repository.dart';
 import 'package:reading_tracker/features/sync/domain/services/sync_orchestrator.dart';
+import 'package:reading_tracker/features/sync/domain/usecases/download_annual_goal_from_supabase.dart';
+import 'package:reading_tracker/features/sync/domain/usecases/download_books_from_supabase.dart';
+import 'package:reading_tracker/features/sync/domain/usecases/download_reader_profile_from_supabase.dart';
+import 'package:reading_tracker/features/sync/domain/usecases/download_reading_sessions_from_supabase.dart';
 import 'package:reading_tracker/features/sync/domain/usecases/sync_pending_annual_goal_to_supabase.dart';
 import 'package:reading_tracker/features/sync/domain/usecases/sync_pending_books_to_supabase.dart';
 import 'package:reading_tracker/features/sync/domain/usecases/sync_pending_reader_profile_to_supabase.dart';
@@ -41,6 +49,10 @@ void main() {
       syncReadingSessions: _emptyReadingSessionsSync(),
       syncReaderProfile: _emptyReaderProfileSync(),
       syncAnnualGoal: _emptyAnnualGoalSync(),
+      downloadBooks: _emptyDownloadBooks(),
+      downloadReadingSessions: _emptyDownloadReadingSessions(),
+      downloadReaderProfile: _emptyDownloadReaderProfile(),
+      downloadAnnualGoal: _emptyDownloadAnnualGoal(),
     );
 
     final result = await orchestrator.runManualSync(userId: 'user-1');
@@ -93,6 +105,10 @@ void main() {
         remoteIdGenerator: () => 'remote-goal-1',
         clock: () => DateTime(2026, 7),
       ),
+      downloadBooks: _emptyDownloadBooks(),
+      downloadReadingSessions: _emptyDownloadReadingSessions(),
+      downloadReaderProfile: _emptyDownloadReaderProfile(),
+      downloadAnnualGoal: _emptyDownloadAnnualGoal(),
     );
 
     final result = await orchestrator.runManualSync(userId: 'user-1');
@@ -125,6 +141,10 @@ void main() {
       syncReadingSessions: _emptyReadingSessionsSync(),
       syncReaderProfile: _emptyReaderProfileSync(),
       syncAnnualGoal: _emptyAnnualGoalSync(),
+      downloadBooks: _emptyDownloadBooks(),
+      downloadReadingSessions: _emptyDownloadReadingSessions(),
+      downloadReaderProfile: _emptyDownloadReaderProfile(),
+      downloadAnnualGoal: _emptyDownloadAnnualGoal(),
     );
 
     await expectLater(
@@ -180,6 +200,10 @@ void main() {
         remoteIdGenerator: () => 'remote-goal-1',
         clock: () => DateTime(2026, 7),
       ),
+      downloadBooks: _emptyDownloadBooks(),
+      downloadReadingSessions: _emptyDownloadReadingSessions(),
+      downloadReaderProfile: _emptyDownloadReaderProfile(),
+      downloadAnnualGoal: _emptyDownloadAnnualGoal(),
     );
 
     await orchestrator.runManualSync(userId: 'user-1');
@@ -190,6 +214,36 @@ void main() {
       'reader-profile',
       'annual-goal',
     ]);
+  });
+
+  test('runs cloud download in dependency order', () async {
+    final operations = <String>[];
+    final orchestrator = SyncOrchestrator(
+      syncBooks: _emptyBooksSync(),
+      syncReadingSessions: _emptyReadingSessionsSync(),
+      syncReaderProfile: _emptyReaderProfileSync(),
+      syncAnnualGoal: _emptyAnnualGoalSync(),
+      downloadBooks: _emptyDownloadBooks(operations: operations),
+      downloadReadingSessions: _emptyDownloadReadingSessions(
+        operations: operations,
+      ),
+      downloadReaderProfile: _emptyDownloadReaderProfile(
+        operations: operations,
+      ),
+      downloadAnnualGoal: _emptyDownloadAnnualGoal(operations: operations),
+    );
+
+    final result = await orchestrator.runManualDownload(userId: 'user-1');
+
+    expect(operations, [
+      'download-books',
+      'download-reading-sessions',
+      'download-reader-profile',
+      'download-annual-goal',
+    ]);
+    expect(result.applied, 0);
+    expect(result.skipped, 0);
+    expect(result.failed, 0);
   });
 
   test('provider returns null when books sync is unavailable', () {
@@ -204,6 +258,18 @@ void main() {
         ),
         syncPendingAnnualGoalToSupabaseProvider.overrideWith(
           (ref) => _emptyAnnualGoalSync(),
+        ),
+        downloadBooksFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadBooks(),
+        ),
+        downloadReadingSessionsFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadReadingSessions(),
+        ),
+        downloadReaderProfileFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadReaderProfile(),
+        ),
+        downloadAnnualGoalFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadAnnualGoal(),
         ),
       ],
     );
@@ -227,6 +293,18 @@ void main() {
         syncPendingAnnualGoalToSupabaseProvider.overrideWith(
           (ref) => _emptyAnnualGoalSync(),
         ),
+        downloadBooksFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadBooks(),
+        ),
+        downloadReadingSessionsFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadReadingSessions(),
+        ),
+        downloadReaderProfileFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadReaderProfile(),
+        ),
+        downloadAnnualGoalFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadAnnualGoal(),
+        ),
       ],
     );
     addTearDown(container.dispose);
@@ -246,6 +324,18 @@ void main() {
         syncPendingReaderProfileToSupabaseProvider.overrideWith((ref) => null),
         syncPendingAnnualGoalToSupabaseProvider.overrideWith(
           (ref) => _emptyAnnualGoalSync(),
+        ),
+        downloadBooksFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadBooks(),
+        ),
+        downloadReadingSessionsFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadReadingSessions(),
+        ),
+        downloadReaderProfileFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadReaderProfile(),
+        ),
+        downloadAnnualGoalFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadAnnualGoal(),
         ),
       ],
     );
@@ -267,6 +357,50 @@ void main() {
           (ref) => _emptyReaderProfileSync(),
         ),
         syncPendingAnnualGoalToSupabaseProvider.overrideWith((ref) => null),
+        downloadBooksFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadBooks(),
+        ),
+        downloadReadingSessionsFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadReadingSessions(),
+        ),
+        downloadReaderProfileFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadReaderProfile(),
+        ),
+        downloadAnnualGoalFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadAnnualGoal(),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    expect(container.read(syncOrchestratorProvider), isNull);
+  });
+
+  test('provider returns null when books download is unavailable', () {
+    final container = ProviderContainer(
+      overrides: [
+        syncPendingBooksToSupabaseProvider.overrideWith(
+          (ref) => _emptyBooksSync(),
+        ),
+        syncPendingReadingSessionsToSupabaseProvider.overrideWith(
+          (ref) => _emptyReadingSessionsSync(),
+        ),
+        syncPendingReaderProfileToSupabaseProvider.overrideWith(
+          (ref) => _emptyReaderProfileSync(),
+        ),
+        syncPendingAnnualGoalToSupabaseProvider.overrideWith(
+          (ref) => _emptyAnnualGoalSync(),
+        ),
+        downloadBooksFromSupabaseProvider.overrideWith((ref) => null),
+        downloadReadingSessionsFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadReadingSessions(),
+        ),
+        downloadReaderProfileFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadReaderProfile(),
+        ),
+        downloadAnnualGoalFromSupabaseProvider.overrideWith(
+          (ref) => _emptyDownloadAnnualGoal(),
+        ),
       ],
     );
     addTearDown(container.dispose);
@@ -327,6 +461,7 @@ class FakeRemoteBooksRepository implements RemoteBooksRepository {
     DateTime? updatedAfter,
     bool includeDeleted = false,
   }) async {
+    operations?.add('download-books');
     return const [];
   }
 
@@ -356,6 +491,7 @@ class FakeRemoteReadingSessionsRepository
     DateTime? updatedAfter,
     bool includeDeleted = false,
   }) async {
+    operations?.add('download-reading-sessions');
     return const [];
   }
 
@@ -378,6 +514,7 @@ class FakeRemoteProfileRepository implements RemoteProfileRepository {
 
   @override
   Future<RemoteProfile?> getProfile(String userId) async {
+    operations?.add('download-reader-profile');
     return null;
   }
 
@@ -405,6 +542,7 @@ class FakeRemoteAnnualGoalsRepository implements RemoteAnnualGoalsRepository {
     DateTime? updatedAfter,
     bool includeDeleted = false,
   }) async {
+    operations?.add('download-annual-goal');
     return const [];
   }
 
@@ -515,6 +653,55 @@ SyncPendingAnnualGoalToSupabase _emptyAnnualGoalSync() {
     metadataRepository: FakeSyncMetadataRepository(const []),
     remoteAnnualGoalsRepository: FakeRemoteAnnualGoalsRepository(),
     loadAnnualGoal: () async => null,
+  );
+}
+
+DownloadBooksFromSupabase _emptyDownloadBooks({List<String>? operations}) {
+  return DownloadBooksFromSupabase(
+    remoteBooksRepository: FakeRemoteBooksRepository(operations: operations),
+    metadataRepository: FakeSyncMetadataRepository(const []),
+    readLocalBook: (_) async => null,
+    writeLocalBook: (_) async {},
+  );
+}
+
+DownloadReadingSessionsFromSupabase _emptyDownloadReadingSessions({
+  List<String>? operations,
+}) {
+  return DownloadReadingSessionsFromSupabase(
+    remoteReadingSessionsRepository: FakeRemoteReadingSessionsRepository(
+      operations: operations,
+    ),
+    metadataRepository: FakeSyncMetadataRepository(const []),
+    readLocalBook: (_) async => null,
+    readLocalSession: (_) async => null,
+    writeLocalSession: (_) async {},
+  );
+}
+
+DownloadReaderProfileFromSupabase _emptyDownloadReaderProfile({
+  List<String>? operations,
+}) {
+  return DownloadReaderProfileFromSupabase(
+    remoteProfileRepository: FakeRemoteProfileRepository(
+      operations: operations,
+    ),
+    metadataRepository: FakeSyncMetadataRepository(const []),
+    readLocalProfile: () async => const ReaderProfile(),
+    writeLocalProfile: (_) async {},
+  );
+}
+
+DownloadAnnualGoalFromSupabase _emptyDownloadAnnualGoal({
+  List<String>? operations,
+}) {
+  return DownloadAnnualGoalFromSupabase(
+    remoteAnnualGoalsRepository: FakeRemoteAnnualGoalsRepository(
+      operations: operations,
+    ),
+    metadataRepository: FakeSyncMetadataRepository(const []),
+    writeAnnualGoal: (_) async {},
+    clock: () => DateTime(2026, 7),
   );
 }
 
