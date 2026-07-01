@@ -90,4 +90,9 @@ class SupabaseRemoteSyncDatasource implements RemoteSyncDatasource {
         .eq(RemoteSyncColumns.userId, userId)
         .eq(RemoteSyncColumns.id, id);
   }
+
+  @override
+  Future<void> deleteById({required String table, required String id}) async {
+    await _client.from(table).delete().eq(RemoteSyncColumns.id, id);
+  }
 }

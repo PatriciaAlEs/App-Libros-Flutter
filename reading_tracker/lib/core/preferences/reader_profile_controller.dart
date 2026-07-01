@@ -78,6 +78,31 @@ class ReaderProfile {
   }
 }
 
+class ReaderProfilePreferences {
+  const ReaderProfilePreferences._();
+
+  static const nameKey = 'reader_profile_name';
+  static const greetingKey = 'reader_profile_greeting';
+  static const customGreetingKey = 'reader_profile_custom_greeting';
+  static const currentReadingBookIdKey = 'reader_profile_current_reading_id';
+
+  static Future<ReaderProfile> load() async {
+    final preferences = await SharedPreferences.getInstance();
+    final storedName = preferences.getString(nameKey) ?? '';
+    final storedCustomGreeting = preferences.getString(customGreetingKey) ?? '';
+    return ReaderProfile(
+      name: ReaderProfileTextValidator.normalize(storedName),
+      greetingPreference: ReaderGreetingPreference.fromName(
+        preferences.getString(greetingKey),
+      ),
+      customGreeting: ReaderProfileTextValidator.normalize(
+        storedCustomGreeting,
+      ),
+      currentReadingBookId: preferences.getString(currentReadingBookIdKey),
+    );
+  }
+}
+
 final readerProfileControllerProvider =
     StateNotifierProvider<ReaderProfileController, ReaderProfile>(
       (ref) => ReaderProfileController(
@@ -92,26 +117,8 @@ class ReaderProfileController extends StateNotifier<ReaderProfile> {
 
   final LocalSyncTracker? _syncTracker;
 
-  static const _nameKey = 'reader_profile_name';
-  static const _greetingKey = 'reader_profile_greeting';
-  static const _customGreetingKey = 'reader_profile_custom_greeting';
-  static const _currentReadingBookIdKey = 'reader_profile_current_reading_id';
-
   Future<void> load() async {
-    final preferences = await SharedPreferences.getInstance();
-    final storedName = preferences.getString(_nameKey) ?? '';
-    final storedCustomGreeting =
-        preferences.getString(_customGreetingKey) ?? '';
-    state = ReaderProfile(
-      name: ReaderProfileTextValidator.normalize(storedName),
-      greetingPreference: ReaderGreetingPreference.fromName(
-        preferences.getString(_greetingKey),
-      ),
-      customGreeting: ReaderProfileTextValidator.normalize(
-        storedCustomGreeting,
-      ),
-      currentReadingBookId: preferences.getString(_currentReadingBookIdKey),
-    );
+    state = await ReaderProfilePreferences.load();
   }
 
   Future<String?> updateName(String name) async {
@@ -119,7 +126,10 @@ class ReaderProfileController extends StateNotifier<ReaderProfile> {
     if (!validation.isValid) return validation.error;
     state = state.copyWith(name: validation.value);
     final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(_nameKey, validation.value);
+    await preferences.setString(
+      ReaderProfilePreferences.nameKey,
+      validation.value,
+    );
     await _syncTracker?.trackProfileUpdated();
     return null;
   }
@@ -129,7 +139,10 @@ class ReaderProfileController extends StateNotifier<ReaderProfile> {
   ) async {
     state = state.copyWith(greetingPreference: preference);
     final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(_greetingKey, preference.name);
+    await preferences.setString(
+      ReaderProfilePreferences.greetingKey,
+      preference.name,
+    );
     await _syncTracker?.trackProfileUpdated();
   }
 
@@ -144,7 +157,10 @@ class ReaderProfileController extends StateNotifier<ReaderProfile> {
     }
     state = state.copyWith(customGreeting: normalized);
     final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(_customGreetingKey, normalized);
+    await preferences.setString(
+      ReaderProfilePreferences.customGreetingKey,
+      normalized,
+    );
     await _syncTracker?.trackProfileUpdated();
     return null;
   }
@@ -152,14 +168,17 @@ class ReaderProfileController extends StateNotifier<ReaderProfile> {
   Future<void> updateCurrentReadingBookId(String bookId) async {
     state = state.copyWith(currentReadingBookId: bookId);
     final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(_currentReadingBookIdKey, bookId);
+    await preferences.setString(
+      ReaderProfilePreferences.currentReadingBookIdKey,
+      bookId,
+    );
     await _syncTracker?.trackProfileUpdated();
   }
 
   Future<void> clearCurrentReadingBookId() async {
     state = state.copyWith(clearCurrentReadingBookId: true);
     final preferences = await SharedPreferences.getInstance();
-    await preferences.remove(_currentReadingBookIdKey);
+    await preferences.remove(ReaderProfilePreferences.currentReadingBookIdKey);
     await _syncTracker?.trackProfileUpdated();
   }
 }

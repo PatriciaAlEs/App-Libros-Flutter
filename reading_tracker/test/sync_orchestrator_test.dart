@@ -1,18 +1,23 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:reading_tracker/core/preferences/reader_profile_controller.dart';
 import 'package:reading_tracker/features/books/domain/entities/book.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/entities/reading_session.dart';
 import 'package:reading_tracker/features/sync/data/repositories/manual_books_sync_provider.dart';
+import 'package:reading_tracker/features/sync/data/repositories/manual_reader_profile_sync_provider.dart';
 import 'package:reading_tracker/features/sync/data/repositories/manual_reading_sessions_sync_provider.dart';
 import 'package:reading_tracker/features/sync/data/repositories/sync_orchestrator_provider.dart';
 import 'package:reading_tracker/features/sync/domain/entities/remote_book.dart';
+import 'package:reading_tracker/features/sync/domain/entities/remote_profile.dart';
 import 'package:reading_tracker/features/sync/domain/entities/remote_reading_session.dart';
 import 'package:reading_tracker/features/sync/domain/entities/sync_metadata.dart';
 import 'package:reading_tracker/features/sync/domain/repositories/remote_books_repository.dart';
+import 'package:reading_tracker/features/sync/domain/repositories/remote_profile_repository.dart';
 import 'package:reading_tracker/features/sync/domain/repositories/remote_reading_sessions_repository.dart';
 import 'package:reading_tracker/features/sync/domain/repositories/sync_metadata_repository.dart';
 import 'package:reading_tracker/features/sync/domain/services/sync_orchestrator.dart';
 import 'package:reading_tracker/features/sync/domain/usecases/sync_pending_books_to_supabase.dart';
+import 'package:reading_tracker/features/sync/domain/usecases/sync_pending_reader_profile_to_supabase.dart';
 import 'package:reading_tracker/features/sync/domain/usecases/sync_pending_reading_sessions_to_supabase.dart';
 
 void main() {
@@ -30,6 +35,7 @@ void main() {
     final orchestrator = SyncOrchestrator(
       syncBooks: syncBooks,
       syncReadingSessions: _emptyReadingSessionsSync(),
+      syncReaderProfile: _emptyReaderProfileSync(),
     );
 
     final result = await orchestrator.runManualSync(userId: 'user-1');
@@ -48,6 +54,7 @@ void main() {
         entityType: SyncEntityType.readingSession,
         localId: 'session-1',
       ),
+      _metadata(entityType: SyncEntityType.profile, localId: 'reader_profile'),
     ]);
     final remoteRepository = FakeRemoteBooksRepository();
     final syncBooks = SyncPendingBooksToSupabase(
@@ -65,19 +72,27 @@ void main() {
     final orchestrator = SyncOrchestrator(
       syncBooks: syncBooks,
       syncReadingSessions: syncReadingSessions,
+      syncReaderProfile: SyncPendingReaderProfileToSupabase(
+        metadataRepository: metadataRepository,
+        remoteProfileRepository: FakeRemoteProfileRepository(),
+        loadProfile: () async => const ReaderProfile(),
+      ),
     );
 
     final result = await orchestrator.runManualSync(userId: 'user-1');
 
     expect(result.books.synced, 1);
     expect(result.books.failed, 0);
-    expect(result.books.ignored, 1);
+    expect(result.books.ignored, 2);
     expect(result.readingSessions.synced, 1);
     expect(result.readingSessions.failed, 0);
-    expect(result.readingSessions.ignored, 1);
-    expect(result.synced, 2);
+    expect(result.readingSessions.ignored, 2);
+    expect(result.readerProfile.synced, 1);
+    expect(result.readerProfile.failed, 0);
+    expect(result.readerProfile.ignored, 2);
+    expect(result.synced, 3);
     expect(result.failed, 0);
-    expect(result.ignored, 2);
+    expect(result.ignored, 6);
   });
 
   test('propagates a full books sync failure', () async {
@@ -89,6 +104,7 @@ void main() {
     final orchestrator = SyncOrchestrator(
       syncBooks: syncBooks,
       syncReadingSessions: _emptyReadingSessionsSync(),
+      syncReaderProfile: _emptyReaderProfileSync(),
     );
 
     await expectLater(
@@ -105,6 +121,7 @@ void main() {
         entityType: SyncEntityType.readingSession,
         localId: 'session-1',
       ),
+      _metadata(entityType: SyncEntityType.profile, localId: 'reader_profile'),
     ]);
     final syncBooks = SyncPendingBooksToSupabase(
       metadataRepository: metadataRepository,
@@ -123,11 +140,18 @@ void main() {
     final orchestrator = SyncOrchestrator(
       syncBooks: syncBooks,
       syncReadingSessions: syncReadingSessions,
+      syncReaderProfile: SyncPendingReaderProfileToSupabase(
+        metadataRepository: metadataRepository,
+        remoteProfileRepository: FakeRemoteProfileRepository(
+          operations: operations,
+        ),
+        loadProfile: () async => const ReaderProfile(),
+      ),
     );
 
     await orchestrator.runManualSync(userId: 'user-1');
 
-    expect(operations, ['books', 'reading-sessions']);
+    expect(operations, ['books', 'reading-sessions', 'reader-profile']);
   });
 
   test('provider returns null when books sync is unavailable', () {
@@ -136,6 +160,9 @@ void main() {
         syncPendingBooksToSupabaseProvider.overrideWith((ref) => null),
         syncPendingReadingSessionsToSupabaseProvider.overrideWith(
           (ref) => _emptyReadingSessionsSync(),
+        ),
+        syncPendingReaderProfileToSupabaseProvider.overrideWith(
+          (ref) => _emptyReaderProfileSync(),
         ),
       ],
     );
@@ -153,6 +180,26 @@ void main() {
         syncPendingReadingSessionsToSupabaseProvider.overrideWith(
           (ref) => null,
         ),
+        syncPendingReaderProfileToSupabaseProvider.overrideWith(
+          (ref) => _emptyReaderProfileSync(),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    expect(container.read(syncOrchestratorProvider), isNull);
+  });
+
+  test('provider returns null when reader profile sync is unavailable', () {
+    final container = ProviderContainer(
+      overrides: [
+        syncPendingBooksToSupabaseProvider.overrideWith(
+          (ref) => _emptyBooksSync(),
+        ),
+        syncPendingReadingSessionsToSupabaseProvider.overrideWith(
+          (ref) => _emptyReadingSessionsSync(),
+        ),
+        syncPendingReaderProfileToSupabaseProvider.overrideWith((ref) => null),
       ],
     );
     addTearDown(container.dispose);
@@ -254,6 +301,26 @@ class FakeRemoteReadingSessionsRepository
   }
 }
 
+class FakeRemoteProfileRepository implements RemoteProfileRepository {
+  FakeRemoteProfileRepository({this.operations});
+
+  final List<String>? operations;
+
+  @override
+  Future<void> deleteProfile(String userId) async {}
+
+  @override
+  Future<RemoteProfile?> getProfile(String userId) async {
+    return null;
+  }
+
+  @override
+  Future<RemoteProfile> upsertProfile(RemoteProfile profile) async {
+    operations?.add('reader-profile');
+    return profile;
+  }
+}
+
 class FakeSyncMetadataRepository implements SyncMetadataRepository {
   FakeSyncMetadataRepository(this.pending);
 
@@ -336,6 +403,14 @@ SyncPendingReadingSessionsToSupabase _emptyReadingSessionsSync() {
     metadataRepository: FakeSyncMetadataRepository(const []),
     remoteReadingSessionsRepository: FakeRemoteReadingSessionsRepository(),
     loadSession: (_) async => null,
+  );
+}
+
+SyncPendingReaderProfileToSupabase _emptyReaderProfileSync() {
+  return SyncPendingReaderProfileToSupabase(
+    metadataRepository: FakeSyncMetadataRepository(const []),
+    remoteProfileRepository: FakeRemoteProfileRepository(),
+    loadProfile: () async => const ReaderProfile(),
   );
 }
 

@@ -23,4 +23,6 @@ abstract interface class RemoteSyncDatasource {
     required String userId,
     required String id,
   });
+
+  Future<void> deleteById({required String table, required String id});
 }
