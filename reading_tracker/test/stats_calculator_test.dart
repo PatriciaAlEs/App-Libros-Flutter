@@ -7,8 +7,7 @@ import 'package:reading_tracker/features/stats/domain/services/statistics_calcul
 
 void main() {
   test('calculateStats computes summary correctly', () {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final today = DateTime(2026, 5, 21);
     final yesterday = today.subtract(const Duration(days: 1));
     final twoDaysAgo = today.subtract(const Duration(days: 2));
 
