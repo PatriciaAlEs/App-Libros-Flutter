@@ -1,14 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reading_tracker/features/books/domain/entities/book.dart';
+import 'package:reading_tracker/features/reading_sessions/domain/entities/reading_session.dart';
 import 'package:reading_tracker/features/sync/data/repositories/manual_books_sync_provider.dart';
+import 'package:reading_tracker/features/sync/data/repositories/manual_reading_sessions_sync_provider.dart';
 import 'package:reading_tracker/features/sync/data/repositories/sync_orchestrator_provider.dart';
 import 'package:reading_tracker/features/sync/domain/entities/remote_book.dart';
+import 'package:reading_tracker/features/sync/domain/entities/remote_reading_session.dart';
 import 'package:reading_tracker/features/sync/domain/entities/sync_metadata.dart';
 import 'package:reading_tracker/features/sync/domain/repositories/remote_books_repository.dart';
+import 'package:reading_tracker/features/sync/domain/repositories/remote_reading_sessions_repository.dart';
 import 'package:reading_tracker/features/sync/domain/repositories/sync_metadata_repository.dart';
 import 'package:reading_tracker/features/sync/domain/services/sync_orchestrator.dart';
 import 'package:reading_tracker/features/sync/domain/usecases/sync_pending_books_to_supabase.dart';
+import 'package:reading_tracker/features/sync/domain/usecases/sync_pending_reading_sessions_to_supabase.dart';
 
 void main() {
   test('runs books sync with the provided user id', () async {
@@ -22,7 +27,10 @@ void main() {
       loadBook: (localId) async => _book(id: localId),
       remoteIdGenerator: () => 'remote-book-1',
     );
-    final orchestrator = SyncOrchestrator(syncBooks: syncBooks);
+    final orchestrator = SyncOrchestrator(
+      syncBooks: syncBooks,
+      syncReadingSessions: _emptyReadingSessionsSync(),
+    );
 
     final result = await orchestrator.runManualSync(userId: 'user-1');
 
@@ -48,16 +56,28 @@ void main() {
       loadBook: (localId) async => _book(id: localId),
       remoteIdGenerator: () => 'remote-book-1',
     );
-    final orchestrator = SyncOrchestrator(syncBooks: syncBooks);
+    final syncReadingSessions = SyncPendingReadingSessionsToSupabase(
+      metadataRepository: metadataRepository,
+      remoteReadingSessionsRepository: FakeRemoteReadingSessionsRepository(),
+      loadSession: (localId) async => _session(id: localId),
+      remoteIdGenerator: () => 'remote-session-1',
+    );
+    final orchestrator = SyncOrchestrator(
+      syncBooks: syncBooks,
+      syncReadingSessions: syncReadingSessions,
+    );
 
     final result = await orchestrator.runManualSync(userId: 'user-1');
 
     expect(result.books.synced, 1);
     expect(result.books.failed, 0);
     expect(result.books.ignored, 1);
-    expect(result.synced, 1);
+    expect(result.readingSessions.synced, 1);
+    expect(result.readingSessions.failed, 0);
+    expect(result.readingSessions.ignored, 1);
+    expect(result.synced, 2);
     expect(result.failed, 0);
-    expect(result.ignored, 1);
+    expect(result.ignored, 2);
   });
 
   test('propagates a full books sync failure', () async {
@@ -66,7 +86,10 @@ void main() {
       remoteBooksRepository: FakeRemoteBooksRepository(),
       loadBook: (_) async => null,
     );
-    final orchestrator = SyncOrchestrator(syncBooks: syncBooks);
+    final orchestrator = SyncOrchestrator(
+      syncBooks: syncBooks,
+      syncReadingSessions: _emptyReadingSessionsSync(),
+    );
 
     await expectLater(
       orchestrator.runManualSync(userId: 'user-1'),
@@ -74,10 +97,62 @@ void main() {
     );
   });
 
+  test('runs books before reading sessions', () async {
+    final operations = <String>[];
+    final metadataRepository = FakeSyncMetadataRepository([
+      _metadata(localId: 'book-1'),
+      _metadata(
+        entityType: SyncEntityType.readingSession,
+        localId: 'session-1',
+      ),
+    ]);
+    final syncBooks = SyncPendingBooksToSupabase(
+      metadataRepository: metadataRepository,
+      remoteBooksRepository: FakeRemoteBooksRepository(operations: operations),
+      loadBook: (localId) async => _book(id: localId),
+      remoteIdGenerator: () => 'remote-book-1',
+    );
+    final syncReadingSessions = SyncPendingReadingSessionsToSupabase(
+      metadataRepository: metadataRepository,
+      remoteReadingSessionsRepository: FakeRemoteReadingSessionsRepository(
+        operations: operations,
+      ),
+      loadSession: (localId) async => _session(id: localId),
+      remoteIdGenerator: () => 'remote-session-1',
+    );
+    final orchestrator = SyncOrchestrator(
+      syncBooks: syncBooks,
+      syncReadingSessions: syncReadingSessions,
+    );
+
+    await orchestrator.runManualSync(userId: 'user-1');
+
+    expect(operations, ['books', 'reading-sessions']);
+  });
+
   test('provider returns null when books sync is unavailable', () {
     final container = ProviderContainer(
       overrides: [
         syncPendingBooksToSupabaseProvider.overrideWith((ref) => null),
+        syncPendingReadingSessionsToSupabaseProvider.overrideWith(
+          (ref) => _emptyReadingSessionsSync(),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    expect(container.read(syncOrchestratorProvider), isNull);
+  });
+
+  test('provider returns null when reading sessions sync is unavailable', () {
+    final container = ProviderContainer(
+      overrides: [
+        syncPendingBooksToSupabaseProvider.overrideWith(
+          (ref) => _emptyBooksSync(),
+        ),
+        syncPendingReadingSessionsToSupabaseProvider.overrideWith(
+          (ref) => null,
+        ),
       ],
     );
     addTearDown(container.dispose);
@@ -90,6 +165,17 @@ Book _book({required String id}) {
   return Book(id: id, title: 'Book $id', createdAt: DateTime(2026, 7));
 }
 
+ReadingSession _session({required String id}) {
+  return ReadingSession(
+    id: id,
+    bookId: 'book-1',
+    date: DateTime(2026, 7),
+    minutes: 30,
+    pagesRead: 12,
+    createdAt: DateTime(2026, 7),
+  );
+}
+
 SyncMetadata _metadata({
   SyncEntityType entityType = SyncEntityType.book,
   required String localId,
@@ -99,6 +185,7 @@ SyncMetadata _metadata({
     id: 'sync-$localId',
     entityType: entityType,
     localId: localId,
+    remoteId: entityType == SyncEntityType.book ? 'remote-book-1' : null,
     syncStatus: SyncStatus.pendingUpload,
     pendingOperation: PendingSyncOperation.create,
     createdAt: now,
@@ -107,6 +194,9 @@ SyncMetadata _metadata({
 }
 
 class FakeRemoteBooksRepository implements RemoteBooksRepository {
+  FakeRemoteBooksRepository({this.operations});
+
+  final List<String>? operations;
   final List<String> userIds = [];
 
   @override
@@ -128,8 +218,39 @@ class FakeRemoteBooksRepository implements RemoteBooksRepository {
 
   @override
   Future<List<RemoteBook>> upsertBooks(List<RemoteBook> books) async {
+    operations?.add('books');
     userIds.add(books.single.userId);
     return books;
+  }
+}
+
+class FakeRemoteReadingSessionsRepository
+    implements RemoteReadingSessionsRepository {
+  FakeRemoteReadingSessionsRepository({this.operations});
+
+  final List<String>? operations;
+
+  @override
+  Future<void> deleteReadingSession({
+    required String userId,
+    required String remoteSessionId,
+  }) async {}
+
+  @override
+  Future<List<RemoteReadingSession>> getReadingSessions({
+    required String userId,
+    DateTime? updatedAfter,
+    bool includeDeleted = false,
+  }) async {
+    return const [];
+  }
+
+  @override
+  Future<List<RemoteReadingSession>> upsertReadingSessions(
+    List<RemoteReadingSession> sessions,
+  ) async {
+    operations?.add('reading-sessions');
+    return sessions;
   }
 }
 
@@ -151,6 +272,11 @@ class FakeSyncMetadataRepository implements SyncMetadataRepository {
     required SyncEntityType entityType,
     required String localId,
   }) async {
+    for (final item in pending) {
+      if (item.entityType == entityType && item.localId == localId) {
+        return item;
+      }
+    }
     return null;
   }
 
@@ -195,6 +321,22 @@ class FakeSyncMetadataRepository implements SyncMetadataRepository {
 
   @override
   Future<void> save(SyncMetadata metadata) async {}
+}
+
+SyncPendingBooksToSupabase _emptyBooksSync() {
+  return SyncPendingBooksToSupabase(
+    metadataRepository: FakeSyncMetadataRepository(const []),
+    remoteBooksRepository: FakeRemoteBooksRepository(),
+    loadBook: (_) async => null,
+  );
+}
+
+SyncPendingReadingSessionsToSupabase _emptyReadingSessionsSync() {
+  return SyncPendingReadingSessionsToSupabase(
+    metadataRepository: FakeSyncMetadataRepository(const []),
+    remoteReadingSessionsRepository: FakeRemoteReadingSessionsRepository(),
+    loadSession: (_) async => null,
+  );
 }
 
 class ThrowingSyncMetadataRepository extends FakeSyncMetadataRepository {

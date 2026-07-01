@@ -7,7 +7,10 @@ abstract interface class RemoteReadingSessionsRepository {
     bool includeDeleted = false,
   });
 
-  Future<void> upsertReadingSessions(List<RemoteReadingSession> sessions);
+  Future<List<RemoteReadingSession>> upsertReadingSessions(
+    List<RemoteReadingSession> sessions,
+  );
+
   Future<void> deleteReadingSession({
     required String userId,
     required String remoteSessionId,

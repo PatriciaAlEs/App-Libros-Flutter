@@ -36,6 +36,12 @@ class ReadingSessionDao extends DatabaseAccessor<AppDatabase>
     )..where((table) => table.id.equals(id))).go();
   }
 
+  Future<ReadingSessionsTableData?> getSessionById(String id) {
+    return (select(
+      readingSessionsTable,
+    )..where((table) => table.id.equals(id))).getSingleOrNull();
+  }
+
   Future<int> deleteLegacySeedSessions() {
     return (delete(readingSessionsTable)..where(
           (table) =>
