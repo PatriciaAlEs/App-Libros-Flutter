@@ -8,6 +8,7 @@ import 'core/theme/app_theme_controller.dart';
 import 'features/navigation/presentation/screens/main_navigation_screen.dart';
 import 'features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'features/sync/presentation/widgets/auto_sync_bootstrap.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -16,23 +17,25 @@ class App extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedTheme = ref.watch(appThemeControllerProvider);
 
-    return MaterialApp(
-      title: 'ReadPp',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(selectedTheme),
-      themeAnimationDuration: AppMotion.slow,
-      themeAnimationCurve: AppMotion.emphasized,
-      home: ref
-          .watch(onboardingControllerProvider)
-          .when(
-            loading: () => const _AppBootstrapScreen(),
-            error: (error, stackTrace) => const OnboardingScreen(),
-            data: (isCompleted) => isCompleted
-                ? const MainNavigationScreen()
-                : const OnboardingScreen(),
-          ),
-      onGenerateRoute: _onGenerateRoute,
-      navigatorObservers: ReadPpSentry.navigatorObservers(),
+    return AutoSyncBootstrap(
+      child: MaterialApp(
+        title: 'ReadPp',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(selectedTheme),
+        themeAnimationDuration: AppMotion.slow,
+        themeAnimationCurve: AppMotion.emphasized,
+        home: ref
+            .watch(onboardingControllerProvider)
+            .when(
+              loading: () => const _AppBootstrapScreen(),
+              error: (error, stackTrace) => const OnboardingScreen(),
+              data: (isCompleted) => isCompleted
+                  ? const MainNavigationScreen()
+                  : const OnboardingScreen(),
+            ),
+        onGenerateRoute: _onGenerateRoute,
+        navigatorObservers: ReadPpSentry.navigatorObservers(),
+      ),
     );
   }
 
