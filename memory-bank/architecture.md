@@ -57,7 +57,7 @@ reading_tracker/lib/
 - `reading_sessions`: entidad `ReadingSession`, repositorio, calendario, detalle de dia y formulario de sesion.
 - `stats`: calculos, provider y pantalla.
 - `insights`: perfil lector calculado desde libros y sesiones, con preferencias, mejores lecturas y curiosidades.
-- `sync`: modelo remoto Supabase, metadata local de sincronizacion, tracking local, orquestacion manual, upload local -> Supabase, descarga Supabase -> local y deteccion de conflictos para Books, Reading Sessions, Reader Profile y Annual Goal.
+- `sync`: modelo remoto Supabase, metadata local de sincronizacion, tracking local, orquestacion manual, upload local -> Supabase, descarga Supabase -> local, deteccion de conflictos, sincronizacion automatica y estado observable de UI para Books, Reading Sessions, Reader Profile y Annual Goal.
 
 ## Persistencia
 
@@ -85,7 +85,7 @@ reading_tracker/lib/
 - Open Library Covers: `https://covers.openlibrary.org/b/id/{coverId}-M.jpg`.
 - Supabase Auth opcional para cuenta/login cuando `SUPABASE_URL` y `SUPABASE_ANON_KEY` estan configurados.
 - Supabase Database schema preparado en SQL para sincronizacion remota, pendiente de aplicar y validar en proyecto real cuando existan credenciales/proyecto enlazado.
-- No hay Firebase, Stripe ni backend propio. Existe sincronizacion manual local -> Supabase y descarga manual Supabase -> local para Books, Reading Sessions, Reader Profile y Annual Goal; no hay sync automatica ni UI de estado.
+- No hay Firebase, Stripe ni backend propio. Existe sincronizacion local -> Supabase, descarga Supabase -> local, sincronizacion automatica y UI de estado para Books, Reading Sessions, Reader Profile y Annual Goal.
 
 ## Herramientas externas relevantes
 
@@ -322,8 +322,8 @@ reading_tracker/lib/
 ### Roadmap backend y sincronizacion
 
 - La arquitectura vigente sigue local-first con Drift/SQLite.
-- Supabase queda como siguiente paso tecnico post-Alpha para Auth, backend cloud y sincronizacion multi-dispositivo.
-- La sincronizacion futura debe cubrir biblioteca, sesiones, progreso, estadisticas y perfil lector.
+- Supabase ya esta integrado como backend progresivo para Auth, backend cloud y sincronizacion multi-dispositivo.
+- La sincronizacion implementada cubre biblioteca, sesiones, perfil lector y objetivo anual; estadisticas se derivan localmente desde esos datos.
 - La persistencia local debe mantenerse incluso cuando exista backend para funcionamiento sin conexion o con conectividad limitada.
 
 ### Preparacion futura de relecturas Hito 7 Sprint 19.5
@@ -376,7 +376,7 @@ reading_tracker/lib/
 
 - La decision base esta registrada en `docs/adr/ADR-001-local-first.md`: ReadPp mantiene arquitectura Offline First / Local First.
 - Drift sigue siendo la fuente de verdad durante el uso normal de la app.
-- Supabase no sustituye a Drift; se usa como backend progresivo para Auth, recuperacion y sincronizacion futura.
+- Supabase no sustituye a Drift; se usa como backend progresivo para Auth, recuperacion y sincronizacion remota.
 - La estrategia de autenticacion esta registrada en `docs/adr/ADR-002-authentication-strategy.md`.
 - Auth v1 queda limitado a Google OAuth y email/contrasena.
 - `supabase_flutter: ^2.15.0` queda agregado como dependencia oficial.
@@ -495,21 +495,26 @@ reading_tracker/lib/
 - Esta decision puede afectar proximos sprints de reconciliacion por `local_book_id`, borrado logico y sync nube -> local.
 - Validacion Sprint 22.0: `flutter analyze` OK y `flutter test` OK con 94/94 tests.
 
-### Sincronizacion Hito 8 Sprint 22.0-22.6
+### Hito 8 - Sincronizacion de datos Sprint 22.0-22.8
 
+- Estado: COMPLETADO.
 - Sprint 22.0 cerrado: Upload Books.
 - Sprint 22.1 cerrado: `SyncOrchestrator`.
 - Sprint 22.2 cerrado: Upload Reading Sessions.
 - Sprint 22.3 cerrado: Upload Reader Profile.
 - Sprint 22.4 cerrado: Upload Annual Goal.
-- Sprint 22.5 cerrado: Manual Cloud Download.
+- Sprint 22.5 cerrado: Cloud Download.
 - Sprint 22.6 cerrado: Conflict Detection.
-- Pendiente: Sprint 22.7 Automatic Synchronization y Sprint 22.8 Sync Status UI.
+- Sprint 22.7 cerrado: Automatic Synchronization.
+- Sprint 22.8 cerrado: Sync Status UI.
 - ReadPp mantiene arquitectura offline-first: Drift es la fuente de verdad local y Supabase actua como backend remoto.
 - `sync_metadata` coordina el estado por `entity_type + local_id`.
 - `LocalSyncTracker` registra cambios locales despues de persistir correctamente en Drift, SharedPreferences o `app_settings`.
-- `SyncOrchestrator` es el punto unico de entrada para sincronizacion manual.
+- `SyncOrchestrator` es el punto unico de sincronizacion.
+- `AutoSyncCoordinator` ejecuta la sincronizacion automatica sin cambiar el comportamiento de los flujos manuales.
+- `SyncStatusController` es la capa observable que alimenta la UI de estado.
 - El orquestador separa dos flujos independientes: `runManualSync()` para Local -> Supabase y `runManualDownload()` para Supabase -> Local.
+- Flujos existentes: `runManualSync()`, `runManualDownload()`, `AutoSyncCoordinator` y `SyncStatusController`.
 - El orden de ejecucion es Books, Reading Sessions, Reader Profile y Annual Goal.
 - La subida local -> Supabase consume `sync_metadata`, procesa `create`, `update` y `delete`, sube cada entidad soportada, guarda `remoteId` y marca synced si la operacion remota finaliza correctamente.
 - La descarga Supabase -> local es conservadora: solo aplica registros remotos cuando el equivalente local no tiene `pendingOperation != none`.
@@ -517,8 +522,10 @@ reading_tracker/lib/
 - La resolucion de conflictos de Sprint 22.6 solo detecta y registra: si existe cambio local pendiente y `remote.updatedAt` es posterior a `lastRemoteUpdate`, se marca `syncStatus = conflict`.
 - `markConflict` conserva `pendingOperation`, guarda `remoteId`, `lastRemoteUpdate` y `errorMessage`, y no marca synced.
 - El upload local mantiene prioridad para preservar datos locales.
-- No existe todavia resolucion automatica, merge campo a campo, UI de conflictos ni sincronizacion automatica.
-- Validacion Sprint 22.6: `flutter analyze` OK y `flutter test` OK con 137/137 tests.
+- No existe todavia resolucion automatica ni merge campo a campo.
+- La UI de estado existe en Cuenta/Perfil mediante `SyncStatusCard`.
+- El modelo observable usa `SyncStatusState`, `LastSyncResult` y estados `idle`, `syncing`, `synced`, `pendingChanges`, `conflict` y `failed`.
+- Validacion Sprint 22.8: `flutter analyze` OK y `flutter test` OK con 164/164 tests.
 
 ### Hallazgos arquitectonicos revision Sprint 19
 

@@ -2,19 +2,21 @@
 
 ## Foco actual
 
-ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1, Analytics Sprint 20.2 y Backend/Auth/Supabase validados hasta Hito 8 Sprint 22.6.
+ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1, Analytics Sprint 20.2 y Backend/Auth/Supabase validados hasta Hito 8 Sprint 22.8.
 
 Estado Hito 8 - Sincronizacion de datos:
 
-- Completado: Sprint 22.0 Upload Books, Sprint 22.1 SyncOrchestrator, Sprint 22.2 Upload Reading Sessions, Sprint 22.3 Upload Reader Profile, Sprint 22.4 Upload Annual Goal, Sprint 22.5 Manual Cloud Download y Sprint 22.6 Conflict Detection.
-- Pendiente: Sprint 22.7 Automatic Synchronization y Sprint 22.8 Sync Status UI.
-- Arquitectura vigente offline-first: Drift sigue siendo la fuente de verdad local, Supabase actua como backend remoto, `sync_metadata` coordina estado de sincronizacion, `LocalSyncTracker` registra cambios locales y `SyncOrchestrator` es el punto unico de entrada.
-- `SyncOrchestrator` separa dos flujos independientes: `runManualSync()` para Local -> Supabase y `runManualDownload()` para Supabase -> Local.
+- Estado: COMPLETADO.
+- Completado: Sprint 22.0 Upload Books, Sprint 22.1 SyncOrchestrator, Sprint 22.2 Upload Reading Sessions, Sprint 22.3 Upload Reader Profile, Sprint 22.4 Upload Annual Goal, Sprint 22.5 Cloud Download, Sprint 22.6 Conflict Detection, Sprint 22.7 Automatic Synchronization y Sprint 22.8 Sync Status UI.
+- Arquitectura vigente offline-first: Drift sigue siendo la fuente de verdad local, Supabase actua como backend remoto, `sync_metadata` coordina estado de sincronizacion, `LocalSyncTracker` registra cambios locales, `SyncOrchestrator` es el punto unico de sincronizacion, `AutoSyncCoordinator` ejecuta la sync automatica y `SyncStatusController` expone estado observable a la UI.
+- Flujos existentes: `runManualSync()`, `runManualDownload()`, `AutoSyncCoordinator` y `SyncStatusController`.
 - Orden de sincronizacion y descarga: Books, Reading Sessions, Reader Profile y Annual Goal.
-- Estrategia Sprint 22.6: durante descarga nunca se sobrescribe un registro local con `pendingOperation != none`; si el remoto es mas nuevo que `lastRemoteUpdate`, se marca `syncStatus = conflict`, se conserva `pendingOperation` y el upload local mantiene prioridad.
+- Estrategia de conflictos: prioridad de cambios locales, deteccion conservadora durante descarga, `syncStatus = conflict`, `markConflict`, y sin resolucion automatica ni merge campo a campo todavia.
 - `markConflict` persiste `remoteId`, `lastRemoteUpdate` y `errorMessage` sin limpiar la operacion pendiente.
-- Aun no existe resolucion automatica, merge campo a campo, UI de conflictos ni sincronizacion automatica.
-- Validacion vigente Hito 8 Sprint 22.6: `flutter analyze` OK, `flutter test` OK y 137/137 tests.
+- Estado de UI: existe `SyncStatusCard`, `SyncStatusState`, `LastSyncResult` y estados observables `idle`, `syncing`, `synced`, `pendingChanges`, `conflict` y `failed`.
+- Aun no existe resolucion automatica de conflictos ni merge campo a campo.
+- Validacion vigente Hito 8 Sprint 22.8: `flutter analyze` OK, `flutter test` OK y 164/164 tests.
+- Proximo objetivo del proyecto: QA manual y estabilizacion previa a beta.
 
 Estado confirmado 2026-06-24:
 
@@ -665,7 +667,7 @@ Estado confirmado para Hito 5 Sprint 13:
 - `ReaderProfileController` marca perfil lector actualizado tras persistir cambios en `SharedPreferences`.
 - Sprint 21.9 no implementa llamadas Supabase, subida/descarga, sync incremental, merge, resolucion de conflictos ni cambios visibles de UI.
 - Validacion Sprint 21.9: `dart format lib test` OK, `flutter analyze` OK y `flutter test` OK con 88/88 tests.
-- Limitacion Sprint 21.9: los pendientes quedan registrados localmente, pero no existe aun proceso que los suba o resuelva conflictos.
+- Limitacion Sprint 21.9 superada por Hito 8: los pendientes registrados localmente ya son consumidos por los flujos de sincronizacion local -> Supabase y Supabase -> local.
 - Sprint 22.0 cerrado: upload manual Books local -> Supabase.
 - Sprint 22.1 cerrado: `SyncOrchestrator` como punto unico para ejecutar sync manual.
 - Sprint 22.2 cerrado: upload manual Reading Sessions local -> Supabase, despues de Books.
@@ -673,6 +675,8 @@ Estado confirmado para Hito 5 Sprint 13:
 - Sprint 22.4 cerrado: upload manual Annual Goal local -> Supabase.
 - Sprint 22.5 cerrado: descarga manual conservadora Supabase -> local para Books, Reading Sessions, Reader Profile y Annual Goal.
 - Sprint 22.6 cerrado: deteccion de conflictos durante descarga sin resolverlos automaticamente.
-- Validacion Sprint 22.6: `flutter analyze` OK y `flutter test` OK con 137/137 tests.
+- Sprint 22.7 cerrado: sincronizacion automatica mediante `AutoSyncCoordinator`.
+- Sprint 22.8 cerrado: estado de sincronizacion visible en Cuenta/Perfil mediante `SyncStatusCard`, `SyncStatusState`, `LastSyncResult` y `SyncStatusController`.
+- Validacion Sprint 22.8: `flutter analyze` OK y `flutter test` OK con 164/164 tests.
 - Decision tecnica heredada: en Supabase Books y entidades sincronizadas, los upserts usan `id` como conflict target cuando los indices locales remotos son parciales con `WHERE deleted_at IS NULL`; los `local_*_id` siguen viajando como identidad local.
-- Proximo paso recomendado: Sprint 22.7 Automatic Synchronization, manteniendo la prioridad local-first y sin introducir UI de estado hasta Sprint 22.8.
+- Proximo paso recomendado: QA manual y estabilizacion previa a beta.

@@ -464,9 +464,9 @@
 
 ## Pendiente inmediato
 
-- Estado vigente: Hito 8 Sincronizacion de datos cerrado hasta Sprint 22.6.
-- Sprint 22.7 pendiente: Automatic Synchronization.
-- Sprint 22.8 pendiente: Sync Status UI.
+- Estado vigente: Hito 8 Sincronizacion de datos COMPLETADO hasta Sprint 22.8.
+- Siguiente objetivo: QA manual y estabilizacion previa a beta.
+- Validar en entorno real login, bootstrap de usuario, sync automatica, boton `Sincronizar ahora`, estados de `SyncStatusCard`, cambios pendientes y conflictos detectados.
 - Validar Auth con Supabase configurado cuando existan variables reales.
 - Mantener Drift como fuente de verdad local, conservar prioridad del upload local ante conflictos y no introducir resolucion automatica sin sprint especifico.
 
@@ -480,9 +480,8 @@
 
 - Estado vigente Sprint 13: el desarrollo funcional de v1 queda cerrado; futuras mejoras quedan para post-v1.
 
-- UX Backlog para cuando la sincronizacion este disponible: mostrar pantalla `Sincronizacion disponible`, explicar el cambio de almacenamiento local a cuenta y ofrecer CTA `Configurar ahora`.
-- UX Backlog sync: tras aceptar, navegar automaticamente a Perfil, mostrar coach mark sobre `Cuenta` y badge `Nuevo` hasta completar el proceso.
-- UX Backlog sync: ocultar definitivamente el onboarding de sincronizacion tras iniciar sesion o descartarlo.
+- UX Backlog post-Hito 8: evaluar si hace falta onboarding o educacion adicional de sincronizacion tras validar `SyncStatusCard` en QA manual.
+- UX Backlog sync: si se incorpora onboarding futuro, debe complementar la sync existente sin duplicar el estado de Cuenta/Perfil.
 - Definir siguiente iteracion de Stats, Insights o Ajustes sin introducir complejidad visual prematura.
 - Investigar Open Library para mejorar resultados en espanol.
 - Revisar consistencia tipografica y visual global antes de cerrar Hito 5.
@@ -578,23 +577,25 @@
 - Impacto futuro: revisar esta decision en los proximos sprints de reconciliacion, borrado logico y sync nube -> local.
 - Sprint 22.0 validado con `dart format` OK, `flutter analyze` OK y `flutter test` OK con 94/94 tests.
 
-## Hito 8 - Sincronizacion de datos Sprint 22.0-22.6
+## Hito 8 - Sincronizacion de datos Sprint 22.0-22.8
 
+- Estado: COMPLETADO.
 - Sprint 22.0 cerrado: Upload Books local -> Supabase.
 - Sprint 22.1 cerrado: `SyncOrchestrator` como punto unico de entrada.
 - Sprint 22.2 cerrado: Upload Reading Sessions local -> Supabase.
 - Sprint 22.3 cerrado: Upload Reader Profile local -> Supabase.
 - Sprint 22.4 cerrado: Upload Annual Goal local -> Supabase.
-- Sprint 22.5 cerrado: Manual Cloud Download para Books, Reading Sessions, Reader Profile y Annual Goal.
+- Sprint 22.5 cerrado: Cloud Download para Books, Reading Sessions, Reader Profile y Annual Goal.
 - Sprint 22.6 cerrado: Conflict Detection durante descarga.
-- Pendiente: Sprint 22.7 Automatic Synchronization.
-- Pendiente: Sprint 22.8 Sync Status UI.
-- Arquitectura vigente: Drift como fuente de verdad local, Supabase como backend remoto, `sync_metadata` como coordinador, `LocalSyncTracker` para registrar cambios locales y `SyncOrchestrator` como entrada unica.
-- `SyncOrchestrator` dispone de `runManualSync()` para Local -> Supabase y `runManualDownload()` para Supabase -> Local.
+- Sprint 22.7 cerrado: Automatic Synchronization mediante `AutoSyncCoordinator`.
+- Sprint 22.8 cerrado: Sync Status UI mediante `SyncStatusCard`, `SyncStatusState`, `LastSyncResult` y `SyncStatusController`.
+- Arquitectura vigente: Drift como fuente de verdad local, Supabase como backend remoto, `sync_metadata` como coordinador, `LocalSyncTracker` para registrar cambios locales, `SyncOrchestrator` como entrada unica, `AutoSyncCoordinator` para sync automatica y `SyncStatusController` como capa observable de UI.
+- Flujos existentes: `runManualSync()`, `runManualDownload()`, `AutoSyncCoordinator` y `SyncStatusController`.
 - Orden fijo de sincronizacion y descarga: Books, Reading Sessions, Reader Profile y Annual Goal.
 - La descarga es conservadora: no sobrescribe registros locales con `pendingOperation != none`.
 - Si durante descarga `remote.updatedAt` es posterior a `lastRemoteUpdate` y hay operacion local pendiente, se marca `syncStatus = conflict`.
 - `markConflict` conserva `pendingOperation` y persiste `remoteId`, `lastRemoteUpdate` y `errorMessage`.
 - El upload local mantiene prioridad para no perder datos locales.
-- No existe todavia resolucion automatica, merge campo a campo, UI de conflictos ni sincronizacion automatica.
-- Validacion vigente: `flutter analyze` OK, `flutter test` OK y 137/137 tests.
+- No existe todavia resolucion automatica ni merge campo a campo.
+- Estados observables de UI: `idle`, `syncing`, `synced`, `pendingChanges`, `conflict` y `failed`.
+- Validacion vigente: `flutter analyze` OK, `flutter test` OK y 164/164 tests.

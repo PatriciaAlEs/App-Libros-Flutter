@@ -53,7 +53,7 @@
 - El dia mas activo se elige por mayor numero de paginas leidas y usa minutos como desempate.
 - Hito 5 Sprint 1 usa `NavigationBar` Material 3 como shell principal con Inicio, Biblioteca, Progreso, Insights y Ajustes.
 - `Progreso` es un hub de acceso a estadisticas, Reading Challenge y activity tracking; no duplica ni reemplaza la logica existente.
-- `Ajustes` incluye preferencias visuales locales; perfil real, login y sincronizacion siguen fuera de alcance.
+- En Hito 5, `Ajustes` incluia preferencias visuales locales y perfil/login/sincronizacion quedaban fuera de alcance; ese alcance fue ampliado posteriormente en Hitos 7 y 8.
 - La navegacion principal debe vivir solo en la `NavigationBar`; evitar duplicar esos accesos en AppBars o CTAs de Home.
 
 ## Design System Hito 5 Sprint 2
@@ -277,10 +277,10 @@
 ## Roadmap Backend y Local-first
 
 - ReadPp sigue local-first con Drift/SQLite durante Alpha.
-- Proximo paso tecnico mayor post-Alpha: Supabase para Auth, backend cloud y sincronizacion multi-dispositivo.
+- Proximo paso tecnico mayor post-Alpha: QA manual y estabilizacion previa a beta con sincronizacion multi-dispositivo ya implementada.
 - La sincronizacion debe recuperar biblioteca, sesiones, progreso, estadisticas y perfil lector en otro dispositivo.
 - La persistencia local debe mantenerse para que la app no dependa siempre de internet.
-- Sprint 22.0 cerrado: primera sincronizacion manual local -> Supabase limitada a Books usando `sync_metadata` como cola de pendientes; no sincroniza Reading Sessions, perfil lector ni objetivo anual, no descarga nube -> local y no activa sync automatica.
+- Hito 8 cerrado: sincronizacion local -> Supabase, descarga Supabase -> local, sincronizacion automatica y UI de estado implementadas para las entidades principales.
 - Decision tecnica Sprint 22.0: en Supabase Books, el upsert remoto usa `id` como conflict target porque el indice `user_id + local_book_id` del schema es parcial con `WHERE deleted_at IS NULL`. `local_book_id` sigue viajando en la fila como identidad local, pero no se usa como conflict target directo en este sprint. Esta decision puede afectar proximos sprints de reconciliacion, borrado logico y sync nube -> local.
 
 ## Sincronizacion Hito 8
@@ -290,21 +290,26 @@
 - Sprint 22.2 cerrado: Upload Reading Sessions.
 - Sprint 22.3 cerrado: Upload Reader Profile.
 - Sprint 22.4 cerrado: Upload Annual Goal.
-- Sprint 22.5 cerrado: Manual Cloud Download.
+- Sprint 22.5 cerrado: Cloud Download.
 - Sprint 22.6 cerrado: Conflict Detection.
-- Pendiente: Sprint 22.7 Automatic Synchronization y Sprint 22.8 Sync Status UI.
+- Sprint 22.7 cerrado: Automatic Synchronization.
+- Sprint 22.8 cerrado: Sync Status UI.
 - Decision: ReadPp implementa sincronizacion offline-first; Drift sigue siendo la fuente de verdad local y Supabase actua como backend remoto.
 - Decision: `sync_metadata` es el coordinador de sincronizacion y conserva estado por `entity_type + local_id`.
 - Decision: `LocalSyncTracker` registra cambios locales despues de persistir correctamente en local.
-- Decision: `SyncOrchestrator` es el punto unico de entrada y separa `runManualSync()` para Local -> Supabase de `runManualDownload()` para Supabase -> Local.
+- Decision: `SyncOrchestrator` es el punto unico de sincronizacion y separa `runManualSync()` para Local -> Supabase de `runManualDownload()` para Supabase -> Local.
+- Decision: `AutoSyncCoordinator` ejecuta la sincronizacion automatica sin modificar la prioridad local-first ni resolver conflictos.
+- Decision: `SyncStatusController` es la capa observable de UI y consume `AutoSyncCoordinator` sin modificar su comportamiento.
 - Decision: el orden fijo es Books, Reading Sessions, Reader Profile y Annual Goal.
 - Decision: durante descarga no se sobrescriben registros locales con `pendingOperation != none`.
 - Decision: si existe operacion local pendiente y `remote.updatedAt` es posterior a `lastRemoteUpdate`, se marca `syncStatus = conflict`.
 - Decision: `markConflict` conserva `pendingOperation`, persiste `remoteId`, `lastRemoteUpdate` y `errorMessage`, y no marca synced.
 - Decision: el upload local mantiene prioridad para minimizar riesgo de perdida de datos locales.
-- Decision: no existe todavia resolucion automatica, merge campo a campo, UI de conflictos ni sincronizacion automatica.
+- Decision: no existe todavia resolucion automatica ni merge campo a campo.
+- Decision UI: `SyncStatusCard` vive en Cuenta/Perfil y se oculta sin usuario autenticado.
+- Decision UI: el estado observable usa `SyncStatusState`, `LastSyncResult` ligero y estados `idle`, `syncing`, `synced`, `pendingChanges`, `conflict` y `failed`.
 - Decision tecnica: en Supabase Books y las entidades sincronizadas se usa `id` como conflict target cuando los indices alternativos por usuario + local id son parciales con `WHERE deleted_at IS NULL`. Los `local_*_id` siguen viajando como identidad local, pero no se usan como conflict target directo en este tramo.
-- Validacion vigente tras Sprint 22.6: `flutter analyze` OK, `flutter test` OK y 137/137 tests.
+- Validacion vigente tras Sprint 22.8: `flutter analyze` OK, `flutter test` OK y 164/164 tests.
 
 ## Motion & Delight Hito 7 Sprint 19.1
 
