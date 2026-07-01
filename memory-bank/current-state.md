@@ -37,7 +37,7 @@ Limitaciones conocidas:
 
 - Escaneo ISBN y seleccion de portada local necesitan validacion manual en dispositivo/emulador con camara/galeria reales.
 - Google Books se usa sin API key y como fallback publico; no hay backend ni cache remoto.
-- No hay sincronizacion cloud; ReadPp sigue local-first con Drift/SQLite.
+- La sincronizacion cloud manual ya existe para las entidades principales; ReadPp sigue offline-first con Drift/SQLite como fuente de verdad local.
 - Logs de proveedor/fallback se limitan a debug.
 
 Estado de roadmap:
@@ -47,9 +47,46 @@ Estado de roadmap:
 - Sprint 20.1 Observabilidad esta completado y validado.
 - Sprint 20.2 Analytics esta completado y validado.
 - Siguiente bloque: Sprint 20.3 Funnel basico.
-- Proximo paso tecnico mayor post-Alpha: Supabase Auth + backend cloud + sincronizacion multi-dispositivo manteniendo persistencia local.
+- Proximo paso tecnico mayor post-Alpha: completar automatizacion y visibilidad de estado de la sincronizacion multi-dispositivo manteniendo persistencia local.
 - Hito 7: Premium Experience (motion, skeleton loaders, microinteracciones, empty states, estadisticas visuales premium).
-- Hito 8: Beta Readiness (Android/Web/Windows QA, Beta APK/AAB, store assets, privacy policy, Play Store release preparation).
+- Hito 8 activo: Sincronizacion de datos offline-first sobre Supabase, con upload/download manual y deteccion de conflictos ya implementados hasta Sprint 22.6.
+
+## Hito 8 - Sincronizacion de datos
+
+Estado vigente tras Sprint 22.6:
+
+- Completado: Sprint 22.0 Upload Books.
+- Completado: Sprint 22.1 SyncOrchestrator.
+- Completado: Sprint 22.2 Upload Reading Sessions.
+- Completado: Sprint 22.3 Upload Reader Profile.
+- Completado: Sprint 22.4 Upload Annual Goal.
+- Completado: Sprint 22.5 Manual Cloud Download.
+- Completado: Sprint 22.6 Conflict Detection.
+- Pendiente: Sprint 22.7 Automatic Synchronization.
+- Pendiente: Sprint 22.8 Sync Status UI.
+
+Arquitectura actual:
+
+- ReadPp implementa una arquitectura offline-first: Drift es la fuente de verdad local y Supabase es el backend remoto.
+- `sync_metadata` coordina el estado de sincronizacion por entidad/local id.
+- `LocalSyncTracker` registra cambios locales tras persistir correctamente en local.
+- `SyncOrchestrator` es el punto unico de entrada para sincronizacion manual.
+- El orquestador expone dos flujos separados: `runManualSync()` para Local -> Supabase y `runManualDownload()` para Supabase -> Local.
+- El orden fijo es Books, Reading Sessions, Reader Profile y Annual Goal.
+
+Resolucion de conflictos Sprint 22.6:
+
+- La descarga nunca sobrescribe registros locales con `pendingOperation != none`.
+- Si durante descarga existe cambio local pendiente y `remote.updatedAt` es posterior a `lastRemoteUpdate`, se marca `syncStatus = conflict`.
+- `pendingOperation` se conserva y el upload local mantiene prioridad.
+- `markConflict` persiste `remoteId`, `lastRemoteUpdate` y `errorMessage`.
+- No existe todavia resolucion automatica, merge campo a campo, UI de conflictos ni sincronizacion automatica.
+
+Validacion vigente Hito 8:
+
+- `flutter analyze` OK.
+- `flutter test` OK.
+- 137/137 tests.
 
 Sprint 19.x implementado:
 
@@ -589,21 +626,21 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Planificar Sprint 22.1 para definir reconciliacion, borrado logico y siguientes pasos de sync tras el primer push manual de Books.
-2. Completar/documentar la validacion real de Sprint 21.8 si aun no se ha registrado en `docs/architecture/sprint-21-8-supabase-rls-validation.md`.
-3. Validar Auth con Supabase configurado cuando existan variables reales.
-4. Mantener Drift como fuente de verdad y no iniciar sincronizacion bidireccional hasta sprint especifico.
-5. Mantener en backlog el onboarding de `Sincronizacion disponible` para activarlo solo cuando la sync real exista.
+1. Planificar Sprint 22.7 Automatic Synchronization sobre la base manual ya existente.
+2. Mantener Drift como fuente de verdad local y conservar la prioridad de upload local ante conflictos.
+3. Mantener fuera de alcance la resolucion automatica y el merge campo a campo hasta un sprint especifico.
+4. Preparar Sprint 22.8 Sync Status UI sin mezclarlo con la automatizacion.
+5. Validar Auth con Supabase configurado cuando existan variables reales.
 
 ## Estado vigente Hito 7 - Backend con Supabase
 
 - Hito 7 esta en fase de backend progresivo con filosofia Offline First / Local First.
 - Drift sigue siendo la fuente de verdad durante el uso normal de la app.
-- Supabase queda como backend progresivo para Auth, recuperacion futura y sincronizacion futura.
+- Supabase queda como backend progresivo para Auth, recuperacion futura y sincronizacion remota.
 - La app sigue funcionando sin login y sin variables Supabase configuradas.
-- No se ha iniciado sincronizacion ni migracion de datos locales.
+- La sincronizacion manual local -> Supabase y Supabase -> local ya existe para las entidades principales.
 - Existe schema Supabase y RLS definidos en repositorio, pendiente de aplicar y validar contra un proyecto real.
-- Existe metadata local de sincronizacion en Drift, pero no se marca automaticamente desde las mutaciones de producto.
+- Existe metadata local de sincronizacion en Drift y se marca desde mutaciones locales mediante `LocalSyncTracker`.
 
 ### Sprint 21.1 - Infraestructura Supabase
 
@@ -770,12 +807,12 @@ Estado actual implementado:
 
 - Google OAuth requiere configuracion externa en Supabase y plataformas objetivo.
 - Email/contrasena requiere validar configuracion real de Supabase Auth.
-- La futura sincronizacion debe asociar datos locales a `user.id` sin perdida de datos.
+- La sincronizacion debe asociar datos locales a `user.id` sin perdida de datos.
 - Las futuras capas remotas no deben leer directamente desde Supabase como fuente principal de UI.
 - Google OAuth y email/contrasena aun requieren validacion real con proyecto Supabase configurado.
-- La UI y el caso de uso de Cuenta preparan la asociacion, el schema remoto esta definido en repositorio y existe metadata local de sync, pero la transferencia real de datos a cuenta sigue pendiente.
+- La UI y el caso de uso de Cuenta preparan la asociacion, el schema remoto esta definido en repositorio y existe metadata local de sync.
 - La metadata local ya se marca automaticamente en altas, ediciones y borrados principales de libros/sesiones y en cambios de objetivo anual/perfil.
-- La transferencia real de Books local -> Supabase ya existe como flujo manual inicial, pero la sincronizacion completa de datos a cuenta sigue pendiente.
+- La transferencia manual local -> Supabase y la descarga manual Supabase -> local ya cubren Books, Reading Sessions, Reader Profile y Annual Goal; quedan pendientes sync automatica, UI de estado y resolucion real de conflictos.
 - Sprint 21.8 esta bloqueado hasta ejecutar la migracion y las pruebas RLS en Supabase real.
 
 ### Decision de cierre
@@ -784,4 +821,10 @@ Estado actual implementado:
 - Sprint 21.8 queda preparado pero no cerrado desde Codex: falta aplicacion/validacion real en Supabase si no se ejecuto externamente.
 - Sprint 21.9 queda cerrado sin sync remota.
 - Sprint 22.0 queda cerrado con primera sync manual Books local -> Supabase.
-- La siguiente sesion debe retomar Sprint 22.1, o completar la evidencia real de Sprint 21.8 si falta documentarla.
+- Sprint 22.1 queda cerrado con `SyncOrchestrator`.
+- Sprint 22.2 queda cerrado con sync manual Reading Sessions local -> Supabase.
+- Sprint 22.3 queda cerrado con sync manual Reader Profile local -> Supabase.
+- Sprint 22.4 queda cerrado con sync manual Annual Goal local -> Supabase.
+- Sprint 22.5 queda cerrado con descarga manual Supabase -> local conservadora.
+- Sprint 22.6 queda cerrado con deteccion de conflictos durante descarga.
+- La siguiente sesion debe retomar Sprint 22.7 Automatic Synchronization o Sprint 22.8 Sync Status UI segun prioridad de producto.

@@ -13,12 +13,14 @@ class DownloadReaderProfileResult {
     required this.remoteProfiles,
     required this.applied,
     required this.skipped,
+    required this.conflicts,
     required this.failed,
   });
 
   final int remoteProfiles;
   final int applied;
   final int skipped;
+  final int conflicts;
   final int failed;
 }
 
@@ -45,6 +47,7 @@ class DownloadReaderProfileFromSupabase {
         remoteProfiles: 0,
         applied: 0,
         skipped: 0,
+        conflicts: 0,
         failed: 0,
       );
     }
@@ -54,6 +57,7 @@ class DownloadReaderProfileFromSupabase {
         remoteProfiles: 1,
         applied: 0,
         skipped: 1,
+        conflicts: 0,
         failed: 0,
       );
     }
@@ -64,10 +68,32 @@ class DownloadReaderProfileFromSupabase {
         localId: LocalSyncTracker.readerProfileLocalId,
       );
       if (metadata?.hasPendingOperation ?? false) {
+        if (_hasNewerRemoteVersion(metadata!, remoteProfile.updatedAt)) {
+          await _metadataRepository.markConflict(
+            entityType: SyncEntityType.profile,
+            localId: LocalSyncTracker.readerProfileLocalId,
+            remoteId: remoteProfile.id,
+            lastRemoteUpdate: remoteProfile.updatedAt!,
+            message: _conflictMessage(
+              entityType: SyncEntityType.profile,
+              localId: LocalSyncTracker.readerProfileLocalId,
+              remoteId: remoteProfile.id,
+              remoteUpdatedAt: remoteProfile.updatedAt!,
+            ),
+          );
+          return const DownloadReaderProfileResult(
+            remoteProfiles: 1,
+            applied: 0,
+            skipped: 0,
+            conflicts: 1,
+            failed: 0,
+          );
+        }
         return const DownloadReaderProfileResult(
           remoteProfiles: 1,
           applied: 0,
           skipped: 1,
+          conflicts: 0,
           failed: 0,
         );
       }
@@ -84,6 +110,7 @@ class DownloadReaderProfileFromSupabase {
         remoteProfiles: 1,
         applied: 1,
         skipped: 0,
+        conflicts: 0,
         failed: 0,
       );
     } catch (_) {
@@ -91,10 +118,27 @@ class DownloadReaderProfileFromSupabase {
         remoteProfiles: 1,
         applied: 0,
         skipped: 0,
+        conflicts: 0,
         failed: 1,
       );
     }
   }
+}
+
+bool _hasNewerRemoteVersion(SyncMetadata metadata, DateTime? remoteUpdatedAt) {
+  if (remoteUpdatedAt == null) return false;
+  final lastRemoteUpdate = metadata.lastRemoteUpdate;
+  return lastRemoteUpdate == null || remoteUpdatedAt.isAfter(lastRemoteUpdate);
+}
+
+String _conflictMessage({
+  required SyncEntityType entityType,
+  required String localId,
+  required String remoteId,
+  required DateTime remoteUpdatedAt,
+}) {
+  return 'Remote ${entityType.value} changed while local pending exists: '
+      'localId=$localId remoteId=$remoteId remoteUpdatedAt=${remoteUpdatedAt.toIso8601String()}';
 }
 
 ReaderProfile _profileFromRemote(

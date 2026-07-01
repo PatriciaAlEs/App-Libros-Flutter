@@ -11,12 +11,14 @@ class DownloadAnnualGoalResult {
     required this.remoteAnnualGoals,
     required this.applied,
     required this.skipped,
+    required this.conflicts,
     required this.failed,
   });
 
   final int remoteAnnualGoals;
   final int applied;
   final int skipped;
+  final int conflicts;
   final int failed;
 }
 
@@ -45,6 +47,7 @@ class DownloadAnnualGoalFromSupabase {
 
     var applied = 0;
     var skipped = 0;
+    var conflicts = 0;
     var failed = 0;
 
     for (final remoteGoal in remoteGoals) {
@@ -61,7 +64,23 @@ class DownloadAnnualGoalFromSupabase {
           localId: localId,
         );
         if (metadata?.hasPendingOperation ?? false) {
-          skipped++;
+          if (_hasNewerRemoteVersion(metadata!, remoteGoal.updatedAt)) {
+            await _metadataRepository.markConflict(
+              entityType: SyncEntityType.annualGoal,
+              localId: localId,
+              remoteId: remoteGoal.id,
+              lastRemoteUpdate: remoteGoal.updatedAt!,
+              message: _conflictMessage(
+                entityType: SyncEntityType.annualGoal,
+                localId: localId,
+                remoteId: remoteGoal.id,
+                remoteUpdatedAt: remoteGoal.updatedAt!,
+              ),
+            );
+            conflicts++;
+          } else {
+            skipped++;
+          }
           continue;
         }
 
@@ -82,7 +101,24 @@ class DownloadAnnualGoalFromSupabase {
       remoteAnnualGoals: remoteGoals.length,
       applied: applied,
       skipped: skipped,
+      conflicts: conflicts,
       failed: failed,
     );
   }
+}
+
+bool _hasNewerRemoteVersion(SyncMetadata metadata, DateTime? remoteUpdatedAt) {
+  if (remoteUpdatedAt == null) return false;
+  final lastRemoteUpdate = metadata.lastRemoteUpdate;
+  return lastRemoteUpdate == null || remoteUpdatedAt.isAfter(lastRemoteUpdate);
+}
+
+String _conflictMessage({
+  required SyncEntityType entityType,
+  required String localId,
+  required String remoteId,
+  required DateTime remoteUpdatedAt,
+}) {
+  return 'Remote ${entityType.value} changed while local pending exists: '
+      'localId=$localId remoteId=$remoteId remoteUpdatedAt=${remoteUpdatedAt.toIso8601String()}';
 }

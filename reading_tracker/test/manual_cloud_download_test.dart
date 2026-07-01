@@ -45,7 +45,49 @@ void main() {
     },
   );
 
-  test('skips books with pending local metadata', () async {
+  test('pending local and newer remote book marks conflict', () async {
+    final metadataRepository = FakeSyncMetadataRepository({
+      'book:book-1': _metadata(
+        entityType: SyncEntityType.book,
+        localId: 'book-1',
+        pendingOperation: PendingSyncOperation.update,
+        lastRemoteUpdate: DateTime(2026, 7),
+      ),
+    });
+    final writtenBooks = <Book>[];
+    final useCase = DownloadBooksFromSupabase(
+      remoteBooksRepository: FakeRemoteBooksRepository([
+        _remoteBook(
+          localBookId: 'book-1',
+          remoteId: 'remote-book-1',
+          updatedAt: DateTime(2026, 7, 2),
+        ),
+      ]),
+      metadataRepository: metadataRepository,
+      readLocalBook: (_) async => null,
+      writeLocalBook: (book) async => writtenBooks.add(book),
+    );
+
+    final result = await useCase(userId: userId);
+
+    expect(result.applied, 0);
+    expect(result.skipped, 0);
+    expect(result.conflicts, 1);
+    expect(writtenBooks, isEmpty);
+    expect(metadataRepository.syncedRemoteIds, isEmpty);
+    expect(metadataRepository.conflictRemoteIds['book-1'], 'remote-book-1');
+    expect(
+      metadataRepository.metadata['book:book-1']!.pendingOperation,
+      PendingSyncOperation.update,
+    );
+    expect(
+      metadataRepository.metadata['book:book-1']!.syncStatus,
+      SyncStatus.conflict,
+    );
+    expect(metadataRepository.conflictMessages['book-1'], contains('book-1'));
+  });
+
+  test('pending local and remote book without updatedAt only skips', () async {
     final metadataRepository = FakeSyncMetadataRepository({
       'book:book-1': _metadata(
         entityType: SyncEntityType.book,
@@ -67,8 +109,9 @@ void main() {
 
     expect(result.applied, 0);
     expect(result.skipped, 1);
+    expect(result.conflicts, 0);
     expect(writtenBooks, isEmpty);
-    expect(metadataRepository.syncedRemoteIds, isEmpty);
+    expect(metadataRepository.conflictRemoteIds, isEmpty);
   });
 
   test('does not process deleted remote books', () async {
@@ -114,6 +157,38 @@ void main() {
     expect(metadataRepository.syncedRemoteIds['session-1'], 'remote-session');
   });
 
+  test('pending local and newer remote session marks conflict', () async {
+    final metadataRepository = FakeSyncMetadataRepository({
+      'reading_session:session-1': _metadata(
+        entityType: SyncEntityType.readingSession,
+        localId: 'session-1',
+        pendingOperation: PendingSyncOperation.update,
+      ),
+    });
+    final writtenSessions = <ReadingSession>[];
+    final useCase = DownloadReadingSessionsFromSupabase(
+      remoteReadingSessionsRepository: FakeRemoteReadingSessionsRepository([
+        _remoteSession(
+          localSessionId: 'session-1',
+          localBookId: 'book-1',
+          updatedAt: DateTime(2026, 7, 2),
+        ),
+      ]),
+      metadataRepository: metadataRepository,
+      readLocalBook: (localId) async =>
+          Book(id: localId, title: 'Book', createdAt: DateTime(2026, 7)),
+      readLocalSession: (_) async => null,
+      writeLocalSession: (session) async => writtenSessions.add(session),
+    );
+
+    final result = await useCase(userId: userId);
+
+    expect(result.applied, 0);
+    expect(result.conflicts, 1);
+    expect(writtenSessions, isEmpty);
+    expect(metadataRepository.conflictRemoteIds['session-1'], 'remote-session');
+  });
+
   test(
     'downloads reader profile without clearing current reading book',
     () async {
@@ -153,6 +228,41 @@ void main() {
     },
   );
 
+  test('pending local and newer remote profile marks conflict', () async {
+    final metadataRepository = FakeSyncMetadataRepository({
+      'profile:${LocalSyncTracker.readerProfileLocalId}': _metadata(
+        entityType: SyncEntityType.profile,
+        localId: LocalSyncTracker.readerProfileLocalId,
+        pendingOperation: PendingSyncOperation.update,
+      ),
+    });
+    var wroteProfile = false;
+    final useCase = DownloadReaderProfileFromSupabase(
+      remoteProfileRepository: FakeRemoteProfileRepository(
+        RemoteProfile(
+          id: userId,
+          readerName: 'Cloud',
+          updatedAt: DateTime(2026, 7, 2),
+        ),
+      ),
+      metadataRepository: metadataRepository,
+      readLocalProfile: () async => const ReaderProfile(name: 'Local'),
+      writeLocalProfile: (_) async => wroteProfile = true,
+    );
+
+    final result = await useCase(userId: userId);
+
+    expect(result.applied, 0);
+    expect(result.skipped, 0);
+    expect(result.conflicts, 1);
+    expect(wroteProfile, isFalse);
+    expect(
+      metadataRepository.conflictRemoteIds[LocalSyncTracker
+          .readerProfileLocalId],
+      userId,
+    );
+  });
+
   test('downloads annual goal only for current year', () async {
     final metadataRepository = FakeSyncMetadataRepository();
     final writtenGoals = <int>[];
@@ -176,11 +286,46 @@ void main() {
       'goal-2026',
     );
   });
+
+  test('pending local and newer remote annual goal marks conflict', () async {
+    final metadataRepository = FakeSyncMetadataRepository({
+      'annual_goal:${LocalSyncTracker.annualGoalLocalId}': _metadata(
+        entityType: SyncEntityType.annualGoal,
+        localId: LocalSyncTracker.annualGoalLocalId,
+        pendingOperation: PendingSyncOperation.update,
+      ),
+    });
+    final writtenGoals = <int>[];
+    final useCase = DownloadAnnualGoalFromSupabase(
+      remoteAnnualGoalsRepository: FakeRemoteAnnualGoalsRepository([
+        _remoteAnnualGoal(
+          year: 2026,
+          targetBooks: 24,
+          remoteId: 'goal-2026',
+          updatedAt: DateTime(2026, 7, 2),
+        ),
+      ]),
+      metadataRepository: metadataRepository,
+      writeAnnualGoal: (goal) async => writtenGoals.add(goal),
+      clock: () => DateTime(2026, 7),
+    );
+
+    final result = await useCase(userId: userId);
+
+    expect(result.applied, 0);
+    expect(result.conflicts, 1);
+    expect(writtenGoals, isEmpty);
+    expect(
+      metadataRepository.conflictRemoteIds[LocalSyncTracker.annualGoalLocalId],
+      'goal-2026',
+    );
+  });
 }
 
 RemoteBook _remoteBook({
   String localBookId = 'book-1',
   String remoteId = 'remote-book',
+  DateTime? updatedAt,
   DateTime? deletedAt,
 }) {
   return RemoteBook(
@@ -190,7 +335,7 @@ RemoteBook _remoteBook({
     title: 'Cloud Book',
     status: 'reading',
     createdAt: DateTime(2026, 7),
-    updatedAt: DateTime(2026, 7, 2),
+    updatedAt: updatedAt,
     deletedAt: deletedAt,
   );
 }
@@ -198,6 +343,7 @@ RemoteBook _remoteBook({
 RemoteReadingSession _remoteSession({
   required String localSessionId,
   required String localBookId,
+  DateTime? updatedAt,
 }) {
   return RemoteReadingSession(
     id: 'remote-session',
@@ -208,6 +354,7 @@ RemoteReadingSession _remoteSession({
     minutesRead: 20,
     sessionDate: DateTime(2026, 7),
     createdAt: DateTime(2026, 7),
+    updatedAt: updatedAt,
   );
 }
 
@@ -215,6 +362,7 @@ RemoteAnnualGoal _remoteAnnualGoal({
   required int year,
   required int targetBooks,
   String remoteId = 'remote-goal',
+  DateTime? updatedAt,
 }) {
   return RemoteAnnualGoal(
     id: remoteId,
@@ -222,6 +370,7 @@ RemoteAnnualGoal _remoteAnnualGoal({
     localGoalId: LocalSyncTracker.annualGoalLocalId,
     year: year,
     targetBooks: targetBooks,
+    updatedAt: updatedAt,
   );
 }
 
@@ -229,6 +378,7 @@ SyncMetadata _metadata({
   required SyncEntityType entityType,
   required String localId,
   required PendingSyncOperation pendingOperation,
+  DateTime? lastRemoteUpdate,
 }) {
   final now = DateTime(2026, 7);
   return SyncMetadata(
@@ -237,6 +387,7 @@ SyncMetadata _metadata({
     localId: localId,
     syncStatus: SyncStatus.pendingUpdate,
     pendingOperation: pendingOperation,
+    lastRemoteUpdate: lastRemoteUpdate,
     createdAt: now,
     updatedAt: now,
   );
@@ -350,6 +501,8 @@ class FakeSyncMetadataRepository implements SyncMetadataRepository {
 
   final Map<String, SyncMetadata> metadata;
   final Map<String, String?> syncedRemoteIds = {};
+  final Map<String, String> conflictRemoteIds = {};
+  final Map<String, String> conflictMessages = {};
 
   @override
   Future<void> associateRemoteId({
@@ -392,6 +545,35 @@ class FakeSyncMetadataRepository implements SyncMetadataRepository {
     required String localId,
     DateTime? localUpdate,
   }) async {}
+
+  @override
+  Future<void> markConflict({
+    required SyncEntityType entityType,
+    required String localId,
+    required String remoteId,
+    required DateTime lastRemoteUpdate,
+    required String message,
+  }) async {
+    final key = '${entityType.value}:$localId';
+    final existing = metadata[key]!;
+    metadata[key] = SyncMetadata(
+      id: existing.id,
+      entityType: existing.entityType,
+      localId: existing.localId,
+      remoteId: remoteId,
+      syncStatus: SyncStatus.conflict,
+      pendingOperation: existing.pendingOperation,
+      lastSyncedAt: existing.lastSyncedAt,
+      lastLocalUpdate: existing.lastLocalUpdate,
+      lastRemoteUpdate: lastRemoteUpdate,
+      errorMessage: message,
+      retryCount: existing.retryCount,
+      createdAt: existing.createdAt,
+      updatedAt: DateTime(2026, 7, 3),
+    );
+    conflictRemoteIds[localId] = remoteId;
+    conflictMessages[localId] = message;
+  }
 
   @override
   Future<void> markSynced({

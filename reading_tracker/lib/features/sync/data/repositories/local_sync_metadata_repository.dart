@@ -151,6 +151,25 @@ class LocalSyncMetadataRepository implements SyncMetadataRepository {
   }
 
   @override
+  Future<void> markConflict({
+    required SyncEntityType entityType,
+    required String localId,
+    required String remoteId,
+    required DateTime lastRemoteUpdate,
+    required String message,
+  }) async {
+    await _dao.markConflict(
+      entityType: entityType.value,
+      localId: localId,
+      syncStatus: SyncStatus.conflict.value,
+      remoteId: remoteId,
+      lastRemoteUpdate: lastRemoteUpdate,
+      errorMessage: message,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
   Future<void> registerFailure({
     required SyncEntityType entityType,
     required String localId,

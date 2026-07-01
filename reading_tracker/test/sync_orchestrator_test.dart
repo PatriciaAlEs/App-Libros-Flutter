@@ -246,6 +246,44 @@ void main() {
     expect(result.failed, 0);
   });
 
+  test('download result aggregates conflicts from every step', () {
+    const result = SyncDownloadOrchestrationResult(
+      books: DownloadBooksResult(
+        remoteBooks: 1,
+        applied: 0,
+        skipped: 0,
+        conflicts: 1,
+        failed: 0,
+      ),
+      readingSessions: DownloadReadingSessionsResult(
+        remoteReadingSessions: 1,
+        applied: 0,
+        skipped: 0,
+        conflicts: 1,
+        failed: 0,
+      ),
+      readerProfile: DownloadReaderProfileResult(
+        remoteProfiles: 1,
+        applied: 0,
+        skipped: 0,
+        conflicts: 1,
+        failed: 0,
+      ),
+      annualGoal: DownloadAnnualGoalResult(
+        remoteAnnualGoals: 1,
+        applied: 0,
+        skipped: 0,
+        conflicts: 1,
+        failed: 0,
+      ),
+    );
+
+    expect(result.applied, 0);
+    expect(result.skipped, 0);
+    expect(result.conflicts, 4);
+    expect(result.failed, 0);
+  });
+
   test('provider returns null when books sync is unavailable', () {
     final container = ProviderContainer(
       overrides: [
@@ -603,6 +641,15 @@ class FakeSyncMetadataRepository implements SyncMetadataRepository {
     required SyncEntityType entityType,
     required String localId,
     DateTime? localUpdate,
+  }) async {}
+
+  @override
+  Future<void> markConflict({
+    required SyncEntityType entityType,
+    required String localId,
+    required String remoteId,
+    required DateTime lastRemoteUpdate,
+    required String message,
   }) async {}
 
   @override

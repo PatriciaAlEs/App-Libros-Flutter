@@ -60,6 +60,11 @@ class SyncDownloadOrchestrationResult {
       readingSessions.skipped +
       readerProfile.skipped +
       annualGoal.skipped;
+  int get conflicts =>
+      books.conflicts +
+      readingSessions.conflicts +
+      readerProfile.conflicts +
+      annualGoal.conflicts;
   int get failed =>
       books.failed +
       readingSessions.failed +

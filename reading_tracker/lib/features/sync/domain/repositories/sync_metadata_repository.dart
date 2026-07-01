@@ -42,6 +42,14 @@ abstract interface class SyncMetadataRepository {
     DateTime? localUpdate,
   });
 
+  Future<void> markConflict({
+    required SyncEntityType entityType,
+    required String localId,
+    required String remoteId,
+    required DateTime lastRemoteUpdate,
+    required String message,
+  });
+
   Future<void> registerFailure({
     required SyncEntityType entityType,
     required String localId,

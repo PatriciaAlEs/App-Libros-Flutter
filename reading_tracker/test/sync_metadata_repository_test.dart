@@ -183,6 +183,41 @@ void main() {
       expect(saved.lastLocalUpdate, DateTime(2026, 6, 27, 13));
     });
 
+    test('marks conflict while preserving pending operation', () async {
+      await repository.save(
+        _metadata(
+          id: 'sync-1',
+          entityType: SyncEntityType.book,
+          localId: 'book-1',
+          syncStatus: SyncStatus.pendingUpdate,
+          pendingOperation: PendingSyncOperation.update,
+        ),
+      );
+
+      await repository.markConflict(
+        entityType: SyncEntityType.book,
+        localId: 'book-1',
+        remoteId: 'remote-book-1',
+        lastRemoteUpdate: DateTime(2026, 6, 27, 14),
+        message: 'Remote book changed while local pending exists',
+      );
+
+      final saved = await repository.getByLocalId(
+        entityType: SyncEntityType.book,
+        localId: 'book-1',
+      );
+
+      expect(saved!.syncStatus, SyncStatus.conflict);
+      expect(saved.pendingOperation, PendingSyncOperation.update);
+      expect(saved.remoteId, 'remote-book-1');
+      expect(saved.lastRemoteUpdate, DateTime(2026, 6, 27, 14));
+      expect(
+        saved.errorMessage,
+        'Remote book changed while local pending exists',
+      );
+      expect(saved.lastSyncedAt, isNull);
+    });
+
     test('registers failures and increments retry count', () async {
       await repository.save(
         _metadata(

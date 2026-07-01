@@ -2,7 +2,7 @@
 
 ## Resumen real
 
-La app usa una arquitectura Flutter por features. La persistencia de producto sigue siendo local con Drift + SQLite/IndexedDB y el estado se gestiona con Riverpod. Supabase existe como backend progresivo opcional para Auth y futura sincronizacion, pero no sustituye a Drift ni bloquea el modo local.
+La app usa una arquitectura Flutter por features. La persistencia de producto sigue siendo local con Drift + SQLite/IndexedDB y el estado se gestiona con Riverpod. Supabase existe como backend progresivo opcional para Auth y sincronizacion remota, pero no sustituye a Drift ni bloquea el modo local.
 
 ## Estructura
 
@@ -57,7 +57,7 @@ reading_tracker/lib/
 - `reading_sessions`: entidad `ReadingSession`, repositorio, calendario, detalle de dia y formulario de sesion.
 - `stats`: calculos, provider y pantalla.
 - `insights`: perfil lector calculado desde libros y sesiones, con preferencias, mejores lecturas y curiosidades.
-- `sync`: modelo remoto preparado para Supabase, metadata local de sincronizacion y primera sincronizacion manual Books local -> Supabase. Incluye DTOs/mappers remotos, contratos de repositorios remotos, repositorio local de estado sync, datasource Supabase y use case manual de Books.
+- `sync`: modelo remoto Supabase, metadata local de sincronizacion, tracking local, orquestacion manual, upload local -> Supabase, descarga Supabase -> local y deteccion de conflictos para Books, Reading Sessions, Reader Profile y Annual Goal.
 
 ## Persistencia
 
@@ -84,8 +84,8 @@ reading_tracker/lib/
 - Open Library Search API: `https://openlibrary.org/search.json`.
 - Open Library Covers: `https://covers.openlibrary.org/b/id/{coverId}-M.jpg`.
 - Supabase Auth opcional para cuenta/login cuando `SUPABASE_URL` y `SUPABASE_ANON_KEY` estan configurados.
-- Supabase Database schema preparado en SQL para futura sincronizacion, pendiente de aplicar y validar en proyecto real.
-- No hay Firebase, Stripe ni backend propio. Existe una primera sincronizacion remota manual limitada a Books; no hay sync automatica ni recuperacion nube -> local.
+- Supabase Database schema preparado en SQL para sincronizacion remota, pendiente de aplicar y validar en proyecto real cuando existan credenciales/proyecto enlazado.
+- No hay Firebase, Stripe ni backend propio. Existe sincronizacion manual local -> Supabase y descarga manual Supabase -> local para Books, Reading Sessions, Reader Profile y Annual Goal; no hay sync automatica ni UI de estado.
 
 ## Herramientas externas relevantes
 
@@ -494,6 +494,31 @@ reading_tracker/lib/
 - `local_book_id` sigue viajando en la fila como identidad local, pero no se usa como conflict target directo en este sprint.
 - Esta decision puede afectar proximos sprints de reconciliacion por `local_book_id`, borrado logico y sync nube -> local.
 - Validacion Sprint 22.0: `flutter analyze` OK y `flutter test` OK con 94/94 tests.
+
+### Sincronizacion Hito 8 Sprint 22.0-22.6
+
+- Sprint 22.0 cerrado: Upload Books.
+- Sprint 22.1 cerrado: `SyncOrchestrator`.
+- Sprint 22.2 cerrado: Upload Reading Sessions.
+- Sprint 22.3 cerrado: Upload Reader Profile.
+- Sprint 22.4 cerrado: Upload Annual Goal.
+- Sprint 22.5 cerrado: Manual Cloud Download.
+- Sprint 22.6 cerrado: Conflict Detection.
+- Pendiente: Sprint 22.7 Automatic Synchronization y Sprint 22.8 Sync Status UI.
+- ReadPp mantiene arquitectura offline-first: Drift es la fuente de verdad local y Supabase actua como backend remoto.
+- `sync_metadata` coordina el estado por `entity_type + local_id`.
+- `LocalSyncTracker` registra cambios locales despues de persistir correctamente en Drift, SharedPreferences o `app_settings`.
+- `SyncOrchestrator` es el punto unico de entrada para sincronizacion manual.
+- El orquestador separa dos flujos independientes: `runManualSync()` para Local -> Supabase y `runManualDownload()` para Supabase -> Local.
+- El orden de ejecucion es Books, Reading Sessions, Reader Profile y Annual Goal.
+- La subida local -> Supabase consume `sync_metadata`, procesa `create`, `update` y `delete`, sube cada entidad soportada, guarda `remoteId` y marca synced si la operacion remota finaliza correctamente.
+- La descarga Supabase -> local es conservadora: solo aplica registros remotos cuando el equivalente local no tiene `pendingOperation != none`.
+- La descarga usa `includeDeleted = false` y no procesa borrados remotos en este tramo.
+- La resolucion de conflictos de Sprint 22.6 solo detecta y registra: si existe cambio local pendiente y `remote.updatedAt` es posterior a `lastRemoteUpdate`, se marca `syncStatus = conflict`.
+- `markConflict` conserva `pendingOperation`, guarda `remoteId`, `lastRemoteUpdate` y `errorMessage`, y no marca synced.
+- El upload local mantiene prioridad para preservar datos locales.
+- No existe todavia resolucion automatica, merge campo a campo, UI de conflictos ni sincronizacion automatica.
+- Validacion Sprint 22.6: `flutter analyze` OK y `flutter test` OK con 137/137 tests.
 
 ### Hallazgos arquitectonicos revision Sprint 19
 

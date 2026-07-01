@@ -343,6 +343,15 @@ class FakeSyncMetadataRepository implements SyncMetadataRepository {
   }) async {}
 
   @override
+  Future<void> markConflict({
+    required SyncEntityType entityType,
+    required String localId,
+    required String remoteId,
+    required DateTime lastRemoteUpdate,
+    required String message,
+  }) async {}
+
+  @override
   Future<void> markSynced({
     required SyncEntityType entityType,
     required String localId,

@@ -13,12 +13,14 @@ class DownloadBooksResult {
     required this.remoteBooks,
     required this.applied,
     required this.skipped,
+    required this.conflicts,
     required this.failed,
   });
 
   final int remoteBooks;
   final int applied;
   final int skipped;
+  final int conflicts;
   final int failed;
 }
 
@@ -46,6 +48,7 @@ class DownloadBooksFromSupabase {
 
     var applied = 0;
     var skipped = 0;
+    var conflicts = 0;
     var failed = 0;
 
     for (final remoteBook in remoteBooks) {
@@ -61,7 +64,23 @@ class DownloadBooksFromSupabase {
           localId: localId,
         );
         if (metadata?.hasPendingOperation ?? false) {
-          skipped++;
+          if (_hasNewerRemoteVersion(metadata!, remoteBook.updatedAt)) {
+            await _metadataRepository.markConflict(
+              entityType: SyncEntityType.book,
+              localId: localId,
+              remoteId: remoteBook.id,
+              lastRemoteUpdate: remoteBook.updatedAt!,
+              message: _conflictMessage(
+                entityType: SyncEntityType.book,
+                localId: localId,
+                remoteId: remoteBook.id,
+                remoteUpdatedAt: remoteBook.updatedAt!,
+              ),
+            );
+            conflicts++;
+          } else {
+            skipped++;
+          }
           continue;
         }
 
@@ -83,9 +102,26 @@ class DownloadBooksFromSupabase {
       remoteBooks: remoteBooks.length,
       applied: applied,
       skipped: skipped,
+      conflicts: conflicts,
       failed: failed,
     );
   }
+}
+
+bool _hasNewerRemoteVersion(SyncMetadata metadata, DateTime? remoteUpdatedAt) {
+  if (remoteUpdatedAt == null) return false;
+  final lastRemoteUpdate = metadata.lastRemoteUpdate;
+  return lastRemoteUpdate == null || remoteUpdatedAt.isAfter(lastRemoteUpdate);
+}
+
+String _conflictMessage({
+  required SyncEntityType entityType,
+  required String localId,
+  required String remoteId,
+  required DateTime remoteUpdatedAt,
+}) {
+  return 'Remote ${entityType.value} changed while local pending exists: '
+      'localId=$localId remoteId=$remoteId remoteUpdatedAt=${remoteUpdatedAt.toIso8601String()}';
 }
 
 Book _bookFromRemote(RemoteBook remoteBook, {Book? existing}) {

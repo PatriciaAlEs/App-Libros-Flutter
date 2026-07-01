@@ -108,6 +108,31 @@ class SyncMetadataDao extends DatabaseAccessor<AppDatabase>
         );
   }
 
+  Future<int> markConflict({
+    required String entityType,
+    required String localId,
+    required String syncStatus,
+    required String remoteId,
+    required DateTime lastRemoteUpdate,
+    required String errorMessage,
+    required DateTime updatedAt,
+  }) {
+    return (update(syncMetadataTable)..where(
+          (table) =>
+              table.entityType.equals(entityType) &
+              table.localId.equals(localId),
+        ))
+        .write(
+          SyncMetadataTableCompanion(
+            remoteId: Value(remoteId),
+            syncStatus: Value(syncStatus),
+            lastRemoteUpdate: Value(lastRemoteUpdate),
+            errorMessage: Value(errorMessage),
+            updatedAt: Value(updatedAt),
+          ),
+        );
+  }
+
   Future<int> registerFailure({
     required String entityType,
     required String localId,
