@@ -114,12 +114,14 @@ void main() {
   });
 
   test('syncNow exposes lightweight last sync result', () async {
+    var completedCallbacks = 0;
     final controller = SyncStatusController(
       coordinator: AutoSyncCoordinator.withRunners(
         runUpload: ({required userId}) async => _uploadResult(),
         runDownload: ({required userId}) async => _downloadResult(),
       ),
       clock: () => DateTime(2026, 7, 1, 10),
+      onSyncCompleted: () => completedCallbacks++,
     );
 
     await controller.syncNow(userId: 'user-1');
@@ -130,6 +132,26 @@ void main() {
     expect(controller.state.lastSyncResult, isNot(isA<AutoSyncResult>()));
     expect(controller.state.lastSyncResult!.uploadSynced, 1);
     expect(controller.state.lastSyncResult!.downloadApplied, 1);
+    expect(completedCallbacks, 1);
+  });
+
+  test('syncNow does not refresh synced data after a failed sync', () async {
+    var completedCallbacks = 0;
+    final controller = SyncStatusController(
+      coordinator: AutoSyncCoordinator.withRunners(
+        runUpload: ({required userId}) async {
+          throw StateError('upload failed');
+        },
+        runDownload: ({required userId}) async => _downloadResult(),
+      ),
+      clock: () => DateTime(2026, 7, 1, 10),
+      onSyncCompleted: () => completedCallbacks++,
+    );
+
+    await controller.syncNow(userId: 'user-1');
+
+    expect(controller.state.status, SyncUiStatus.failed);
+    expect(completedCallbacks, 0);
   });
 
   test('syncNow exposes syncing while the coordinator is running', () async {

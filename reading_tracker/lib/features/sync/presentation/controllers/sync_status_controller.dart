@@ -1,6 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/preferences/reader_profile_controller.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../books/presentation/providers/books_provider.dart';
+import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
+import '../../../reading_sessions/presentation/providers/reading_sessions_provider.dart';
+import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 import '../../data/repositories/auto_sync_coordinator_provider.dart';
 import '../../data/repositories/sync_metadata_summary_provider.dart';
 import '../../domain/entities/sync_status_state.dart';
@@ -11,6 +16,7 @@ final syncStatusControllerProvider =
       return SyncStatusController(
         coordinator: ref.watch(autoSyncCoordinatorProvider),
         clock: DateTime.now,
+        onSyncCompleted: () => _invalidateSyncedData(ref),
       );
     });
 
@@ -32,12 +38,15 @@ class SyncStatusController extends StateNotifier<SyncStatusState> {
   SyncStatusController({
     required AutoSyncCoordinator? coordinator,
     required DateTime Function() clock,
+    VoidCallback? onSyncCompleted,
   }) : _coordinator = coordinator,
        _clock = clock,
+       _onSyncCompleted = onSyncCompleted,
        super(const SyncStatusState.idle());
 
   final AutoSyncCoordinator? _coordinator;
   final DateTime Function() _clock;
+  final VoidCallback? _onSyncCompleted;
 
   Future<void> syncNow({required String userId}) async {
     if (state.status == SyncUiStatus.syncing) {
@@ -69,17 +78,7 @@ class SyncStatusController extends StateNotifier<SyncStatusState> {
     final finishedAt = _clock();
 
     state = switch (result.status) {
-      AutoSyncStatus.completed => state.copyWith(
-        status: SyncUiStatus.synced,
-        lastSyncAt: finishedAt,
-        lastSyncResult: LastSyncResult(
-          status: LastSyncResultStatus.completed,
-          finishedAt: finishedAt,
-          uploadSynced: result.upload?.synced ?? 0,
-          downloadApplied: result.download?.applied ?? 0,
-          downloadConflicts: result.download?.conflicts ?? 0,
-        ),
-      ),
+      AutoSyncStatus.completed => _completedState(result, finishedAt),
       AutoSyncStatus.failed => state.copyWith(
         status: SyncUiStatus.failed,
         lastSyncResult: LastSyncResult(
@@ -97,6 +96,21 @@ class SyncStatusController extends StateNotifier<SyncStatusState> {
         ),
       ),
     };
+  }
+
+  SyncStatusState _completedState(AutoSyncResult result, DateTime finishedAt) {
+    _onSyncCompleted?.call();
+    return state.copyWith(
+      status: SyncUiStatus.synced,
+      lastSyncAt: finishedAt,
+      lastSyncResult: LastSyncResult(
+        status: LastSyncResultStatus.completed,
+        finishedAt: finishedAt,
+        uploadSynced: result.upload?.synced ?? 0,
+        downloadApplied: result.download?.applied ?? 0,
+        downloadConflicts: result.download?.conflicts ?? 0,
+      ),
+    );
   }
 
   static SyncStatusState mergeState({
@@ -141,4 +155,22 @@ class SyncStatusController extends StateNotifier<SyncStatusState> {
     if (second == null) return first;
     return first.isAfter(second) ? first : second;
   }
+}
+
+typedef VoidCallback = void Function();
+
+void _invalidateSyncedData(Ref ref) {
+  if (ref.exists(booksProvider)) ref.invalidate(booksProvider);
+  if (ref.exists(statisticsSummaryProvider)) {
+    ref.invalidate(statisticsSummaryProvider);
+  }
+  if (ref.exists(readingInsightsSummaryProvider)) {
+    ref.invalidate(readingInsightsSummaryProvider);
+  }
+  if (ref.exists(readerProfileControllerProvider)) {
+    ref.invalidate(readerProfileControllerProvider);
+  }
+  ref.invalidate(readingSessionsForRangeProvider);
+  ref.invalidate(readingSessionsForDayProvider);
+  ref.invalidate(readingSessionsForBookProvider);
 }
