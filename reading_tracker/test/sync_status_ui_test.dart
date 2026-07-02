@@ -144,6 +144,33 @@ void main() {
     expect(controller.syncCalls, ['user-1']);
   });
 
+  testWidgets('sync success shows completion sheet with home CTA', (
+    tester,
+  ) async {
+    final controller = RecordingSyncStatusController(completeOnSync: true);
+    await tester.pumpWidget(
+      _cardHost(
+        authRepository: FakeAuthRepository(
+          initialUser: const AppUser(id: 'user-1'),
+        ),
+        state: const SyncStatusState(status: SyncUiStatus.idle),
+        controller: controller,
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('sync_now_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sincronización completada'), findsOneWidget);
+    expect(find.text('Tu biblioteca ya está actualizada.'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('sync_success_home_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('home_route_marker')), findsOneWidget);
+  });
+
   testWidgets(
     'bootstrap calls SyncStatusController and avoids rebuild repeats',
     (tester) async {
@@ -181,7 +208,17 @@ Widget _cardHost({
         (ref) => controller ?? RecordingSyncStatusController(),
       ),
     ],
-    child: const MaterialApp(home: Scaffold(body: SyncStatusCard())),
+    child: MaterialApp(
+      home: const Scaffold(body: SyncStatusCard()),
+      routes: {
+        '/home': (_) => const Scaffold(
+          body: KeyedSubtree(
+            key: Key('home_route_marker'),
+            child: Text('Inicio'),
+          ),
+        ),
+      },
+    ),
   );
 }
 
@@ -204,14 +241,21 @@ Widget _bootstrapHost({
 }
 
 class RecordingSyncStatusController extends SyncStatusController {
-  RecordingSyncStatusController()
+  RecordingSyncStatusController({this.completeOnSync = false})
     : super(coordinator: null, clock: () => DateTime(2026, 7));
 
+  final bool completeOnSync;
   final List<String> syncCalls = [];
 
   @override
   Future<void> syncNow({required String userId}) async {
     syncCalls.add(userId);
+    if (completeOnSync) {
+      state = SyncStatusState(
+        status: SyncUiStatus.synced,
+        lastSyncAt: DateTime(2026, 7),
+      );
+    }
   }
 }
 

@@ -140,7 +140,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
         _searchController.text.trim() == query;
   }
 
-  void _selectBook(BookSearchResult book) {
+  Future<void> _selectBook(BookSearchResult book) async {
     setState(() {
       _selectedBook = book;
       _isManualEntry = false;
@@ -155,6 +155,30 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
         _totalPagesAutoFilled = false;
       }
     });
+
+    final draft = await showModalBottomSheet<_BookSaveDraft>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => _SaveBookSheet(
+        book: book,
+        initialStatus: _selectedStatus,
+        initialTotalPages: _totalPagesController.text.trim().isEmpty
+            ? book.numberOfPages?.toString()
+            : _totalPagesController.text.trim(),
+      ),
+    );
+    if (!mounted || draft == null) return;
+
+    setState(() {
+      _selectedBook = book;
+      _selectedStatus = draft.status;
+      _startedAt = draft.startedAt;
+      _finishedAt = draft.finishedAt;
+      _totalPagesController.text = draft.totalPagesText;
+      _totalPagesAutoFilled = false;
+    });
+    await _save(showSavedFeedback: true);
   }
 
   void _selectManualBook() {
@@ -385,7 +409,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
     );
   }
 
-  Future<void> _save() async {
+  Future<void> _save({bool showSavedFeedback = false}) async {
     final selectedBook = _currentBookCandidate();
     if (selectedBook == null) return;
 
@@ -465,7 +489,13 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
       );
     }
 
-    if (mounted) Navigator.pop(context, _selectedStatus);
+    if (!mounted) return;
+    if (showSavedFeedback) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('Libro guardado')));
+    }
+    Navigator.pop(context, _selectedStatus);
   }
 
   String _analyticsBookSource(Book book) {
@@ -619,9 +649,19 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
               ),
               const SizedBox(height: 16),
             ],
-            if (_selectedBook != null && !_isManualEntry) ...[
-              _SelectedBookCard(book: _selectedBook!),
-              const SizedBox(height: 16),
+            if (_error == null) ...[
+              _ResultsList(
+                results: _results,
+                hasSearched: _hasSearched,
+                isSearching: _isSearching,
+                visibleCount: _visibleResultsCount,
+                selectedBook: _selectedBook,
+                onSelected: _selectBook,
+                onShowMore: _showMoreResults,
+                onManualAdd: _selectManualBook,
+              ),
+              if (_results.isNotEmpty || _isSearching || _hasSearched)
+                const SizedBox(height: 16),
             ],
             if (_isManualEntry) ...[
               _FormSection(
@@ -641,59 +681,50 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> {
               ),
               const SizedBox(height: 16),
             ],
-            _FormSection(
-              title: 'Cómo entra en tu biblioteca',
-              icon: AppIcons.bookmark,
-              child: _InitialStatusSelector(
-                selectedStatus: _selectedStatus,
-                onChanged: _changeStatus,
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (_selectedStatus != BookStatus.pending) ...[
+            if (_isManualEntry) ...[
               _FormSection(
-                title: 'Fechas de lectura',
-                icon: AppIcons.calendar,
-                child: _InitialDatesFields(
-                  startedAt: _startedAt,
-                  finishedAt: _finishedAt,
-                  showFinishedAt: _selectedStatus == BookStatus.completed,
-                  onStartedAtTap: _pickStartedAt,
-                  onFinishedAtTap: _pickFinishedAt,
-                  onClearStartedAt: () => setState(() {
-                    _startedAt = null;
-                    _finishedAt = null;
-                  }),
-                  onClearFinishedAt: () => setState(() => _finishedAt = null),
+                title: 'Cómo entra en tu biblioteca',
+                icon: AppIcons.bookmark,
+                child: _InitialStatusSelector(
+                  selectedStatus: _selectedStatus,
+                  onChanged: _changeStatus,
                 ),
               ),
               const SizedBox(height: 16),
-            ],
-            _FormSection(
-              title: 'Datos del libro',
-              icon: AppIcons.pages,
-              child: _TotalPagesField(
-                controller: _totalPagesController,
-                onChanged: (_) => _totalPagesAutoFilled = false,
+              if (_selectedStatus != BookStatus.pending) ...[
+                _FormSection(
+                  title: 'Fechas de lectura',
+                  icon: AppIcons.calendar,
+                  child: _InitialDatesFields(
+                    startedAt: _startedAt,
+                    finishedAt: _finishedAt,
+                    showFinishedAt: _selectedStatus == BookStatus.completed,
+                    onStartedAtTap: _pickStartedAt,
+                    onFinishedAtTap: _pickFinishedAt,
+                    onClearStartedAt: () => setState(() {
+                      _startedAt = null;
+                      _finishedAt = null;
+                    }),
+                    onClearFinishedAt: () => setState(() => _finishedAt = null),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              _FormSection(
+                title: 'Datos del libro',
+                icon: AppIcons.pages,
+                child: _TotalPagesField(
+                  controller: _totalPagesController,
+                  onChanged: (_) => _totalPagesAutoFilled = false,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            _ResultsList(
-              results: _results,
-              hasSearched: _hasSearched,
-              isSearching: _isSearching,
-              visibleCount: _visibleResultsCount,
-              selectedBook: _selectedBook,
-              onSelected: _selectBook,
-              onShowMore: _showMoreResults,
-              onManualAdd: _selectManualBook,
-            ),
-            const SizedBox(height: 24),
-            _SaveButton(
-              isSaving: _isSaving,
-              enabled: _currentBookCandidate() != null,
-              onPressed: _save,
-            ),
+              const SizedBox(height: 24),
+              _SaveButton(
+                isSaving: _isSaving,
+                enabled: _currentBookCandidate() != null,
+                onPressed: _save,
+              ),
+            ],
           ],
         ),
       ),
@@ -891,6 +922,211 @@ class _InlineError extends StatelessWidget {
 }
 
 enum _DuplicateBookAction { view, changeStatus, enrich }
+
+class _BookSaveDraft {
+  const _BookSaveDraft({
+    required this.status,
+    required this.totalPagesText,
+    this.startedAt,
+    this.finishedAt,
+  });
+
+  final BookStatus status;
+  final String totalPagesText;
+  final DateTime? startedAt;
+  final DateTime? finishedAt;
+}
+
+class _SaveBookSheet extends StatefulWidget {
+  const _SaveBookSheet({
+    required this.book,
+    required this.initialStatus,
+    this.initialTotalPages,
+  });
+
+  final BookSearchResult book;
+  final BookStatus initialStatus;
+  final String? initialTotalPages;
+
+  @override
+  State<_SaveBookSheet> createState() => _SaveBookSheetState();
+}
+
+class _SaveBookSheetState extends State<_SaveBookSheet> {
+  late final TextEditingController _totalPagesController;
+  late BookStatus _status;
+  DateTime? _startedAt;
+  DateTime? _finishedAt;
+
+  @override
+  void initState() {
+    super.initState();
+    _status = widget.initialStatus;
+    _totalPagesController = TextEditingController(
+      text: widget.initialTotalPages ?? '',
+    );
+    final today = _today();
+    if (_status != BookStatus.pending) {
+      _startedAt = today;
+    }
+  }
+
+  @override
+  void dispose() {
+    _totalPagesController.dispose();
+    super.dispose();
+  }
+
+  void _changeStatus(BookStatus status) {
+    final today = _today();
+    setState(() {
+      _status = status;
+      if (status == BookStatus.pending) {
+        _startedAt = null;
+        _finishedAt = null;
+      } else {
+        _startedAt ??= today;
+        if (status != BookStatus.completed) _finishedAt = null;
+      }
+    });
+  }
+
+  Future<void> _pickStartedAt() async {
+    final selected = await _pickDate(_startedAt);
+    if (selected == null) return;
+    setState(() {
+      _startedAt = selected;
+      if (_finishedAt != null && _finishedAt!.isBefore(selected)) {
+        _finishedAt = null;
+      }
+    });
+  }
+
+  Future<void> _pickFinishedAt() async {
+    final selected = await _pickDate(
+      _finishedAt ?? _startedAt,
+      firstDate: _startedAt,
+    );
+    if (selected == null) return;
+    setState(() => _finishedAt = selected);
+  }
+
+  Future<DateTime?> _pickDate(DateTime? initialDate, {DateTime? firstDate}) {
+    final today = _today();
+    final effectiveFirstDate = firstDate ?? DateTime(1900);
+    final effectiveInitialDate = initialDate ?? today;
+    return showDatePicker(
+      context: context,
+      initialDate: effectiveInitialDate.isBefore(effectiveFirstDate)
+          ? effectiveFirstDate
+          : effectiveInitialDate,
+      firstDate: effectiveFirstDate,
+      lastDate: today,
+    );
+  }
+
+  DateTime _today() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  void _submit() {
+    Navigator.pop(
+      context,
+      _BookSaveDraft(
+        status: _status,
+        totalPagesText: _totalPagesController.text.trim(),
+        startedAt: _startedAt,
+        finishedAt: _status == BookStatus.completed ? _finishedAt : null,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(20, 6, 20, 20 + bottomInset),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _Cover(url: widget.book.coverUrl, width: 72, height: 104),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.book.title,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        if (widget.book.author != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            widget.book.author!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _InitialStatusSelector(
+                selectedStatus: _status,
+                onChanged: _changeStatus,
+              ),
+              if (_status != BookStatus.pending) ...[
+                const SizedBox(height: AppSpacing.md),
+                _InitialDatesFields(
+                  startedAt: _startedAt,
+                  finishedAt: _finishedAt,
+                  showFinishedAt: _status == BookStatus.completed,
+                  onStartedAtTap: _pickStartedAt,
+                  onFinishedAtTap: _pickFinishedAt,
+                  onClearStartedAt: () => setState(() {
+                    _startedAt = null;
+                    _finishedAt = null;
+                  }),
+                  onClearFinishedAt: () => setState(() => _finishedAt = null),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.md),
+              _TotalPagesField(
+                controller: _totalPagesController,
+                onChanged: (_) {},
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              FilledButton(
+                key: const Key('confirm_save_book_button'),
+                onPressed: _submit,
+                child: const Text('Guardar libro'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class _DuplicateBookDialog extends StatelessWidget {
   const _DuplicateBookDialog({required this.book, required this.candidate});
@@ -1608,6 +1844,7 @@ class _TotalPagesField extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _SelectedBookCard extends StatelessWidget {
   const _SelectedBookCard({required this.book});
 

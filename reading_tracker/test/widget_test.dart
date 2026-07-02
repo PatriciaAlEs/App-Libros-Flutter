@@ -189,18 +189,15 @@ void main() {
     );
     await tester.tap(resultTile);
     await tester.pumpAndSettle();
+
+    expect(find.text('Libro de prueba'), findsWidgets);
+    expect(find.byKey(const Key('confirm_save_book_button')), findsOneWidget);
+
     await tester.tap(find.byType(DropdownButtonFormField<BookStatus>));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Leyendo').last);
     await tester.pumpAndSettle();
-    final saveButton = find.widgetWithText(FilledButton, 'Guardar libro');
-    await tester.scrollUntilVisible(
-      saveButton,
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.ensureVisible(saveButton);
-    await tester.pumpAndSettle();
+    final saveButton = find.byKey(const Key('confirm_save_book_button'));
     await tester.tap(saveButton);
     await tester.pumpAndSettle();
 
@@ -517,6 +514,28 @@ void main() {
 
     expect(find.text('4 / 4'), findsOneWidget);
     expect(find.text('Cuarta lectura'), findsWidgets);
+
+    final secondReadingChip = find.byKey(
+      const Key('other_current_reading_book-2'),
+    );
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -360));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(secondReadingChip);
+    await tester.pumpAndSettle();
+    await tester.tap(secondReadingChip);
+    await tester.pumpAndSettle();
+
+    final preferences = await SharedPreferences.getInstance();
+    expect(
+      preferences.getString('reader_profile_current_reading_id'),
+      'book-2',
+    );
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, 600));
+    await tester.pumpAndSettle();
+    expect(
+      _semanticsWithLabel('Lectura principal: Segunda lectura'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('book form blocks duplicate books by ISBN', (tester) async {

@@ -56,8 +56,8 @@ class _CompletionCelebrationOverlayState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return IgnorePointer(
-      child: Positioned.fill(
+    return Positioned.fill(
+      child: IgnorePointer(
         child: AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {

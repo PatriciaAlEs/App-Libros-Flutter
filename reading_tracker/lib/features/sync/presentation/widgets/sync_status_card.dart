@@ -44,13 +44,87 @@ class SyncStatusCard extends ConsumerWidget {
           state: state,
           onSyncNow: state.status == SyncUiStatus.syncing
               ? null
-              : () {
-                  ref
+              : () async {
+                  await ref
                       .read(syncStatusControllerProvider.notifier)
                       .syncNow(userId: userId);
+                  if (!context.mounted) return;
+                  final syncResult = ref.read(syncStatusControllerProvider);
+                  if (syncResult.status == SyncUiStatus.synced) {
+                    showBookCompletionCelebration(context);
+                    await showModalBottomSheet<void>(
+                      context: context,
+                      showDragHandle: true,
+                      builder: (_) => const _SyncSuccessSheet(),
+                    );
+                  }
                 },
         );
       },
+    );
+  }
+}
+
+class _SyncSuccessSheet extends StatelessWidget {
+  const _SyncSuccessSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.cloud_done_rounded,
+                color: theme.colorScheme.primary,
+                size: 28,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'Sincronización completada',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Tu biblioteca ya está actualizada.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            FilledButton.icon(
+              key: const Key('sync_success_home_button'),
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/home', (_) => false);
+              },
+              icon: const Icon(Icons.home_rounded),
+              label: const Text('Ir a Inicio'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -150,12 +150,8 @@ class HomeScreen extends ConsumerWidget {
                             const SizedBox(height: AppSpacing.lg),
                             _CurrentReadingStrip(
                               books: otherCurrentBooks,
-                              onBookTap: (book) => _openQuickProgress(
-                                context,
-                                ref,
-                                book,
-                                recentActivityRange,
-                              ),
+                              onBookTap: (book) =>
+                                  _selectCurrentReading(context, ref, book),
                             ),
                           ],
                           const SizedBox(height: 28),
@@ -288,6 +284,24 @@ class HomeScreen extends ConsumerWidget {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Progreso actualizado')));
+  }
+
+  Future<void> _selectCurrentReading(
+    BuildContext context,
+    WidgetRef ref,
+    Book book,
+  ) async {
+    await ref
+        .read(readerProfileControllerProvider.notifier)
+        .updateCurrentReadingBookId(book.id);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('"${book.title}" es ahora tu lectura principal'),
+        ),
+      );
   }
 
   List<Book> _currentReadingBooks(List<Book> books) {
@@ -1327,6 +1341,7 @@ class _CurrentReadingStripState extends State<_CurrentReadingStrip> {
                         : AppSpacing.xxl,
                   ),
                   child: _CurrentReadingChip(
+                    key: Key('other_current_reading_${book.id}'),
                     book: book,
                     isSelected: index == _currentPage,
                     onTap: () {
@@ -1371,6 +1386,7 @@ class _CurrentReadingStripState extends State<_CurrentReadingStrip> {
 
 class _CurrentReadingChip extends StatelessWidget {
   const _CurrentReadingChip({
+    super.key,
     required this.book,
     required this.isSelected,
     required this.onTap,
