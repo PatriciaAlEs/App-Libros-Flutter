@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/backend/supabase_client_provider.dart';
+import '../../domain/services/sync_debug_logger.dart';
 import 'remote_sync_datasource.dart';
 import 'remote_sync_tables.dart';
 
@@ -22,11 +23,11 @@ class SupabaseRemoteSyncDatasource implements RemoteSyncDatasource {
     required String idColumn,
     required String id,
   }) async {
-    final row = await _client
-        .from(table)
-        .select()
-        .eq(idColumn, id)
-        .maybeSingle();
+    final row = await _runRemote(
+      table: table,
+      operation: 'select_one',
+      action: () => _client.from(table).select().eq(idColumn, id).maybeSingle(),
+    );
 
     return row == null ? null : Map<String, dynamic>.from(row);
   }
@@ -54,7 +55,12 @@ class SupabaseRemoteSyncDatasource implements RemoteSyncDatasource {
       query = query.isFilter(RemoteSyncColumns.deletedAt, null);
     }
 
-    final rows = await query;
+    final rows = await _runRemote(
+      table: table,
+      operation: 'select_many',
+      userId: userId,
+      action: () async => await query,
+    );
     return (rows as List)
         .map((row) => Map<String, dynamic>.from(row as Map))
         .toList();
@@ -68,10 +74,13 @@ class SupabaseRemoteSyncDatasource implements RemoteSyncDatasource {
   }) async {
     if (rows.isEmpty) return const [];
 
-    final response = await _client
-        .from(table)
-        .upsert(rows, onConflict: onConflict)
-        .select();
+    final response = await _runRemote(
+      table: table,
+      operation: 'upsert_many',
+      userId: rows.first[RemoteSyncColumns.userId] as String?,
+      action: () =>
+          _client.from(table).upsert(rows, onConflict: onConflict).select(),
+    );
 
     return (response as List)
         .map((row) => Map<String, dynamic>.from(row as Map))
@@ -84,15 +93,44 @@ class SupabaseRemoteSyncDatasource implements RemoteSyncDatasource {
     required String userId,
     required String id,
   }) async {
-    await _client
-        .from(table)
-        .delete()
-        .eq(RemoteSyncColumns.userId, userId)
-        .eq(RemoteSyncColumns.id, id);
+    await _runRemote(
+      table: table,
+      operation: 'delete_one',
+      userId: userId,
+      action: () => _client
+          .from(table)
+          .delete()
+          .eq(RemoteSyncColumns.userId, userId)
+          .eq(RemoteSyncColumns.id, id),
+    );
   }
 
   @override
   Future<void> deleteById({required String table, required String id}) async {
-    await _client.from(table).delete().eq(RemoteSyncColumns.id, id);
+    await _runRemote(
+      table: table,
+      operation: 'delete_by_id',
+      action: () => _client.from(table).delete().eq(RemoteSyncColumns.id, id),
+    );
+  }
+
+  Future<T> _runRemote<T>({
+    required String table,
+    required String operation,
+    required Future<T> Function() action,
+    String? userId,
+  }) async {
+    try {
+      return await action();
+    } catch (error, stackTrace) {
+      logSyncDebugError(
+        table: table,
+        operation: operation,
+        userId: userId,
+        error: error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
   }
 }

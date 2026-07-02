@@ -3,6 +3,7 @@ import '../entities/remote_profile.dart';
 import '../entities/sync_metadata.dart';
 import '../repositories/remote_profile_repository.dart';
 import '../repositories/sync_metadata_repository.dart';
+import '../services/sync_debug_logger.dart';
 
 typedef LocalReaderProfileLoader = Future<ReaderProfile> Function();
 
@@ -12,12 +13,14 @@ class SyncPendingReaderProfileResult {
     required this.synced,
     required this.failed,
     required this.ignored,
+    this.failureMessages = const [],
   });
 
   final int pendingReaderProfiles;
   final int synced;
   final int failed;
   final int ignored;
+  final List<String> failureMessages;
 }
 
 class SyncPendingReaderProfileToSupabase {
@@ -41,6 +44,7 @@ class SyncPendingReaderProfileToSupabase {
 
     var synced = 0;
     var failed = 0;
+    final failureMessages = <String>[];
 
     for (final metadata in pendingReaderProfiles) {
       try {
@@ -57,12 +61,29 @@ class SyncPendingReaderProfileToSupabase {
           case PendingSyncOperation.none:
             break;
         }
-      } catch (error) {
+      } catch (error, stackTrace) {
+        final message = syncFailureMessage(
+          operation: metadata.pendingOperation.value,
+          entityType: metadata.entityType.value,
+          localId: metadata.localId,
+          table: 'profiles',
+          error: error,
+        );
         failed++;
+        failureMessages.add(message);
+        logSyncDebugError(
+          operation: metadata.pendingOperation.value,
+          entityType: metadata.entityType.value,
+          localId: metadata.localId,
+          userId: userId,
+          table: 'profiles',
+          error: error,
+          stackTrace: stackTrace,
+        );
         await _metadataRepository.registerFailure(
           entityType: metadata.entityType,
           localId: metadata.localId,
-          message: error.toString(),
+          message: message,
         );
       }
     }
@@ -72,6 +93,7 @@ class SyncPendingReaderProfileToSupabase {
       synced: synced,
       failed: failed,
       ignored: pending.length - pendingReaderProfiles.length,
+      failureMessages: failureMessages,
     );
   }
 

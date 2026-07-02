@@ -5,6 +5,7 @@ import '../entities/remote_book.dart';
 import '../entities/sync_metadata.dart';
 import '../repositories/remote_books_repository.dart';
 import '../repositories/sync_metadata_repository.dart';
+import '../services/sync_debug_logger.dart';
 
 typedef LocalBookLoader = Future<Book?> Function(String localId);
 typedef RemoteBookIdGenerator = String Function();
@@ -15,12 +16,14 @@ class SyncPendingBooksResult {
     required this.synced,
     required this.failed,
     required this.ignored,
+    this.failureMessages = const [],
   });
 
   final int pendingBooks;
   final int synced;
   final int failed;
   final int ignored;
+  final List<String> failureMessages;
 }
 
 class SyncPendingBooksToSupabase {
@@ -47,6 +50,7 @@ class SyncPendingBooksToSupabase {
 
     var synced = 0;
     var failed = 0;
+    final failureMessages = <String>[];
 
     for (final metadata in pendingBooks) {
       try {
@@ -63,12 +67,29 @@ class SyncPendingBooksToSupabase {
           case PendingSyncOperation.none:
             break;
         }
-      } catch (error) {
+      } catch (error, stackTrace) {
+        final message = syncFailureMessage(
+          operation: metadata.pendingOperation.value,
+          entityType: metadata.entityType.value,
+          localId: metadata.localId,
+          table: 'books',
+          error: error,
+        );
         failed++;
+        failureMessages.add(message);
+        logSyncDebugError(
+          operation: metadata.pendingOperation.value,
+          entityType: metadata.entityType.value,
+          localId: metadata.localId,
+          userId: userId,
+          table: 'books',
+          error: error,
+          stackTrace: stackTrace,
+        );
         await _metadataRepository.registerFailure(
           entityType: metadata.entityType,
           localId: metadata.localId,
-          message: error.toString(),
+          message: message,
         );
       }
     }
@@ -78,6 +99,7 @@ class SyncPendingBooksToSupabase {
       synced: synced,
       failed: failed,
       ignored: pending.length - pendingBooks.length,
+      failureMessages: failureMessages,
     );
   }
 

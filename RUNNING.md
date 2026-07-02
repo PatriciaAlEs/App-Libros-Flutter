@@ -62,3 +62,7 @@ flutter run -d chrome
 
 ---
 Archivo creado para el equipo: instrucciones mínimas para levantar la app en desarrollo.
+
+
+
+flutter run -d emulator-5554 --release

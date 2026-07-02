@@ -5,6 +5,7 @@ import '../entities/remote_reading_session.dart';
 import '../entities/sync_metadata.dart';
 import '../repositories/remote_reading_sessions_repository.dart';
 import '../repositories/sync_metadata_repository.dart';
+import '../services/sync_debug_logger.dart';
 
 typedef LocalReadingSessionLoader =
     Future<ReadingSession?> Function(String localId);
@@ -16,12 +17,14 @@ class SyncPendingReadingSessionsResult {
     required this.synced,
     required this.failed,
     required this.ignored,
+    this.failureMessages = const [],
   });
 
   final int pendingReadingSessions;
   final int synced;
   final int failed;
   final int ignored;
+  final List<String> failureMessages;
 }
 
 class SyncPendingReadingSessionsToSupabase {
@@ -52,6 +55,7 @@ class SyncPendingReadingSessionsToSupabase {
 
     var synced = 0;
     var failed = 0;
+    final failureMessages = <String>[];
 
     for (final metadata in pendingReadingSessions) {
       try {
@@ -68,12 +72,29 @@ class SyncPendingReadingSessionsToSupabase {
           case PendingSyncOperation.none:
             break;
         }
-      } catch (error) {
+      } catch (error, stackTrace) {
+        final message = syncFailureMessage(
+          operation: metadata.pendingOperation.value,
+          entityType: metadata.entityType.value,
+          localId: metadata.localId,
+          table: 'reading_sessions',
+          error: error,
+        );
         failed++;
+        failureMessages.add(message);
+        logSyncDebugError(
+          operation: metadata.pendingOperation.value,
+          entityType: metadata.entityType.value,
+          localId: metadata.localId,
+          userId: userId,
+          table: 'reading_sessions',
+          error: error,
+          stackTrace: stackTrace,
+        );
         await _metadataRepository.registerFailure(
           entityType: metadata.entityType,
           localId: metadata.localId,
-          message: error.toString(),
+          message: message,
         );
       }
     }
@@ -83,6 +104,7 @@ class SyncPendingReadingSessionsToSupabase {
       synced: synced,
       failed: failed,
       ignored: pending.length - pendingReadingSessions.length,
+      failureMessages: failureMessages,
     );
   }
 

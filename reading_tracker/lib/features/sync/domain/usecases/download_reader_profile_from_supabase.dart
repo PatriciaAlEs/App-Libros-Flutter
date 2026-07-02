@@ -4,6 +4,7 @@ import '../entities/sync_metadata.dart';
 import '../repositories/remote_profile_repository.dart';
 import '../repositories/sync_metadata_repository.dart';
 import '../services/local_sync_tracker.dart';
+import '../services/sync_debug_logger.dart';
 
 typedef LocalReaderProfileReader = Future<ReaderProfile> Function();
 typedef LocalReaderProfileWriter = Future<void> Function(ReaderProfile profile);
@@ -15,6 +16,7 @@ class DownloadReaderProfileResult {
     required this.skipped,
     required this.conflicts,
     required this.failed,
+    this.failureMessages = const [],
   });
 
   final int remoteProfiles;
@@ -22,6 +24,7 @@ class DownloadReaderProfileResult {
   final int skipped;
   final int conflicts;
   final int failed;
+  final List<String> failureMessages;
 }
 
 class DownloadReaderProfileFromSupabase {
@@ -113,13 +116,30 @@ class DownloadReaderProfileFromSupabase {
         conflicts: 0,
         failed: 0,
       );
-    } catch (_) {
-      return const DownloadReaderProfileResult(
+    } catch (error, stackTrace) {
+      final message = syncFailureMessage(
+        operation: 'download',
+        entityType: SyncEntityType.profile.value,
+        localId: LocalSyncTracker.readerProfileLocalId,
+        table: 'profiles',
+        error: error,
+      );
+      logSyncDebugError(
+        operation: 'download',
+        entityType: SyncEntityType.profile.value,
+        localId: LocalSyncTracker.readerProfileLocalId,
+        userId: userId,
+        table: 'profiles',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return DownloadReaderProfileResult(
         remoteProfiles: 1,
         applied: 0,
         skipped: 0,
         conflicts: 0,
         failed: 1,
+        failureMessages: [message],
       );
     }
   }

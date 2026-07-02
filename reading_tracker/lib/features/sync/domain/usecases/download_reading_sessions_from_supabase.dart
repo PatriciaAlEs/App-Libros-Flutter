@@ -4,6 +4,7 @@ import '../entities/remote_reading_session.dart';
 import '../entities/sync_metadata.dart';
 import '../repositories/remote_reading_sessions_repository.dart';
 import '../repositories/sync_metadata_repository.dart';
+import '../services/sync_debug_logger.dart';
 
 typedef LocalBookLookup = Future<Book?> Function(String localId);
 typedef LocalReadingSessionReader =
@@ -18,6 +19,7 @@ class DownloadReadingSessionsResult {
     required this.skipped,
     required this.conflicts,
     required this.failed,
+    this.failureMessages = const [],
   });
 
   final int remoteReadingSessions;
@@ -25,6 +27,7 @@ class DownloadReadingSessionsResult {
   final int skipped;
   final int conflicts;
   final int failed;
+  final List<String> failureMessages;
 }
 
 class DownloadReadingSessionsFromSupabase {
@@ -54,6 +57,7 @@ class DownloadReadingSessionsFromSupabase {
     var skipped = 0;
     var conflicts = 0;
     var failed = 0;
+    final failureMessages = <String>[];
 
     for (final remoteSession in remoteSessions) {
       if (remoteSession.deletedAt != null) {
@@ -105,8 +109,25 @@ class DownloadReadingSessionsFromSupabase {
           lastRemoteUpdate: remoteSession.updatedAt,
         );
         applied++;
-      } catch (_) {
+      } catch (error, stackTrace) {
         failed++;
+        final message = syncFailureMessage(
+          operation: 'download',
+          entityType: SyncEntityType.readingSession.value,
+          localId: remoteSession.localSessionId,
+          table: 'reading_sessions',
+          error: error,
+        );
+        failureMessages.add(message);
+        logSyncDebugError(
+          operation: 'download',
+          entityType: SyncEntityType.readingSession.value,
+          localId: remoteSession.localSessionId,
+          userId: userId,
+          table: 'reading_sessions',
+          error: error,
+          stackTrace: stackTrace,
+        );
       }
     }
 
@@ -116,6 +137,7 @@ class DownloadReadingSessionsFromSupabase {
       skipped: skipped,
       conflicts: conflicts,
       failed: failed,
+      failureMessages: failureMessages,
     );
   }
 }

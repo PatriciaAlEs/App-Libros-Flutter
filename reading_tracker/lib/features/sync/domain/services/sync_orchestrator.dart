@@ -35,6 +35,13 @@ class SyncOrchestrationResult {
       readingSessions.ignored +
       readerProfile.ignored +
       annualGoal.ignored;
+
+  List<String> get failureMessages => [
+    ...books.failureMessages,
+    ...readingSessions.failureMessages,
+    ...readerProfile.failureMessages,
+    ...annualGoal.failureMessages,
+  ];
 }
 
 class SyncDownloadOrchestrationResult {
@@ -70,6 +77,13 @@ class SyncDownloadOrchestrationResult {
       readingSessions.failed +
       readerProfile.failed +
       annualGoal.failed;
+
+  List<String> get failureMessages => [
+    ...books.failureMessages,
+    ...readingSessions.failureMessages,
+    ...readerProfile.failureMessages,
+    ...annualGoal.failureMessages,
+  ];
 }
 
 class SyncOrchestrator {

@@ -22,9 +22,11 @@ class AutoSyncResult {
   const AutoSyncResult.failed({
     required String errorMessage,
     SyncOrchestrationResult? upload,
+    SyncDownloadOrchestrationResult? download,
   }) : this._(
          status: AutoSyncStatus.failed,
          upload: upload,
+         download: download,
          errorMessage: errorMessage,
        );
 
@@ -75,8 +77,30 @@ class AutoSyncCoordinator {
     _isRunning = true;
     try {
       final upload = await _runUpload(userId: userId);
+      if (upload.failed > 0) {
+        return AutoSyncResult.failed(
+          upload: upload,
+          errorMessage: _failureMessage(
+            phase: 'Subida',
+            failed: upload.failed,
+            messages: upload.failureMessages,
+          ),
+        );
+      }
+
       try {
         final download = await _runDownload(userId: userId);
+        if (download.failed > 0) {
+          return AutoSyncResult.failed(
+            upload: upload,
+            download: download,
+            errorMessage: _failureMessage(
+              phase: 'Descarga',
+              failed: download.failed,
+              messages: download.failureMessages,
+            ),
+          );
+        }
         return AutoSyncResult.completed(upload: upload, download: download);
       } catch (error) {
         return AutoSyncResult.failed(
@@ -89,5 +113,14 @@ class AutoSyncCoordinator {
     } finally {
       _isRunning = false;
     }
+  }
+
+  String _failureMessage({
+    required String phase,
+    required int failed,
+    required List<String> messages,
+  }) {
+    final detail = messages.isEmpty ? 'sin detalle adicional' : messages.first;
+    return '$phase de sincronizacion con $failed fallo(s): $detail';
   }
 }

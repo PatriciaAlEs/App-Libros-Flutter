@@ -5,6 +5,7 @@ import '../entities/sync_metadata.dart';
 import '../repositories/remote_annual_goals_repository.dart';
 import '../repositories/sync_metadata_repository.dart';
 import '../services/local_sync_tracker.dart';
+import '../services/sync_debug_logger.dart';
 
 typedef LocalAnnualGoalLoader = Future<int?> Function();
 typedef RemoteAnnualGoalIdGenerator = String Function();
@@ -16,12 +17,14 @@ class SyncPendingAnnualGoalResult {
     required this.synced,
     required this.failed,
     required this.ignored,
+    this.failureMessages = const [],
   });
 
   final int pendingAnnualGoals;
   final int synced;
   final int failed;
   final int ignored;
+  final List<String> failureMessages;
 }
 
 class SyncPendingAnnualGoalToSupabase {
@@ -51,6 +54,7 @@ class SyncPendingAnnualGoalToSupabase {
 
     var synced = 0;
     var failed = 0;
+    final failureMessages = <String>[];
 
     for (final metadata in pendingAnnualGoals) {
       try {
@@ -67,12 +71,29 @@ class SyncPendingAnnualGoalToSupabase {
           case PendingSyncOperation.none:
             break;
         }
-      } catch (error) {
+      } catch (error, stackTrace) {
+        final message = syncFailureMessage(
+          operation: metadata.pendingOperation.value,
+          entityType: metadata.entityType.value,
+          localId: metadata.localId,
+          table: 'annual_goals',
+          error: error,
+        );
         failed++;
+        failureMessages.add(message);
+        logSyncDebugError(
+          operation: metadata.pendingOperation.value,
+          entityType: metadata.entityType.value,
+          localId: metadata.localId,
+          userId: userId,
+          table: 'annual_goals',
+          error: error,
+          stackTrace: stackTrace,
+        );
         await _metadataRepository.registerFailure(
           entityType: metadata.entityType,
           localId: metadata.localId,
-          message: error.toString(),
+          message: message,
         );
       }
     }
@@ -82,6 +103,7 @@ class SyncPendingAnnualGoalToSupabase {
       synced: synced,
       failed: failed,
       ignored: pending.length - pendingAnnualGoals.length,
+      failureMessages: failureMessages,
     );
   }
 

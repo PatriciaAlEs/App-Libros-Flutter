@@ -2,6 +2,7 @@ import '../entities/sync_metadata.dart';
 import '../repositories/remote_annual_goals_repository.dart';
 import '../repositories/sync_metadata_repository.dart';
 import '../services/local_sync_tracker.dart';
+import '../services/sync_debug_logger.dart';
 
 typedef LocalAnnualGoalWriter = Future<void> Function(int goal);
 typedef AnnualGoalDownloadClock = DateTime Function();
@@ -13,6 +14,7 @@ class DownloadAnnualGoalResult {
     required this.skipped,
     required this.conflicts,
     required this.failed,
+    this.failureMessages = const [],
   });
 
   final int remoteAnnualGoals;
@@ -20,6 +22,7 @@ class DownloadAnnualGoalResult {
   final int skipped;
   final int conflicts;
   final int failed;
+  final List<String> failureMessages;
 }
 
 class DownloadAnnualGoalFromSupabase {
@@ -49,6 +52,7 @@ class DownloadAnnualGoalFromSupabase {
     var skipped = 0;
     var conflicts = 0;
     var failed = 0;
+    final failureMessages = <String>[];
 
     for (final remoteGoal in remoteGoals) {
       if (remoteGoal.deletedAt != null || remoteGoal.year != currentYear) {
@@ -92,8 +96,27 @@ class DownloadAnnualGoalFromSupabase {
           lastRemoteUpdate: remoteGoal.updatedAt,
         );
         applied++;
-      } catch (_) {
+      } catch (error, stackTrace) {
         failed++;
+        final localId =
+            remoteGoal.localGoalId ?? LocalSyncTracker.annualGoalLocalId;
+        final message = syncFailureMessage(
+          operation: 'download',
+          entityType: SyncEntityType.annualGoal.value,
+          localId: localId,
+          table: 'annual_goals',
+          error: error,
+        );
+        failureMessages.add(message);
+        logSyncDebugError(
+          operation: 'download',
+          entityType: SyncEntityType.annualGoal.value,
+          localId: localId,
+          userId: userId,
+          table: 'annual_goals',
+          error: error,
+          stackTrace: stackTrace,
+        );
       }
     }
 
@@ -103,6 +126,7 @@ class DownloadAnnualGoalFromSupabase {
       skipped: skipped,
       conflicts: conflicts,
       failed: failed,
+      failureMessages: failureMessages,
     );
   }
 }

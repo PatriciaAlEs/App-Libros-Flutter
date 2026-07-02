@@ -4,6 +4,7 @@ import '../entities/remote_book.dart';
 import '../entities/sync_metadata.dart';
 import '../repositories/remote_books_repository.dart';
 import '../repositories/sync_metadata_repository.dart';
+import '../services/sync_debug_logger.dart';
 
 typedef LocalBookReader = Future<Book?> Function(String localId);
 typedef LocalBookWriter = Future<void> Function(Book book);
@@ -15,6 +16,7 @@ class DownloadBooksResult {
     required this.skipped,
     required this.conflicts,
     required this.failed,
+    this.failureMessages = const [],
   });
 
   final int remoteBooks;
@@ -22,6 +24,7 @@ class DownloadBooksResult {
   final int skipped;
   final int conflicts;
   final int failed;
+  final List<String> failureMessages;
 }
 
 class DownloadBooksFromSupabase {
@@ -50,6 +53,7 @@ class DownloadBooksFromSupabase {
     var skipped = 0;
     var conflicts = 0;
     var failed = 0;
+    final failureMessages = <String>[];
 
     for (final remoteBook in remoteBooks) {
       if (remoteBook.deletedAt != null) {
@@ -93,8 +97,25 @@ class DownloadBooksFromSupabase {
           lastRemoteUpdate: remoteBook.updatedAt,
         );
         applied++;
-      } catch (_) {
+      } catch (error, stackTrace) {
         failed++;
+        final message = syncFailureMessage(
+          operation: 'download',
+          entityType: SyncEntityType.book.value,
+          localId: remoteBook.localBookId,
+          table: 'books',
+          error: error,
+        );
+        failureMessages.add(message);
+        logSyncDebugError(
+          operation: 'download',
+          entityType: SyncEntityType.book.value,
+          localId: remoteBook.localBookId,
+          userId: userId,
+          table: 'books',
+          error: error,
+          stackTrace: stackTrace,
+        );
       }
     }
 
@@ -104,6 +125,7 @@ class DownloadBooksFromSupabase {
       skipped: skipped,
       conflicts: conflicts,
       failed: failed,
+      failureMessages: failureMessages,
     );
   }
 }

@@ -66,6 +66,36 @@ void main() {
     expect(operations, ['upload']);
   });
 
+  test('does not execute download when upload has row failures', () async {
+    final operations = <String>[];
+    final coordinator = AutoSyncCoordinator.withRunners(
+      runUpload: ({required userId}) async {
+        operations.add('upload');
+        return _uploadResult(
+          books: const SyncPendingBooksResult(
+            pendingBooks: 1,
+            synced: 0,
+            failed: 1,
+            ignored: 0,
+            failureMessages: ['books/create failed'],
+          ),
+        );
+      },
+      runDownload: ({required userId}) async {
+        operations.add('download');
+        return _downloadResult();
+      },
+    );
+
+    final result = await coordinator.run(userId: 'user-1');
+
+    expect(result.status, AutoSyncStatus.failed);
+    expect(result.errorMessage, contains('books/create failed'));
+    expect(result.upload, isNotNull);
+    expect(result.download, isNull);
+    expect(operations, ['upload']);
+  });
+
   test('captures download errors without throwing', () async {
     final coordinator = AutoSyncCoordinator.withRunners(
       runUpload: ({required userId}) async => _uploadResult(),
@@ -80,6 +110,29 @@ void main() {
     expect(result.upload, isNotNull);
     expect(result.download, isNull);
     expect(result.errorMessage, contains('download failed'));
+  });
+
+  test('captures download row failures as failed sync', () async {
+    final coordinator = AutoSyncCoordinator.withRunners(
+      runUpload: ({required userId}) async => _uploadResult(),
+      runDownload: ({required userId}) async => _downloadResult(
+        books: const DownloadBooksResult(
+          remoteBooks: 1,
+          applied: 0,
+          skipped: 0,
+          conflicts: 0,
+          failed: 1,
+          failureMessages: ['books/download failed'],
+        ),
+      ),
+    );
+
+    final result = await coordinator.run(userId: 'user-1');
+
+    expect(result.status, AutoSyncStatus.failed);
+    expect(result.upload, isNotNull);
+    expect(result.download, isNotNull);
+    expect(result.errorMessage, contains('books/download failed'));
   });
 
   test('cleans the lock after success and after failure', () async {
@@ -236,14 +289,16 @@ AutoSyncCoordinator _recordingCoordinator(List<String> syncCalls) {
   );
 }
 
-SyncOrchestrationResult _uploadResult() {
-  return const SyncOrchestrationResult(
-    books: SyncPendingBooksResult(
-      pendingBooks: 1,
-      synced: 1,
-      failed: 0,
-      ignored: 0,
-    ),
+SyncOrchestrationResult _uploadResult({SyncPendingBooksResult? books}) {
+  return SyncOrchestrationResult(
+    books:
+        books ??
+        const SyncPendingBooksResult(
+          pendingBooks: 1,
+          synced: 1,
+          failed: 0,
+          ignored: 0,
+        ),
     readingSessions: SyncPendingReadingSessionsResult(
       pendingReadingSessions: 0,
       synced: 0,
@@ -265,15 +320,17 @@ SyncOrchestrationResult _uploadResult() {
   );
 }
 
-SyncDownloadOrchestrationResult _downloadResult() {
-  return const SyncDownloadOrchestrationResult(
-    books: DownloadBooksResult(
-      remoteBooks: 1,
-      applied: 1,
-      skipped: 0,
-      conflicts: 0,
-      failed: 0,
-    ),
+SyncDownloadOrchestrationResult _downloadResult({DownloadBooksResult? books}) {
+  return SyncDownloadOrchestrationResult(
+    books:
+        books ??
+        const DownloadBooksResult(
+          remoteBooks: 1,
+          applied: 1,
+          skipped: 0,
+          conflicts: 0,
+          failed: 0,
+        ),
     readingSessions: DownloadReadingSessionsResult(
       remoteReadingSessions: 0,
       applied: 0,
