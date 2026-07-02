@@ -50,10 +50,29 @@ class _SyncOnboardingNoticeState extends ConsumerState<SyncOnboardingNotice> {
             color: theme.colorScheme.primary,
           ),
           title: const Text('Sincronizacion disponible'),
-          content: Text(
-            'Ya puedes iniciar sesion para preparar la sincronizacion de tu '
-            'biblioteca, sesiones, perfil lector y objetivo anual.',
-            style: theme.textTheme.bodyMedium?.copyWith(height: 1.35),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Tus lecturas siguen estando guardadas en este dispositivo.',
+                style: theme.textTheme.bodyMedium?.copyWith(height: 1.35),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'Ahora puedes iniciar sesion para proteger y sincronizar tu '
+                'biblioteca en la nube cuando quieras.',
+                style: theme.textTheme.bodyMedium?.copyWith(height: 1.35),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'Es opcional y puedes activarlo mas adelante desde Perfil.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  height: 1.35,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
           actionsPadding: const EdgeInsets.fromLTRB(
             AppSpacing.lg,
@@ -67,7 +86,7 @@ class _SyncOnboardingNoticeState extends ConsumerState<SyncOnboardingNotice> {
                 await controller.dismiss();
                 if (dialogContext.mounted) Navigator.of(dialogContext).pop();
               },
-              child: const Text('Mas tarde'),
+              child: const Text('Ahora no'),
             ),
             FilledButton.icon(
               onPressed: () async {
@@ -78,7 +97,7 @@ class _SyncOnboardingNoticeState extends ConsumerState<SyncOnboardingNotice> {
                 Navigator.of(context).pushNamed('/account/transition');
               },
               icon: const Icon(Icons.person_outline_rounded),
-              label: const Text('Ir a Perfil'),
+              label: const Text('Ver como activar sync'),
             ),
           ],
         );
