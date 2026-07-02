@@ -102,7 +102,12 @@ class SyncPendingReaderProfileToSupabase {
     required String userId,
   }) async {
     final profile = await _loadProfile();
-    final remoteProfile = _remoteProfileFromLocal(profile, userId: userId);
+    final remoteProfile = _remoteProfileFromLocal(
+      profile,
+      userId: userId,
+      createdAt: metadata.createdAt,
+      updatedAt: metadata.lastLocalUpdate ?? metadata.updatedAt,
+    );
     final syncedProfile = await _remoteProfileRepository.upsertProfile(
       remoteProfile,
     );
@@ -136,6 +141,8 @@ class SyncPendingReaderProfileToSupabase {
 RemoteProfile _remoteProfileFromLocal(
   ReaderProfile profile, {
   required String userId,
+  required DateTime createdAt,
+  required DateTime updatedAt,
 }) {
   final readerName = profile.displayName;
   final customGreeting = profile.customGreeting.trim();
@@ -145,5 +152,7 @@ RemoteProfile _remoteProfileFromLocal(
     readerName: readerName.isEmpty ? null : readerName,
     greeting: profile.greetingPreference.name,
     customGreeting: customGreeting.isEmpty ? null : customGreeting,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
   );
 }

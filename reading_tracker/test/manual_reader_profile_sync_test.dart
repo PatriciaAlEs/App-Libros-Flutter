@@ -35,6 +35,8 @@ void main() {
     expect(remoteRepository.upserted.single.readerName, 'Patricia');
     expect(remoteRepository.upserted.single.greeting, 'custom');
     expect(remoteRepository.upserted.single.customGreeting, 'Hola');
+    expect(remoteRepository.upserted.single.createdAt, DateTime(2026, 7, 1));
+    expect(remoteRepository.upserted.single.updatedAt, DateTime(2026, 7, 1));
     expect(
       metadataRepository.syncedRemoteIds[LocalSyncTracker.readerProfileLocalId],
       userId,

@@ -26,6 +26,8 @@ void main() {
     expect(profile.id, 'user-1');
     expect(profile.readerName, 'Patricia');
     expect(json['reader_name'], 'Patricia');
+    expect(json['created_at'], '2026-06-27T10:00:00.000Z');
+    expect(json['updated_at'], '2026-06-27T10:30:00.000Z');
     expect(json, containsPair('deleted_at', null));
   });
 
