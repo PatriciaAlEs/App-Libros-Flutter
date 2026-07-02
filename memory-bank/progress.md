@@ -464,10 +464,10 @@
 
 ## Pendiente inmediato
 
-- Estado vigente: Hito 8 Sincronizacion de datos COMPLETADO hasta Sprint 22.8.
-- Siguiente objetivo: QA manual y estabilizacion previa a beta.
-- Validar en entorno real login, bootstrap de usuario, sync automatica, boton `Sincronizar ahora`, estados de `SyncStatusCard`, cambios pendientes y conflictos detectados.
-- Validar Auth con Supabase configurado cuando existan variables reales.
+- Estado vigente: Hito 8 Sincronizacion de datos COMPLETADO y QA post-Hito 8 cerrado.
+- Siguiente objetivo: Hito 9 - UX & Product Polish.
+- Validar en QA manual restante escenarios multi-dispositivo, offline -> online y conflictos detectados.
+- Mantener Google OAuth fuera de alcance hasta configurar el provider externo en Supabase.
 - Mantener Drift como fuente de verdad local, conservar prioridad del upload local ante conflictos y no introducir resolucion automatica sin sprint especifico.
 
 - Revision final de assets de tienda, privacidad, versionado y release.
@@ -598,4 +598,38 @@
 - El upload local mantiene prioridad para no perder datos locales.
 - No existe todavia resolucion automatica ni merge campo a campo.
 - Estados observables de UI: `idle`, `syncing`, `synced`, `pendingChanges`, `conflict` y `failed`.
-- Validacion vigente: `flutter analyze` OK, `flutter test` OK y 164/164 tests.
+- Validacion Sprint 22.8: `flutter analyze` OK, `flutter test` OK y 164/164 tests.
+
+## Hito 8 - QA post-sync y UX polish
+
+- Estado: COMPLETADO.
+- Auth email validado manualmente en Android emulator con Supabase configurado:
+  - crear cuenta funciona;
+  - logout funciona;
+  - login funciona;
+  - tras borrar cache/datos locales se puede iniciar sesion de nuevo con la misma cuenta.
+- Google OAuth queda fuera de alcance hasta configurar el provider externo en Supabase.
+- Restore remoto validado: tras borrar datos locales e iniciar sesion, la app recupera datos remotos desde Supabase.
+- Upload local validado tras corregir errores reales de sync: crear/modificar libro y pulsar `Sincronizar ahora` sube datos a Supabase.
+- Bug resuelto: upsert remoto de `profiles` fallaba por `created_at` null en columna NOT NULL.
+- Solucion aplicada: mapping remoto de perfil garantiza `created_at` y `updated_at` seguros; schema remoto debe conservar defaults `now()` para ambas columnas si son NOT NULL.
+- Bug resuelto: errores de sync quedaban ocultos por mensaje generico; logging debug seguro registra tabla, operacion, entidad/localId, excepcion real y codigo/status cuando existe.
+- Bug resuelto: descarga remota escribia en local pero Home/Biblioteca no refrescaban hasta pull-to-refresh.
+- Solucion aplicada: `SyncStatusController` invalida/refresca providers sincronizados tras sync exitosa: libros, sesiones, estadisticas, insights y perfil lector.
+- UX-001 completado: usuarios nuevos ven onboarding de sincronizacion; usuarios existentes ven aviso unico de `Sincronizacion disponible` con persistencia local de cierre.
+- UX post-Hito 8 completado: sync manual exitosa muestra `Sincronizacion completada`, `Tu biblioteca ya esta actualizada.` y CTA `Ir a Inicio`.
+- UX post-Hito 8 completado: `Otras lecturas` en Home cambia la lectura principal persistiendo `reader_profile_current_reading_id`; la card principal sigue siendo el lugar para registrar avance.
+- UX post-Hito 8 completado: alta de libro prioriza buscador/resultados y abre bottom sheet de confirmacion al seleccionar resultado, con portada, titulo, autor, estado inicial, paginas editables y boton `Guardar libro`.
+- Bug UI resuelto: overlay de microcelebracion corregido para evitar `ParentDataWidget` incorrecto.
+- Validacion final post-Hito 8: `flutter analyze` OK, tests focales OK y `flutter test` OK con 173/173 tests.
+
+## Proximo hito - UX & Product Polish
+
+- Estado: PROXIMO.
+- Objetivo: pulir cierre de flujos y claridad de producto antes de beta, sin ampliar arquitectura cloud salvo necesidad de QA.
+- Foco recomendado:
+  - revisar success/error states de Auth y Sync;
+  - pulir Home/Biblioteca tras recuperacion remota;
+  - refinar alta de libro, duplicados y guardado;
+  - revisar copy, accesibilidad y navegacion de flujos principales;
+  - completar QA manual Android/Web de sincronizacion, offline/online y conflictos.

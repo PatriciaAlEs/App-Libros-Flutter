@@ -525,7 +525,19 @@ reading_tracker/lib/
 - No existe todavia resolucion automatica ni merge campo a campo.
 - La UI de estado existe en Cuenta/Perfil mediante `SyncStatusCard`.
 - El modelo observable usa `SyncStatusState`, `LastSyncResult` y estados `idle`, `syncing`, `synced`, `pendingChanges`, `conflict` y `failed`.
-- Validacion Sprint 22.8: `flutter analyze` OK y `flutter test` OK con 164/164 tests.
+- Post-QA Hito 8: `SyncStatusController` invalida/refresca providers visibles tras sync exitosa para que Home, Biblioteca, sesiones, estadisticas, insights y perfil reflejen el merge remoto sin pull-to-refresh manual.
+- Post-QA Hito 8: `SyncStatusCard` muestra feedback de exito tras sync manual y CTA `Ir a Inicio`, pero solo cuando el resultado final es `synced`.
+- Post-QA Hito 8: el mapping remoto de `profiles` debe garantizar `created_at` y `updated_at` seguros; el schema remoto debe mantener defaults `now()` en columnas NOT NULL.
+- Post-QA Hito 8: el logging debug de sync debe ser diagnostico y seguro, registrando tabla, operacion, entidad/localId, excepcion y codigo/status sin secretos.
+- Validacion post-QA Hito 8: `flutter analyze` OK y `flutter test` OK con 173/173 tests.
+
+### UX & Product Polish post-Hito 8
+
+- La sincronizacion manual exitosa es un flujo de producto completo: estado `synced`, feedback visible, microcelebracion ligera y CTA hacia Inicio.
+- `Otras lecturas` en Home se interpreta como selector de lectura principal, persistiendo `reader_profile_current_reading_id`; el registro de avance permanece en la lectura principal/detalle.
+- El alta de libro por busqueda remota prioriza buscador y resultados. La seleccion de un resultado abre un bottom sheet de confirmacion con datos editables antes de guardar.
+- El onboarding/aviso de sincronizacion se controla con persistencia local de visualizacion/cierre para no repetir avisos a usuarios existentes.
+- El siguiente hito no requiere nueva arquitectura: UX & Product Polish debe trabajar sobre flujos existentes, claridad de estados y QA manual antes de beta.
 
 ### Hallazgos arquitectonicos revision Sprint 19
 

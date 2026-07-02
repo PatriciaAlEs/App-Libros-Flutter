@@ -4,7 +4,7 @@
 
 `reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario, estadisticas basicas e insights de lectura.
 
-Estado tras Hito 6 Sprint 20.2: ReadPp esta en Alpha Testing & Polish con Observabilidad/Sentry completada y Analytics de producto/PostHog completado y validado.
+Estado vigente: ReadPp esta en Alpha Testing & Polish con Observabilidad/Sentry, Analytics/PostHog, Supabase Auth y Hito 8 de sincronizacion completados y validados. El siguiente bloque es Hito 9 - UX & Product Polish.
 
 Sprint 18.x Alpha QA implementado:
 
@@ -50,6 +50,8 @@ Estado de roadmap:
 - Proximo paso tecnico mayor post-Alpha: QA manual y estabilizacion previa a beta con la sincronizacion de datos ya completada.
 - Hito 7: Premium Experience (motion, skeleton loaders, microinteracciones, empty states, estadisticas visuales premium).
 - Hito 8 completado: Sincronizacion de datos offline-first sobre Supabase, con upload/download, sincronizacion automatica, deteccion de conflictos y estado visible en UI.
+- QA post-Hito 8 completado: Auth email validado, restore remoto validado, upload local validado, bugs de `profiles.created_at` y refresco UI post-sync resueltos, y polish UX de sync/Home/alta de libro aplicado.
+- Validacion automatizada vigente post-Hito 8: `flutter analyze` OK y `flutter test` OK con 173/173 tests.
 
 ## Hito 8 - Sincronizacion de datos
 
@@ -97,7 +99,28 @@ Validacion vigente Hito 8:
 
 - `flutter analyze` OK.
 - `flutter test` OK.
-- 164/164 tests.
+- 173/173 tests tras QA post-Hito 8 y UX polish.
+
+QA post-Hito 8:
+
+- Auth por email funciona en entorno real Supabase: crear cuenta, login, logout y recuperacion de sesion tras limpiar datos locales.
+- Google OAuth sigue condicionado a configuracion externa del provider en Supabase.
+- La sincronizacion manual y automatica cubre subida local y descarga remota para entidades principales.
+- Restore remoto tras reinstalacion/limpieza local recupera biblioteca y progreso.
+- Tras merge remoto, Home/Biblioteca refrescan sin pull-to-refresh manual.
+- Sync manual exitosa ofrece cierre UX con mensaje de exito y CTA hacia Inicio.
+- `Otras lecturas` en Home cambia lectura principal; registrar avance queda reservado para la card principal.
+- Alta de libro prioriza busqueda/resultados y confirma guardado en bottom sheet.
+
+Bugs resueltos en QA post-Hito 8:
+
+- `profiles.created_at` null en upsert remoto.
+- Error generico de sync sin diagnostico suficiente.
+- Providers de UI sin invalidacion tras descarga remota.
+- Success flow ausente tras sync manual.
+- Tap de `Otras lecturas` abriendo registro de avance en vez de cambiar lectura principal.
+- Alta de libro con formulario demasiado alto antes de resultados.
+- Overlay de microcelebracion con `Positioned` anidado incorrectamente.
 
 Sprint 19.x implementado:
 
@@ -637,11 +660,11 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Ejecutar QA manual de sincronizacion completa en entorno real antes de beta.
-2. Validar inicio de sesion, bootstrap de usuario, sincronizacion automatica, boton `Sincronizar ahora` y estados de `SyncStatusCard`.
-3. Verificar escenarios offline/online, errores Supabase, cambios pendientes y conflictos detectados sin resolucion automatica.
-4. Estabilizar cualquier hallazgo previo a beta sin ampliar alcance funcional.
-5. Validar Auth con Supabase configurado cuando existan variables reales.
+1. Iniciar Hito 9 - UX & Product Polish.
+2. Revisar cierre de flujos principales: Auth, Sync, Home, Biblioteca, alta de libro y duplicados.
+3. Validar QA manual Android/Web de sincronizacion en escenarios offline -> online, multi-dispositivo y conflictos.
+4. Mantener Drift como fuente de verdad local y no introducir resolucion automatica de conflictos sin sprint especifico.
+5. Preparar beta readiness con copy, accesibilidad, navegacion y estados vacios/error consistentes.
 
 ## Estado vigente Hito 7 - Backend con Supabase
 
@@ -840,4 +863,4 @@ Estado actual implementado:
 - Sprint 22.6 queda cerrado con deteccion de conflictos durante descarga.
 - Sprint 22.7 queda cerrado con sincronizacion automatica.
 - Sprint 22.8 queda cerrado con estado de sincronizacion en UI.
-- Hito 8 queda cerrado completamente; la siguiente fase es QA manual y estabilizacion previa a beta.
+- Hito 8 queda cerrado completamente; la siguiente fase es Hito 9 - UX & Product Polish.

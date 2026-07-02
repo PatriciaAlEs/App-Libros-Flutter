@@ -309,7 +309,37 @@
 - Decision UI: `SyncStatusCard` vive en Cuenta/Perfil y se oculta sin usuario autenticado.
 - Decision UI: el estado observable usa `SyncStatusState`, `LastSyncResult` ligero y estados `idle`, `syncing`, `synced`, `pendingChanges`, `conflict` y `failed`.
 - Decision tecnica: en Supabase Books y las entidades sincronizadas se usa `id` como conflict target cuando los indices alternativos por usuario + local id son parciales con `WHERE deleted_at IS NULL`. Los `local_*_id` siguen viajando como identidad local, pero no se usan como conflict target directo en este tramo.
-- Validacion vigente tras Sprint 22.8: `flutter analyze` OK, `flutter test` OK y 164/164 tests.
+- Validacion vigente tras QA post-Hito 8: `flutter analyze` OK, `flutter test` OK y 173/173 tests.
+
+## Cierre Hito 8 - Decisiones post-QA
+
+- Decision: Hito 8 queda completado cuando Auth email, subida local, descarga remota, restore tras limpieza local y refresco UI post-merge estan validados en QA manual.
+- Decision: Google OAuth no se implementa ni se promete en UI como funcional completo hasta configurar el provider OAuth externo en Supabase.
+- Decision: `profiles.created_at` y `profiles.updated_at` deben viajar con valores seguros desde el cliente cuando el schema remoto los exige NOT NULL; ademas el schema Supabase debe conservar defaults `now()` como red de seguridad.
+- Decision: durante QA de sync, los errores no deben quedar reducidos a mensaje generico. El logging debug seguro debe incluir tabla, operacion, entidad/localId, excepcion real y codigo/status si existe, sin exponer secretos.
+- Decision: una sync exitosa que modifica datos locales debe notificar a la capa UI. `SyncStatusController` es el lugar vigente para invalidar/refrescar providers visibles tras sync completada.
+- Decision: `SyncStatusCard` no solo informa estado; en sync manual exitosa tambien cierra el flujo de usuario con feedback claro y CTA `Ir a Inicio`.
+- Decision: `Otras lecturas` en Home cambia la lectura principal y persiste `reader_profile_current_reading_id`; registrar avance queda en la card principal o detalle del libro.
+- Decision: el formulario de alta debe priorizar busqueda y resultados. Estado inicial, paginas y confirmacion de guardado de resultados remotos viven en un bottom sheet de confirmacion, no encima de la lista.
+- Decision: onboarding/aviso de sincronizacion usa persistencia local para mostrarse una sola vez y no debe romper el onboarding existente.
+- Decision: el siguiente hito es UX & Product Polish, no nueva arquitectura cloud. Cualquier cambio de sync debe responder a hallazgos de QA o claridad de producto.
+
+## Bugs cerrados Hito 8
+
+- Supabase rechazaba upsert de `profiles` por `created_at` null (`23502`).
+- La app mostraba solo `Sincronizacion fallida` sin causa util durante QA.
+- Restore remoto funcionaba pero Home/Biblioteca no refrescaban hasta pull-to-refresh.
+- La sync manual exitosa dejaba al usuario en Perfil/Auth sin confirmacion ni salida clara.
+- `Otras lecturas` abria registro de avance y no cambiaba la lectura principal.
+- Alta de libro obligaba a bajar hasta el final para guardar tras seleccionar resultado.
+- La microcelebracion usaba `Positioned` bajo `IgnorePointer`, provocando error de `ParentDataWidget`.
+
+## Proximo hito - UX & Product Polish
+
+- Enfocar en producto y QA: estados de exito/error, copy, navegacion, accesibilidad, alta de libro, Home/Biblioteca y consistencia post-sync.
+- No ampliar alcance de resolucion automatica de conflictos sin sprint propio.
+- No hacer Google OAuth hasta que el provider este configurado externamente.
+- Mantener local-first: Drift sigue siendo fuente de verdad local y Supabase complementa Auth/sync.
 
 ## Motion & Delight Hito 7 Sprint 19.1
 

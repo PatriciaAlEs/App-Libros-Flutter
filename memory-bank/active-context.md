@@ -2,7 +2,7 @@
 
 ## Foco actual
 
-ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1, Analytics Sprint 20.2 y Backend/Auth/Supabase validados hasta Hito 8 Sprint 22.8.
+ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1, Analytics Sprint 20.2 y Backend/Auth/Supabase validados hasta Hito 8 Sprint 22.8 + QA post-Hito 8.
 
 Estado Hito 8 - Sincronizacion de datos:
 
@@ -15,8 +15,30 @@ Estado Hito 8 - Sincronizacion de datos:
 - `markConflict` persiste `remoteId`, `lastRemoteUpdate` y `errorMessage` sin limpiar la operacion pendiente.
 - Estado de UI: existe `SyncStatusCard`, `SyncStatusState`, `LastSyncResult` y estados observables `idle`, `syncing`, `synced`, `pendingChanges`, `conflict` y `failed`.
 - Aun no existe resolucion automatica de conflictos ni merge campo a campo.
-- Validacion vigente Hito 8 Sprint 22.8: `flutter analyze` OK, `flutter test` OK y 164/164 tests.
-- Proximo objetivo del proyecto: QA manual y estabilizacion previa a beta.
+- QA real Auth: email signup, login, logout y recuperacion de sesion tras limpiar datos locales validados en Android emulator con Supabase configurado.
+- QA real Sync: subida local -> Supabase y recuperacion remota -> local validadas tras corregir fallos de `profiles.created_at`, schema/defaults remotos y refresco de UI post-merge.
+- UX post-Hito 8 aplicado: onboarding/aviso de sincronizacion, success flow tras sync manual con CTA `Ir a Inicio`, seleccion de lectura principal desde `Otras lecturas` y alta de libro mediante bottom sheet de confirmacion.
+- Validacion vigente post-Hito 8: `flutter analyze` OK, `flutter test` OK y 173/173 tests.
+- Proximo objetivo del proyecto: Hito 9 - UX & Product Polish.
+
+## Cierre Hito 8 - QA post-sync
+
+- Hito 8 queda completado y estabilizado funcionalmente para las entidades principales: Books, Reading Sessions, Reader Profile y Annual Goal.
+- Supabase Auth por email queda validado manualmente; Google OAuth sigue condicionado a configuracion externa del provider en Supabase y no debe implementarse en codigo hasta que esa configuracion exista.
+- La app mantiene modo local/offline-first como experiencia base: login habilita sincronizacion, no bloquea el uso local.
+- La sincronizacion recupera datos remotos tras reinstalacion/limpieza local y refresca Biblioteca/Home sin pull-to-refresh manual.
+- `SyncStatusCard` ya no debe cerrar el flujo dejando al usuario en Perfil/Auth sin salida clara: la sync manual exitosa muestra confirmacion y CTA hacia Inicio.
+- Proximo hito: UX & Product Polish, centrado en cierre de flujos, claridad de estados, pulido de alta de libro, Home/Biblioteca y QA de producto previo a beta.
+
+## Bugs encontrados y resueltos Hito 8
+
+- `profiles.created_at` llegaba null o ausente en upsert remoto y Supabase rechazaba el payload con `23502`; resuelto garantizando `created_at` y `updated_at` seguros desde metadata/local timestamps y recomendando defaults `now()` en schema remoto.
+- La sync manual ocultaba el error real con mensaje generico; resuelto con logging debug seguro por tabla, operacion, entidad, localId, tipo de excepcion y codigo/status cuando existe.
+- La descarga remota escribia datos en local pero la UI quedaba stale hasta pull-to-refresh; resuelto invalidando/refrescando providers de libros, sesiones, estadisticas, insights y perfil tras sync exitosa.
+- Tras sync manual exitosa no habia cierre UX del flujo; resuelto con feedback `Sincronizacion completada`, copy `Tu biblioteca ya esta actualizada.`, microcelebracion y CTA `Ir a Inicio`.
+- En Home, tocar `Otras lecturas` abria registro de avance; resuelto para que esa accion cambie la lectura principal persistiendo `reader_profile_current_reading_id`.
+- En alta de libro, los bloques de estado/datos empujaban resultados y obligaban a hacer scroll hasta `Guardar libro`; resuelto priorizando buscador/resultados y moviendo confirmacion de guardado a bottom sheet.
+- La microcelebracion de completado tenia `Positioned` bajo `IgnorePointer`, generando uso incorrecto de `ParentDataWidget`; corregido poniendo `Positioned.fill` como raiz del overlay.
 
 Estado confirmado 2026-06-24:
 
@@ -678,5 +700,6 @@ Estado confirmado para Hito 5 Sprint 13:
 - Sprint 22.7 cerrado: sincronizacion automatica mediante `AutoSyncCoordinator`.
 - Sprint 22.8 cerrado: estado de sincronizacion visible en Cuenta/Perfil mediante `SyncStatusCard`, `SyncStatusState`, `LastSyncResult` y `SyncStatusController`.
 - Validacion Sprint 22.8: `flutter analyze` OK y `flutter test` OK con 164/164 tests.
+- Validacion post-QA Hito 8: `flutter analyze` OK y `flutter test` OK con 173/173 tests.
 - Decision tecnica heredada: en Supabase Books y entidades sincronizadas, los upserts usan `id` como conflict target cuando los indices locales remotos son parciales con `WHERE deleted_at IS NULL`; los `local_*_id` siguen viajando como identidad local.
-- Proximo paso recomendado: QA manual y estabilizacion previa a beta.
+- Proximo paso recomendado: Hito 9 - UX & Product Polish.
