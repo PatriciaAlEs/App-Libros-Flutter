@@ -1,17 +1,31 @@
-# reading_tracker
-
-A new Flutter project.
+# ReadPp
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+ReadPp is a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+## Development environment
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Supabase is configured with compile-time Dart defines. Create a local
+`dart_defines/dev.json` file from `dart_defines/example.json` and fill it with
+the project values.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Do not commit `dart_defines/dev.json` or any `*.local.json` file.
+
+Run on Android emulator:
+
+```sh
+flutter run -d emulator-5554 --dart-define-from-file=dart_defines/dev.json
+```
+
+Run on Chrome:
+
+```sh
+flutter run -d chrome --dart-define-from-file=dart_defines/dev.json
+```
+
+Build Web:
+
+```sh
+flutter build web --dart-define-from-file=dart_defines/dev.json
+```

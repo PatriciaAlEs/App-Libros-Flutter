@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/analytics/readpp_analytics.dart';
+import 'sync_onboarding_notice_controller.dart';
 
 final onboardingControllerProvider =
     StateNotifierProvider<OnboardingController, AsyncValue<bool>>(
@@ -19,6 +20,7 @@ class OnboardingController extends StateNotifier<AsyncValue<bool>> {
   Future<void> complete() async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setBool(_storageKey, true);
+    await SyncOnboardingNoticeController.markSeen(preferences);
     await _analytics.trackOnboardingCompleted();
     state = const AsyncValue.data(true);
   }

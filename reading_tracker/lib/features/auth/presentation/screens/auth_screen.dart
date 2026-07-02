@@ -51,17 +51,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     );
   }
 
-  void _continueWithoutLogin() {
-    Navigator.maybePop(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final state = ref.watch(authControllerProvider);
     final isAuthConfigured = ref.watch(isSupabaseEnabledProvider);
     const authUnavailableMessage =
-        'El inicio de sesion aun no esta configurado en este entorno.';
+        'La autenticacion no esta disponible en este entorno.';
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -91,7 +87,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 alignment: Alignment.centerLeft,
                 child: IconButton(
                   tooltip: 'Volver',
-                  onPressed: _continueWithoutLogin,
+                  onPressed: () => Navigator.maybePop(context),
                   icon: Icon(
                     Icons.arrow_back_rounded,
                     color: theme.colorScheme.primary,
@@ -124,9 +120,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      isAuthConfigured
-                          ? 'Inicia sesion para sincronizar tu biblioteca y progreso en varios dispositivos.'
-                          : 'ReadPp sigue funcionando en modo local. La cuenta estara disponible proximamente.',
+                      'Inicia sesion o crea una cuenta para sincronizar tu '
+                      'biblioteca, sesiones, perfil lector y objetivo anual.',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
@@ -141,11 +136,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                                 .read(authControllerProvider.notifier)
                                 .signInWithGoogle,
                       icon: const Icon(Icons.login_rounded),
-                      label: Text(
-                        isAuthConfigured
-                            ? 'Continuar con Google'
-                            : 'Google proximamente',
-                      ),
+                      label: const Text('Continuar con Google'),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     TextField(
@@ -180,11 +171,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ? null
                           : _submitEmailPassword,
                       child: Text(
-                        isAuthConfigured
-                            ? (_isRegisterMode
-                                  ? 'Crear cuenta'
-                                  : 'Iniciar sesion')
-                            : 'Cuenta proximamente',
+                        _isRegisterMode ? 'Crear cuenta' : 'Iniciar sesion',
                       ),
                     ),
                     TextButton(
@@ -223,11 +210,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ],
                   ],
                 ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: state.isLoading ? null : _continueWithoutLogin,
-                child: const Text('Continuar sin login'),
               ),
             ],
           ),

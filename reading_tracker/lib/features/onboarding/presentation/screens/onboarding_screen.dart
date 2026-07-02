@@ -33,6 +33,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       message:
           'Conoce tus hábitos, estadísticas y objetivos para leer más y mejor.',
     ),
+    _OnboardingPageData(
+      title: 'Sincroniza tus lecturas',
+      message:
+          'Crea una cuenta cuando quieras para preparar tu biblioteca y tu progreso entre dispositivos.',
+    ),
   ];
 
   @override
@@ -234,6 +239,7 @@ class _OnboardingIllustration extends StatelessWidget {
           if (index == 0) const _LibraryIllustration(),
           if (index == 1) const _ProgressIllustration(),
           if (index == 2) const _InsightsIllustration(),
+          if (index == 3) const _SyncIllustration(),
         ],
       ),
     );
@@ -454,6 +460,139 @@ class _InsightsIllustration extends StatelessWidget {
             top: 84,
             left: 44,
             child: _FloatingBadge(icon: AppIcons.insightsNav),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SyncIllustration extends StatelessWidget {
+  const _SyncIllustration();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      width: 320,
+      height: 280,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(top: 18, child: _SoftCircle(size: 224, alpha: 0.12)),
+          Positioned(
+            bottom: 74,
+            left: 34,
+            child: _DeviceFrame(
+              width: 104,
+              height: 158,
+              icon: Icons.menu_book_rounded,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          Positioned(
+            bottom: 54,
+            right: 34,
+            child: _DeviceFrame(
+              width: 118,
+              height: 184,
+              icon: Icons.auto_graph_rounded,
+              color: theme.colorScheme.secondary,
+            ),
+          ),
+          Positioned(
+            top: 76,
+            child: Container(
+              width: 78,
+              height: 78,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface.withValues(alpha: 0.96),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.16),
+                ),
+                boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+              ),
+              child: Icon(
+                Icons.cloud_sync_outlined,
+                color: theme.colorScheme.primary,
+                size: 38,
+              ),
+            ),
+          ),
+          Positioned(
+            left: 112,
+            top: 128,
+            child: Icon(
+              Icons.sync_alt_rounded,
+              color: theme.colorScheme.primary.withValues(alpha: 0.58),
+              size: 34,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DeviceFrame extends StatelessWidget {
+  const _DeviceFrame({
+    required this.width,
+    required this.height,
+    required this.icon,
+    required this.color,
+  });
+
+  final double width;
+  final double height;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: width,
+      height: height,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.96),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: color.withValues(alpha: 0.18)),
+        boxShadow: AppShadows.editorial(color),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: width * 0.36,
+            height: 5,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.20),
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+          const Spacer(),
+          Icon(icon, color: color, size: 34),
+          const Spacer(),
+          Container(
+            width: double.infinity,
+            height: 8,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: width * 0.46,
+            height: 8,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(999),
+            ),
           ),
         ],
       ),

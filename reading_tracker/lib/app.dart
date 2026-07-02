@@ -8,6 +8,7 @@ import 'core/theme/app_theme_controller.dart';
 import 'features/navigation/presentation/screens/main_navigation_screen.dart';
 import 'features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'features/onboarding/presentation/widgets/sync_onboarding_notice.dart';
 import 'features/sync/presentation/widgets/auto_sync_bootstrap.dart';
 
 class App extends ConsumerWidget {
@@ -30,7 +31,7 @@ class App extends ConsumerWidget {
               loading: () => const _AppBootstrapScreen(),
               error: (error, stackTrace) => const OnboardingScreen(),
               data: (isCompleted) => isCompleted
-                  ? const MainNavigationScreen()
+                  ? const SyncOnboardingNotice(child: MainNavigationScreen())
                   : const OnboardingScreen(),
             ),
         onGenerateRoute: _onGenerateRoute,
