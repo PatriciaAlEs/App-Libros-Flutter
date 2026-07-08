@@ -71,6 +71,31 @@ void main() {
     expect(metadataRepository.syncedRemoteIds['book-1'], 'remote-book-1');
   });
 
+  test('create falls back to createdAt when local updatedAt is null', () async {
+    final metadataRepository = FakeSyncMetadataRepository([
+      _metadata(localId: 'book-1', operation: PendingSyncOperation.create),
+    ]);
+    final remoteRepository = FakeRemoteBooksRepository();
+    final createdAt = DateTime(2026, 6, 27);
+    final useCase = _useCase(
+      metadataRepository: metadataRepository,
+      remoteRepository: remoteRepository,
+      books: {
+        'book-1': _book(
+          id: 'book-1',
+          createdAt: createdAt,
+          hasUpdatedAt: false,
+        ),
+      },
+    );
+
+    final result = await useCase(userId: userId);
+
+    expect(result.synced, 1);
+    expect(remoteRepository.upserted.single.createdAt, createdAt);
+    expect(remoteRepository.upserted.single.updatedAt, createdAt);
+  });
+
   test(
     'update uploads existing remote book and marks metadata as synced',
     () async {
@@ -177,6 +202,8 @@ Book _book({
   required String id,
   String? title,
   BookStatus status = BookStatus.pending,
+  DateTime? createdAt,
+  bool hasUpdatedAt = true,
 }) {
   return Book(
     id: id,
@@ -189,8 +216,8 @@ Book _book({
     status: status,
     rating: 4,
     startDate: DateTime(2026, 6, 1),
-    createdAt: DateTime(2026, 6, 27),
-    updatedAt: DateTime(2026, 6, 28),
+    createdAt: createdAt ?? DateTime(2026, 6, 27),
+    updatedAt: hasUpdatedAt ? DateTime(2026, 6, 28) : null,
   );
 }
 

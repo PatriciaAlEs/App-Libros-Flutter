@@ -4,7 +4,23 @@
 
 `reading_tracker` es una app Flutter mobile-first para registrar libros, sesiones de lectura, progreso, calendario, estadisticas basicas e insights de lectura.
 
-Estado vigente: ReadPp esta en Alpha Testing & Polish con Observabilidad/Sentry, Analytics/PostHog, Supabase Auth y Hito 8 de sincronizacion completados y validados. El siguiente bloque es Hito 9 - UX & Product Polish.
+Estado vigente: ReadPp esta en Alpha Testing & Polish con Observabilidad/Sentry, Analytics/PostHog, Supabase Auth, Hito 8 de sincronizacion y Hito 9 UX & Product completados y validados. El siguiente bloque es la Beta publica y futuras funcionalidades inteligentes: AI Assistant, automatizaciones y mejoras de producto.
+
+Hito 9 - UX & Product completado:
+
+- UX-003 implementado.
+- UX-004 implementado.
+- Onboarding actualizado a 4 pantallas.
+- Coach Mark de sincronizacion implementado.
+- Flujo de migracion para usuarios existentes implementado.
+- Persistencia mediante `SharedPreferences` para onboarding, avisos, coach marks y preferencias ligeras.
+- Integracion completa con Supabase Auth.
+- Login con Email implementado y validado.
+- Login con Google implementado y validado.
+- Sincronizacion validada entre dispositivos.
+- QA funcional completado en Android y Web.
+- Validacion final: `flutter analyze` sin issues.
+- Validacion final: `flutter test` 178/178.
 
 Sprint 18.x Alpha QA implementado:
 
@@ -46,12 +62,12 @@ Estado de roadmap:
 - Hito 7 ya inicio con Premium Experience: Motion & Delight y Premium Statistics aplicados.
 - Sprint 20.1 Observabilidad esta completado y validado.
 - Sprint 20.2 Analytics esta completado y validado.
-- Siguiente bloque: Sprint 20.3 Funnel basico.
-- Proximo paso tecnico mayor post-Alpha: QA manual y estabilizacion previa a beta con la sincronizacion de datos ya completada.
+- Siguiente bloque: Beta publica.
+- Proximo paso tecnico mayor post-Alpha: estabilizacion previa a beta con Auth, Google OAuth, sincronizacion multi-dispositivo y UX de migracion ya completadas.
 - Hito 7: Premium Experience (motion, skeleton loaders, microinteracciones, empty states, estadisticas visuales premium).
 - Hito 8 completado: Sincronizacion de datos offline-first sobre Supabase, con upload/download, sincronizacion automatica, deteccion de conflictos y estado visible en UI.
 - QA post-Hito 8 completado: Auth email validado, restore remoto validado, upload local validado, bugs de `profiles.created_at` y refresco UI post-sync resueltos, y polish UX de sync/Home/alta de libro aplicado.
-- Validacion automatizada vigente post-Hito 8: `flutter analyze` OK y `flutter test` OK con 173/173 tests.
+- Validacion automatizada vigente post-Hito 9: `flutter analyze` sin issues y `flutter test` OK con 178/178 tests.
 
 ## Hito 8 - Sincronizacion de datos
 
@@ -104,7 +120,7 @@ Validacion vigente Hito 8:
 QA post-Hito 8:
 
 - Auth por email funciona en entorno real Supabase: crear cuenta, login, logout y recuperacion de sesion tras limpiar datos locales.
-- Google OAuth sigue condicionado a configuracion externa del provider en Supabase.
+- Google OAuth queda validado tras completar la configuracion externa del provider en Supabase y plataformas objetivo.
 - La sincronizacion manual y automatica cubre subida local y descarga remota para entidades principales.
 - Restore remoto tras reinstalacion/limpieza local recupera biblioteca y progreso.
 - Tras merge remoto, Home/Biblioteca refrescan sin pull-to-refresh manual.
@@ -121,6 +137,38 @@ Bugs resueltos en QA post-Hito 8:
 - Tap de `Otras lecturas` abriendo registro de avance en vez de cambiar lectura principal.
 - Alta de libro con formulario demasiado alto antes de resultados.
 - Overlay de microcelebracion con `Positioned` anidado incorrectamente.
+
+## Hito 9 - UX & Product
+
+Estado: COMPLETADO.
+
+Alcance cerrado:
+
+- UX-003 implementado.
+- UX-004 implementado.
+- Onboarding actualizado a 4 pantallas.
+- Coach Mark de sincronizacion implementado.
+- Flujo de migracion para usuarios existentes implementado.
+- Persistencia ligera mediante `SharedPreferences`.
+- Integracion completa con Supabase Auth.
+- Login con Email implementado.
+- Login con Google implementado.
+- Sincronizacion validada entre dispositivos.
+- QA funcional completado en Android y Web.
+
+Decisiones de producto vigentes:
+
+- ReadPp sigue siendo local-first: login y sync mejoran continuidad, pero no bloquean el uso local.
+- La migracion de usuarios existentes debe explicar que los datos locales se conservan y que la cuenta habilita backup/sync multi-dispositivo.
+- El Coach Mark de sincronizacion debe aparecer como ayuda contextual, no como intersticial obligatorio.
+- Google OAuth queda activo solo con configuracion externa correcta de Supabase/proveedor y redirect/deep links validados.
+- `SharedPreferences` es suficiente para flags de onboarding, coach marks, avisos y preferencias ligeras; Drift se reserva para datos de producto.
+
+Validacion vigente Hito 9:
+
+- `flutter analyze` sin issues.
+- `flutter test` OK.
+- 178/178 tests.
 
 Sprint 19.x implementado:
 
@@ -247,10 +295,11 @@ La Home ya funciona como biblioteca personal moderna. Actualmente ofrece:
 Estado actual implementado:
 
 - Onboarding funcional de primera apertura.
-- El flujo tiene 3 pantallas:
+- El flujo tiene 4 pantallas:
   - `Tu biblioteca personal`.
   - `Convierte la lectura en un habito`.
   - `Descubre tu perfil lector`.
+  - Pantalla de cuenta/sincronizacion para explicar backup, continuidad entre dispositivos y modo local.
 - Incluye acciones `Omitir`, `Siguiente` y `Empezar`.
 - Incluye indicador visual de progreso.
 - Usa logo real ReadPp en lugar del branding manual antiguo.
@@ -260,7 +309,8 @@ Estado actual implementado:
 - El onboarding se muestra solo si la flag no existe o esta en `false`.
 - Al completar u omitir, la app entra en el flujo normal.
 - Los usuarios recurrentes no ven onboarding automaticamente.
-- No se introdujo login, backend, sincronizacion ni nueva arquitectura.
+- El onboarding convive con Supabase Auth y sincronizacion: educa sobre cuenta/sync, pero no obliga a iniciar sesion.
+- Usuarios existentes cuentan con flujo de migracion/aviso separado para activar sincronizacion sin repetir el onboarding completo.
 - El estilo visual mantiene Burgundy/Forest y la estrategia tipografica Roboto + Space Grotesk.
 
 ## UX Home
@@ -660,11 +710,11 @@ Estado actual implementado:
 
 ## Siguiente paso recomendado
 
-1. Iniciar Hito 9 - UX & Product Polish.
-2. Revisar cierre de flujos principales: Auth, Sync, Home, Biblioteca, alta de libro y duplicados.
-3. Validar QA manual Android/Web de sincronizacion en escenarios offline -> online, multi-dispositivo y conflictos.
-4. Mantener Drift como fuente de verdad local y no introducir resolucion automatica de conflictos sin sprint especifico.
-5. Preparar beta readiness con copy, accesibilidad, navegacion y estados vacios/error consistentes.
+1. Preparar Beta publica.
+2. Mantener la base validada de Hito 9: onboarding de 4 pantallas, Coach Mark de sincronizacion, migracion para usuarios existentes, Supabase Auth completo, Email, Google OAuth y sync multi-dispositivo.
+3. Priorizar futuras funcionalidades inteligentes: AI Assistant, automatizaciones y mejoras de producto.
+4. Mantener Drift como fuente de verdad local y Supabase como capa de cuenta/sincronizacion.
+5. No introducir resolucion automatica de conflictos ni IA sobre datos personales sin sprint especifico de producto, privacidad y QA.
 
 ## Estado vigente Hito 7 - Backend con Supabase
 
@@ -673,7 +723,7 @@ Estado actual implementado:
 - Supabase queda como backend progresivo para Auth, recuperacion futura y sincronizacion remota.
 - La app sigue funcionando sin login y sin variables Supabase configuradas.
 - La sincronizacion manual local -> Supabase y Supabase -> local ya existe para las entidades principales.
-- Existe schema Supabase y RLS definidos en repositorio, pendiente de aplicar y validar contra un proyecto real.
+- Existe schema Supabase y RLS definidos en repositorio y la sincronizacion remota queda validada funcionalmente con Supabase real.
 - Existe metadata local de sincronizacion en Drift y se marca desde mutaciones locales mediante `LocalSyncTracker`.
 
 ### Sprint 21.1 - Infraestructura Supabase
@@ -839,11 +889,11 @@ Estado actual implementado:
 
 ### Riesgos abiertos Hito 7
 
-- Google OAuth requiere configuracion externa en Supabase y plataformas objetivo.
-- Email/contrasena requiere validar configuracion real de Supabase Auth.
+- Google OAuth requiere mantener configuracion externa correcta en Supabase y plataformas objetivo.
+- Email/contrasena queda validado con configuracion real de Supabase Auth.
 - La sincronizacion debe asociar datos locales a `user.id` sin perdida de datos.
 - Las futuras capas remotas no deben leer directamente desde Supabase como fuente principal de UI.
-- Google OAuth y email/contrasena aun requieren validacion real con proyecto Supabase configurado.
+- Google OAuth y email/contrasena quedan validados con proyecto Supabase configurado.
 - La UI y el caso de uso de Cuenta preparan la asociacion, el schema remoto esta definido en repositorio y existe metadata local de sync.
 - La metadata local ya se marca automaticamente en altas, ediciones y borrados principales de libros/sesiones y en cambios de objetivo anual/perfil.
 - La transferencia manual local -> Supabase, la descarga manual Supabase -> local, la sincronizacion automatica y la UI de estado ya cubren Books, Reading Sessions, Reader Profile y Annual Goal; queda pendiente la resolucion real de conflictos.
@@ -863,4 +913,6 @@ Estado actual implementado:
 - Sprint 22.6 queda cerrado con deteccion de conflictos durante descarga.
 - Sprint 22.7 queda cerrado con sincronizacion automatica.
 - Sprint 22.8 queda cerrado con estado de sincronizacion en UI.
-- Hito 8 queda cerrado completamente; la siguiente fase es Hito 9 - UX & Product Polish.
+- Hito 8 queda cerrado completamente.
+- Hito 9 queda cerrado completamente con UX-003, UX-004, onboarding de 4 pantallas, Coach Mark de sincronizacion, migracion de usuarios existentes, Supabase Auth completo, Email, Google OAuth, sync multi-dispositivo validada, QA Android/Web, `flutter analyze` sin issues y `flutter test` 178/178.
+- La siguiente fase es Beta publica y futuras funcionalidades inteligentes.

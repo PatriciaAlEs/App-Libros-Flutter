@@ -1,13 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design_system/design_system.dart';
+import '../../../onboarding/presentation/providers/sync_coach_mark_controller.dart';
 
-class AccountTransitionScreen extends StatelessWidget {
+class AccountTransitionScreen extends ConsumerStatefulWidget {
   const AccountTransitionScreen({super.key});
+
+  @override
+  ConsumerState<AccountTransitionScreen> createState() =>
+      _AccountTransitionScreenState();
+}
+
+class _AccountTransitionScreenState
+    extends ConsumerState<AccountTransitionScreen> {
+  bool _markSeenQueued = false;
+  bool _displayCoachMark = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final shouldShowCoachMark =
+        ref.watch(syncCoachMarkControllerProvider).valueOrNull ?? false;
+
+    if (shouldShowCoachMark && !_displayCoachMark) {
+      _displayCoachMark = true;
+    }
+
+    if (shouldShowCoachMark && !_markSeenQueued) {
+      _markSeenQueued = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        await ref.read(syncCoachMarkControllerProvider.notifier).markShown();
+      });
+    }
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -45,6 +71,10 @@ class AccountTransitionScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
+              if (_displayCoachMark) ...[
+                const _SyncCoachMarkCard(),
+                const SizedBox(height: AppSpacing.lg),
+              ],
               ReadPpSurface(
                 padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
                 borderRadius: 30,
@@ -129,6 +159,76 @@ class AccountTransitionScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SyncCoachMarkCard extends StatelessWidget {
+  const _SyncCoachMarkCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.34),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.22),
+        ),
+        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface.withValues(alpha: 0.82),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.touch_app_outlined,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  'Entra en Perfil',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Inicia sesion para activar la sincronizacion.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w700,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Tus lecturas seguiran guardadas en este dispositivo.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              height: 1.35,
+            ),
+          ),
+        ],
       ),
     );
   }

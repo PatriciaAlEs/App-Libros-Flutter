@@ -2,7 +2,25 @@
 
 ## Foco actual
 
-ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1, Analytics Sprint 20.2 y Backend/Auth/Supabase validados hasta Hito 8 Sprint 22.8 + QA post-Hito 8.
+ReadPp v0.2.0-alpha: release alpha completada, en QA externo y con Observabilidad Sprint 20.1, Analytics Sprint 20.2, Backend/Auth/Supabase, Hito 8 de sincronizacion y Hito 9 UX & Product completados.
+
+Estado Hito 9 - UX & Product:
+
+- Estado: COMPLETADO.
+- UX-003 implementado.
+- UX-004 implementado.
+- Onboarding actualizado a 4 pantallas, incorporando educacion de cuenta/sincronizacion.
+- Coach Mark de sincronizacion implementado para guiar el flujo sin bloquear el uso local.
+- Flujo de migracion para usuarios existentes implementado: usuarios con datos locales pueden entender y activar cuenta/sync sin perder el modo offline-first.
+- Persistencia mediante `SharedPreferences` para flags de onboarding, avisos, coach mark y preferencias locales de producto.
+- Integracion completa con Supabase Auth.
+- Login con Email implementado y validado.
+- Login con Google implementado y validado tras completar configuracion OAuth externa en Supabase/proveedor.
+- Sincronizacion validada entre dispositivos.
+- QA funcional completado en Android y Web.
+- Validacion vigente: `flutter analyze` sin issues.
+- Validacion vigente: `flutter test` OK con 178/178 tests.
+- Siguiente fase del proyecto: Beta publica y futuras funcionalidades inteligentes: AI Assistant, automatizaciones y mejoras de producto.
 
 Estado Hito 8 - Sincronizacion de datos:
 
@@ -18,17 +36,32 @@ Estado Hito 8 - Sincronizacion de datos:
 - QA real Auth: email signup, login, logout y recuperacion de sesion tras limpiar datos locales validados en Android emulator con Supabase configurado.
 - QA real Sync: subida local -> Supabase y recuperacion remota -> local validadas tras corregir fallos de `profiles.created_at`, schema/defaults remotos y refresco de UI post-merge.
 - UX post-Hito 8 aplicado: onboarding/aviso de sincronizacion, success flow tras sync manual con CTA `Ir a Inicio`, seleccion de lectura principal desde `Otras lecturas` y alta de libro mediante bottom sheet de confirmacion.
-- Validacion vigente post-Hito 8: `flutter analyze` OK, `flutter test` OK y 173/173 tests.
-- Proximo objetivo del proyecto: Hito 9 - UX & Product Polish.
+- Validacion vigente post-Hito 9: `flutter analyze` OK, `flutter test` OK y 178/178 tests.
+- Proximo objetivo del proyecto: Beta publica y futuras funcionalidades inteligentes.
+
+## Cierre Hito 9 - UX & Product
+
+- Hito 9 queda completado como cierre de UX & Product previo a Beta publica.
+- UX-003 y UX-004 quedan implementados.
+- El onboarding pasa de 3 a 4 pantallas para explicar mejor valor, uso local, cuenta y sincronizacion.
+- El Coach Mark de sincronizacion guia al usuario hacia la cuenta/sync en el momento adecuado, sin convertir el login en requisito para usar ReadPp.
+- El flujo de migracion para usuarios existentes conserva la promesa local-first: los datos locales permanecen disponibles y la cuenta habilita sincronizacion multi-dispositivo.
+- `SharedPreferences` sigue siendo la persistencia adecuada para flags ligeras de experiencia, cierre de avisos, onboarding y preferencias de producto.
+- Supabase Auth queda integrado en el producto con Email y Google como metodos disponibles.
+- La integracion de Google OAuth se considera cerrada tras validar configuracion externa, redirect/deep links y retorno de sesion en las plataformas objetivo.
+- La sincronizacion multi-dispositivo queda validada funcionalmente entre dispositivos.
+- QA funcional cerrado en Android y Web.
+- Estado automatizado final del hito: `flutter analyze` sin issues y `flutter test` 178/178.
+- Siguiente hito: Beta publica, AI Assistant, automatizaciones y mejoras de producto.
 
 ## Cierre Hito 8 - QA post-sync
 
 - Hito 8 queda completado y estabilizado funcionalmente para las entidades principales: Books, Reading Sessions, Reader Profile y Annual Goal.
-- Supabase Auth por email queda validado manualmente; Google OAuth sigue condicionado a configuracion externa del provider en Supabase y no debe implementarse en codigo hasta que esa configuracion exista.
+- Supabase Auth queda validado con Email y Google OAuth; la configuracion externa del provider OAuth ya forma parte del cierre de Hito 9.
 - La app mantiene modo local/offline-first como experiencia base: login habilita sincronizacion, no bloquea el uso local.
 - La sincronizacion recupera datos remotos tras reinstalacion/limpieza local y refresca Biblioteca/Home sin pull-to-refresh manual.
 - `SyncStatusCard` ya no debe cerrar el flujo dejando al usuario en Perfil/Auth sin salida clara: la sync manual exitosa muestra confirmacion y CTA hacia Inicio.
-- Proximo hito: UX & Product Polish, centrado en cierre de flujos, claridad de estados, pulido de alta de libro, Home/Biblioteca y QA de producto previo a beta.
+- Hito 9 posterior ya cerrado; proximo hito vigente: Beta publica e inteligencia de producto.
 
 ## Bugs encontrados y resueltos Hito 8
 
@@ -444,7 +477,7 @@ El sistema visual base ahora incluye:
 - Tipografia actual indicada por el usuario: Roboto global.
 - Se implemento Hito 5 Sprint 12 - Onboarding + First Run Experience.
 - La app ahora muestra onboarding solo en primera apertura.
-- El onboarding tiene 3 pantallas: viaje lector, registro de lecturas y perfil lector.
+- El onboarding vigente tiene 4 pantallas: viaje lector, registro de lecturas, perfil lector y cuenta/sincronizacion.
 - El flujo incluye acciones `Omitir`, `Siguiente`, `Empezar` e indicador visual de progreso.
 - El estado de finalizacion se persiste localmente con `SharedPreferences` usando la flag `onboarding_completed`.
 - Los usuarios recurrentes no ven onboarding automaticamente despues de completarlo u omitirlo.
@@ -702,4 +735,5 @@ Estado confirmado para Hito 5 Sprint 13:
 - Validacion Sprint 22.8: `flutter analyze` OK y `flutter test` OK con 164/164 tests.
 - Validacion post-QA Hito 8: `flutter analyze` OK y `flutter test` OK con 173/173 tests.
 - Decision tecnica heredada: en Supabase Books y entidades sincronizadas, los upserts usan `id` como conflict target cuando los indices locales remotos son parciales con `WHERE deleted_at IS NULL`; los `local_*_id` siguen viajando como identidad local.
-- Proximo paso recomendado: Hito 9 - UX & Product Polish.
+- Hito 9 cerrado: UX & Product completado con onboarding de 4 pantallas, Coach Mark de sincronizacion, migracion para usuarios existentes, Supabase Auth completo, Email, Google OAuth, sync multi-dispositivo validada, QA Android/Web y suite 178/178.
+- Proximo paso recomendado: preparar Beta publica y priorizar funcionalidades inteligentes futuras: AI Assistant, automatizaciones y mejoras de producto.

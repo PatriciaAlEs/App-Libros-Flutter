@@ -171,6 +171,6 @@ RemoteBook _remoteBookFromLocal(
     startedAt: book.startDate,
     finishedAt: book.completedDate,
     createdAt: book.createdAt,
-    updatedAt: book.updatedAt,
+    updatedAt: book.updatedAt ?? book.createdAt,
   );
 }

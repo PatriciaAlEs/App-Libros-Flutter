@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design_system/design_system.dart';
+import '../providers/sync_coach_mark_controller.dart';
 import '../providers/sync_onboarding_notice_controller.dart';
 
 class SyncOnboardingNotice extends ConsumerStatefulWidget {
@@ -91,6 +92,9 @@ class _SyncOnboardingNoticeState extends ConsumerState<SyncOnboardingNotice> {
             FilledButton.icon(
               onPressed: () async {
                 await controller.dismiss();
+                await ref
+                    .read(syncCoachMarkControllerProvider.notifier)
+                    .request();
                 if (!dialogContext.mounted) return;
                 Navigator.of(dialogContext).pop();
                 if (!mounted) return;

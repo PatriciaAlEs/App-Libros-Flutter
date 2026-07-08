@@ -2,7 +2,7 @@
 
 ## Resumen real
 
-La app usa una arquitectura Flutter por features. La persistencia de producto sigue siendo local con Drift + SQLite/IndexedDB y el estado se gestiona con Riverpod. Supabase existe como backend progresivo opcional para Auth y sincronizacion remota, pero no sustituye a Drift ni bloquea el modo local.
+La app usa una arquitectura Flutter por features. La persistencia de producto sigue siendo local con Drift + SQLite/IndexedDB y el estado se gestiona con Riverpod. Supabase existe como backend progresivo para Auth y sincronizacion remota, pero no sustituye a Drift ni bloquea el modo local. Hito 9 deja completada la capa de UX/Product alrededor de cuenta, migracion y sincronizacion.
 
 ## Estructura
 
@@ -52,7 +52,7 @@ reading_tracker/lib/
 
 ## Features
 
-- `auth`: usuario de dominio, contrato de autenticacion, implementacion Supabase Auth, controlador Riverpod y pantallas de Cuenta/Auth.
+- `auth`: usuario de dominio, contrato de autenticacion, implementacion Supabase Auth, login con Email, login con Google, controlador Riverpod y pantallas de Cuenta/Auth.
 - `books`: busqueda Open Library, repositorio, entidad `Book`, estado de libro y UI de listado/detalle/formulario.
 - `reading_sessions`: entidad `ReadingSession`, repositorio, calendario, detalle de dia y formulario de sesion.
 - `stats`: calculos, provider y pantalla.
@@ -83,9 +83,9 @@ reading_tracker/lib/
 
 - Open Library Search API: `https://openlibrary.org/search.json`.
 - Open Library Covers: `https://covers.openlibrary.org/b/id/{coverId}-M.jpg`.
-- Supabase Auth opcional para cuenta/login cuando `SUPABASE_URL` y `SUPABASE_ANON_KEY` estan configurados.
-- Supabase Database schema preparado en SQL para sincronizacion remota, pendiente de aplicar y validar en proyecto real cuando existan credenciales/proyecto enlazado.
-- No hay Firebase, Stripe ni backend propio. Existe sincronizacion local -> Supabase, descarga Supabase -> local, sincronizacion automatica y UI de estado para Books, Reading Sessions, Reader Profile y Annual Goal.
+- Supabase Auth para cuenta/login cuando `SUPABASE_URL` y `SUPABASE_ANON_KEY` estan configurados, con Email y Google OAuth validados.
+- Supabase Database schema definido en SQL y usado por la sincronizacion remota validada funcionalmente.
+- No hay Firebase, Stripe ni backend propio. Existe sincronizacion local -> Supabase, descarga Supabase -> local, sincronizacion automatica, UI de estado para Books, Reading Sessions, Reader Profile y Annual Goal, y validacion funcional multi-dispositivo.
 
 ## Herramientas externas relevantes
 
@@ -410,9 +410,9 @@ reading_tracker/lib/
 - `AccountMigrationController` orquesta esta preparacion desde presentacion y mantiene `AuthController` centrado en autenticacion.
 - La pantalla de Cuenta puede mostrar el resultado de preparacion local cuando hay usuario autenticado.
 - Auth no debe bloquear el uso local: sin Supabase configurado el estado es no autenticado y el error aparece solo si el usuario intenta iniciar sesion.
-- No existe sincronizacion todavia.
+- La sincronizacion remota existe y queda validada funcionalmente; esta frase reemplaza la limitacion historica previa a Hito 8.
 - Existe migracion Drift de Hito 7 para `sync_metadata`.
-- Existe migracion SQL de tablas Supabase y RLS en repositorio, pero no aplicada ni validada contra Supabase real desde esta ejecucion.
+- Existe migracion SQL de tablas Supabase y RLS en repositorio; la integracion de Auth/sync queda validada funcionalmente contra Supabase real en el cierre de Hito 9.
 - Existe metadata local preparada para asociar datos locales con futuros IDs remotos; no hay transferencia real de datos al `user.id` todavia.
 - Decision Sprint 21.4: preparar UX de cuenta y transicion cloud sin tocar biblioteca, progreso, sesiones, estadisticas, preferencias ni persistencia local.
 - Decision Sprint 21.5: preparar un resultado en memoria para asociacion futura a `user.id`, sin escribir en Drift ni llamar a Supabase.
@@ -531,13 +531,24 @@ reading_tracker/lib/
 - Post-QA Hito 8: el logging debug de sync debe ser diagnostico y seguro, registrando tabla, operacion, entidad/localId, excepcion y codigo/status sin secretos.
 - Validacion post-QA Hito 8: `flutter analyze` OK y `flutter test` OK con 173/173 tests.
 
-### UX & Product Polish post-Hito 8
+### Hito 9 - UX & Product
 
 - La sincronizacion manual exitosa es un flujo de producto completo: estado `synced`, feedback visible, microcelebracion ligera y CTA hacia Inicio.
 - `Otras lecturas` en Home se interpreta como selector de lectura principal, persistiendo `reader_profile_current_reading_id`; el registro de avance permanece en la lectura principal/detalle.
 - El alta de libro por busqueda remota prioriza buscador y resultados. La seleccion de un resultado abre un bottom sheet de confirmacion con datos editables antes de guardar.
 - El onboarding/aviso de sincronizacion se controla con persistencia local de visualizacion/cierre para no repetir avisos a usuarios existentes.
-- El siguiente hito no requiere nueva arquitectura: UX & Product Polish debe trabajar sobre flujos existentes, claridad de estados y QA manual antes de beta.
+- Hito 9 queda completado con UX-003 y UX-004 implementados.
+- El onboarding queda actualizado a 4 pantallas para incorporar educacion de cuenta/sincronizacion sin bloquear el modo local.
+- El Coach Mark de sincronizacion vive como guia contextual de producto sobre la arquitectura existente de Auth/Sync.
+- El flujo de migracion para usuarios existentes se apoya en la preparacion local, Supabase Auth y `SyncOrchestrator`; no crea una segunda fuente de verdad.
+- Las flags ligeras de onboarding, cierre de avisos, Coach Mark y preferencias de experiencia se persisten con `SharedPreferences`.
+- Drift se reserva para datos de producto y `sync_metadata`; `SharedPreferences` se reserva para estado ligero de experiencia.
+- Supabase Auth queda integrado con Email y Google OAuth.
+- Google OAuth requiere y conserva configuracion externa correcta en Supabase/proveedor, redirect/deep links y retorno de sesion validados.
+- La sincronizacion multi-dispositivo queda validada funcionalmente entre dispositivos.
+- QA funcional completado en Android y Web.
+- Validacion vigente: `flutter analyze` sin issues y `flutter test` 178/178.
+- El siguiente hito no requiere nueva arquitectura base: Beta publica debe trabajar sobre la arquitectura local-first existente y priorizar AI Assistant, automatizaciones y mejoras de producto con criterios de privacidad y QA.
 
 ### Hallazgos arquitectonicos revision Sprint 19
 

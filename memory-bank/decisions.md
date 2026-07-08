@@ -14,7 +14,7 @@
 ## Decisiones de producto
 
 - Priorizar registro de libros, sesiones, calendario y estadisticas basicas.
-- No implementar backend, login ni JWT por ahora.
+- Backend/login ya estan implementados mediante Supabase Auth y sincronizacion progresiva; no introducir JWT/backend propio adicional sin necesidad clara.
 - Mantener UX mobile-first.
 - Evitar complejidad prematura.
 - Las secciones principales deben estar accesibles desde navegacion principal, no escondidas en acciones secundarias.
@@ -314,7 +314,7 @@
 ## Cierre Hito 8 - Decisiones post-QA
 
 - Decision: Hito 8 queda completado cuando Auth email, subida local, descarga remota, restore tras limpieza local y refresco UI post-merge estan validados en QA manual.
-- Decision: Google OAuth no se implementa ni se promete en UI como funcional completo hasta configurar el provider OAuth externo en Supabase.
+- Decision: Google OAuth solo se considera funcional completo cuando el provider OAuth externo de Supabase, los redirect/deep links y el retorno de sesion estan configurados y validados. Ese criterio queda cumplido en Hito 9.
 - Decision: `profiles.created_at` y `profiles.updated_at` deben viajar con valores seguros desde el cliente cuando el schema remoto los exige NOT NULL; ademas el schema Supabase debe conservar defaults `now()` como red de seguridad.
 - Decision: durante QA de sync, los errores no deben quedar reducidos a mensaje generico. El logging debug seguro debe incluir tabla, operacion, entidad/localId, excepcion real y codigo/status si existe, sin exponer secretos.
 - Decision: una sync exitosa que modifica datos locales debe notificar a la capa UI. `SyncStatusController` es el lugar vigente para invalidar/refrescar providers visibles tras sync completada.
@@ -322,7 +322,7 @@
 - Decision: `Otras lecturas` en Home cambia la lectura principal y persiste `reader_profile_current_reading_id`; registrar avance queda en la card principal o detalle del libro.
 - Decision: el formulario de alta debe priorizar busqueda y resultados. Estado inicial, paginas y confirmacion de guardado de resultados remotos viven en un bottom sheet de confirmacion, no encima de la lista.
 - Decision: onboarding/aviso de sincronizacion usa persistencia local para mostrarse una sola vez y no debe romper el onboarding existente.
-- Decision: el siguiente hito es UX & Product Polish, no nueva arquitectura cloud. Cualquier cambio de sync debe responder a hallazgos de QA o claridad de producto.
+- Decision: Hito 9 UX & Product queda cerrado; el siguiente hito es Beta publica e inteligencia de producto, no nueva arquitectura cloud base. Cualquier cambio de sync debe responder a hallazgos de QA o claridad de producto.
 
 ## Bugs cerrados Hito 8
 
@@ -334,11 +334,27 @@
 - Alta de libro obligaba a bajar hasta el final para guardar tras seleccionar resultado.
 - La microcelebracion usaba `Positioned` bajo `IgnorePointer`, provocando error de `ParentDataWidget`.
 
-## Proximo hito - UX & Product Polish
+## Hito 9 - UX & Product
 
-- Enfocar en producto y QA: estados de exito/error, copy, navegacion, accesibilidad, alta de libro, Home/Biblioteca y consistencia post-sync.
+- Hito 9 queda completado como cierre de UX & Product previo a Beta publica.
+- UX-003 y UX-004 quedan implementados.
+- El onboarding se actualiza a 4 pantallas para incorporar cuenta/sincronizacion sin obligar al login.
+- El Coach Mark de sincronizacion debe guiar de forma contextual, no bloquear flujos ni sustituir estados persistentes de Cuenta/Sync.
+- El flujo de migracion para usuarios existentes conserva local-first: los datos locales siguen disponibles y la cuenta habilita backup/sync multi-dispositivo.
+- `SharedPreferences` es la persistencia elegida para flags ligeras: onboarding, avisos, coach marks y preferencias de experiencia.
+- Drift sigue siendo la fuente de verdad para datos de producto; `sync_metadata` sigue coordinando estado de sincronizacion.
+- Supabase Auth queda integrado completamente con Login por Email y Login con Google.
+- Google OAuth se da por cerrado tras validar configuracion externa, redirects/deep links y retorno de sesion.
+- La sincronizacion entre dispositivos queda validada funcionalmente.
+- QA funcional Android y Web queda completado.
+- Validacion final: `flutter analyze` sin issues y `flutter test` 178/178.
+
+## Proximo hito - Beta publica e inteligencia de producto
+
+- Enfocar en beta readiness, feedback real de testers y estabilidad Android/Web.
+- Priorizar futuras funcionalidades inteligentes: AI Assistant, automatizaciones y mejoras de producto.
 - No ampliar alcance de resolucion automatica de conflictos sin sprint propio.
-- No hacer Google OAuth hasta que el provider este configurado externamente.
+- No introducir IA sobre datos personales sin criterios explicitos de privacidad, control de usuario y QA.
 - Mantener local-first: Drift sigue siendo fuente de verdad local y Supabase complementa Auth/sync.
 
 ## Motion & Delight Hito 7 Sprint 19.1

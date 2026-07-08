@@ -464,11 +464,11 @@
 
 ## Pendiente inmediato
 
-- Estado vigente: Hito 8 Sincronizacion de datos COMPLETADO y QA post-Hito 8 cerrado.
-- Siguiente objetivo: Hito 9 - UX & Product Polish.
-- Validar en QA manual restante escenarios multi-dispositivo, offline -> online y conflictos detectados.
-- Mantener Google OAuth fuera de alcance hasta configurar el provider externo en Supabase.
+- Estado vigente: Hito 9 UX & Product COMPLETADO.
+- Siguiente objetivo: preparar Beta publica.
+- Prioridad futura: AI Assistant, automatizaciones y mejoras de producto.
 - Mantener Drift como fuente de verdad local, conservar prioridad del upload local ante conflictos y no introducir resolucion automatica sin sprint especifico.
+- Mantener Supabase Auth y sync como infraestructura validada para cuenta, Email, Google OAuth y sincronizacion multi-dispositivo.
 
 - Revision final de assets de tienda, privacidad, versionado y release.
 
@@ -513,7 +513,7 @@
 - Sprint 21.4 no modifica Drift, biblioteca, progreso, estadisticas, sesiones ni preferencias locales.
 - Sprint 21.4 no implementa sincronizacion, migracion, subida/descarga de datos, RLS ni perfiles remotos.
 - Sprint 21.4 validado con `flutter analyze` OK y `flutter test` OK con 67/67.
-- Riesgos abiertos: configurar Google OAuth, validar email/contrasena real y disenar asociacion local -> `user.id` antes de sync.
+- Riesgos abiertos historicos superados por Hito 9: Google OAuth y email/contrasena quedan validados; la asociacion local -> `user.id` se apoya en el flujo de migracion y sync existentes.
 - Revision tecnica Sprint 21.4: no se detecta deuda bloqueante; existe duplicacion visual menor entre `AccountScreen`, `AccountTransitionScreen` y `AuthScreen` en scaffold, gradiente, `SafeArea`, padding, boton de volver y superficie principal.
 - Oportunidad de refactorizacion futura: extraer un layout compartido de pantallas de cuenta/auth si el flujo crece en recuperacion de contrasena, verificacion de email o migracion local -> cuenta.
 - Oportunidad arquitectonica futura: antes de Sprint 21.5 definir un servicio/caso de uso explicito para preparar transferencia de datos locales a `user.id`, manteniendo dominio libre de Supabase y Drift como fuente principal.
@@ -608,7 +608,7 @@
   - logout funciona;
   - login funciona;
   - tras borrar cache/datos locales se puede iniciar sesion de nuevo con la misma cuenta.
-- Google OAuth queda fuera de alcance hasta configurar el provider externo en Supabase.
+- Google OAuth queda validado tras configurar el provider externo en Supabase.
 - Restore remoto validado: tras borrar datos locales e iniciar sesion, la app recupera datos remotos desde Supabase.
 - Upload local validado tras corregir errores reales de sync: crear/modificar libro y pulsar `Sincronizar ahora` sube datos a Supabase.
 - Bug resuelto: upsert remoto de `profiles` fallaba por `created_at` null en columna NOT NULL.
@@ -623,13 +623,30 @@
 - Bug UI resuelto: overlay de microcelebracion corregido para evitar `ParentDataWidget` incorrecto.
 - Validacion final post-Hito 8: `flutter analyze` OK, tests focales OK y `flutter test` OK con 173/173 tests.
 
-## Proximo hito - UX & Product Polish
+## Hito 9 - UX & Product
+
+- Estado: COMPLETADO.
+- UX-003 implementado.
+- UX-004 implementado.
+- Onboarding actualizado a 4 pantallas.
+- Coach Mark de sincronizacion implementado.
+- Flujo de migracion para usuarios existentes implementado.
+- Persistencia mediante `SharedPreferences` para flags y preferencias ligeras de experiencia.
+- Integracion completa con Supabase Auth.
+- Login con Email implementado y validado.
+- Login con Google implementado y validado.
+- Sincronizacion validada entre dispositivos.
+- QA funcional completado en Android y Web.
+- Validacion final: `flutter analyze` sin issues.
+- Validacion final: `flutter test` OK con 178/178 tests.
+
+## Proximo hito - Beta publica e inteligencia de producto
 
 - Estado: PROXIMO.
-- Objetivo: pulir cierre de flujos y claridad de producto antes de beta, sin ampliar arquitectura cloud salvo necesidad de QA.
+- Objetivo: preparar ReadPp para Beta publica sobre la base estable de Auth, sync y UX de migracion.
 - Foco recomendado:
-  - revisar success/error states de Auth y Sync;
-  - pulir Home/Biblioteca tras recuperacion remota;
-  - refinar alta de libro, duplicados y guardado;
-  - revisar copy, accesibilidad y navegacion de flujos principales;
-  - completar QA manual Android/Web de sincronizacion, offline/online y conflictos.
+  - beta readiness, distribucion y feedback de testers;
+  - AI Assistant con criterios claros de privacidad y utilidad real;
+  - automatizaciones de lectura/sync/producto;
+  - mejoras incrementales de producto sin romper local-first;
+  - seguimiento de calidad Android/Web con suite completa verde.
