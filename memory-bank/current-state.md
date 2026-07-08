@@ -22,6 +22,29 @@ Hito 9 - UX & Product completado:
 - Validacion final: `flutter analyze` sin issues.
 - Validacion final: `flutter test` 178/178.
 
+## Cierre de fase actual - APK/Web
+
+Estado registrado el 2026-07-08:
+
+- Web/PWA: lista y desplegada en Vercel.
+- URL publica: `https://readpp-web-alpha.vercel.app`.
+- Procedimiento Web/PWA: build manual de Flutter Web y deploy desde `build/web`, nunca desde la raiz del proyecto.
+- Comando Web/PWA validado: `flutter build web --release --dart-define-from-file=dart_defines/dev.json`.
+- Proyecto Vercel: `readpp-web-alpha`.
+- APK generada: `reading_tracker/build/app/outputs/flutter-apk/app-release.apk`.
+- APK inspeccionada con `aapt`: package `com.readpp.app`, `versionName=1.0.0`, `versionCode=1`, `minSdkVersion=24`, `targetSdkVersion=36`.
+- SHA1 APK: `8a771c6ab44b69cba34ad009877a1e8e3ef4b3b1`.
+- Nota de versionado Android: una futura APK de actualizacion debe subir `versionCode` por encima de 1.
+
+Integraciones documentadas:
+
+- Supabase: backend progresivo para Auth y sincronizacion.
+- Auth: Login con Email y Login con Google mediante Supabase Auth.
+- Sync: sincronizacion offline-first para libros, sesiones, perfil lector y objetivo anual.
+- PWA: Flutter Web desplegado en Vercel.
+- Sentry: observabilidad de errores de release mediante `dart-define`.
+- Analytics: PostHog mediante `ReadPpAnalytics` y configuracion por `dart-define`.
+
 Sprint 18.x Alpha QA implementado:
 
 - Home soporta multiples libros en estado `reading` con indicador `1 / N`, swipe completo y seleccion de lectura principal persistida.

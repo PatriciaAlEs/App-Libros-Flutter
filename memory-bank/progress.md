@@ -296,7 +296,7 @@
 - Validacion Sprint 18.17: `dart format` aplicado, `flutter analyze` OK y `flutter test` OK con 55/55 tests.
 - Limitacion conocida: escaneo ISBN y portada local requieren validacion manual en dispositivo/emulador con camara/galeria reales.
 - Limitacion conocida: Google Books funciona sin API key como fallback publico; no hay backend ni cache remoto en esta fase.
-- Limitacion conocida: ReadPp sigue local-first sin Supabase, login ni sincronizacion cloud.
+- Limitacion historica superada: ReadPp sigue local-first, pero ya cuenta con Supabase Auth y sincronizacion cloud como capa progresiva.
 
 ## Hito 7 - Premium Experience Sprint 19.x
 
@@ -469,6 +469,7 @@
 - Prioridad futura: AI Assistant, automatizaciones y mejoras de producto.
 - Mantener Drift como fuente de verdad local, conservar prioridad del upload local ante conflictos y no introducir resolucion automatica sin sprint especifico.
 - Mantener Supabase Auth y sync como infraestructura validada para cuenta, Email, Google OAuth y sincronizacion multi-dispositivo.
+- Versionado Android pendiente para proxima APK de update: incrementar `versionCode` por encima de 1.
 
 - Revision final de assets de tienda, privacidad, versionado y release.
 
@@ -650,3 +651,14 @@
   - automatizaciones de lectura/sync/producto;
   - mejoras incrementales de producto sin romper local-first;
   - seguimiento de calidad Android/Web con suite completa verde.
+
+## Registro de version APK/Web - 2026-07-08
+
+- Web/PWA lista y desplegada en Vercel.
+- URL publica: `https://readpp-web-alpha.vercel.app`.
+- Proyecto Vercel: `readpp-web-alpha`.
+- Flujo correcto: `flutter build web --release --dart-define-from-file=dart_defines/dev.json`, despues `cd build/web` y `vercel --prod`.
+- APK generada en `reading_tracker/build/app/outputs/flutter-apk/app-release.apk`.
+- APK inspeccionada: package `com.readpp.app`, `versionName=1.0.0`, `versionCode=1`.
+- APK SHA1: `8a771c6ab44b69cba34ad009877a1e8e3ef4b3b1`.
+- Integraciones de fase documentadas: Supabase, Auth Email/Google, Sync, PWA, Sentry y Analytics.

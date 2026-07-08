@@ -25,11 +25,16 @@ El proyecto ya contiene una app funcional en `reading_tracker/` con:
 - Hito 6 Sprint 18.x implementado: Alpha Testing & Polish con Android QA, shared header/card, calendario/diario refinados, reto lector pulido, busqueda multi-fuente, deduplicacion, alta manual, escaneo ISBN y portada local.
 - Busqueda de libros actual: `BookSearchRepository` coordina Open Library como proveedor primario, Google Books como fallback y alta manual como ultima opcion.
 - Persistencia actual de libros incluye identificadores externos `externalSource` y `externalId` para deduplicacion entre proveedores.
-- Estado actual: ReadPp v0.2.0-alpha completada, APK Release generada, Web desplegada en Vercel y testers externos activos, manteniendo enfoque local-first con Drift/SQLite.
-- Validacion vigente de v0.2.0-alpha: 67/67 tests y `flutter analyze` OK.
-- Hito 6 Sprint 20.1 Observabilidad completado y validado: Sentry integrado, entorno `alpha`, release `0.2.0-alpha` y evento recibido correctamente en Web Release.
-- Pendientes post-alpha: QA-018, QA-019, QA-020, QA-021 y QA-022.
-- Roadmap: Sprint 20.2 Analytics, Sprint 20.3 Funnel basico, v0.4 Google Books fallback robustecido y v0.5 Supabase.
+- Estado actual: Hito 9 UX & Product completado, Web/PWA lista en Vercel, APK de cierre generada y base preparada para Beta publica.
+- Validacion vigente de cierre: `flutter analyze` sin issues y `flutter test` 178/178.
+- Web/PWA vigente: `https://readpp-web-alpha.vercel.app`.
+- APK registrada: package `com.readpp.app`, `versionName=1.0.0`, `versionCode=1`, SHA1 `8a771c6ab44b69cba34ad009877a1e8e3ef4b3b1`.
+- Supabase integrado como backend progresivo para Auth y sincronizacion, manteniendo Drift/SQLite como fuente de verdad local.
+- Auth completado con Login Email y Login Google.
+- Sync completada para Books, Reading Sessions, Reader Profile y Annual Goal, con sincronizacion automatica, descarga remota, upload local y estado visible.
+- Observabilidad completada con Sentry por `dart-define`.
+- Analytics completado con PostHog mediante `ReadPpAnalytics` y configuracion por `dart-define`.
+- Roadmap: Beta publica, AI Assistant, automatizaciones y mejoras de producto.
 
 ## Principios de documentacion
 

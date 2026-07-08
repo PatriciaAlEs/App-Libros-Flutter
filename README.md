@@ -1,18 +1,73 @@
-# reading_tracker
+# ReadPp
 
-`reading_tracker` es una app Flutter mobile-first para seguimiento personal de lectura: libros, sesiones, calendario, progreso y estadisticas.
+ReadPp es una app Flutter mobile-first para seguimiento personal de lectura: libros, sesiones, calendario, progreso, estadisticas e insights.
 
-El entregable principal del proyecto **"Creando Tus Requisitos de Producto con IA"** esta en:
+## Estado de fase
 
-- [memory-bank/mvp/product-requirements.md](memory-bank/mvp/product-requirements.md)
+Fase actual cerrada: Hito 9 - UX & Product.
 
-El repo usa un flujo de desarrollo asistido por IA con:
+- Web/PWA lista y desplegada en Vercel.
+- Supabase integrado como backend progresivo para Auth y sincronizacion.
+- Login con Email y Google disponible mediante Supabase Auth.
+- Sincronizacion multi-dispositivo validada para biblioteca, sesiones, perfil lector y objetivo anual.
+- Sentry documentado como observabilidad de errores de release.
+- PostHog documentado como analytics de producto.
+- Validacion de cierre registrada: `flutter analyze` sin issues y `flutter test` 178/178.
 
-- `memory-bank/` para contexto vivo del producto y del MVP.
-- `.cursor/rules/` para reglas de trabajo en Cursor.
-- AI-assisted workflow para mantener cambios pequenos, trazables y alineados con la arquitectura existente.
+## Versiones registradas
 
-## AI Context / Fuente de verdad del proyecto
+- Web/PWA: desplegada en `https://readpp-web-alpha.vercel.app`.
+- APK generada: `reading_tracker/build/app/outputs/flutter-apk/app-release.apk`.
+- APK actual inspeccionada: `versionName=1.0.0`, `versionCode=1`, package `com.readpp.app`.
+- SHA1 APK: `8a771c6ab44b69cba34ad009877a1e8e3ef4b3b1`.
+
+Nota: para publicar una APK como actualizacion sobre otra instalacion Android con el mismo paquete, el siguiente build debe incrementar `versionCode` mediante `--build-number` o `pubspec.yaml`.
+
+## Despliegue Web/PWA
+
+El despliegue oficial se hace desde los artefactos generados por Flutter, nunca desde la raiz del proyecto:
+
+```sh
+cd reading_tracker
+flutter build web --release --dart-define-from-file=dart_defines/dev.json
+cd build/web
+vercel --prod
+```
+
+Proyecto Vercel: `readpp-web-alpha`.
+
+URL publica: `https://readpp-web-alpha.vercel.app`.
+
+## Build APK
+
+```sh
+cd reading_tracker
+flutter build apk --release --dart-define-from-file=dart_defines/dev.json --build-number=2
+```
+
+Salida esperada:
+
+```text
+reading_tracker/build/app/outputs/flutter-apk/app-release.apk
+```
+
+## Configuracion
+
+La configuracion sensible se inyecta por `dart-define` / `dart-define-from-file`.
+
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SENTRY_DSN`
+- `SENTRY_ENVIRONMENT`
+- `SENTRY_RELEASE`
+- `ANALYTICS_ENABLED`
+- `POSTHOG_API_KEY`
+- `POSTHOG_HOST`
+- `APP_ENV`
+
+No commitear `dart_defines/dev.json`, claves reales, DSNs ni archivos `*.local.json`.
+
+## Memory Bank
 
 La fuente viva para agentes IA esta en:
 
@@ -21,4 +76,5 @@ La fuente viva para agentes IA esta en:
 - [memory-bank/architecture.md](memory-bank/architecture.md)
 - [memory-bank/current-state.md](memory-bank/current-state.md)
 - [memory-bank/active-context.md](memory-bank/active-context.md)
-- [memory-bank/mvp/backlog.md](memory-bank/mvp/backlog.md)
+- [memory-bank/progress.md](memory-bank/progress.md)
+- [memory-bank/decisions.md](memory-bank/decisions.md)

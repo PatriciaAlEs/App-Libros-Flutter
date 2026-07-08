@@ -357,6 +357,16 @@
 - No introducir IA sobre datos personales sin criterios explicitos de privacidad, control de usuario y QA.
 - Mantener local-first: Drift sigue siendo fuente de verdad local y Supabase complementa Auth/sync.
 
+## Cierre de fase actual - Versionado y despliegue
+
+- Decision: registrar en README y Memory Bank las versiones APK/Web al cerrar fase.
+- Decision: Web/PWA se despliega siempre desde `reading_tracker/build/web` con `vercel --prod`; no desplegar desde la raiz del proyecto Flutter.
+- Decision: el proyecto Vercel vigente es `readpp-web-alpha` y la URL publica vigente es `https://readpp-web-alpha.vercel.app`.
+- Decision: la APK generada de cierre queda registrada como `app-release.apk`, package `com.readpp.app`, `versionName=1.0.0`, `versionCode=1`.
+- Decision: para una APK de actualizacion Android, el `versionCode` debe ser mayor que el de la version instalada. El proximo build de update debe usar `--build-number` superior o actualizar `pubspec.yaml`.
+- Decision: no guardar claves reales, DSNs, tokens ni contenido de `dart_defines/dev.json` en README o Memory Bank.
+- Decision: documentar Supabase, Auth, Sync, PWA, Sentry y Analytics como capacidades cerradas de fase, manteniendo local-first como principio arquitectonico.
+
 ## Motion & Delight Hito 7 Sprint 19.1
 
 - Las animaciones de ReadPp deben sentirse calmadas, elegantes, editoriales y modernas.

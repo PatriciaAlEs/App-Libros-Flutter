@@ -24,20 +24,27 @@
 - Home Premium: lectura actual protagonista, metricas compactas, objetivo anual y actividad reciente.
 - Alpha QA: shared header basado en Biblioteca, card compartida de lectura actual, carrusel de multiples lecturas activas, calendario/diario sincronizados, polish de reto lector/insights y QA manual previo a release completado.
 - Busqueda de libros: Open Library como proveedor primario, Google Books como fallback, alta manual como ultima opcion y deduplicacion por ISBN, proveedor+externalId o titulo+autor normalizados.
-- Release alpha: ReadPp v0.2.0-alpha completada con APK Release generada, Web desplegada en Vercel, testers externos activos, 67/67 tests y `flutter analyze` OK.
-- Observabilidad: Sprint 20.1 completado con Sentry integrado, configuracion por entorno, DSN via `dart-define`, captura global de errores, breadcrumbs/captura para Open Library y validacion real en Web Release.
+- Cierre de fase actual: Hito 9 UX & Product completado, Web/PWA lista en Vercel, APK de cierre generada y base preparada para Beta publica.
+- Web/PWA vigente: `https://readpp-web-alpha.vercel.app`.
+- APK registrada: package `com.readpp.app`, `versionName=1.0.0`, `versionCode=1`, SHA1 `8a771c6ab44b69cba34ad009877a1e8e3ef4b3b1`.
+- Validacion vigente de cierre: `flutter analyze` sin issues y `flutter test` 178/178.
+- Supabase: backend progresivo para Auth y sincronizacion, manteniendo Drift/SQLite como fuente local.
+- Auth: Login Email y Login Google completados.
+- Sync: Books, Reading Sessions, Reader Profile y Annual Goal sincronizados con Supabase.
+- PWA: Flutter Web desplegado en Vercel desde `build/web`.
+- Observabilidad: Sentry integrado por `dart-define`.
+- Analytics: PostHog integrado mediante `ReadPpAnalytics` y configuracion por `dart-define`.
 
 ## Fuera de alcance por ahora
 
 - Backend propio.
-- Login, JWT o sincronizacion entre usuarios.
+- JWT/backend propio adicional fuera de Supabase.
 - Social, recomendaciones avanzadas o gamificacion compleja.
 - Arquitecturas pesadas que no aporten valor inmediato al MVP.
 
 ## Roadmap vigente
 
-- Resolver QA-018, QA-019, QA-020, QA-021 y QA-022 detectadas tras la salida alpha.
-- Sprint 20.2 Analytics.
-- Sprint 20.3 Funnel basico.
-- v0.4 Google Books fallback robustecido.
-- v0.5 Supabase para Auth, backend cloud y sincronizacion multi-dispositivo manteniendo persistencia local.
+- Beta publica.
+- AI Assistant.
+- Automatizaciones.
+- Mejoras de producto manteniendo local-first.

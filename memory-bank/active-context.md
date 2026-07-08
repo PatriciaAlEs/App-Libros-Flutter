@@ -22,6 +22,22 @@ Estado Hito 9 - UX & Product:
 - Validacion vigente: `flutter test` OK con 178/178 tests.
 - Siguiente fase del proyecto: Beta publica y futuras funcionalidades inteligentes: AI Assistant, automatizaciones y mejoras de producto.
 
+## Cierre de fase actual - 2026-07-08
+
+- Web/PWA lista y desplegada en Vercel.
+- URL publica vigente: `https://readpp-web-alpha.vercel.app`.
+- Despliegue Web/PWA oficial: `flutter build web --release --dart-define-from-file=dart_defines/dev.json`, luego desplegar con `vercel --prod` desde `reading_tracker/build/web`.
+- APK generada en `reading_tracker/build/app/outputs/flutter-apk/app-release.apk`.
+- APK inspeccionada: package `com.readpp.app`, `versionName=1.0.0`, `versionCode=1`.
+- APK SHA1: `8a771c6ab44b69cba34ad009877a1e8e3ef4b3b1`.
+- Nota Android: para que una APK se instale como actualizacion sobre una version previa con el mismo paquete, el proximo build debe incrementar `versionCode` con `--build-number` o `pubspec.yaml`.
+- Supabase queda documentado como backend progresivo de Auth y sincronizacion.
+- Auth queda documentado con Login Email y Login Google.
+- Sync queda documentada para Books, Reading Sessions, Reader Profile y Annual Goal.
+- PWA queda documentada como build Flutter Web desplegada en Vercel.
+- Sentry queda documentado como observabilidad de errores de release por `dart-define`.
+- Analytics queda documentado como PostHog por capa propia, configurado por `dart-define`.
+
 Estado Hito 8 - Sincronizacion de datos:
 
 - Estado: COMPLETADO.

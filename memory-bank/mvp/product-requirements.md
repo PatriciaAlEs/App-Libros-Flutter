@@ -82,7 +82,7 @@ Crear una app sencilla y mantenible para registrar libros y sesiones de lectura,
 ## 7. Funcionalidades fuera del MVP
 
 - Backend propio.
-- Login, JWT o sincronizacion entre usuarios.
+- JWT/backend propio adicional fuera de Supabase.
 - Recomendaciones avanzadas.
 - Funciones sociales.
 - Exportacion/importacion de biblioteca.

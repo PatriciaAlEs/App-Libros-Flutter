@@ -550,6 +550,21 @@ reading_tracker/lib/
 - Validacion vigente: `flutter analyze` sin issues y `flutter test` 178/178.
 - El siguiente hito no requiere nueva arquitectura base: Beta publica debe trabajar sobre la arquitectura local-first existente y priorizar AI Assistant, automatizaciones y mejoras de producto con criterios de privacidad y QA.
 
+### Cierre de fase actual - APK/Web
+
+- Web/PWA se construye como artefacto estatico de Flutter Web.
+- El despliegue Vercel debe hacerse desde `reading_tracker/build/web`, no desde la raiz del proyecto Flutter.
+- Comando de build Web/PWA vigente: `flutter build web --release --dart-define-from-file=dart_defines/dev.json`.
+- Comando de deploy Web/PWA: `vercel --prod` ejecutado dentro de `build/web`.
+- Proyecto Vercel vigente: `readpp-web-alpha`.
+- URL publica vigente: `https://readpp-web-alpha.vercel.app`.
+- APK de cierre generada en `reading_tracker/build/app/outputs/flutter-apk/app-release.apk`.
+- APK inspeccionada: `com.readpp.app`, `versionName=1.0.0`, `versionCode=1`, `minSdkVersion=24`, `targetSdkVersion=36`.
+- SHA1 APK: `8a771c6ab44b69cba34ad009877a1e8e3ef4b3b1`.
+- Para actualizaciones Android, `versionCode` debe incrementarse antes de generar una APK destinada a instalar encima de una version previa.
+- Supabase, Sentry y Analytics se configuran por `dart-define`; no documentar secretos en README ni Memory Bank.
+- PWA, Auth, Sync, Sentry y Analytics quedan como parte de la arquitectura operativa de la fase cerrada.
+
 ### Hallazgos arquitectonicos revision Sprint 19
 
 - `MainNavigationScreen` debe ser un shell unico por flujo principal; navegar entre tabs requiere coordinacion de indice, no apilar nuevas instancias del shell.
