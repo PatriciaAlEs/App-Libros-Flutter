@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-const _configuredAuthRedirectUrl = String.fromEnvironment(
-  'AUTH_REDIRECT_URL',
-);
+const _configuredAuthRedirectUrl = String.fromEnvironment('AUTH_REDIRECT_URL');
 
 String? get authRedirectUrl => resolveAuthRedirectUrl(
   isWeb: kIsWeb,
