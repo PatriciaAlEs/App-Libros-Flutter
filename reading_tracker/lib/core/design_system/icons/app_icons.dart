@@ -15,6 +15,7 @@ class AppIcons {
   static const home = LucideIcons.house;
   static const insights = Icons.auto_graph_rounded;
   static const insightsNav = LucideIcons.sparkles;
+  static const libreria = Icons.auto_awesome_rounded;
   static const library = LucideIcons.library;
   static const libraryNav = LucideIcons.library;
   static const pages = LucideIcons.file_text;
