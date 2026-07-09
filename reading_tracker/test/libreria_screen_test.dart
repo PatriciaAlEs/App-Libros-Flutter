@@ -12,13 +12,28 @@ void main() {
   testWidgets('shows the honest initial LibrerIA experience', (tester) async {
     await _pumpScreen(tester);
 
-    expect(find.text('LibrerIA'), findsOneWidget);
-    expect(find.text('Tu lectura, con más claridad'), findsOneWidget);
-    expect(find.text('Tus próximos insights vivirán aquí'), findsOneWidget);
-    expect(find.text('¿Qué estoy leyendo?'), findsOneWidget);
+    expect(find.text('LibrerIA'), findsNWidgets(2));
+    expect(
+      find.textContaining('Tu coach de lectura dentro de ReadPp'),
+      findsOneWidget,
+    );
+    expect(find.text('Bienvenida a LibrerIA'), findsOneWidget);
+    expect(find.text('Preparando coach de lectura'), findsOneWidget);
+    expect(find.text('Ejemplos de futuras preguntas'), findsOneWidget);
+    expect(find.text('¿Cómo voy con mi objetivo anual?'), findsOneWidget);
+    expect(
+      find.text('¿Qué patrón tiene mi lectura esta semana?'),
+      findsOneWidget,
+    );
+    expect(find.text('¿Qué libro conviene retomar primero?'), findsOneWidget);
+  });
 
-    final input = tester.widget<TextField>(find.byType(TextField));
-    expect(input.enabled, isFalse);
+  testWidgets('does not show conversational chat controls', (tester) async {
+    await _pumpScreen(tester);
+
+    expect(find.byType(TextField), findsNothing);
+    expect(find.textContaining('Pregunta por tu biblioteca'), findsNothing);
+    expect(find.byIcon(Icons.send_rounded), findsNothing);
   });
 
   testWidgets('renders unavailable state without claiming data changed', (
@@ -68,7 +83,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('Tu lectura, con más claridad'), findsOneWidget);
+    expect(find.text('Preparando coach de lectura'), findsOneWidget);
   });
 
   testWidgets('opens LibrerIA as a contextual shell route', (tester) async {

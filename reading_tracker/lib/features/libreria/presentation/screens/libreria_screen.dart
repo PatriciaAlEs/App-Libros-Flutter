@@ -13,10 +13,9 @@ class LibreriaScreen extends ConsumerWidget {
   final LibreriaRouteArguments? arguments;
 
   static const _suggestedQuestions = <String>[
-    '¿Qué estoy leyendo?',
-    '¿Cuánto avancé esta semana?',
-    '¿Cuál es mi racha actual?',
     '¿Cómo voy con mi objetivo anual?',
+    '¿Qué patrón tiene mi lectura esta semana?',
+    '¿Qué libro conviene retomar primero?',
   ];
 
   @override
@@ -78,13 +77,11 @@ class LibreriaScreen extends ConsumerWidget {
       ),
       LibreriaViewStatus.response => _MessageContent(
         key: const ValueKey('libreria-response'),
-        icon: AppIcons.libreria,
         title: 'LibrerIA',
         message: state.message ?? 'Respuesta preparada.',
       ),
       LibreriaViewStatus.error => _MessageContent(
         key: const ValueKey('libreria-error'),
-        icon: Icons.error_outline_rounded,
         title: 'No pudimos preparar LibrerIA',
         message:
             state.message ??
@@ -92,7 +89,6 @@ class LibreriaScreen extends ConsumerWidget {
       ),
       LibreriaViewStatus.unavailable => _MessageContent(
         key: const ValueKey('libreria-unavailable'),
-        icon: Icons.cloud_off_outlined,
         title: 'LibrerIA no está disponible',
         message:
             state.message ??
@@ -130,7 +126,7 @@ class _InitialContent extends StatelessWidget {
           Semantics(
             header: true,
             child: Text(
-              'Tu lectura, con más claridad',
+              'LibrerIA',
               style: theme.textTheme.headlineMedium?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.w900,
@@ -140,7 +136,7 @@ class _InitialContent extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Aquí podrás entender tu progreso y encontrar el siguiente paso en tu biblioteca.',
+            'Tu coach de lectura dentro de ReadPp: un espacio para entender tu progreso, detectar hábitos y preparar mejores decisiones lectoras.',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
               height: 1.45,
@@ -148,52 +144,147 @@ class _InitialContent extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xl),
           LibreriaLimitCard(
-            title: 'Tus próximos insights vivirán aquí',
+            title: 'Bienvenida a LibrerIA',
             message:
-                'Esta primera versión prepara la experiencia sin consultar todavía tus datos de lectura.',
+                'Estamos preparando una experiencia especializada en tu biblioteca. En este MVP inicial no consulta datos ni genera respuestas todavía.',
             actionLabel: origin == null ? null : 'Volver a $origin',
             onAction: origin == null ? null : () => Navigator.maybePop(context),
           ),
           const SizedBox(height: AppSpacing.xl),
+          const _CoachPreparationCard(),
+          const SizedBox(height: AppSpacing.xl),
           Text(
-            'Preguntas que podrás hacer',
+            'Ejemplos de futuras preguntas',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
+          Column(
             children: [
               for (final question in suggestedQuestions)
-                ActionChip(
-                  label: Text(question),
-                  onPressed: null,
-                  tooltip: 'Disponible próximamente',
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: _FutureQuestionTile(question: question),
                 ),
             ],
           ),
-          const SizedBox(height: AppSpacing.xl),
-          Semantics(
-            textField: true,
-            enabled: false,
-            label: 'Pregunta a LibrerIA. Disponible próximamente.',
-            child: ExcludeSemantics(
-              child: TextField(
-                enabled: false,
-                decoration: InputDecoration(
-                  labelText: 'Pregunta por tu biblioteca o tu progreso',
-                  helperText: 'Las preguntas estarán disponibles pronto.',
-                  suffixIcon: Icon(
-                    Icons.send_rounded,
-                    color: theme.disabledColor,
+        ],
+      ),
+    );
+  }
+}
+
+class _CoachPreparationCard extends StatelessWidget {
+  const _CoachPreparationCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Semantics(
+      container: true,
+      label:
+          'Estado de LibrerIA. Preparando coach de lectura. Sin chat ni inteligencia artificial activa todavía.',
+      child: ReadPpSurface(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer.withValues(
+                  alpha: 0.72,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                AppIcons.libreria,
+                color: theme.colorScheme.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Preparando coach de lectura',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'La base visual ya está lista. Las respuestas, datos reales y herramientas llegarán en siguientes pasos del sprint.',
+                    style: theme.textTheme.bodyMedium?.copyWith(height: 1.4),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FutureQuestionTile extends StatelessWidget {
+  const _FutureQuestionTile({required this.question});
+
+  final String question;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Semantics(
+      label: 'Ejemplo no funcional: $question',
+      child: ExcludeSemantics(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.88),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.auto_awesome_outlined,
+                color: theme.colorScheme.primary.withValues(alpha: 0.76),
+                size: 19,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  question,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-            ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                'Próximamente',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -216,12 +307,10 @@ class _LoadingContent extends StatelessWidget {
 class _MessageContent extends StatelessWidget {
   const _MessageContent({
     super.key,
-    required this.icon,
     required this.title,
     required this.message,
   });
 
-  final IconData icon;
   final String title;
   final String message;
 
