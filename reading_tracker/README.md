@@ -48,6 +48,16 @@ Build Web:
 flutter build web --release --dart-define-from-file=dart_defines/dev.json
 ```
 
+For production Auth, set `AUTH_REDIRECT_URL` to the public HTTPS origin (with
+its trailing slash) in the Dart defines file. Add that exact URL to Supabase
+Authentication > URL Configuration > Redirect URLs. Keep the Supabase project
+Site URL on the production origin as a safe fallback. Google Cloud must only
+use Supabase's callback URL as its authorized redirect URI:
+`https://<project-ref>.supabase.co/auth/v1/callback`.
+
+Email/password must be enabled in Supabase Authentication > Providers. If email
+confirmation is enabled, confirmation links use `AUTH_REDIRECT_URL` as well.
+
 Deploy Web/PWA:
 
 ```sh

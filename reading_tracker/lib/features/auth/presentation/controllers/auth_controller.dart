@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/auth_repository_impl.dart';
 import '../../domain/app_user.dart';
@@ -113,7 +115,17 @@ class AuthController extends StateNotifier<AuthControllerState> {
         errorMessage:
             'El inicio de sesion aun no esta configurado en este entorno.',
       );
-    } catch (_) {
+    } on AuthException catch (error) {
+      debugPrint(
+        'Supabase authentication failed '
+        '(status: ${error.statusCode}): ${error.message}',
+      );
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: _authErrorMessage(error),
+      );
+    } catch (error, stackTrace) {
+      debugPrint('Unexpected authentication failure: $error\n$stackTrace');
       state = state.copyWith(
         isLoading: false,
         errorMessage:
@@ -127,4 +139,28 @@ class AuthController extends StateNotifier<AuthControllerState> {
     _subscription?.cancel();
     super.dispose();
   }
+}
+
+String _authErrorMessage(AuthException error) {
+  final message = error.message.toLowerCase();
+
+  if (message.contains('invalid login credentials')) {
+    return 'El correo o la contrasena no son correctos.';
+  }
+  if (message.contains('email not confirmed')) {
+    return 'Confirma tu correo antes de iniciar sesion.';
+  }
+  if (message.contains('user already registered') ||
+      message.contains('already been registered')) {
+    return 'Ya existe una cuenta con este correo.';
+  }
+  if (message.contains('password') &&
+      (message.contains('weak') || message.contains('least'))) {
+    return 'La contrasena no cumple los requisitos de seguridad.';
+  }
+  if (error.statusCode == '429' || message.contains('rate limit')) {
+    return 'Demasiados intentos. Espera un momento y vuelve a probar.';
+  }
+
+  return 'No se ha podido completar la autenticacion. Intentalo de nuevo.';
 }

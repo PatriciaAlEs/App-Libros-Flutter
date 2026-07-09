@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/backend/supabase_client_provider.dart';
+import 'auth_redirect_url.dart';
 import '../domain/app_user.dart';
 import '../domain/auth_repository.dart';
 
@@ -49,13 +50,17 @@ class SupabaseAuthRepository implements AuthRepository {
     final response = await _auth.signUp(
       email: email.trim(),
       password: password,
+      emailRedirectTo: authRedirectUrl,
     );
     return response.user?.toAppUser();
   }
 
   @override
   Future<void> signInWithGoogle() async {
-    await _auth.signInWithOAuth(OAuthProvider.google);
+    await _auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: authRedirectUrl,
+    );
   }
 
   @override
