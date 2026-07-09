@@ -88,6 +88,30 @@ void main() {
     expect(find.text('Volver a Inicio'), findsOneWidget);
   });
 
+  testWidgets('keeps LibrerIA outside the primary bottom navigation', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(
+          home: MainNavigationScreen(
+            initialRoute: '/libreria',
+            initialArguments: LibreriaRouteArguments(origin: 'Inicio'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LibreriaScreen), findsOneWidget);
+    expect(find.text('Inicio'), findsOneWidget);
+    expect(find.text('Biblioteca'), findsOneWidget);
+    expect(find.text('Progreso'), findsOneWidget);
+    expect(find.text('Insights'), findsOneWidget);
+    expect(find.text('Perfil'), findsOneWidget);
+    expect(find.byType(BottomNavigationBar), findsNothing);
+  });
+
   testWidgets('entry card invokes navigation callback', (tester) async {
     var tapped = false;
     await tester.pumpWidget(
