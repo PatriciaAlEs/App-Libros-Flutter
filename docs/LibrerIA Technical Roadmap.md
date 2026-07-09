@@ -69,6 +69,10 @@ Los Product Success Criteria `PSC-001` a `PSC-007` son gates de producto. En par
 
 **Estimación relativa:** M
 
+**Estado:** COMPLETADO Y VALIDADO — 9 de julio de 2026
+
+**Evidencia:** `docs/libreria/sprint-1-libreria-experience.md`
+
 ### Objetivo del sprint
 
 Crear la entrada visible de LibrerIA dentro de ReadPp, establecer su UI base y definir el esqueleto del Engine sin conectar herramientas, contexto ni proveedor de IA.

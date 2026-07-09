@@ -6,6 +6,7 @@ import 'core/observability/readpp_sentry.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_theme_controller.dart';
 import 'features/navigation/presentation/screens/main_navigation_screen.dart';
+import 'features/libreria/presentation/models/libreria_route_arguments.dart';
 import 'features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/onboarding/presentation/widgets/sync_onboarding_notice.dart';
@@ -101,6 +102,13 @@ class App extends ConsumerWidget {
           settings,
           (_) => const MainNavigationScreen(initialIndex: 4),
         );
+
+      case '/libreria':
+        final arguments = settings.arguments;
+        if (arguments != null && arguments is! LibreriaRouteArguments) {
+          return _notFoundRoute();
+        }
+        return _shellRoute(settings);
 
       case '/account':
       case '/account/transition':

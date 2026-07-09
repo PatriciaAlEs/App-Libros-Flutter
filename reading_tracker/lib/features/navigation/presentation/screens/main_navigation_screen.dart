@@ -10,6 +10,8 @@ import '../../../books/presentation/screens/book_form_screen.dart';
 import '../../../books/presentation/screens/books_list_screen.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../insights/presentation/screens/insights_screen.dart';
+import '../../../libreria/presentation/models/libreria_route_arguments.dart';
+import '../../../libreria/presentation/screens/libreria_screen.dart';
 import '../../../progress/presentation/screens/progress_screen.dart';
 import '../../../reading_sessions/domain/entities/reading_session.dart';
 import '../../../reading_sessions/presentation/screens/calendar_screen.dart';
@@ -124,6 +126,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         session: settings.arguments! as ReadingSession,
       ),
       '/stats' => (_) => const StatsScreen(),
+      '/libreria' => (_) => LibreriaScreen(
+        arguments: settings.arguments as LibreriaRouteArguments?,
+      ),
       '/account' => (_) => const AccountScreen(),
       '/account/transition' => (_) => const AccountTransitionScreen(),
       '/account/auth' => (_) => AuthScreen(

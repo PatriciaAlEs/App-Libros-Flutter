@@ -10,6 +10,9 @@ import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
 import '../../../books/presentation/widgets/current_reading_card.dart';
 import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
+import '../../../libreria/presentation/models/libreria_route_arguments.dart';
+import '../../../libreria/presentation/providers/libreria_provider.dart';
+import '../../../libreria/presentation/widgets/libreria_entry_card.dart';
 import '../../../reading_sessions/domain/entities/reading_session.dart';
 import '../../../reading_sessions/domain/usecases/register_reading_session.dart';
 import '../../../reading_sessions/presentation/providers/reading_sessions_provider.dart';
@@ -39,6 +42,7 @@ class HomeScreen extends ConsumerWidget {
     final recentSessionsAsync = ref.watch(
       readingSessionsForRangeProvider(recentActivityRange),
     );
+    final libreriaEnabled = ref.watch(libreriaFeatureEnabledProvider);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -125,6 +129,18 @@ class HomeScreen extends ConsumerWidget {
                             onCalendarTap: () =>
                                 Navigator.pushNamed(context, '/calendar'),
                           ),
+                          if (libreriaEnabled) ...[
+                            const SizedBox(height: AppSpacing.xl),
+                            LibreriaEntryCard(
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                '/libreria',
+                                arguments: const LibreriaRouteArguments(
+                                  origin: 'Inicio',
+                                ),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: AppSpacing.xl),
                           _CurrentReadingCards(
                             books: prioritizedCurrentBooks,

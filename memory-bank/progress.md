@@ -662,3 +662,20 @@
 - APK inspeccionada: package `com.readpp.app`, `versionName=1.0.0`, `versionCode=1`.
 - APK SHA1: `8a771c6ab44b69cba34ad009877a1e8e3ef4b3b1`.
 - Integraciones de fase documentadas: Supabase, Auth Email/Google, Sync, PWA, Sentry y Analytics.
+
+## LibrerIA Sprint 1 - LibrerIA Experience
+
+- Estado: COMPLETADO Y VALIDADO el 2026-07-09.
+- Alcance cerrado: feature LibrerIA, navegacion, UI base y Engine Skeleton.
+- Nueva ruta `/libreria` integrada en el shell principal.
+- Entrada desde Inicio protegida por `LIBRERIA_ENABLED`.
+- UI inicial honesta: no consulta datos, no simula chat y no inventa insights.
+- Engine independiente con request, response, rutas y guard inicial de dominio.
+- No se implementaron ContextBuilder, Tool Manager, Tool Contracts, AiProvider, herramientas, memoria ni llamadas de red.
+- Validacion: `flutter analyze --no-pub` sin issues.
+- Validacion focal: 9/9 tests.
+- Validacion completa: 190/190 tests.
+- Build Web debug OK.
+- Build APK debug OK.
+- Documentacion: `docs/libreria/sprint-1-libreria-experience.md`.
+- Siguiente gate: no iniciar Sprint 2 sin autorizacion explicita del usuario.
