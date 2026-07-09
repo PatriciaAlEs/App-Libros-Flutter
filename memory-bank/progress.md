@@ -666,16 +666,16 @@
 ## LibrerIA Sprint 1 - LibrerIA Experience
 
 - Estado: COMPLETADO Y VALIDADO el 2026-07-09.
-- Alcance cerrado: feature LibrerIA, navegacion, UI base y Engine Skeleton.
+- Sprint 1 queda cerrado funcional y tecnicamente.
+- Alcance cerrado: feature `libreria`, acceso desde Home, ruta `/libreria`, UI base y `LibrerIAEngine` como esqueleto central.
 - Nueva ruta `/libreria` integrada en el shell principal.
 - Entrada desde Inicio protegida por `LIBRERIA_ENABLED`.
-- UI inicial honesta: no consulta datos, no simula chat y no inventa insights.
-- Engine independiente con request, response, rutas y guard inicial de dominio.
-- No se implementaron ContextBuilder, Tool Manager, Tool Contracts, AiProvider, herramientas, memoria ni llamadas de red.
-- Validacion: `flutter analyze --no-pub` sin issues.
-- Validacion focal: 9/9 tests.
-- Validacion completa: 190/190 tests.
-- Build Web debug OK.
-- Build APK debug OK.
+- UI inicial honesta: placeholder de LibrerIA sin chat, sin IA, sin consultas reales, sin recomendaciones y sin acciones.
+- `LibrerIAEngine` existe como centro del flujo futuro.
+- Estado inicial del engine: `preparing`.
+- El provider de vista deriva el estado desde el engine.
+- No se implementaron OpenAI, IA, `ContextBuilder` real, `ToolManager` real, recomendaciones, acciones, herramientas reales, memoria ni llamadas de red.
+- Validacion final: `flutter analyze` OK.
+- Validacion final: `flutter test` OK con 198/198 tests.
 - Documentacion: `docs/libreria/sprint-1-libreria-experience.md`.
 - Siguiente gate: no iniciar Sprint 2 sin autorizacion explicita del usuario.

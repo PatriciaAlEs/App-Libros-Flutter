@@ -357,6 +357,18 @@
 - No introducir IA sobre datos personales sin criterios explicitos de privacidad, control de usuario y QA.
 - Mantener local-first: Drift sigue siendo fuente de verdad local y Supabase complementa Auth/sync.
 
+## LibrerIA Sprint 1 - Cierre
+
+- Decision: LibrerIA Sprint 1 queda cerrado funcional y tecnicamente el 2026-07-09.
+- Decision: la feature `libreria` existe como base separada, accesible desde Home y mediante ruta `/libreria`.
+- Decision: la UI base debe permanecer como placeholder honesto mientras no haya capacidades reales; no debe simular chat, IA, recomendaciones ni acciones.
+- Decision: `LibrerIAEngine` es el esqueleto central para la futura evolucion de LibrerIA.
+- Decision: el estado inicial del engine queda en `preparing`.
+- Decision: el provider de vista deriva desde el engine para evitar duplicar el estado de presentacion.
+- Decision: Sprint 1 no incluye OpenAI, IA, `ContextBuilder` real, `ToolManager` real, recomendaciones ni acciones.
+- Validacion de cierre: `flutter analyze` OK y `flutter test` OK con 198/198 tests.
+- Gate: no abrir Sprint 2 sin autorizacion explicita del usuario.
+
 ## Cierre de fase actual - Versionado y despliegue
 
 - Decision: registrar en README y Memory Bank las versiones APK/Web al cerrar fase.

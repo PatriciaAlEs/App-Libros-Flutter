@@ -69,9 +69,15 @@ Estado Hito 8 - Sincronizacion de datos:
 - QA funcional cerrado en Android y Web.
 - Estado automatizado final del hito: `flutter analyze` sin issues y `flutter test` 178/178.
 - Siguiente hito: Beta publica, AI Assistant, automatizaciones y mejoras de producto.
-- LibrerIA Sprint 1 cerrado el 2026-07-09: feature, navegacion, UI base y Engine Skeleton completados.
-- LibrerIA mantiene deshabilitadas consultas y chat; no existen todavia ContextBuilder, Tool Manager ni AiProvider.
-- Validacion Sprint 1: analisis limpio, 190/190 tests, build Web debug y APK debug correctos.
+- LibrerIA Sprint 1 cerrado el 2026-07-09 funcional y tecnicamente.
+- Feature `libreria` creada.
+- Acceso implementado desde Home y ruta `/libreria`.
+- UI base de LibrerIA entregada como placeholder honesto, sin chat ni IA.
+- `LibrerIAEngine` creado como esqueleto central.
+- Estado inicial del engine: `preparing`.
+- Provider de vista derivando desde el engine.
+- LibrerIA Sprint 1 no incluye OpenAI, IA, `ContextBuilder` real, `ToolManager` real, recomendaciones ni acciones.
+- Validacion final Sprint 1: `flutter analyze` OK y `flutter test` OK con 198/198 tests.
 - Siguiente gate LibrerIA: esperar autorizacion explicita antes de Sprint 2.
 
 ## Cierre Hito 8 - QA post-sync

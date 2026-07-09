@@ -193,6 +193,41 @@ Validacion vigente Hito 9:
 - `flutter test` OK.
 - 178/178 tests.
 
+## LibrerIA Sprint 1
+
+Estado: COMPLETADO.
+
+Sprint 1 queda cerrado funcional y tecnicamente el 2026-07-09.
+
+Alcance cerrado:
+
+- Feature `libreria` creada.
+- Acceso desde Home.
+- Ruta `/libreria` disponible.
+- UI base de LibrerIA como placeholder honesto.
+- Placeholder sin chat y sin IA.
+- `LibrerIAEngine` creado como esqueleto central.
+- Estado inicial del engine en `preparing`.
+- Provider de vista derivando desde el engine.
+
+Limites cerrados del sprint:
+
+- Sin OpenAI.
+- Sin IA.
+- Sin `ContextBuilder` real.
+- Sin `ToolManager` real.
+- Sin recomendaciones.
+- Sin acciones.
+
+Validacion final:
+
+- `flutter analyze`: OK.
+- `flutter test`: 198/198.
+
+Gate vigente:
+
+- No abrir Sprint 2 todavia.
+
 Sprint 19.x implementado:
 
 - Sprint 19.1 agrega motion premium calmado: confeti breve al completar libro, transiciones suaves, microinteracciones, skeletons y empty states animados.
