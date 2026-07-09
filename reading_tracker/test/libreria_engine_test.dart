@@ -9,10 +9,15 @@ void main() {
   const engine = LibrerIAEngine();
 
   group('LibrerIAEngine', () {
-    test('instantiates in the ready state', () {
+    test('instantiates in the preparation state without AI, data or tools', () {
       expect(engine, isA<LibrerIAEngine>());
-      expect(engine.state.phase, LibreriaEnginePhase.ready);
+      expect(engine.state.phase, LibreriaEnginePhase.preparing);
       expect(engine.state.lastRoute, isNull);
+      expect(engine.state.message, 'Preparando coach de lectura');
+      expect(engine.state.hasConsultedData, isFalse);
+      expect(engine.state.isAiActive, isFalse);
+      expect(engine.state.hasAvailableActions, isFalse);
+      expect(engine.state.hasRealTools, isFalse);
     });
 
     test('asks for clarification when the message is empty', () async {

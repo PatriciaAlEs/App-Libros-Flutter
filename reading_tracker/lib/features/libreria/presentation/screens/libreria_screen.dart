@@ -71,6 +71,7 @@ class LibreriaScreen extends ConsumerWidget {
         key: const ValueKey('libreria-initial'),
         suggestedQuestions: _suggestedQuestions,
         origin: arguments?.origin,
+        engineMessage: state.message,
       ),
       LibreriaViewStatus.loading => const _LoadingContent(
         key: ValueKey('libreria-loading'),
@@ -103,10 +104,12 @@ class _InitialContent extends StatelessWidget {
     super.key,
     required this.suggestedQuestions,
     this.origin,
+    this.engineMessage,
   });
 
   final List<String> suggestedQuestions;
   final String? origin;
+  final String? engineMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +154,7 @@ class _InitialContent extends StatelessWidget {
             onAction: origin == null ? null : () => Navigator.maybePop(context),
           ),
           const SizedBox(height: AppSpacing.xl),
-          const _CoachPreparationCard(),
+          _CoachPreparationCard(message: engineMessage),
           const SizedBox(height: AppSpacing.xl),
           Text(
             'Ejemplos de futuras preguntas',
@@ -176,7 +179,9 @@ class _InitialContent extends StatelessWidget {
 }
 
 class _CoachPreparationCard extends StatelessWidget {
-  const _CoachPreparationCard();
+  const _CoachPreparationCard({this.message});
+
+  final String? message;
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +216,7 @@ class _CoachPreparationCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Preparando coach de lectura',
+                    message ?? 'Preparando coach de lectura',
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.w800,

@@ -13,6 +13,7 @@ final libreriaEngineProvider = Provider<LibreriaEngine>(
   (ref) => const LibrerIAEngine(),
 );
 
-final libreriaViewStateProvider = Provider<LibreriaViewState>(
-  (ref) => const LibreriaViewState(),
-);
+final libreriaViewStateProvider = Provider<LibreriaViewState>((ref) {
+  final engine = ref.watch(libreriaEngineProvider);
+  return LibreriaViewState.fromEngineState(engine.state);
+});
