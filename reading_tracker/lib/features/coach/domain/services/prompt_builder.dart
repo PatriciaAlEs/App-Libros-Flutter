@@ -8,6 +8,7 @@ abstract interface class PromptBuilder {
     required String userMessage,
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
+    bool conversationIncludesCurrentMessage = false,
   });
 }
 
@@ -27,11 +28,24 @@ final class CoachPromptBuilder implements PromptBuilder {
     required String userMessage,
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
+    bool conversationIncludesCurrentMessage = false,
   }) {
     final currentMessage = CoachMessage.user(userMessage);
     final domainConversation = conversation
         .where((message) => message.role != CoachMessageRole.system)
-        .toList(growable: false);
+        .toList();
+    if (conversationIncludesCurrentMessage) {
+      if (domainConversation.isEmpty ||
+          domainConversation.last.role != CoachMessageRole.user ||
+          domainConversation.last.content != userMessage) {
+        throw ArgumentError.value(
+          conversation,
+          'conversation',
+          'The conversation must end with the current user message',
+        );
+      }
+      domainConversation.removeLast();
+    }
     final retainedCount = domainConversation.length < maxConversationMessages
         ? domainConversation.length
         : maxConversationMessages;

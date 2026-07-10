@@ -34,6 +34,12 @@ void main() {
 
 ReaderContext _readerContext() => ReaderContext(
   metadata: ReaderContextMetadata(generatedAt: DateTime(2026, 7, 10)),
-  library: ReaderLibraryContext(allBooks: const [], currentBooks: const [], completedBooks: const [], pendingBooks: const [], abandonedBooks: const []),
+  library: ReaderLibraryContext(
+    allBooks: const [],
+    currentBooks: const [],
+    completedBooks: const [],
+    pendingBooks: const [],
+    abandonedBooks: const [],
+  ),
   activity: ReaderActivityContext(readingSessions: const []),
 );

@@ -9,42 +9,54 @@ import '../../domain/services/fakes/fake_llm_client.dart';
 
 void main() {
   group('CoachRepositoryImpl', () {
-    test('usa el builder y envia exactamente su resultado al cliente', () async {
-      final builtMessages = [CoachMessage.system('Sistema'), CoachMessage.user('Actual')];
-      final builder = _RecordingPromptBuilder(builtMessages);
-      final client = FakeLlmClient('Respuesta');
-      final repository = CoachRepositoryImpl(llmClient: client, promptBuilder: builder);
-      final conversation = [CoachMessage.user('Anterior')];
-      final context = _readerContext();
+    test(
+      'usa el builder y envia exactamente su resultado al cliente',
+      () async {
+        final builtMessages = [
+          CoachMessage.system('Sistema'),
+          CoachMessage.user('Actual'),
+        ];
+        final builder = _RecordingPromptBuilder(builtMessages);
+        final client = FakeLlmClient('Respuesta');
+        final repository = CoachRepositoryImpl(
+          llmClient: client,
+          promptBuilder: builder,
+        );
+        final conversation = [CoachMessage.user('Anterior')];
+        final context = _readerContext();
 
-      final response = await repository.generateReply(
-        userMessage: 'Actual',
-        conversation: conversation,
-        readerContext: context,
-      );
+        final response = await repository.generateReply(
+          userMessage: 'Actual',
+          conversation: conversation,
+          readerContext: context,
+        );
 
-      expect(repository, isA<CoachRepository>());
-      expect(builder.userMessage, 'Actual');
-      expect(builder.conversation, same(conversation));
-      expect(builder.readerContext, same(context));
-      expect(client.lastMessages, builtMessages);
-      expect(response, 'Respuesta');
-    });
+        expect(repository, isA<CoachRepository>());
+        expect(builder.userMessage, 'Actual');
+        expect(builder.conversation, same(conversation));
+        expect(builder.readerContext, same(context));
+        expect(client.lastMessages, builtMessages);
+        expect(response, 'Respuesta');
+      },
+    );
 
-    test('conserva una respuesta vacia para que la gestione el controller', () async {
-      final repository = CoachRepositoryImpl(
-        llmClient: FakeLlmClient('   '),
-        promptBuilder: _RecordingPromptBuilder([CoachMessage.user('Actual')]),
-      );
+    test(
+      'conserva una respuesta vacia para que la gestione el controller',
+      () async {
+        final repository = CoachRepositoryImpl(
+          llmClient: FakeLlmClient('   '),
+          promptBuilder: _RecordingPromptBuilder([CoachMessage.user('Actual')]),
+        );
 
-      final response = await repository.generateReply(
-        userMessage: 'Actual',
-        conversation: const [],
-        readerContext: _readerContext(),
-      );
+        final response = await repository.generateReply(
+          userMessage: 'Actual',
+          conversation: const [],
+          readerContext: _readerContext(),
+        );
 
-      expect(response, '   ');
-    });
+        expect(response, '   ');
+      },
+    );
 
     test('propaga errores de LlmClient', () {
       final repository = CoachRepositoryImpl(
@@ -73,7 +85,12 @@ class _RecordingPromptBuilder implements PromptBuilder {
   ReaderContext? readerContext;
 
   @override
-  List<CoachMessage> build({required String userMessage, required List<CoachMessage> conversation, required ReaderContext readerContext}) {
+  List<CoachMessage> build({
+    required String userMessage,
+    required List<CoachMessage> conversation,
+    required ReaderContext readerContext,
+    bool conversationIncludesCurrentMessage = false,
+  }) {
     this.userMessage = userMessage;
     this.conversation = conversation;
     this.readerContext = readerContext;
@@ -92,6 +109,12 @@ class _FailingLlmClient extends FakeLlmClient {
 
 ReaderContext _readerContext() => ReaderContext(
   metadata: ReaderContextMetadata(generatedAt: DateTime(2026, 7, 10)),
-  library: ReaderLibraryContext(allBooks: const [], currentBooks: const [], completedBooks: const [], pendingBooks: const [], abandonedBooks: const []),
+  library: ReaderLibraryContext(
+    allBooks: const [],
+    currentBooks: const [],
+    completedBooks: const [],
+    pendingBooks: const [],
+    abandonedBooks: const [],
+  ),
   activity: ReaderActivityContext(readingSessions: const []),
 );

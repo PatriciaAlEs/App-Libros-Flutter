@@ -7,9 +7,7 @@ import '../../domain/repositories/coach_repository.dart';
 
 final coachControllerProvider =
     StateNotifierProvider<CoachController, CoachControllerState>((ref) {
-      return CoachController(
-        repository: ref.watch(coachRepositoryProvider),
-      );
+      return CoachController(repository: ref.watch(coachRepositoryProvider));
     });
 
 class CoachControllerState {
@@ -38,10 +36,9 @@ class CoachControllerState {
 }
 
 class CoachController extends StateNotifier<CoachControllerState> {
-  CoachController({
-    required CoachRepository repository,
-  }) : _repository = repository,
-       super(CoachControllerState());
+  CoachController({required CoachRepository repository})
+    : _repository = repository,
+      super(CoachControllerState());
 
   final CoachRepository _repository;
 

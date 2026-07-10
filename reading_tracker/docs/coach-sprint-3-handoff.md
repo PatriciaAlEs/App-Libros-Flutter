@@ -15,9 +15,9 @@ El flujo queda ahora como `CoachController -> CoachRepository -> PromptBuilder -
 - `PromptBuilder.build` recibe `userMessage`, historial de dominio anterior al mensaje actual y `ReaderContext`, y devuelve una lista inmutable de `CoachMessage` lista para `LlmClient`.
 - El builder vive en `domain/services` porque opera solo con contratos y modelos de dominio y no depende de Flutter, Riverpod, HTTP ni OpenAI.
 - El orden estable es: instrucciones system, contexto lector system, historial cronologico retenido y mensaje actual user.
-- El controller añade el mensaje actual al estado visible, pero pasa al repositorio el historial anterior. El builder lo añade exactamente una vez.
+- El controller añade el mensaje actual al estado visible, pero pasa al repositorio el historial anterior. El builder lo añade exactamente una vez. Para otros consumidores, `conversationIncludesCurrentMessage` permite declarar explicitamente que el ultimo mensaje user ya es el actual; el builder lo separa antes del recorte y lo vuelve a situar una sola vez al final. No se deduplica por coincidencia de texto, por lo que una repeticion intencionada se conserva cuando el historial excluye el envio actual.
 - Los mensajes `system` presentes accidentalmente en el historial visible se descartan; las instrucciones y el contexto solo proceden de las dependencias explicitas del builder.
-- El limite centralizado y configurable es `maxConversationMessages`, con valor prudente por defecto de 20. Se conservan los mensajes mas recientes, siempre se mantienen ambos mensajes system y el mensaje actual.
+- El limite centralizado y configurable es `maxConversationMessages`, con valor prudente por defecto de 20. Cuenta exclusivamente mensajes del historial. Instrucciones, contexto y mensaje actual quedan fuera del cupo. Primero se selecciona el sufijo mas reciente y se conserva su orden cronologico; ambos mensajes system y el mensaje actual permanecen siempre.
 - Se conserva el contenido exacto de `DefaultCoachSystemPromptBuilder`, el formato de `MarkdownContextFormatter`, la respuesta vacia gestionada como error visible por el controller y la propagacion de errores desde cliente a controller a traves del repositorio.
 
 ## Archivos
@@ -40,7 +40,9 @@ Modificados:
 
 `promptBuilderProvider` crea `CoachPromptBuilder` con `DefaultCoachSystemPromptBuilder` y `MarkdownContextFormatter`. `coachRepositoryProvider` inyecta ese contrato y `llmClientProvider`; el controller solo lee el repositorio.
 
-Los tests del builder cubren instrucciones, contexto, roles, orden, historial vacio, espacios, no duplicacion, filtrado de system, determinismo y limite con prioridad reciente. Los tests del repositorio verifican argumentos al builder, identidad exacta del resultado enviado al cliente, respuesta vacia, respuesta correcta y errores. Los tests del controller verifican estado/loading, mensaje de usuario, datos de dominio entregados al repositorio, respuesta y errores sin inspeccionar detalles del prompt.
+Los tests del builder cubren instrucciones, contexto, roles, orden, historial vacio, espacios, ambos contratos respecto al mensaje actual, repeticion intencionada, filtrado de system, determinismo y limite con prioridad reciente y orden cronologico. Los tests del repositorio verifican argumentos al builder, identidad exacta del resultado enviado al cliente, respuesta vacia, respuesta correcta y errores. Los tests del controller verifican estado/loading, mensaje de usuario, datos de dominio entregados al repositorio, respuesta y errores sin inspeccionar detalles del prompt.
+
+El test de integraciones prohibidas pertenecia a `reader_context_provider_test.dart`, pero recorria accidentalmente todo `lib/features/coach`. Ese alcance global ya producia falsos positivos con componentes legitimos y preexistentes como `LlmClient` y `OpenAiLlmClient`, y es incompatible con el `PromptBuilder` exigido por esta epic. No se elimino la proteccion: ahora enumera de forma explicita `reader_context_provider.dart`, `reader_context_builder.dart` y `reader_context_builder_impl.dart`, que son el limite arquitectonico que el test pretende mantener libre de LLM, OpenAI, red y sincronizacion. Las capas data, prompt y cliente quedan fuera porque esas dependencias forman parte legitima de sus responsabilidades.
 
 ## Riesgos y extensiones futuras
 

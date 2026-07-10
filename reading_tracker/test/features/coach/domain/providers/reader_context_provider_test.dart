@@ -73,9 +73,13 @@ void main() {
 
     test('reader context source does not introduce forbidden integrations', () {
       final source = [
-        File('lib/features/coach/domain/providers/reader_context_provider.dart'),
+        File(
+          'lib/features/coach/domain/providers/reader_context_provider.dart',
+        ),
         File('lib/features/coach/domain/services/reader_context_builder.dart'),
-        File('lib/features/coach/domain/services/reader_context_builder_impl.dart'),
+        File(
+          'lib/features/coach/domain/services/reader_context_builder_impl.dart',
+        ),
       ].map((file) => file.readAsStringSync()).join();
 
       for (final forbiddenPattern in [
