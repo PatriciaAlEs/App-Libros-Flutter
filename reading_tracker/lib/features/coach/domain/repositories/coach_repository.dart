@@ -1,5 +1,10 @@
 import '../entities/coach_message.dart';
+import '../models/reader_context.dart';
 
 abstract class CoachRepository {
-  Future<String> generateReply(List<CoachMessage> messages);
+  Future<String> generateReply({
+    required String userMessage,
+    required List<CoachMessage> conversation,
+    required ReaderContext readerContext,
+  });
 }

@@ -1,3 +1,51 @@
+# Epic 3.8 - Prompt Builder
+
+## Estado
+
+Implementada en codigo y pendiente de comprobaciones manuales por la desarrolladora. No debe marcarse como cerrada hasta ejecutar las validaciones locales acordadas.
+
+## Arquitectura y problema resuelto
+
+Antes de esta epic, `CoachController` construia directamente las instrucciones del sistema, el contexto lector y el orden final de mensajes. `CoachRepositoryImpl` se limitaba a reenviar esa lista al `LlmClient`. Esto acoplaba presentacion al protocolo interno del modelo.
+
+El flujo queda ahora como `CoachController -> CoachRepository -> PromptBuilder -> LlmClient -> OpenAiLlmClient`. El controller conserva estado, loading, errores y mensajes visibles; el repositorio coordina la construccion y llamada; `CoachPromptBuilder` concentra toda la composicion; el cliente mantiene la serializacion especifica de OpenAI.
+
+## Contrato y decisiones
+
+- `PromptBuilder.build` recibe `userMessage`, historial de dominio anterior al mensaje actual y `ReaderContext`, y devuelve una lista inmutable de `CoachMessage` lista para `LlmClient`.
+- El builder vive en `domain/services` porque opera solo con contratos y modelos de dominio y no depende de Flutter, Riverpod, HTTP ni OpenAI.
+- El orden estable es: instrucciones system, contexto lector system, historial cronologico retenido y mensaje actual user.
+- El controller añade el mensaje actual al estado visible, pero pasa al repositorio el historial anterior. El builder lo añade exactamente una vez.
+- Los mensajes `system` presentes accidentalmente en el historial visible se descartan; las instrucciones y el contexto solo proceden de las dependencias explicitas del builder.
+- El limite centralizado y configurable es `maxConversationMessages`, con valor prudente por defecto de 20. Se conservan los mensajes mas recientes, siempre se mantienen ambos mensajes system y el mensaje actual.
+- Se conserva el contenido exacto de `DefaultCoachSystemPromptBuilder`, el formato de `MarkdownContextFormatter`, la respuesta vacia gestionada como error visible por el controller y la propagacion de errores desde cliente a controller a traves del repositorio.
+
+## Archivos
+
+Creado:
+
+- `lib/features/coach/domain/services/prompt_builder.dart`
+- `test/features/coach/domain/services/prompt_builder_test.dart`
+
+Modificados:
+
+- `lib/features/coach/domain/repositories/coach_repository.dart`
+- `lib/features/coach/data/repositories/coach_repository_impl.dart`
+- `lib/features/coach/data/providers/coach_repository_provider.dart`
+- `lib/features/coach/presentation/controllers/coach_controller.dart`
+- tests de repository, provider y controller
+- test de aislamiento de ReaderContext, acotado a los archivos de ese subsistema
+
+## Providers y tests
+
+`promptBuilderProvider` crea `CoachPromptBuilder` con `DefaultCoachSystemPromptBuilder` y `MarkdownContextFormatter`. `coachRepositoryProvider` inyecta ese contrato y `llmClientProvider`; el controller solo lee el repositorio.
+
+Los tests del builder cubren instrucciones, contexto, roles, orden, historial vacio, espacios, no duplicacion, filtrado de system, determinismo y limite con prioridad reciente. Los tests del repositorio verifican argumentos al builder, identidad exacta del resultado enviado al cliente, respuesta vacia, respuesta correcta y errores. Los tests del controller verifican estado/loading, mensaje de usuario, datos de dominio entregados al repositorio, respuesta y errores sin inspeccionar detalles del prompt.
+
+## Riesgos y extensiones futuras
+
+El limite cuenta mensajes, no tokens ni caracteres; una futura epic puede incorporar tokenizacion real. RAG, memoria persistente, herramientas y function calling quedan deliberadamente fuera y pueden incorporarse detras del builder o mediante nuevos colaboradores explicitos sin devolver esa responsabilidad al controller.
+
 # Estado actual
 
 - Epic actual: Sprint 3 del ReadPp Coach. Ultimo epic implementado en codigo: Epic 3.7 - wiring del repository/controller con `LlmClient`.

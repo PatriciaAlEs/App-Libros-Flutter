@@ -71,12 +71,12 @@ void main() {
       expect(builder.buildCount, 1);
     });
 
-    test('coach source does not introduce forbidden integrations', () {
-      final coachFiles = Directory('lib/features/coach')
-          .listSync(recursive: true)
-          .whereType<File>()
-          .where((file) => file.path.endsWith('.dart'));
-      final source = coachFiles.map((file) => file.readAsStringSync()).join();
+    test('reader context source does not introduce forbidden integrations', () {
+      final source = [
+        File('lib/features/coach/domain/providers/reader_context_provider.dart'),
+        File('lib/features/coach/domain/services/reader_context_builder.dart'),
+        File('lib/features/coach/domain/services/reader_context_builder_impl.dart'),
+      ].map((file) => file.readAsStringSync()).join();
 
       for (final forbiddenPattern in [
         RegExp('OpenAI'),

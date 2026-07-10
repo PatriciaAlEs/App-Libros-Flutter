@@ -4,15 +4,11 @@ import '../../data/providers/coach_repository_provider.dart';
 import '../../domain/entities/coach_message.dart';
 import '../../domain/models/reader_context.dart';
 import '../../domain/repositories/coach_repository.dart';
-import '../../domain/services/coach_system_\u0070rompt_builder.dart';
-import '../../domain/services/context_formatter.dart';
 
 final coachControllerProvider =
     StateNotifierProvider<CoachController, CoachControllerState>((ref) {
       return CoachController(
         repository: ref.watch(coachRepositoryProvider),
-        contextFormatter: const MarkdownContextFormatter(),
-        systemPromptBuilder: const DefaultCoachSystemPromptBuilder(),
       );
     });
 
@@ -44,16 +40,10 @@ class CoachControllerState {
 class CoachController extends StateNotifier<CoachControllerState> {
   CoachController({
     required CoachRepository repository,
-    required ContextFormatter contextFormatter,
-    required CoachSystemPromptBuilder systemPromptBuilder,
   }) : _repository = repository,
-       _contextFormatter = contextFormatter,
-       _systemPromptBuilder = systemPromptBuilder,
        super(CoachControllerState());
 
   final CoachRepository _repository;
-  final ContextFormatter _contextFormatter;
-  final CoachSystemPromptBuilder _systemPromptBuilder;
 
   Future<void> sendMessage({
     required String userMessage,
@@ -67,8 +57,9 @@ class CoachController extends StateNotifier<CoachControllerState> {
       );
     }
 
+    final conversation = state.messages;
     final userCoachMessage = CoachMessage.user(userMessage);
-    final visibleMessages = [...state.messages, userCoachMessage];
+    final visibleMessages = [...conversation, userCoachMessage];
 
     state = state.copyWith(
       messages: visibleMessages,
@@ -78,10 +69,9 @@ class CoachController extends StateNotifier<CoachControllerState> {
 
     try {
       final reply = await _repository.generateReply(
-        _requestMessages(
-          readerContext: readerContext,
-          visibleMessages: visibleMessages,
-        ),
+        userMessage: userMessage,
+        conversation: conversation,
+        readerContext: readerContext,
       );
 
       if (reply.trim().isEmpty) {
@@ -101,17 +91,6 @@ class CoachController extends StateNotifier<CoachControllerState> {
             'No se ha podido generar la respuesta. Intentalo de nuevo.',
       );
     }
-  }
-
-  List<CoachMessage> _requestMessages({
-    required ReaderContext readerContext,
-    required List<CoachMessage> visibleMessages,
-  }) {
-    return [
-      CoachMessage.system(_systemPromptBuilder.build()),
-      CoachMessage.system(_contextFormatter.format(readerContext)),
-      ...visibleMessages,
-    ];
   }
 }
 

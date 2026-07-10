@@ -50,7 +50,7 @@ void main() {
       expect(state.messages[1].content, 'Vas bien.');
     });
 
-    test('envio usa repository con instrucciones contexto y usuario', () async {
+    test('envio usa repository con datos de dominio y sin construir prompt', () async {
       final repository = _CompletingCoachRepository('Respuesta');
       final container = _container(repository);
       addTearDown(container.dispose);
@@ -62,13 +62,9 @@ void main() {
             readerContext: _readerContext(),
           );
 
-      expect(repository.lastMessages, hasLength(3));
-      expect(repository.lastMessages?[0].role, CoachMessageRole.system);
-      expect(repository.lastMessages?[0].content, contains('ReadPp Coach'));
-      expect(repository.lastMessages?[1].role, CoachMessageRole.system);
-      expect(repository.lastMessages?[1].content, startsWith('# Contexto'));
-      expect(repository.lastMessages?[2].role, CoachMessageRole.user);
-      expect(repository.lastMessages?[2].content, '  Como voy?  ');
+      expect(repository.lastUserMessage, '  Como voy?  ');
+      expect(repository.lastConversation, isEmpty);
+      expect(repository.lastReaderContext, isNotNull);
     });
 
     test('error desactiva loading y no anade respuesta falsa', () async {
@@ -135,22 +131,23 @@ class _CompletingCoachRepository implements CoachRepository {
   _CompletingCoachRepository(this.response);
 
   final String response;
-  List<CoachMessage>? lastMessages;
+  String? lastUserMessage;
+  List<CoachMessage>? lastConversation;
+  ReaderContext? lastReaderContext;
 
   @override
-  Future<String> generateReply(List<CoachMessage> messages) async {
-    lastMessages = List.unmodifiable(messages);
+  Future<String> generateReply({required String userMessage, required List<CoachMessage> conversation, required ReaderContext readerContext}) async {
+    lastUserMessage = userMessage;
+    lastConversation = List.unmodifiable(conversation);
+    lastReaderContext = readerContext;
     return response;
   }
 }
 
 class _PendingCoachRepository implements CoachRepository {
   final Completer<String> _completer = Completer<String>();
-  List<CoachMessage>? lastMessages;
-
   @override
-  Future<String> generateReply(List<CoachMessage> messages) {
-    lastMessages = List.unmodifiable(messages);
+  Future<String> generateReply({required String userMessage, required List<CoachMessage> conversation, required ReaderContext readerContext}) {
     return _completer.future;
   }
 
@@ -161,7 +158,7 @@ class _PendingCoachRepository implements CoachRepository {
 
 class _FailingCoachRepository implements CoachRepository {
   @override
-  Future<String> generateReply(List<CoachMessage> messages) async {
+  Future<String> generateReply({required String userMessage, required List<CoachMessage> conversation, required ReaderContext readerContext}) async {
     throw StateError('failure');
   }
 }
