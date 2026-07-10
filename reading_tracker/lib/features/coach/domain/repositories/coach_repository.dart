@@ -7,5 +7,6 @@ abstract class CoachRepository {
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
     bool conversationIncludesCurrentMessage = false,
+    String? conversationSummary,
   });
 }

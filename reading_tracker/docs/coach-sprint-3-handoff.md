@@ -1,3 +1,43 @@
+# Epic 3.11 - Memoria conversacional
+
+## Arquitectura resultante
+
+La arquitectura previa conservaba conversaciones solo dentro de `CoachControllerState`. Ahora el flujo se divide: `CoachController -> CoachRepository -> PromptBuilder -> LlmClient` para generación y `CoachController -> CoachConversationRepository -> CoachConversationDao -> Drift` para memoria local. Ningún objeto Drift sale de data.
+
+## Modelos, esquema y migracion
+
+`CoachConversation` incorpora ID, titulo, fechas de creación/actualización/actividad y resumen nullable. `CoachMessage` incorpora ID UUID estable, `conversationId`, fecha, secuencia y `parentUserMessageId`; `copyWith` conserva identidad durante streaming.
+
+El esquema sube de versión 6 a 7. La migración crea `coach_conversations` y `coach_messages`, foreign key con borrado en cascada, índice de actividad, índice único conversación/secuencia e índice de asociación user-assistant. Se usa SQL Drift encapsulado para no requerir regenerar `app_database.g.dart` durante una epic que prohíbe ejecutar generación automática.
+
+## DAO, repositorio y providers
+
+`CoachConversationDao` crea/lista/carga conversaciones, inserta o actualiza mensajes, ordena por secuencia, reemplaza contenido sobre la misma fila, elimina rangos y elimina conversaciones con sus mensajes. `DriftCoachConversationRepository` realiza el mapeo de dominio y genera títulos deterministas desde el primer mensaje, normalizados y limitados a 60 caracteres.
+
+Los providers nuevos exponen DAO, repositorio de conversaciones, `ConversationContextPolicy` y `ConversationSummaryService`. `CoachRepository` mantiene su responsabilidad LLM.
+
+## Flujos de memoria
+
+La primera pregunta crea automáticamente una conversación en memoria y persistencia; no se guarda una conversación vacía. User y assistant provisional se guardan con IDs estables. La UI se actualiza por chunk, mientras Drift recibe actualizaciones agrupadas cada 400 ms y una escritura final al completar, cancelar o fallar. Un provisional vacío se elimina. Los errores de persistencia no bloquean la respuesta principal.
+
+Al abrir el Coach se restaura la conversación más reciente. El estado distingue carga de conversación de generación. Nueva conversación limpia la sesión visual sin borrar historial; abrir otra cancela el stream anterior antes de cargar; eliminar solicita confirmación y borra mensajes relacionados.
+
+Regenerar y reintentar eliminan la respuesta assistant anterior y crean una nueva con ID nuevo asociada al mismo user. El user no se duplica y el historial anterior permanece.
+
+## Contexto y resumen
+
+`ConversationContextPolicy` limita de forma determinista a 20 mensajes recientes y 12.000 caracteres, con umbral de resumen de 16.000 caracteres. `PromptBuilder` excluye vacíos e incluye system, contexto lector, resumen persistido, historial reciente y mensaje actual sin duplicarlo.
+
+`LlmConversationSummaryService` selecciona mensajes antiguos, pide un resumen sin razonamiento interno y conserva el resumen anterior si la llamada falla. El resumen se actualiza después de una respuesta completa, por lo que no retrasa el streaming visible.
+
+## UI, tests y limites
+
+La AppBar ofrece Nueva conversación e Historial. Un bottom sheet lista por actividad, abre conversaciones y permite eliminarlas con confirmación. Las claves de mensajes ahora usan `message.id`.
+
+Se añadieron tests de modelos, política de contexto, resumen dentro del prompt y DAO sobre Drift en memoria; los tests existentes conservan streaming, cancelación, Markdown, regeneración y reintento mediante repositorios sustituibles.
+
+Quedan fuera sincronización cloud, RAG, embeddings, búsqueda semántica, tool calling, consultas/modificaciones de lectura y exportación. El watch del historial ofrece snapshot bajo demanda; una futura evolución puede registrar las tablas en el código generado de Drift y obtener streams reactivos tipados cuando se autorice ejecutar build_runner. La arquitectura queda preparada para Epic 3.12.
+
 # Epic 3.10 - Conversational UX
 
 ## Estado previo y objetivo

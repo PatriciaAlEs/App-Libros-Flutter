@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reading_tracker/features/coach/data/providers/coach_repository_provider.dart';
 import 'package:reading_tracker/features/coach/domain/entities/coach_message.dart';
+import 'package:reading_tracker/features/coach/domain/entities/coach_conversation.dart';
 import 'package:reading_tracker/features/coach/domain/models/reader_context.dart';
 import 'package:reading_tracker/features/coach/domain/repositories/coach_repository.dart';
+import 'package:reading_tracker/features/coach/domain/repositories/coach_conversation_repository.dart';
 import 'package:reading_tracker/features/coach/presentation/controllers/coach_controller.dart';
 
 void main() {
@@ -133,6 +135,7 @@ void main() {
         userMessage: 'Primero',
         readerContext: _readerContext(),
       );
+      await _flush();
 
       await controller.sendMessage(
         userMessage: 'Segundo',
@@ -244,8 +247,47 @@ void main() {
 Future<void> _flush() => Future<void>.delayed(Duration.zero);
 
 ProviderContainer _container(CoachRepository repository) => ProviderContainer(
-  overrides: [coachRepositoryProvider.overrideWithValue(repository)],
+  overrides: [
+    coachRepositoryProvider.overrideWithValue(repository),
+    coachConversationRepositoryProvider.overrideWithValue(
+      _TestConversationRepository(),
+    ),
+  ],
 );
+
+class _TestConversationRepository implements CoachConversationRepository {
+  final List<CoachConversation> conversations = [];
+  final List<CoachMessage> messages = [];
+  @override
+  Future<CoachConversation> createFromFirstMessage(String message) =>
+      throw UnimplementedError();
+  @override
+  Future<void> deleteConversation(String id) async {}
+  @override
+  Future<void> deleteMessage(String id) async =>
+      messages.removeWhere((item) => item.id == id);
+  @override
+  Future<void> deleteMessagesAfter(String id, int sequence) async {}
+  @override
+  Future<CoachConversation?> getConversation(String id) async => null;
+  @override
+  Future<List<CoachConversation>> getConversations() async => const [];
+  @override
+  Future<List<CoachMessage>> getMessages(String id) async => const [];
+  @override
+  Future<void> saveConversation(CoachConversation value) async {
+    conversations.add(value);
+  }
+
+  @override
+  Future<void> saveMessage(CoachMessage value) async {
+    messages.removeWhere((item) => item.id == value.id);
+    messages.add(value);
+  }
+
+  @override
+  Stream<List<CoachConversation>> watchConversations() => const Stream.empty();
+}
 
 class _ControlledRepository implements CoachRepository {
   final StreamController<String> _controller = StreamController<String>();
@@ -257,6 +299,7 @@ class _ControlledRepository implements CoachRepository {
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
     bool conversationIncludesCurrentMessage = false,
+    String? conversationSummary,
   }) {
     callCount++;
     return _controller.stream;
@@ -280,6 +323,7 @@ class _ImmediateRepository implements CoachRepository {
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
     bool conversationIncludesCurrentMessage = false,
+    String? conversationSummary,
   }) {
     lastUserMessage = userMessage;
     lastConversation = List.unmodifiable(conversation);
@@ -295,6 +339,7 @@ class _ErrorRepository implements CoachRepository {
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
     bool conversationIncludesCurrentMessage = false,
+    String? conversationSummary,
   }) {
     return Stream<String>.error(StateError('failure'));
   }
@@ -312,6 +357,7 @@ class _QueuedRepository implements CoachRepository {
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
     bool conversationIncludesCurrentMessage = false,
+    String? conversationSummary,
   }) {
     conversations.add(List.unmodifiable(conversation));
     return streams[_index++];

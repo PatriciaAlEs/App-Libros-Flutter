@@ -52,7 +52,24 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(title: const Text('ReadPp Coach'), centerTitle: false),
+      appBar: AppBar(
+        title: const Text('ReadPp Coach'),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            tooltip: 'Nueva conversación',
+            onPressed: () => ref
+                .read(coachControllerProvider.notifier)
+                .startNewConversation(),
+            icon: const Icon(Icons.add_comment_outlined),
+          ),
+          IconButton(
+            tooltip: 'Historial de conversaciones',
+            onPressed: () => _showConversationHistory(state),
+            icon: const Icon(Icons.history),
+          ),
+        ],
+      ),
       body: SafeArea(
         top: false,
         child: Column(
@@ -76,9 +93,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
                         final message = state.messages[index];
                         final isActive = state.activeAssistantIndex == index;
                         return CoachMessageBubble(
-                          key: ValueKey(
-                            'coach-message-$index-${message.role.name}',
-                          ),
+                          key: ValueKey('coach-message-${message.id}'),
                           message: message,
                           isWaiting: isActive && state.isWaitingFirstChunk,
                           isStreaming: isActive && state.hasPartialResponse,
@@ -167,6 +182,96 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
         ),
       );
     }
+  }
+
+  Future<void> _showConversationHistory(CoachControllerState state) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.add_comment_outlined),
+              title: const Text('Nueva conversación'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                ref
+                    .read(coachControllerProvider.notifier)
+                    .startNewConversation();
+              },
+            ),
+            if (state.conversations.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(AppSpacing.xl),
+                child: Text('Todavía no hay conversaciones guardadas.'),
+              ),
+            for (final conversation in state.conversations)
+              ListTile(
+                selected: conversation.id == state.activeConversation?.id,
+                leading: const Icon(Icons.chat_bubble_outline),
+                title: Text(conversation.title),
+                subtitle: Text(
+                  _formatConversationDate(conversation.lastMessageAt),
+                ),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  ref
+                      .read(coachControllerProvider.notifier)
+                      .openConversation(conversation.id);
+                },
+                trailing: IconButton(
+                  tooltip: 'Eliminar ${conversation.title}',
+                  onPressed: () => _confirmDeleteConversation(
+                    sheetContext,
+                    conversation.id,
+                    conversation.title,
+                  ),
+                  icon: const Icon(Icons.delete_outline),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteConversation(
+    BuildContext sheetContext,
+    String id,
+    String title,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Eliminar conversación'),
+        content: Text('¿Quieres eliminar “$title” y todos sus mensajes?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
+    if (sheetContext.mounted) {
+      Navigator.pop(sheetContext);
+    }
+    await ref.read(coachControllerProvider.notifier).deleteConversation(id);
+  }
+
+  String _formatConversationDate(DateTime date) {
+    final local = date.toLocal();
+    return '${local.day.toString().padLeft(2, '0')}/'
+        '${local.month.toString().padLeft(2, '0')}/${local.year}';
   }
 
   void _handleScroll() {

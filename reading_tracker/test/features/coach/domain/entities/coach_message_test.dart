@@ -44,5 +44,23 @@ void main() {
 
       expect(message.content, '  Leer 20 minutos hoy.  ');
     });
+
+    test('copyWith conserva identidad persistente y asociacion', () {
+      final message = CoachMessage.assistant(
+        '',
+        id: 'assistant-1',
+        conversationId: 'conversation-1',
+        parentUserMessageId: 'user-1',
+        sequence: 2,
+      );
+
+      final updated = message.copyWith(content: 'Respuesta');
+
+      expect(updated.id, 'assistant-1');
+      expect(updated.conversationId, 'conversation-1');
+      expect(updated.parentUserMessageId, 'user-1');
+      expect(updated.sequence, 2);
+      expect(updated.content, 'Respuesta');
+    });
   });
 }

@@ -101,6 +101,7 @@ class _RecordingPromptBuilder implements PromptBuilder {
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
     bool conversationIncludesCurrentMessage = false,
+    String? conversationSummary,
   }) {
     buildCount++;
     this.userMessage = userMessage;

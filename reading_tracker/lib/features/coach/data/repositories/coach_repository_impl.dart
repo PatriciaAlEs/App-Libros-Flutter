@@ -20,12 +20,14 @@ class CoachRepositoryImpl implements CoachRepository {
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
     bool conversationIncludesCurrentMessage = false,
+    String? conversationSummary,
   }) {
     final messages = _promptBuilder.build(
       userMessage: userMessage,
       conversation: conversation,
       readerContext: readerContext,
       conversationIncludesCurrentMessage: conversationIncludesCurrentMessage,
+      conversationSummary: conversationSummary,
     );
     return _llmClient.streamCompletion(messages: messages);
   }

@@ -20,13 +20,14 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (migrator) async {
       await migrator.createAll();
       await _createAppSettingsTable();
+      await _createCoachMemoryTables();
     },
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
@@ -55,6 +56,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 6) {
         await migrator.createTable(syncMetadataTable);
       }
+      if (from < 7) {
+        await _createCoachMemoryTables();
+      }
     },
   );
 
@@ -65,6 +69,44 @@ class AppDatabase extends _$AppDatabase {
         int_value INTEGER,
         updated_at INTEGER
       )
+    ''');
+  }
+
+  Future<void> _createCoachMemoryTables() async {
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS coach_conversations (
+        id TEXT NOT NULL PRIMARY KEY,
+        title TEXT NOT NULL,
+        summary TEXT,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        last_message_at INTEGER NOT NULL
+      )
+    ''');
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS coach_messages (
+        id TEXT NOT NULL PRIMARY KEY,
+        conversation_id TEXT NOT NULL,
+        role TEXT NOT NULL,
+        content TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        parent_user_message_id TEXT,
+        sequence_number INTEGER NOT NULL,
+        FOREIGN KEY (conversation_id) REFERENCES coach_conversations(id)
+          ON DELETE CASCADE
+      )
+    ''');
+    await customStatement('''
+      CREATE INDEX IF NOT EXISTS idx_coach_conversations_activity
+      ON coach_conversations(last_message_at DESC)
+    ''');
+    await customStatement('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_coach_messages_conversation_sequence
+      ON coach_messages(conversation_id, sequence_number)
+    ''');
+    await customStatement('''
+      CREATE INDEX IF NOT EXISTS idx_coach_messages_parent
+      ON coach_messages(parent_user_message_id)
     ''');
   }
 }

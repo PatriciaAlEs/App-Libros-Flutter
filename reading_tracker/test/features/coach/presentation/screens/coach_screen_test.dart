@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reading_tracker/features/coach/data/providers/coach_repository_provider.dart';
 import 'package:reading_tracker/features/coach/domain/entities/coach_message.dart';
+import 'package:reading_tracker/features/coach/domain/entities/coach_conversation.dart';
 import 'package:reading_tracker/features/coach/domain/models/reader_context.dart';
 import 'package:reading_tracker/features/coach/domain/providers/reader_context_provider.dart';
 import 'package:reading_tracker/features/coach/domain/repositories/coach_repository.dart';
+import 'package:reading_tracker/features/coach/domain/repositories/coach_conversation_repository.dart';
 import 'package:reading_tracker/features/coach/presentation/controllers/coach_controller.dart';
 import 'package:reading_tracker/features/coach/presentation/screens/coach_screen.dart';
 
@@ -149,6 +151,9 @@ Future<void> _pumpAsyncWork(WidgetTester tester) async {
 Widget _app(CoachRepository repository) => ProviderScope(
   overrides: [
     coachRepositoryProvider.overrideWithValue(repository),
+    coachConversationRepositoryProvider.overrideWithValue(
+      _MemoryConversationRepository(),
+    ),
     readerContextProvider.overrideWith((ref) async => _readerContext()),
   ],
   child: const MaterialApp(home: CoachScreen()),
@@ -164,6 +169,7 @@ class _WidgetRepository implements CoachRepository {
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
     bool conversationIncludesCurrentMessage = false,
+    String? conversationSummary,
   }) {
     lastUserMessage = userMessage;
     return _controller.stream;
@@ -180,6 +186,7 @@ class _FailingWidgetRepository implements CoachRepository {
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
     bool conversationIncludesCurrentMessage = false,
+    String? conversationSummary,
   }) {
     return Stream<String>.error(StateError('failure'));
   }
@@ -192,6 +199,7 @@ class _RepeatingWidgetRepository implements CoachRepository {
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
     bool conversationIncludesCurrentMessage = false,
+    String? conversationSummary,
   }) {
     return Stream.value(
       'Respuesta extensa para comprobar el desplazamiento inteligente de la conversación. '
@@ -217,6 +225,61 @@ class _PreloadedCoachController extends CoachController {
       ],
     );
   }
+}
+
+class _MemoryConversationRepository implements CoachConversationRepository {
+  final List<CoachConversation> conversations = [];
+  final List<CoachMessage> messages = [];
+
+  @override
+  Future<CoachConversation> createFromFirstMessage(String message) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> deleteConversation(String id) async {
+    conversations.removeWhere((item) => item.id == id);
+    messages.removeWhere((item) => item.conversationId == id);
+  }
+
+  @override
+  Future<void> deleteMessage(String id) async =>
+      messages.removeWhere((item) => item.id == id);
+  @override
+  Future<void> deleteMessagesAfter(String id, int sequence) async =>
+      messages.removeWhere(
+        (item) => item.conversationId == id && item.sequence > sequence,
+      );
+  @override
+  Future<CoachConversation?> getConversation(String id) async {
+    for (final item in conversations) {
+      if (item.id == id) return item;
+    }
+    return null;
+  }
+
+  @override
+  Future<List<CoachConversation>> getConversations() async =>
+      List.unmodifiable(conversations);
+  @override
+  Future<List<CoachMessage>> getMessages(String id) async => messages
+      .where((item) => item.conversationId == id)
+      .toList(growable: false);
+  @override
+  Future<void> saveConversation(CoachConversation value) async {
+    conversations.removeWhere((item) => item.id == value.id);
+    conversations.add(value);
+  }
+
+  @override
+  Future<void> saveMessage(CoachMessage value) async {
+    messages.removeWhere((item) => item.id == value.id);
+    messages.add(value);
+  }
+
+  @override
+  Stream<List<CoachConversation>> watchConversations() =>
+      Stream.value(List.unmodifiable(conversations));
 }
 
 ReaderContext _readerContext() => ReaderContext(

@@ -190,6 +190,20 @@ void main() {
       );
     });
 
+    test('incluye resumen antes del historial reciente', () {
+      final result = builder.build(
+        userMessage: 'Actual',
+        conversation: [CoachMessage.user('Anterior')],
+        readerContext: _readerContext(),
+        conversationSummary: 'Preferencia por novela histórica.',
+      );
+
+      expect(result[2].role, CoachMessageRole.system);
+      expect(result[2].content, contains('Preferencia por novela histórica.'));
+      expect(result[3].content, 'Anterior');
+      expect(result.last.content, 'Actual');
+    });
+
     test('rechaza mensaje actual vacio segun la regla de CoachMessage', () {
       expect(
         () => builder.build(
