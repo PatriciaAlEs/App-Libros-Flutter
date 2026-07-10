@@ -9,20 +9,9 @@ import 'package:reading_tracker/features/coach/domain/repositories/coach_reposit
 import 'package:reading_tracker/features/coach/presentation/controllers/coach_controller.dart';
 
 void main() {
-  group('CoachController', () {
-    test('estado inicial correcto', () {
-      final container = _container(_CompletingCoachRepository('Respuesta'));
-      addTearDown(container.dispose);
-
-      final state = container.read(coachControllerProvider);
-
-      expect(state.messages, isEmpty);
-      expect(state.isLoading, isFalse);
-      expect(state.errorMessage, isNull);
-    });
-
-    test('envio satisfactorio actualiza mensajes y loading', () async {
-      final repository = _PendingCoachRepository();
+  group('CoachController streaming', () {
+    test('crea un provisional y lo actualiza acumulando chunks', () async {
+      final repository = _ControlledRepository();
       final container = _container(repository);
       addTearDown(container.dispose);
       final controller = container.read(coachControllerProvider.notifier);
@@ -34,51 +23,54 @@ void main() {
 
       var state = container.read(coachControllerProvider);
       expect(state.isLoading, isTrue);
-      expect(state.messages, hasLength(1));
-      expect(state.messages.single.role, CoachMessageRole.user);
-      expect(state.messages.single.content, 'Como voy?');
+      expect(state.messages, hasLength(2));
+      expect(state.messages[0].role, CoachMessageRole.user);
+      expect(state.messages[1].role, CoachMessageRole.assistant);
+      expect(state.messages[1].content, isEmpty);
 
-      repository.complete('Vas bien.');
+      repository.add('Vas ');
+      await _flush();
+      state = container.read(coachControllerProvider);
+      expect(state.messages, hasLength(2));
+      expect(state.messages[1].content, 'Vas ');
+
+      repository.add('bien.');
+      await _flush();
+      expect(
+        container.read(coachControllerProvider).messages[1].content,
+        'Vas bien.',
+      );
+
+      await repository.close();
       await future;
-
       state = container.read(coachControllerProvider);
       expect(state.isLoading, isFalse);
       expect(state.errorMessage, isNull);
       expect(state.messages, hasLength(2));
-      expect(state.messages[0].role, CoachMessageRole.user);
-      expect(state.messages[1].role, CoachMessageRole.assistant);
-      expect(state.messages[1].content, 'Vas bien.');
     });
 
-    test(
-      'envio usa repository con datos de dominio y sin construir prompt',
-      () async {
-        final repository = _CompletingCoachRepository('Respuesta');
-        final container = _container(repository);
-        addTearDown(container.dispose);
-
-        await container
-            .read(coachControllerProvider.notifier)
-            .sendMessage(
-              userMessage: '  Como voy?  ',
-              readerContext: _readerContext(),
-            );
-
-        expect(repository.lastUserMessage, '  Como voy?  ');
-        expect(repository.lastConversation, isEmpty);
-        expect(repository.lastReaderContext, isNotNull);
-      },
-    );
-
-    test('error desactiva loading y no anade respuesta falsa', () async {
-      final repository = _FailingCoachRepository();
+    test('pasa historial anterior y mensaje actual por separado', () async {
+      final repository = _ImmediateRepository(['Respuesta']);
       final container = _container(repository);
       addTearDown(container.dispose);
 
       await container
           .read(coachControllerProvider.notifier)
+          .sendMessage(userMessage: 'Actual', readerContext: _readerContext());
+
+      expect(repository.lastUserMessage, 'Actual');
+      expect(repository.lastConversation, isEmpty);
+      expect(repository.lastIncludesCurrentMessage, isFalse);
+    });
+
+    test('error antes del primer chunk elimina el provisional', () async {
+      final container = _container(_ErrorRepository());
+      addTearDown(container.dispose);
+
+      await container
+          .read(coachControllerProvider.notifier)
           .sendMessage(
-            userMessage: 'Como voy?',
+            userMessage: 'Pregunta',
             readerContext: _readerContext(),
           );
 
@@ -89,15 +81,37 @@ void main() {
       expect(state.messages.single.role, CoachMessageRole.user);
     });
 
-    test('respuesta vacia se representa como error', () async {
-      final repository = _CompletingCoachRepository('   ');
+    test('error posterior conserva el contenido parcial', () async {
+      final repository = _ControlledRepository();
       final container = _container(repository);
+      addTearDown(container.dispose);
+      final future = container
+          .read(coachControllerProvider.notifier)
+          .sendMessage(
+            userMessage: 'Pregunta',
+            readerContext: _readerContext(),
+          );
+
+      repository.add('Parcial');
+      await _flush();
+      repository.addError(StateError('failure'));
+      await future;
+
+      final state = container.read(coachControllerProvider);
+      expect(state.isLoading, isFalse);
+      expect(state.errorMessage, isNotEmpty);
+      expect(state.messages, hasLength(2));
+      expect(state.messages.last.content, 'Parcial');
+    });
+
+    test('stream vacio no deja un mensaje assistant vacio', () async {
+      final container = _container(_ImmediateRepository(const []));
       addTearDown(container.dispose);
 
       await container
           .read(coachControllerProvider.notifier)
           .sendMessage(
-            userMessage: 'Como voy?',
+            userMessage: 'Pregunta',
             readerContext: _readerContext(),
           );
 
@@ -105,75 +119,101 @@ void main() {
       expect(state.isLoading, isFalse);
       expect(state.errorMessage, isNotEmpty);
       expect(state.messages, hasLength(1));
-      expect(state.messages.single.role, CoachMessageRole.user);
+    });
+
+    test('ignora un segundo envio durante una generacion activa', () async {
+      final repository = _ControlledRepository();
+      final container = _container(repository);
+      addTearDown(container.dispose);
+      final controller = container.read(coachControllerProvider.notifier);
+      final first = controller.sendMessage(
+        userMessage: 'Primero',
+        readerContext: _readerContext(),
+      );
+
+      await controller.sendMessage(
+        userMessage: 'Segundo',
+        readerContext: _readerContext(),
+      );
+
+      expect(repository.callCount, 1);
+      expect(
+        container.read(coachControllerProvider).messages.first.content,
+        'Primero',
+      );
+      await repository.close();
+      await first;
     });
   });
 }
 
-ProviderContainer _container(CoachRepository repository) {
-  return ProviderContainer(
-    overrides: [coachRepositoryProvider.overrideWithValue(repository)],
-  );
+Future<void> _flush() => Future<void>.delayed(Duration.zero);
+
+ProviderContainer _container(CoachRepository repository) => ProviderContainer(
+  overrides: [coachRepositoryProvider.overrideWithValue(repository)],
+);
+
+class _ControlledRepository implements CoachRepository {
+  final StreamController<String> _controller = StreamController<String>();
+  int callCount = 0;
+
+  @override
+  Stream<String> streamReply({
+    required String userMessage,
+    required List<CoachMessage> conversation,
+    required ReaderContext readerContext,
+    bool conversationIncludesCurrentMessage = false,
+  }) {
+    callCount++;
+    return _controller.stream;
+  }
+
+  void add(String chunk) => _controller.add(chunk);
+  void addError(Object error) => _controller.addError(error);
+  Future<void> close() => _controller.close();
 }
 
-ReaderContext _readerContext() {
-  return ReaderContext(
-    metadata: ReaderContextMetadata(generatedAt: DateTime(2026, 7, 10, 10)),
-    library: ReaderLibraryContext(
-      allBooks: const [],
-      currentBooks: const [],
-      completedBooks: const [],
-      pendingBooks: const [],
-      abandonedBooks: const [],
-    ),
-    activity: ReaderActivityContext(readingSessions: const []),
-  );
-}
-
-class _CompletingCoachRepository implements CoachRepository {
-  _CompletingCoachRepository(this.response);
-
-  final String response;
+class _ImmediateRepository implements CoachRepository {
+  _ImmediateRepository(this.chunks);
+  final List<String> chunks;
   String? lastUserMessage;
   List<CoachMessage>? lastConversation;
-  ReaderContext? lastReaderContext;
+  bool? lastIncludesCurrentMessage;
 
   @override
-  Future<String> generateReply({
+  Stream<String> streamReply({
     required String userMessage,
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
-  }) async {
+    bool conversationIncludesCurrentMessage = false,
+  }) {
     lastUserMessage = userMessage;
     lastConversation = List.unmodifiable(conversation);
-    lastReaderContext = readerContext;
-    return response;
+    lastIncludesCurrentMessage = conversationIncludesCurrentMessage;
+    return Stream.fromIterable(chunks);
   }
 }
 
-class _PendingCoachRepository implements CoachRepository {
-  final Completer<String> _completer = Completer<String>();
+class _ErrorRepository implements CoachRepository {
   @override
-  Future<String> generateReply({
+  Stream<String> streamReply({
     required String userMessage,
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
+    bool conversationIncludesCurrentMessage = false,
   }) {
-    return _completer.future;
-  }
-
-  void complete(String response) {
-    _completer.complete(response);
+    return Stream<String>.error(StateError('failure'));
   }
 }
 
-class _FailingCoachRepository implements CoachRepository {
-  @override
-  Future<String> generateReply({
-    required String userMessage,
-    required List<CoachMessage> conversation,
-    required ReaderContext readerContext,
-  }) async {
-    throw StateError('failure');
-  }
-}
+ReaderContext _readerContext() => ReaderContext(
+  metadata: ReaderContextMetadata(generatedAt: DateTime(2026, 7, 10, 10)),
+  library: ReaderLibraryContext(
+    allBooks: const [],
+    currentBooks: const [],
+    completedBooks: const [],
+    pendingBooks: const [],
+    abandonedBooks: const [],
+  ),
+  activity: ReaderActivityContext(readingSessions: const []),
+);

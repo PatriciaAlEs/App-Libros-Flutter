@@ -20,4 +20,15 @@ class FakeLlmClient implements LlmClient {
     lastMessages = List.unmodifiable(messages);
     return response;
   }
+
+  @override
+  Stream<String> streamCompletion({required List<CoachMessage> messages}) {
+    if (messages.isEmpty) {
+      return Stream.error(
+        ArgumentError.value(messages, 'messages', 'Messages cannot be empty'),
+      );
+    }
+    lastMessages = List.unmodifiable(messages);
+    return Stream.value(response);
+  }
 }

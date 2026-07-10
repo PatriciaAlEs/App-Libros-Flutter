@@ -15,16 +15,18 @@ class CoachRepositoryImpl implements CoachRepository {
   final PromptBuilder _promptBuilder;
 
   @override
-  Future<String> generateReply({
+  Stream<String> streamReply({
     required String userMessage,
     required List<CoachMessage> conversation,
     required ReaderContext readerContext,
+    bool conversationIncludesCurrentMessage = false,
   }) {
     final messages = _promptBuilder.build(
       userMessage: userMessage,
       conversation: conversation,
       readerContext: readerContext,
+      conversationIncludesCurrentMessage: conversationIncludesCurrentMessage,
     );
-    return _llmClient.complete(messages: messages);
+    return _llmClient.streamCompletion(messages: messages);
   }
 }

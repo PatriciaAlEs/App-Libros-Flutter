@@ -170,6 +170,98 @@ void main() {
       );
     });
 
+    test('streaming conserva request y emite deltas en orden', () async {
+      final httpClient = _StreamingClient([
+        utf8.encode('\n'),
+        utf8.encode(
+          'data: {"type":"response.output_text.delta","delta":"Ho"}\n',
+        ),
+        utf8.encode(
+          'data: {"type":"response.output_text.delta","delta":"la\\n"}\n',
+        ),
+        utf8.encode('data: {"type":"response.completed"}\n'),
+        utf8.encode('data: [DONE]\n'),
+      ]);
+      final client = _client(httpClient);
+
+      final chunks = await client
+          .streamCompletion(messages: _messages())
+          .toList();
+      final body = jsonDecode(httpClient.request.body) as Map<String, dynamic>;
+
+      expect(chunks, ['Ho', 'la\n']);
+      expect(body['stream'], isTrue);
+      expect(body['model'], 'test-model');
+      expect(body['input'], hasLength(3));
+      expect(httpClient.request.headers['Authorization'], 'Bearer test-key');
+      expect(httpClient.request.headers['Content-Type'], 'application/json');
+    });
+
+    test('streaming procesa eventos y UTF-8 divididos entre chunks', () async {
+      final payload = utf8.encode(
+        'data: {"type":"response.output_text.delta","delta":"¡España 📚!"}\n'
+        'data: [DONE]\n',
+      );
+      final splitInsideEmoji = payload.indexOf(0xF0) + 2;
+      final httpClient = _StreamingClient([
+        payload.sublist(0, 9),
+        payload.sublist(9, splitInsideEmoji),
+        payload.sublist(splitInsideEmoji),
+      ]);
+
+      final chunks = await _client(
+        httpClient,
+      ).streamCompletion(messages: _messages()).toList();
+
+      expect(chunks, ['¡España 📚!']);
+    });
+
+    test(
+      'streaming ignora eventos validos sin texto y marcador final',
+      () async {
+        final client = _client(
+          _StreamingClient([
+            utf8.encode(
+              'data: {"type":"response.created"}\n'
+              'data: {"type":"response.output_text.delta","delta":""}\n'
+              'data: [DONE]\n',
+            ),
+          ]),
+        );
+
+        expect(
+          await client.streamCompletion(messages: _messages()).toList(),
+          isEmpty,
+        );
+      },
+    );
+
+    test('streaming falla ante status no exitoso', () {
+      final client = _client(
+        _StreamingClient([utf8.encode('Error')], statusCode: 500),
+      );
+
+      expect(
+        client.streamCompletion(messages: _messages()).toList(),
+        throwsA(
+          isA<OpenAiLlmException>().having(
+            (error) => error.statusCode,
+            'statusCode',
+            500,
+          ),
+        ),
+      );
+    });
+
+    test('streaming falla ante JSON procesable invalido', () {
+      final client = _client(_StreamingClient([utf8.encode('data: {\n')]));
+
+      expect(
+        client.streamCompletion(messages: _messages()).toList(),
+        throwsA(isA<OpenAiLlmException>()),
+      );
+    });
+
     test('OpenAiConfig rechaza apiKey vacia', () {
       expect(
         () => OpenAiConfig(apiKey: '', model: 'test-model'),
@@ -203,4 +295,18 @@ List<CoachMessage> _messages() {
 
 http.Response _outputTextResponse(String text) {
   return http.Response(jsonEncode({'output_text': text}), 200);
+}
+
+class _StreamingClient extends http.BaseClient {
+  _StreamingClient(this.byteChunks, {this.statusCode = 200});
+
+  final List<List<int>> byteChunks;
+  final int statusCode;
+  late http.Request request;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    this.request = request as http.Request;
+    return http.StreamedResponse(Stream.fromIterable(byteChunks), statusCode);
+  }
 }

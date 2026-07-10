@@ -4,6 +4,8 @@ class CoachMessage {
   CoachMessage({required this.role, required String content})
     : content = _validateContent(content);
 
+  CoachMessage._assistant(this.content) : role = CoachMessageRole.assistant;
+
   factory CoachMessage.system(String content) {
     return CoachMessage(role: CoachMessageRole.system, content: content);
   }
@@ -13,7 +15,7 @@ class CoachMessage {
   }
 
   factory CoachMessage.assistant(String content) {
-    return CoachMessage(role: CoachMessageRole.assistant, content: content);
+    return CoachMessage._assistant(content);
   }
 
   final CoachMessageRole role;

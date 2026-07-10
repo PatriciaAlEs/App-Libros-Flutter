@@ -18,11 +18,13 @@ void main() {
       addTearDown(container.dispose);
 
       final repository = container.read(coachRepositoryProvider);
-      final response = await repository.generateReply(
-        userMessage: 'Pregunta',
-        conversation: const [],
-        readerContext: _readerContext(),
-      );
+      final response = await repository
+          .streamReply(
+            userMessage: 'Pregunta',
+            conversation: const [],
+            readerContext: _readerContext(),
+          )
+          .join();
 
       expect(repository, isA<CoachRepository>());
       expect(container.read(promptBuilderProvider), isA<PromptBuilder>());

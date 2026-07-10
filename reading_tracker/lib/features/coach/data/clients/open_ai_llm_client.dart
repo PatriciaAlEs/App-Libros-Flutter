@@ -87,6 +87,79 @@ class OpenAiLlmClient implements LlmClient {
     return text;
   }
 
+  @override
+  Stream<String> streamCompletion({
+    required List<CoachMessage> messages,
+  }) async* {
+    if (messages.isEmpty) {
+      throw ArgumentError.value(
+        messages,
+        'messages',
+        'Messages cannot be empty',
+      );
+    }
+
+    final request = http.Request('POST', config.baseUri)
+      ..headers.addAll({
+        'Authorization': 'Bearer ${config.apiKey}',
+        'Content-Type': 'application/json',
+      })
+      ..body = jsonEncode({
+        'model': config.model,
+        'input': messages.map(_messageToJson).toList(),
+        'stream': true,
+      });
+    final response = await httpClient.send(request);
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      await response.stream.drain<void>();
+      throw OpenAiLlmException(
+        'Streaming request failed',
+        statusCode: response.statusCode,
+      );
+    }
+
+    yield* _parseStream(response.stream);
+  }
+
+  Stream<String> _parseStream(Stream<List<int>> bytes) async* {
+    await for (final line
+        in bytes.transform(utf8.decoder).transform(const LineSplitter())) {
+      final trimmed = line.trim();
+      if (trimmed.isEmpty || !trimmed.startsWith('data:')) continue;
+
+      final data = trimmed.substring(5).trimLeft();
+      if (data == '[DONE]') return;
+
+      final Object? event;
+      try {
+        event = jsonDecode(data);
+      } on FormatException catch (error) {
+        throw OpenAiLlmException('Invalid streaming JSON: ${error.message}');
+      }
+      if (event is! Map<String, dynamic>) continue;
+
+      final type = event['type'];
+      if (type == 'response.output_text.delta') {
+        final delta = event['delta'];
+        if (delta is String && delta.isNotEmpty) yield delta;
+        continue;
+      }
+
+      final choices = event['choices'];
+      if (choices is List && choices.isNotEmpty) {
+        final choice = choices.first;
+        if (choice is Map<String, dynamic>) {
+          final delta = choice['delta'];
+          if (delta is Map<String, dynamic>) {
+            final content = delta['content'];
+            if (content is String && content.isNotEmpty) yield content;
+          }
+        }
+      }
+    }
+  }
+
   Map<String, String> _messageToJson(CoachMessage message) {
     return {'role': _roleToString(message.role), 'content': message.content};
   }

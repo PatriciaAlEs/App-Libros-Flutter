@@ -1,3 +1,40 @@
+# Epic 3.9 - Streaming de respuestas
+
+## Estado
+
+Implementada en codigo y pendiente de comprobaciones manuales por la desarrolladora. No debe marcarse como cerrada hasta ejecutar las validaciones locales acordadas.
+
+## Arquitectura y problema resuelto
+
+Antes de esta epic, el flujo `CoachController -> CoachRepository -> PromptBuilder -> LlmClient -> OpenAiLlmClient` esperaba una respuesta completa antes de añadir el mensaje assistant. Ahora el flujo es `CoachController -> CoachRepository -> PromptBuilder -> LlmClient.streamCompletion -> OpenAiLlmClient -> OpenAI streaming API`, y las capas superiores reciben exclusivamente `Stream<String>` con texto incremental.
+
+## Contratos y responsabilidades
+
+- `LlmClient` conserva `complete()` porque `DefaultCoachEngine` sigue siendo consumidor y añade `streamCompletion()` como contrato agnostico del proveedor.
+- `CoachRepository.streamReply()` construye el prompt una sola vez y devuelve sin modificar los chunks del cliente. Conserva `conversationIncludesCurrentMessage`.
+- `PromptBuilder` no cambia su orden, limite de 20 mensajes de historial ni independencia respecto al streaming.
+- `OpenAiLlmClient` usa `http.Client.send()` con el mismo endpoint, autenticacion, modelo, input y headers, añadiendo `stream: true`.
+
+## Parsing del stream
+
+El cliente transforma el stream de bytes mediante `utf8.decoder` incremental y `LineSplitter`. Esto tolera caracteres multibyte, lineas y eventos partidos entre chunks, asi como varios eventos en un mismo chunk. Solo procesa lineas `data:`, reconoce `[DONE]`, extrae deltas `response.output_text.delta` y mantiene compatibilidad defensiva con `choices[].delta.content`. Ignora lineas vacias y eventos validos sin texto; JSON procesable malformado produce `OpenAiLlmException`. Bytes, SSE y JSON nunca salen de infraestructura.
+
+## Estado, errores y concurrencia
+
+El controller inserta un solo `CoachMessage.assistant('')` provisional en la ultima posicion y lo reemplaza en esa misma posicion con el contenido acumulado. El modelo no dispone de ID, por lo que la identidad estable se representa mediante posicion y cardinalidad constantes. Una finalizacion vacia o un error anterior al primer texto elimina el provisional; un error posterior conserva el parcial sin añadir texto tecnico. `try/finally` desactiva siempre `isLoading`.
+
+Mientras `isLoading` es verdadero, un segundo envio se ignora deterministicamente para impedir streams mezclados. El controller conserva la suscripcion activa, la cancela en `dispose` y completa la espera interna para evitar actualizaciones posteriores. No existe aun cancelacion iniciada desde UI; un boton detener queda como mejora futura.
+
+## Archivos y tests
+
+Se modificaron `coach_message.dart`, `llm_client.dart`, `coach_repository.dart`, `coach_repository_impl.dart`, `open_ai_llm_client.dart`, `coach_controller.dart` y sus tests. No fue necesario modificar providers: la cadena de inyeccion existente ya suministra una unica instancia logica de repository, builder y cliente.
+
+Los tests cubren payload y headers streaming, deltas ordenados, lineas vacias, eventos sin texto, `[DONE]`, multiples eventos, fragmentacion de linea/evento, UTF-8 dividido, saltos de linea, HTTP no exitoso, JSON invalido y cierre. Repository cubre builder unico, request exacto, orden y errores. Controller cubre provisional unico, acumulacion, finalizacion, vacio, error temprano, parcial, concurrencia e historial separado del mensaje actual.
+
+## Riesgos y mejoras futuras
+
+La cancelacion se activa actualmente por ciclo de vida, no por una accion visible. Quedan fuera regeneracion, cursor animado, Markdown progresivo avanzado y auto-scroll. La compatibilidad defensiva con el formato Chat Completions puede retirarse si el proyecto decide limitar definitivamente el parser al endpoint Responses.
+
 # Epic 3.8 - Prompt Builder
 
 ## Estado

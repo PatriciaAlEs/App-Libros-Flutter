@@ -25,18 +25,23 @@ void main() {
         final conversation = [CoachMessage.user('Anterior')];
         final context = _readerContext();
 
-        final response = await repository.generateReply(
-          userMessage: 'Actual',
-          conversation: conversation,
-          readerContext: context,
-        );
+        final chunks = await repository
+            .streamReply(
+              userMessage: 'Actual',
+              conversation: conversation,
+              readerContext: context,
+              conversationIncludesCurrentMessage: true,
+            )
+            .toList();
 
         expect(repository, isA<CoachRepository>());
         expect(builder.userMessage, 'Actual');
         expect(builder.conversation, same(conversation));
         expect(builder.readerContext, same(context));
+        expect(builder.conversationIncludesCurrentMessage, isTrue);
+        expect(builder.buildCount, 1);
         expect(client.lastMessages, builtMessages);
-        expect(response, 'Respuesta');
+        expect(chunks, ['Respuesta']);
       },
     );
 
@@ -48,13 +53,15 @@ void main() {
           promptBuilder: _RecordingPromptBuilder([CoachMessage.user('Actual')]),
         );
 
-        final response = await repository.generateReply(
-          userMessage: 'Actual',
-          conversation: const [],
-          readerContext: _readerContext(),
-        );
+        final chunks = await repository
+            .streamReply(
+              userMessage: 'Actual',
+              conversation: const [],
+              readerContext: _readerContext(),
+            )
+            .toList();
 
-        expect(response, '   ');
+        expect(chunks, ['   ']);
       },
     );
 
@@ -65,11 +72,13 @@ void main() {
       );
 
       expect(
-        repository.generateReply(
-          userMessage: 'Actual',
-          conversation: const [],
-          readerContext: _readerContext(),
-        ),
+        repository
+            .streamReply(
+              userMessage: 'Actual',
+              conversation: const [],
+              readerContext: _readerContext(),
+            )
+            .toList(),
         throwsA(isA<StateError>()),
       );
     });
@@ -83,6 +92,8 @@ class _RecordingPromptBuilder implements PromptBuilder {
   String? userMessage;
   List<CoachMessage>? conversation;
   ReaderContext? readerContext;
+  bool? conversationIncludesCurrentMessage;
+  int buildCount = 0;
 
   @override
   List<CoachMessage> build({
@@ -91,9 +102,12 @@ class _RecordingPromptBuilder implements PromptBuilder {
     required ReaderContext readerContext,
     bool conversationIncludesCurrentMessage = false,
   }) {
+    buildCount++;
     this.userMessage = userMessage;
     this.conversation = conversation;
     this.readerContext = readerContext;
+    this.conversationIncludesCurrentMessage =
+        conversationIncludesCurrentMessage;
     return result;
   }
 }
@@ -102,8 +116,8 @@ class _FailingLlmClient extends FakeLlmClient {
   _FailingLlmClient() : super('Respuesta');
 
   @override
-  Future<String> complete({required List<CoachMessage> messages}) async {
-    throw StateError('failure');
+  Stream<String> streamCompletion({required List<CoachMessage> messages}) {
+    return Stream.error(StateError('failure'));
   }
 }
 

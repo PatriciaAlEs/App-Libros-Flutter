@@ -24,6 +24,13 @@ void main() {
       expect(message.content, 'Vamos a revisar tu progreso.');
     });
 
+    test('permite un assistant vacio como mensaje provisional', () {
+      final message = CoachMessage.assistant('');
+
+      expect(message.role, CoachMessageRole.assistant);
+      expect(message.content, isEmpty);
+    });
+
     test('rechaza contenido vacio', () {
       expect(() => CoachMessage.user(''), throwsArgumentError);
     });

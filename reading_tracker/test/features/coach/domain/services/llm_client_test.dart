@@ -69,5 +69,15 @@ void main() {
         CoachMessageRole.assistant,
       ]);
     });
+
+    test('streamCompletion expone fragmentos de texto', () async {
+      final client = FakeLlmClient('fragmento');
+
+      final chunks = await client
+          .streamCompletion(messages: [CoachMessage.user('Pregunta')])
+          .toList();
+
+      expect(chunks, ['fragmento']);
+    });
   });
 }
