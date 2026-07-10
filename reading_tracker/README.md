@@ -28,6 +28,21 @@ Supabase is configured with compile-time Dart defines. Create a local
 `dart_defines/dev.json` file from `dart_defines/example.json` and fill it with
 the project values.
 
+The Coach also reads `OPENAI_API_KEY`, `OPENAI_MODEL`, and
+`OPENAI_BASE_URL` at compile time. `flutter run -d chrome` by itself does not
+read shell environment variables or `.env` files. For local Chrome debugging,
+put those values in the ignored `dart_defines/dev.json` and always launch with
+`--dart-define-from-file` as shown below. If `OPENAI_API_KEY` is absent, the
+Coach now fails before issuing HTTP and prints `phase=configuration` in the
+development console.
+
+Do not ship a production Web build with a provider secret in Dart defines:
+compile-time values are visible in browser assets. Production Web must point
+`OPENAI_BASE_URL` to a same-origin or CORS-enabled server-side proxy and keep
+the real provider key on that server. A browser transport failure such as
+`ClientException: Failed to fetch` at `phase=http.stream.send` indicates that
+the configured endpoint is unreachable from the browser or rejected by CORS.
+
 Do not commit `dart_defines/dev.json` or any `*.local.json` file.
 
 Run on Android emulator:

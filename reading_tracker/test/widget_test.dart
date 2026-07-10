@@ -17,7 +17,9 @@ import 'package:reading_tracker/features/books/domain/enums/book_status.dart';
 import 'package:reading_tracker/features/books/domain/repositories/book_repository.dart';
 import 'package:reading_tracker/features/books/presentation/screens/book_form_screen.dart';
 import 'package:reading_tracker/features/books/presentation/screens/books_list_screen.dart';
+import 'package:reading_tracker/features/coach/presentation/screens/coach_screen.dart';
 import 'package:reading_tracker/features/home/presentation/screens/home_screen.dart';
+import 'package:reading_tracker/features/libreria/presentation/widgets/libreria_entry_card.dart';
 import 'package:reading_tracker/features/navigation/presentation/screens/main_navigation_screen.dart';
 import 'package:reading_tracker/features/reading_sessions/data/repositories/reading_session_repository_provider.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/entities/reading_session.dart';
@@ -128,6 +130,35 @@ void main() {
 
     expect(find.byType(BooksListScreen), findsOneWidget);
     expect(find.byType(ReadPpBottomNavigation), findsOneWidget);
+  });
+
+  testWidgets('Inicio exposes one LibrerIA access and opens CoachScreen', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookRepositoryProvider.overrideWithValue(_EmptyBookRepository()),
+          statisticsRepositoryProvider.overrideWithValue(
+            const _EmptyStatisticsRepository(),
+          ),
+          readingSessionRepositoryProvider.overrideWithValue(
+            const _EmptyReadingSessionRepository(),
+          ),
+        ],
+        child: const MaterialApp(home: MainNavigationScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LibreriaEntryCard), findsOneWidget);
+    expect(find.text('ReadPp Coach'), findsNothing);
+    expect(find.text('LibrerIA'), findsOneWidget);
+
+    await tester.tap(find.byType(LibreriaEntryCard));
+    await tester.pump();
+
+    expect(find.byType(CoachScreen), findsOneWidget);
   });
 
   testWidgets('shows the books screen', (WidgetTester tester) async {

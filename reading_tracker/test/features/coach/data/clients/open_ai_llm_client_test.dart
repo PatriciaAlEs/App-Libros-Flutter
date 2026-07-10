@@ -253,6 +253,76 @@ void main() {
       );
     });
 
+    test('streaming conserva error HTTP sanitizado para diagnostico', () {
+      final client = _client(
+        _StreamingClient([
+          utf8.encode(
+            '{"error":{"message":"model not found"},'
+            '"api_key":"secret-value"}',
+          ),
+        ], statusCode: 404),
+      );
+
+      expect(
+        client.streamCompletion(messages: _messages()).toList(),
+        throwsA(
+          isA<OpenAiLlmException>()
+              .having((error) => error.statusCode, 'statusCode', 404)
+              .having(
+                (error) => error.message,
+                'message',
+                allOf(
+                  contains('model not found'),
+                  isNot(contains('secret-value')),
+                ),
+              ),
+        ),
+      );
+    });
+
+    test('streaming detecta evento SSE de error antes del primer delta', () {
+      final client = _client(
+        _StreamingClient([
+          utf8.encode(
+            'data: {"type":"error","error":{"message":"bad input"}}\n',
+          ),
+        ]),
+      );
+
+      expect(
+        client.streamCompletion(messages: _messages()).toList(),
+        throwsA(
+          isA<OpenAiLlmException>().having(
+            (error) => error.message,
+            'message',
+            contains('bad input'),
+          ),
+        ),
+      );
+    });
+
+    test('streaming falla antes de HTTP si falta OPENAI_API_KEY', () {
+      final httpClient = _StreamingClient(const []);
+      final client = OpenAiLlmClient(
+        config: OpenAiConfig(
+          apiKey: 'missing-openai-api-key',
+          model: 'test-model',
+        ),
+        httpClient: httpClient,
+      );
+
+      expect(
+        client.streamCompletion(messages: _messages()).toList(),
+        throwsA(
+          isA<OpenAiLlmException>().having(
+            (error) => error.message,
+            'message',
+            contains('OPENAI_API_KEY is missing'),
+          ),
+        ),
+      );
+    });
+
     test('streaming falla ante JSON procesable invalido', () {
       final client = _client(_StreamingClient([utf8.encode('data: {\n')]));
 

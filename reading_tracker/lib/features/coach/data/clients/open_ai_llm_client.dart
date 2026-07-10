@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../domain/entities/coach_message.dart';
@@ -14,6 +15,8 @@ class OpenAiConfig {
   final String apiKey;
   final String model;
   final Uri baseUri;
+
+  bool get hasApiKey => apiKey != 'missing-openai-api-key';
 
   static String _validateValue(String value, String name) {
     if (value.trim().isEmpty) {
@@ -53,22 +56,24 @@ class OpenAiLlmClient implements LlmClient {
       );
     }
 
-    final response = await httpClient.post(
-      config.baseUri,
-      headers: {
-        'Authorization': 'Bearer ${config.apiKey}',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'model': config.model,
-        'input': messages.map(_messageToJson).toList(),
-      }),
-    );
+    _validateRuntimeConfiguration();
+    http.Response response;
+    try {
+      response = await httpClient.post(
+        config.baseUri,
+        headers: _headers,
+        body: jsonEncode(_requestBody(messages, stream: false)),
+      );
+    } catch (error, stackTrace) {
+      _logFailure('http.complete.send', error, stackTrace: stackTrace);
+      rethrow;
+    }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw OpenAiLlmException(
-        'Request failed',
+      throw _httpFailure(
+        phase: 'http.complete.response',
         statusCode: response.statusCode,
+        body: response.body,
       );
     }
 
@@ -99,27 +104,33 @@ class OpenAiLlmClient implements LlmClient {
       );
     }
 
+    _validateRuntimeConfiguration();
     final request = http.Request('POST', config.baseUri)
-      ..headers.addAll({
-        'Authorization': 'Bearer ${config.apiKey}',
-        'Content-Type': 'application/json',
-      })
-      ..body = jsonEncode({
-        'model': config.model,
-        'input': messages.map(_messageToJson).toList(),
-        'stream': true,
-      });
-    final response = await httpClient.send(request);
+      ..headers.addAll(_headers)
+      ..body = jsonEncode(_requestBody(messages, stream: true));
+    late http.StreamedResponse response;
+    try {
+      response = await httpClient.send(request);
+    } catch (error, stackTrace) {
+      _logFailure('http.stream.send', error, stackTrace: stackTrace);
+      rethrow;
+    }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      await response.stream.drain<void>();
-      throw OpenAiLlmException(
-        'Streaming request failed',
+      final errorBody = await response.stream.bytesToString();
+      throw _httpFailure(
+        phase: 'http.stream.response',
         statusCode: response.statusCode,
+        body: errorBody,
       );
     }
 
-    yield* _parseStream(response.stream);
+    try {
+      yield* _parseStream(response.stream);
+    } catch (error, stackTrace) {
+      _logFailure('sse.parse', error, stackTrace: stackTrace);
+      rethrow;
+    }
   }
 
   Stream<String> _parseStream(Stream<List<int>> bytes) async* {
@@ -138,6 +149,12 @@ class OpenAiLlmClient implements LlmClient {
         throw OpenAiLlmException('Invalid streaming JSON: ${error.message}');
       }
       if (event is! Map<String, dynamic>) continue;
+
+      final eventError = event['error'];
+      if (eventError != null || event['type'] == 'error') {
+        final sanitized = _sanitizeErrorBody(jsonEncode(eventError ?? event));
+        throw OpenAiLlmException('Streaming API error: $sanitized');
+      }
 
       final type = event['type'];
       if (type == 'response.output_text.delta') {
@@ -158,6 +175,80 @@ class OpenAiLlmClient implements LlmClient {
         }
       }
     }
+  }
+
+  Map<String, String> get _headers => {
+    'Authorization': 'Bearer ${config.apiKey}',
+    'Content-Type': 'application/json',
+    'Accept': 'text/event-stream',
+  };
+
+  Map<String, Object> _requestBody(
+    List<CoachMessage> messages, {
+    required bool stream,
+  }) => {
+    'model': config.model,
+    'input': messages.map(_messageToJson).toList(),
+    if (stream) 'stream': true,
+  };
+
+  void _validateRuntimeConfiguration() {
+    if (config.hasApiKey) return;
+    const error = OpenAiLlmException(
+      'OPENAI_API_KEY is missing. Start Flutter with a Dart define.',
+    );
+    _logFailure('configuration', error);
+    throw error;
+  }
+
+  OpenAiLlmException _httpFailure({
+    required String phase,
+    required int statusCode,
+    required String body,
+  }) {
+    final sanitizedBody = _sanitizeErrorBody(body);
+    final error = OpenAiLlmException(
+      'Request failed: $sanitizedBody',
+      statusCode: statusCode,
+    );
+    _logFailure(phase, error, statusCode: statusCode, body: sanitizedBody);
+    return error;
+  }
+
+  void _logFailure(
+    String phase,
+    Object error, {
+    int? statusCode,
+    String? body,
+    StackTrace? stackTrace,
+  }) {
+    if (!kDebugMode) return;
+    debugPrint(
+      '[Coach/OpenAI] phase=$phase status=${statusCode ?? 'n/a'} '
+      'exception=${error.runtimeType} error=${_sanitizeErrorBody('$error')}'
+      '${body == null ? '' : ' body=$body'}',
+    );
+    if (stackTrace != null) {
+      debugPrint(stackTrace.toString());
+    }
+  }
+
+  String _sanitizeErrorBody(String value) {
+    final withoutBearer = value.replaceAll(
+      RegExp(r'Bearer\s+[A-Za-z0-9._-]+', caseSensitive: false),
+      'Bearer [REDACTED]',
+    );
+    final withoutJsonSecrets = withoutBearer.replaceAllMapped(
+      RegExp(
+        r'("(?:api[_-]?key|authorization)"\s*:\s*")[^"]+(\")',
+        caseSensitive: false,
+      ),
+      (match) => '${match.group(1)}[REDACTED]${match.group(2)}',
+    );
+    const maxLength = 800;
+    return withoutJsonSecrets.length <= maxLength
+        ? withoutJsonSecrets
+        : '${withoutJsonSecrets.substring(0, maxLength)}…';
   }
 
   Map<String, String> _messageToJson(CoachMessage message) {

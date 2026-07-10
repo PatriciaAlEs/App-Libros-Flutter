@@ -13,8 +13,16 @@ final openAiConfigProvider = Provider<OpenAiConfig>((ref) {
     'OPENAI_MODEL',
     defaultValue: 'gpt-4o-mini',
   );
+  const baseUrl = String.fromEnvironment(
+    'OPENAI_BASE_URL',
+    defaultValue: 'https://api.openai.com/v1/responses',
+  );
 
-  return OpenAiConfig(apiKey: apiKey, model: model);
+  return OpenAiConfig(
+    apiKey: apiKey,
+    model: model,
+    baseUri: Uri.parse(baseUrl),
+  );
 });
 
 final openAiHttpClientProvider = Provider<http.Client>((ref) {

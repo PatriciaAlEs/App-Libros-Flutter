@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -407,8 +408,9 @@ class CoachController extends StateNotifier<CoachControllerState> {
       try {
         await preparePersistence;
         await _conversationRepository?.saveMessage(assistantMessage);
-      } catch (_) {
+      } catch (error, stackTrace) {
         // Persistence failures must not block the conversational response.
+        _debugFailure('persistence.prepare', error, stackTrace);
       }
     }();
 
@@ -468,12 +470,27 @@ class CoachController extends StateNotifier<CoachControllerState> {
         );
         unawaited(_updateConversationMemory());
       }
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _debugFailure(
+        accumulated.isEmpty
+            ? 'generation.before-first-chunk'
+            : 'generation.streaming',
+        error,
+        stackTrace,
+      );
       if (mounted && generationId == _generationId) {
         final messages = state.messages.toList();
         if (accumulated.trim().isEmpty && assistantIndex < messages.length) {
           final removed = messages.removeAt(assistantIndex);
-          await _conversationRepository?.deleteMessage(removed.id);
+          try {
+            await _conversationRepository?.deleteMessage(removed.id);
+          } catch (persistenceError, persistenceStackTrace) {
+            _debugFailure(
+              'persistence.cleanup-provisional',
+              persistenceError,
+              persistenceStackTrace,
+            );
+          }
         } else if (assistantIndex < messages.length) {
           await _flushPersistentMessage(messages[assistantIndex]);
         }
@@ -492,6 +509,14 @@ class CoachController extends StateNotifier<CoachControllerState> {
         _activeCompletion = null;
       }
     }
+  }
+
+  void _debugFailure(String phase, Object error, StackTrace stackTrace) {
+    if (!kDebugMode) return;
+    debugPrint(
+      '[Coach] phase=$phase exception=${error.runtimeType} error=$error',
+    );
+    debugPrint(stackTrace.toString());
   }
 
   int? _lastUserIndex(List<CoachMessage> messages) {
