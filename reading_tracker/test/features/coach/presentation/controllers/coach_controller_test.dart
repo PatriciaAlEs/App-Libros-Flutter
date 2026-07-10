@@ -23,6 +23,7 @@ void main() {
 
       var state = container.read(coachControllerProvider);
       expect(state.isLoading, isTrue);
+      expect(state.generationStatus, CoachGenerationStatus.waitingFirstChunk);
       expect(state.messages, hasLength(2));
       expect(state.messages[0].role, CoachMessageRole.user);
       expect(state.messages[1].role, CoachMessageRole.assistant);
@@ -33,6 +34,7 @@ void main() {
       state = container.read(coachControllerProvider);
       expect(state.messages, hasLength(2));
       expect(state.messages[1].content, 'Vas ');
+      expect(state.generationStatus, CoachGenerationStatus.streaming);
 
       repository.add('bien.');
       await _flush();
@@ -47,6 +49,7 @@ void main() {
       expect(state.isLoading, isFalse);
       expect(state.errorMessage, isNull);
       expect(state.messages, hasLength(2));
+      expect(state.generationStatus, CoachGenerationStatus.completed);
     });
 
     test('pasa historial anterior y mensaje actual por separado', () async {
@@ -144,6 +147,97 @@ void main() {
       await repository.close();
       await first;
     });
+
+    test('cancelar elimina provisional vacio y permite otro envio', () async {
+      final repository = _ControlledRepository();
+      final container = _container(repository);
+      addTearDown(container.dispose);
+      final controller = container.read(coachControllerProvider.notifier);
+      final future = controller.sendMessage(
+        userMessage: 'Pregunta',
+        readerContext: _readerContext(),
+      );
+
+      await controller.cancelGeneration();
+      await future;
+
+      final state = container.read(coachControllerProvider);
+      expect(state.generationStatus, CoachGenerationStatus.cancelled);
+      expect(state.messages, hasLength(1));
+      expect(state.errorMessage, isNull);
+    });
+
+    test('cancelar conserva parcial e ignora fragmentos posteriores', () async {
+      final repository = _ControlledRepository();
+      final container = _container(repository);
+      addTearDown(container.dispose);
+      final controller = container.read(coachControllerProvider.notifier);
+      final future = controller.sendMessage(
+        userMessage: 'Pregunta',
+        readerContext: _readerContext(),
+      );
+      repository.add('Parcial');
+      await _flush();
+
+      await controller.cancelGeneration();
+      repository.add('Obsoleto');
+      await _flush();
+      await future;
+
+      expect(
+        container.read(coachControllerProvider).messages.last.content,
+        'Parcial',
+      );
+    });
+
+    test('regenera sin duplicar el mensaje user', () async {
+      final repository = _QueuedRepository([
+        Stream.value('Primera'),
+        Stream.fromIterable(['Nueva ', 'respuesta']),
+      ]);
+      final container = _container(repository);
+      addTearDown(container.dispose);
+      final controller = container.read(coachControllerProvider.notifier);
+      await controller.sendMessage(
+        userMessage: 'Pregunta',
+        readerContext: _readerContext(),
+      );
+
+      await controller.regenerateLastResponse();
+
+      final state = container.read(coachControllerProvider);
+      expect(state.messages, hasLength(2));
+      expect(
+        state.messages.where(
+          (message) => message.role == CoachMessageRole.user,
+        ),
+        hasLength(1),
+      );
+      expect(state.messages.last.content, 'Nueva respuesta');
+      expect(repository.conversations.last, isEmpty);
+    });
+
+    test('reintenta un error sin duplicar el mensaje user', () async {
+      final repository = _QueuedRepository([
+        Stream<String>.error(StateError('failure')),
+        Stream.value('Recuperada'),
+      ]);
+      final container = _container(repository);
+      addTearDown(container.dispose);
+      final controller = container.read(coachControllerProvider.notifier);
+      await controller.sendMessage(
+        userMessage: 'Pregunta',
+        readerContext: _readerContext(),
+      );
+      expect(container.read(coachControllerProvider).canRetry, isTrue);
+
+      await controller.retryLastResponse();
+
+      final state = container.read(coachControllerProvider);
+      expect(state.messages, hasLength(2));
+      expect(state.messages.last.content, 'Recuperada');
+      expect(state.errorMessage, isNull);
+    });
   });
 }
 
@@ -203,6 +297,24 @@ class _ErrorRepository implements CoachRepository {
     bool conversationIncludesCurrentMessage = false,
   }) {
     return Stream<String>.error(StateError('failure'));
+  }
+}
+
+class _QueuedRepository implements CoachRepository {
+  _QueuedRepository(this.streams);
+  final List<Stream<String>> streams;
+  final List<List<CoachMessage>> conversations = [];
+  int _index = 0;
+
+  @override
+  Stream<String> streamReply({
+    required String userMessage,
+    required List<CoachMessage> conversation,
+    required ReaderContext readerContext,
+    bool conversationIncludesCurrentMessage = false,
+  }) {
+    conversations.add(List.unmodifiable(conversation));
+    return streams[_index++];
   }
 }
 

@@ -170,6 +170,10 @@ class HomeScreen extends ConsumerWidget {
                                   _selectCurrentReading(context, ref, book),
                             ),
                           ],
+                          const SizedBox(height: AppSpacing.xl),
+                          _CoachEntryCard(
+                            onTap: () => Navigator.pushNamed(context, '/coach'),
+                          ),
                           const SizedBox(height: 28),
                           _TodaySummaryCard(sessions: todaySessions),
                           const SizedBox(height: 30),
@@ -380,6 +384,59 @@ class HomeScreen extends ConsumerWidget {
               session.date.day == now.day,
         )
         .toList();
+  }
+}
+
+class _CoachEntryCard extends StatelessWidget {
+  const _CoachEntryCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Semantics(
+      button: true,
+      label: 'Abrir ReadPp Coach',
+      child: ReadPpSurface(
+        padding: EdgeInsets.zero,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: theme.colorScheme.primaryContainer,
+                  child: Icon(
+                    Icons.auto_awesome,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('ReadPp Coach', style: theme.textTheme.titleMedium),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Conversa sobre tu progreso y próximas lecturas',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

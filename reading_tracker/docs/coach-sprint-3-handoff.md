@@ -1,3 +1,52 @@
+# Epic 3.10 - Conversational UX
+
+## Estado previo y objetivo
+
+El modulo disponia de controller, repository, PromptBuilder y streaming, pero no existia ninguna pantalla ni widget del Coach. La epic crea la experiencia conversacional completa sin mover responsabilidades visuales a dominio o data. Permanece pendiente de validacion manual por la desarrolladora.
+
+## Componentes y archivos
+
+Se crearon:
+
+- `lib/features/coach/presentation/screens/coach_screen.dart`
+- `lib/features/coach/presentation/widgets/coach_message_bubble.dart`
+- `lib/features/coach/presentation/widgets/coach_markdown.dart`
+- tests de pantalla y Markdown en `test/features/coach/presentation/`
+
+Se modificaron `coach_controller.dart`, la navegacion principal, Inicio, `pubspec.yaml`, `pubspec.lock`, tests del controller y este handoff. Inicio expone una tarjeta ReadPp Coach y `/coach` resuelve la nueva pantalla.
+
+## Estado y flujos del controller
+
+`CoachGenerationStatus` distingue `idle`, `waitingFirstChunk`, `streaming`, `completed`, `cancelled` y `failed`. El contenido parcial sigue viviendo exclusivamente en el ultimo `CoachMessage`; `activeAssistantIndex` identifica su posicion durante la generacion. `isLoading`, espera, parcial, reintento y regeneracion se derivan del estado para evitar flags contradictorios.
+
+Cada generacion recibe un ID monotono. Stop incrementa ese ID, cancela la suscripcion y completa la espera: callbacks antiguos quedan ignorados. Si el provisional esta vacio se elimina; si contiene texto se conserva. La operacion es idempotente y no genera error visual.
+
+Regenerar localiza el ultimo user asociado, elimina solo su respuesta assistant y vuelve a generar usando como conversacion los mensajes anteriores a ese user. El user visible no se duplica. Reintentar aplica el mismo flujo despues de un fallo; la respuesta parcial fallida permanece hasta que el usuario confirma el reintento y entonces es sustituida por el nuevo provisional.
+
+## Experiencia visual
+
+Antes del primer chunk, el provisional representa visualmente `Escribiendo…` mediante una animacion discreta, sin almacenar ese texto. Tras el primer chunk, cada assistant renderiza su propio Markdown y el mensaje activo muestra un cursor parpadeante excluido de semantica y contenido. Ambos controladores de animacion se liberan con el widget.
+
+El composer conserva sus controladores fuera de `build`, cambia Enviar por Stop durante la generacion y no bloquea scroll ni seleccion. Los errores usan un banner discreto con Reintentar; la cancelacion no se presenta como error. El estado vacio ofrece cuatro sugerencias que se envian mediante el mismo flujo que el composer.
+
+## Auto-scroll y renderizado eficiente
+
+La pantalla considera que el usuario esta al final con una tolerancia de 80 px. Mientras sigue el final, agrupa solicitudes mediante un unico post-frame callback; si el usuario sube, deja de mover la lista y muestra Volver al final. Las duraciones respetan `MediaQuery.disableAnimations` donde interviene la pantalla.
+
+Los mensajes usan claves estables por posicion y rol, nunca por contenido. Solo el bubble activo cambia con los chunks; controllers de texto, foco y scroll se crean una vez. Cada assistant parsea su propio documento Markdown, no toda la conversacion.
+
+## Markdown y codigo
+
+Se añadio `flutter_markdown_plus: 1.0.11`, fork mantenido del renderer oficial discontinuado. Soporta Markdown progresivo, GFM, listas, citas, enlaces, tablas, codigo inline y bloques aunque la entrada este temporalmente incompleta. Los bloques tienen fondo, tipografia monoespaciada, scroll horizontal, lenguaje cuando existe y copia solo del codigo mediante el Clipboard de Flutter, con feedback `Copiado`.
+
+## Tests y accesibilidad
+
+Los tests del controller cubren espera, streaming, acumulacion, cierre, error temprano y tardio, vacio, concurrencia, cancelacion vacia/parcial, callbacks obsoletos, regeneracion y reintento sin duplicar user. Los widgets cubren estado vacio, sugerencias, Escribiendo, Stop, cursor, Regenerar, Markdown basico, listas, citas, codigo inline, bloques y portapapeles. Las acciones principales incluyen labels semanticos y el cursor queda fuera del arbol accesible.
+
+## Limites, riesgos y trabajo excluido
+
+`CoachMessage` no dispone de ID persistente; durante esta epic la identidad estable se basa en posicion y rol. No se implementan persistencia, memoria conversacional, resumen, RAG, tool calling, consultas o modificaciones de datos, syntax highlighting, regeneracion ramificada ni ejecucion de codigo. Un futuro trabajo puede añadir ID de dominio, apertura segura de enlaces y pruebas visuales mas amplias. La base queda preparada para Epic 3.11 sin anticipar su alcance.
+
 # Epic 3.9 - Streaming de respuestas
 
 ## Estado
