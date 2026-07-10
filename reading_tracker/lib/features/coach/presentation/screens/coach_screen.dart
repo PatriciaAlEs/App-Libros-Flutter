@@ -47,13 +47,39 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
         _scheduleScrollToEnd();
       }
     });
-    final state = ref.watch(coachControllerProvider);
+    final uiState = ref.watch(
+      coachControllerProvider.select(
+        (state) => (
+          messageCount: state.messages.length,
+          isLoading: state.isLoading,
+          errorMessage: state.errorMessage,
+          canRetry: state.canRetry,
+        ),
+      ),
+    );
     final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('ReadPp Coach'),
+        titleSpacing: AppSpacing.lg,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '📚 LibrerIA',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(
+              'Tu asistente de lectura',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
         centerTitle: false,
         actions: [
           IconButton(
@@ -65,7 +91,9 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
           ),
           IconButton(
             tooltip: 'Historial de conversaciones',
-            onPressed: () => _showConversationHistory(state),
+            onPressed: () => _showConversationHistory(
+              ref.read(coachControllerProvider),
+            ),
             icon: const Icon(Icons.history),
           ),
         ],
@@ -77,32 +105,22 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
             Expanded(
               child: Stack(
                 children: [
-                  if (state.messages.isEmpty)
+                  if (uiState.messageCount == 0)
                     _CoachEmptyState(onSuggestion: _sendSuggestion)
                   else
                     ListView.builder(
                       controller: _scrollController,
                       padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.lg,
-                        AppSpacing.lg,
-                        AppSpacing.lg,
-                        96,
+                        18,
+                        AppSpacing.md,
+                        18,
+                        32,
                       ),
-                      itemCount: state.messages.length,
+                      itemCount: uiState.messageCount,
                       itemBuilder: (context, index) {
-                        final message = state.messages[index];
-                        final isActive = state.activeAssistantIndex == index;
-                        return CoachMessageBubble(
-                          key: ValueKey('coach-message-${message.id}'),
-                          message: message,
-                          isWaiting: isActive && state.isWaitingFirstChunk,
-                          isStreaming: isActive && state.hasPartialResponse,
-                          showRegenerate:
-                              index == state.messages.length - 1 &&
-                              state.canRegenerate,
-                          onRegenerate: () => ref
-                              .read(coachControllerProvider.notifier)
-                              .regenerateLastResponse(),
+                        return _CoachMessageItem(
+                          key: ValueKey('coach-message-position-$index'),
+                          index: index,
                         );
                       },
                     ),
@@ -128,10 +146,10 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
                 ],
               ),
             ),
-            if (state.errorMessage != null)
+            if (uiState.errorMessage != null)
               _CoachErrorBanner(
-                message: state.errorMessage!,
-                onRetry: state.canRetry
+                message: uiState.errorMessage!,
+                onRetry: uiState.canRetry
                     ? () => ref
                           .read(coachControllerProvider.notifier)
                           .retryLastResponse()
@@ -140,7 +158,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
             _CoachComposer(
               controller: _textController,
               focusNode: _focusNode,
-              isGenerating: state.isLoading,
+              isGenerating: uiState.isLoading,
               onSend: _sendComposerMessage,
               onStop: () =>
                   ref.read(coachControllerProvider.notifier).cancelGeneration(),
@@ -323,14 +341,48 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
       : AppMotion.normal;
 }
 
+class _CoachMessageItem extends ConsumerWidget {
+  const _CoachMessageItem({super.key, required this.index});
+
+  final int index;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final item = ref.watch(
+      coachControllerProvider.select((state) {
+        if (index >= state.messages.length) return null;
+        final message = state.messages[index];
+        final isActive = state.activeAssistantIndex == index;
+        return (
+          message: message,
+          isWaiting: isActive && state.isWaitingFirstChunk,
+          isStreaming: isActive && state.hasPartialResponse,
+          showRegenerate:
+              index == state.messages.length - 1 && state.canRegenerate,
+        );
+      }),
+    );
+    if (item == null) return const SizedBox.shrink();
+    return CoachMessageBubble(
+      key: ValueKey('coach-message-${item.message.id}'),
+      message: item.message,
+      isWaiting: item.isWaiting,
+      isStreaming: item.isStreaming,
+      showRegenerate: item.showRegenerate,
+      onRegenerate: () => ref
+          .read(coachControllerProvider.notifier)
+          .regenerateLastResponse(),
+    );
+  }
+}
+
 class _CoachEmptyState extends StatelessWidget {
   const _CoachEmptyState({required this.onSuggestion});
 
   static const suggestions = [
+    'Recomiéndame un libro',
     'Resume mi progreso de lectura',
-    'Recomiéndame mi próxima lectura',
-    'Analiza mis hábitos lectores',
-    'Ayúdame a crear un objetivo de lectura',
+    'Ayúdame a crear un hábito',
   ];
 
   final ValueChanged<String> onSuggestion;
@@ -339,24 +391,28 @@ class _CoachEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.xxl,
-        AppSpacing.lg,
-        AppSpacing.xl,
-      ),
+      padding: const EdgeInsets.fromLTRB(24, 56, 24, AppSpacing.xl),
       children: [
-        Icon(Icons.auto_awesome, size: 42, color: theme.colorScheme.primary),
-        const SizedBox(height: AppSpacing.md),
+        const Center(
+          child: ExcludeSemantics(
+            child: Text('📚', style: TextStyle(fontSize: 50)),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
         Text(
-          '¿Qué te gustaría explorar?',
-          style: theme.textTheme.headlineSmall,
+          '¿Sobre qué quieres leer hoy?',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Conversa sobre tu progreso, tus hábitos y tus próximas lecturas.',
-          style: theme.textTheme.bodyLarge?.copyWith(
+          'Explora nuevas lecturas, comprende tu progreso y construye un hábito a tu ritmo.',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
+            height: 1.45,
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -370,9 +426,26 @@ class _CoachEmptyState extends StatelessWidget {
                 onPressed: () => onSuggestion(suggestion),
                 style: OutlinedButton.styleFrom(
                   alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.all(AppSpacing.md),
+                  minimumSize: const Size.fromHeight(52),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: 14,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
                 ),
-                child: Text(suggestion),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.arrow_outward_rounded,
+                      size: 18,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(child: Text(suggestion)),
+                  ],
+                ),
               ),
             ),
           ),
@@ -445,51 +518,70 @@ class _CoachComposer extends StatelessWidget {
         ),
         child: Material(
           color: theme.colorScheme.surface,
-          elevation: 2,
-          borderRadius: BorderRadius.circular(24),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  focusNode: focusNode,
-                  minLines: 1,
-                  maxLines: 5,
-                  textInputAction: TextInputAction.newline,
-                  decoration: const InputDecoration(
-                    hintText: 'Pregunta al Coach…',
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.all(AppSpacing.md),
+          elevation: 1,
+          shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.16),
+          borderRadius: BorderRadius.circular(28),
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 58),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.8),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    minLines: 1,
+                    maxLines: 5,
+                    textInputAction: TextInputAction.newline,
+                    decoration: const InputDecoration(
+                      hintText: 'Escribe a LibrerIA…',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: 17,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(6),
-                child: AnimatedSwitcher(
-                  duration: AppMotion.normal,
-                  child: isGenerating
-                      ? Semantics(
-                          button: true,
-                          label: 'Detener respuesta',
-                          child: IconButton.filled(
-                            key: const ValueKey('stop'),
-                            onPressed: onStop,
-                            icon: const Icon(Icons.stop_rounded),
+                Padding(
+                  padding: const EdgeInsets.all(7),
+                  child: AnimatedSwitcher(
+                    duration: AppMotion.fast,
+                    switchInCurve: AppMotion.standard,
+                    switchOutCurve: AppMotion.standard,
+                    transitionBuilder: (child, animation) =>
+                        ScaleTransition(scale: animation, child: child),
+                    child: isGenerating
+                        ? Semantics(
+                            button: true,
+                            label: 'Detener respuesta',
+                            child: IconButton.filledTonal(
+                              key: const ValueKey('stop'),
+                              tooltip: 'Detener respuesta',
+                              onPressed: onStop,
+                              icon: const Icon(Icons.stop_rounded),
+                            ),
+                          )
+                        : Semantics(
+                            button: true,
+                            label: 'Enviar mensaje',
+                            child: IconButton.filled(
+                              key: const ValueKey('send'),
+                              tooltip: 'Enviar mensaje',
+                              onPressed: onSend,
+                              icon: const Icon(Icons.arrow_upward_rounded),
+                            ),
                           ),
-                        )
-                      : Semantics(
-                          button: true,
-                          label: 'Enviar mensaje',
-                          child: IconButton.filled(
-                            key: const ValueKey('send'),
-                            onPressed: onSend,
-                            icon: const Icon(Icons.arrow_upward_rounded),
-                          ),
-                        ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -136,7 +136,7 @@ class _AccountTransitionScreenState
                         arguments: true,
                       ),
                       icon: const Icon(Icons.person_add_alt_1_rounded),
-                      label: const Text('Crear cuenta'),
+                      label: const Text('Crear una cuenta'),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     OutlinedButton.icon(
@@ -146,7 +146,7 @@ class _AccountTransitionScreenState
                         arguments: false,
                       ),
                       icon: const Icon(Icons.login_rounded),
-                      label: const Text('Ya tengo una cuenta'),
+                      label: const Text('Entrar con correo'),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     TextButton(

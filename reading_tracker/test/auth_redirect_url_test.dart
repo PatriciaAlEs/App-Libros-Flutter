@@ -32,4 +32,24 @@ void main() {
       expect(redirectUrl, isNull);
     });
   });
+
+  group('OAuth callback detection', () {
+    test('detects callback code and cancellation', () {
+      expect(
+        isOAuthCallbackUri(Uri.parse('https://readpp.dev/?code=oauth-code')),
+        isTrue,
+      );
+      final cancellation = Uri.parse(
+        'https://readpp.dev/?error=access_denied',
+      );
+      expect(isOAuthCallbackUri(cancellation), isTrue);
+      expect(isOAuthCancellationUri(cancellation), isTrue);
+    });
+
+    test('does not treat a normal Home URL as callback', () {
+      final uri = Uri.parse('https://readpp.dev/');
+      expect(isOAuthCallbackUri(uri), isFalse);
+      expect(isOAuthCancellationUri(uri), isFalse);
+    });
+  });
 }

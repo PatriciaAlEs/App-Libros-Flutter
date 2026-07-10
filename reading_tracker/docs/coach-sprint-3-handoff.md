@@ -1,3 +1,60 @@
+# Epic 3.12 - Coach UI Polish
+
+## Alcance y arquitectura conservada
+
+El polish se limita a presentación. Se mantiene intacto el flujo
+`CoachScreen -> CoachController -> CoachRepository -> PromptBuilder ->
+LlmClient`, junto con streaming, cancelación, regeneración, memoria y
+persistencia. Los cambios se concentran en `coach_screen.dart`,
+`coach_message_bubble.dart` y `coach_markdown.dart`; el test de pantalla solo
+actualiza los textos visuales del nuevo estado vacío.
+
+## Conversación y jerarquía visual
+
+Las burbujas dejan de ocupar el ancho completo: user queda limitado al 80% y
+assistant al 82% del ancho disponible. User continúa alineado a la derecha sin
+avatar. Assistant incorpora un avatar visual fijo 📚, alineado con la primera
+línea y excluido de semántica, selección, copia y persistencia. La cabecera usa
+la identidad `📚 LibrerIA` con el subtítulo `Tu asistente de lectura`; las
+acciones existentes de nueva conversación e historial se conservan como
+iconos accesibles.
+
+El estado vacío presenta una entrada editorial centrada y tres sugerencias
+accionables: recomendación, resumen de progreso y creación de hábito. Todas
+siguen usando el mismo callback de envío. Regenerar pasa a una acción compacta
+de icono y texto con color secundario, manteniendo un área táctil mínima de 44
+px.
+
+## Composer, movimiento y rendimiento
+
+El composer conserva exactamente sus callbacks y controladores, pero adopta
+radio de 28 px, altura mínima de 58 px, padding uniforme, borde discreto y
+acciones Enviar/Stop integradas mediante una transición corta de escala. La
+entrada de cada mensaje combina fade y desplazamiento mínimo; typing, cursor y
+entrada respetan `disableAnimations`.
+
+La pantalla selecciona únicamente metadatos de UI mediante Riverpod y cada fila
+observa su propio mensaje. Los chunks del stream reconstruyen el bubble activo,
+no el scaffold ni toda la lista visible. No se añadió estado de negocio ni se
+alteró el contrato del controller.
+
+## Markdown y código
+
+Markdown mantiene el renderer y la selección actuales. Se refinan ritmo
+vertical, listas, enlaces, citas y tablas con contraste derivado del tema. Los
+bloques de código usan fondo diferenciado, borde y radio de 16 px, cabecera
+separada, lenguaje alineado y acción Copiar compacta; el portapapeles continúa
+recibiendo exclusivamente el código.
+
+## Exclusiones y riesgos
+
+Quedan fuera RAG, embeddings, tool calling, cambios de provider, prompts,
+memoria, Drift, sincronización, branching de conversaciones y cualquier cambio
+de datos. No se introducen assets ni paquetes nuevos. La validación visual con
+texto extremo, pantallas muy estrechas y temas personalizados queda como riesgo
+manual pendiente. Por restricción de la entrega no se ejecutaron `dart format`,
+`flutter analyze` ni `flutter test`.
+
 # Ampliación posterior a Epic 3.11 - proveedor Google Gemini
 
 El Coach incorpora Google Gemini como segundo proveedor sin modificar

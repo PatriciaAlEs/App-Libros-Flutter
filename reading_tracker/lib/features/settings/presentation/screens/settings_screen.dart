@@ -59,6 +59,7 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.lg),
               _AccountAccessCard(
                 isAuthenticated: authState.isAuthenticated,
+                isRestoring: authState.isRestoring,
                 email: authState.user?.email,
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -84,17 +85,25 @@ class SettingsScreen extends ConsumerWidget {
 class _AccountAccessCard extends StatelessWidget {
   const _AccountAccessCard({
     required this.isAuthenticated,
+    required this.isRestoring,
     required this.email,
   });
 
   final bool isAuthenticated;
+  final bool isRestoring;
   final String? email;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final status = isAuthenticated ? 'Sesion iniciada' : 'Modo local';
-    final detail = isAuthenticated
+    final status = isRestoring
+        ? 'Comprobando sesion…'
+        : isAuthenticated
+        ? 'Sesion iniciada'
+        : 'Modo local';
+    final detail = isRestoring
+        ? 'Estamos restaurando tu acceso.'
+        : isAuthenticated
         ? email ?? 'Cuenta conectada'
         : 'Tus datos siguen guardados en este dispositivo.';
 
@@ -125,7 +134,9 @@ class _AccountAccessCard extends StatelessWidget {
                   color: theme.colorScheme.secondary.withValues(alpha: 0.24),
                 ),
                 child: Icon(
-                  isAuthenticated
+                  isRestoring
+                      ? Icons.sync_rounded
+                      : isAuthenticated
                       ? Icons.verified_user_outlined
                       : Icons.phone_android_rounded,
                   color: theme.colorScheme.primary,
@@ -147,7 +158,7 @@ class _AccountAccessCard extends StatelessWidget {
                     Text(
                       status,
                       style: theme.textTheme.labelLarge?.copyWith(
-                        color: isAuthenticated
+                        color: isAuthenticated || isRestoring
                             ? theme.colorScheme.primary
                             : theme.colorScheme.secondary,
                         fontWeight: FontWeight.w800,

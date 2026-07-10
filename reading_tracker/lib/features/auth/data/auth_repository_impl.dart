@@ -23,7 +23,7 @@ class SupabaseAuthRepository implements AuthRepository {
   @override
   Stream<AppUser?> watchAuthState() {
     final client = _client;
-    if (client == null) return const Stream<AppUser?>.empty();
+    if (client == null) return Stream<AppUser?>.value(null);
 
     return client.auth.onAuthStateChange.map(
       (state) => state.session?.user.toAppUser(),
@@ -56,8 +56,8 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> signInWithGoogle() async {
-    await _auth.signInWithOAuth(
+  Future<bool> signInWithGoogle() {
+    return _auth.signInWithOAuth(
       OAuthProvider.google,
       redirectTo: authRedirectUrl,
     );

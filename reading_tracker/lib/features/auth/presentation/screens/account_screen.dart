@@ -63,7 +63,9 @@ class AccountScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Icon(
-                      state.isAuthenticated
+                      state.isRestoring
+                          ? Icons.sync_rounded
+                          : state.isAuthenticated
                           ? Icons.verified_user_outlined
                           : Icons.phone_android_rounded,
                       size: 46,
@@ -81,7 +83,9 @@ class AccountScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
-                    if (state.isAuthenticated && user != null)
+                    if (state.isRestoring)
+                      const _RestoringAccountContent()
+                    else if (state.isAuthenticated && user != null)
                       _SignedInContent(
                         email: user.email ?? 'Cuenta sin email visible',
                         isLoading: state.isLoading,
@@ -112,6 +116,21 @@ class AccountScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _RestoringAccountContent extends StatelessWidget {
+  const _RestoringAccountContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        LinearProgressIndicator(),
+        SizedBox(height: AppSpacing.md),
+        Text('Comprobando tu sesion…', textAlign: TextAlign.center),
+      ],
     );
   }
 }

@@ -55,7 +55,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final state = ref.watch(authControllerProvider);
+    ref.listen<AuthControllerState>(authControllerProvider, (previous, next) {
+      if (previous?.isAuthenticated == true || !next.isAuthenticated) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
+      });
+    });
     final isAuthConfigured = ref.watch(isSupabaseEnabledProvider);
+    final isBusy = state.isRestoring || state.isLoading;
     const authUnavailableMessage =
         'La autenticacion no esta disponible en este entorno.';
 
@@ -129,8 +137,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xl),
+                    if (state.isRestoring) ...[
+                      const LinearProgressIndicator(),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        'Comprobando tu sesion…',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                    ],
                     FilledButton.icon(
-                      onPressed: state.isLoading || !isAuthConfigured
+                      onPressed: isBusy || !isAuthConfigured
                           ? null
                           : ref
                                 .read(authControllerProvider.notifier)
@@ -141,7 +161,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     const SizedBox(height: AppSpacing.lg),
                     TextField(
                       controller: _emailController,
-                      enabled: isAuthConfigured && !state.isLoading,
+                      enabled: isAuthConfigured && !isBusy,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       autofillHints: const [AutofillHints.email],
@@ -153,11 +173,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     const SizedBox(height: AppSpacing.md),
                     TextField(
                       controller: _passwordController,
-                      enabled: isAuthConfigured && !state.isLoading,
+                      enabled: isAuthConfigured && !isBusy,
                       obscureText: true,
                       textInputAction: TextInputAction.done,
                       autofillHints: const [AutofillHints.password],
-                      onSubmitted: (_) => state.isLoading || !isAuthConfigured
+                      onSubmitted: (_) => isBusy || !isAuthConfigured
                           ? null
                           : _submitEmailPassword(),
                       decoration: const InputDecoration(
@@ -167,23 +187,23 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     FilledButton(
-                      onPressed: state.isLoading || !isAuthConfigured
+                      onPressed: isBusy || !isAuthConfigured
                           ? null
                           : _submitEmailPassword,
                       child: Text(
-                        _isRegisterMode ? 'Crear cuenta' : 'Iniciar sesion',
+                        _isRegisterMode ? 'Crear una cuenta' : 'Entrar con correo',
                       ),
                     ),
                     TextButton(
-                      onPressed: state.isLoading || !isAuthConfigured
+                      onPressed: isBusy || !isAuthConfigured
                           ? null
                           : () => setState(
                               () => _isRegisterMode = !_isRegisterMode,
                             ),
                       child: Text(
                         _isRegisterMode
-                            ? 'Ya tengo cuenta'
-                            : 'Crear cuenta con email',
+                            ? '¿Ya tienes una cuenta? Inicia sesion'
+                            : '¿Aun no tienes cuenta? Registrate',
                       ),
                     ),
                     if (!isAuthConfigured || state.errorMessage != null) ...[

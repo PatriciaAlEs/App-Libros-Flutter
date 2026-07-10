@@ -10,7 +10,6 @@ import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
 import '../../../books/presentation/widgets/current_reading_card.dart';
 import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
-import '../../../libreria/presentation/providers/libreria_provider.dart';
 import '../../../libreria/presentation/widgets/libreria_entry_card.dart';
 import '../../../reading_sessions/domain/entities/reading_session.dart';
 import '../../../reading_sessions/domain/usecases/register_reading_session.dart';
@@ -41,7 +40,6 @@ class HomeScreen extends ConsumerWidget {
     final recentSessionsAsync = ref.watch(
       readingSessionsForRangeProvider(recentActivityRange),
     );
-    final libreriaEnabled = ref.watch(libreriaFeatureEnabledProvider);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -60,8 +58,12 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
           child: booksAsync.when(
-            loading: () => const _HomeLoadingState(),
-            error: (error, _) => const _HomeErrorState(),
+            loading: () => _HomeLoadingState(
+              onOpenCoach: () => Navigator.pushNamed(context, '/coach'),
+            ),
+            error: (error, _) => _HomeErrorState(
+              onOpenCoach: () => Navigator.pushNamed(context, '/coach'),
+            ),
             data: (books) {
               final summary =
                   summaryAsync.valueOrNull ?? const StatisticsSummary.empty();
@@ -128,13 +130,10 @@ class HomeScreen extends ConsumerWidget {
                             onCalendarTap: () =>
                                 Navigator.pushNamed(context, '/calendar'),
                           ),
-                          if (libreriaEnabled) ...[
-                            const SizedBox(height: AppSpacing.xl),
-                            LibreriaEntryCard(
-                              onTap: () =>
-                                  Navigator.pushNamed(context, '/coach'),
-                            ),
-                          ],
+                          const SizedBox(height: AppSpacing.xl),
+                          LibreriaEntryCard(
+                            onTap: () => Navigator.pushNamed(context, '/coach'),
+                          ),
                           const SizedBox(height: AppSpacing.xl),
                           _CurrentReadingCards(
                             books: prioritizedCurrentBooks,
@@ -378,7 +377,9 @@ class HomeScreen extends ConsumerWidget {
 }
 
 class _HomeLoadingState extends StatelessWidget {
-  const _HomeLoadingState();
+  const _HomeLoadingState({required this.onOpenCoach});
+
+  final VoidCallback onOpenCoach;
 
   @override
   Widget build(BuildContext context) {
@@ -400,6 +401,8 @@ class _HomeLoadingState extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
+        LibreriaEntryCard(onTap: onOpenCoach),
+        const SizedBox(height: AppSpacing.xl),
         Container(
           height: 302,
           decoration: BoxDecoration(
@@ -424,16 +427,25 @@ class _HomeLoadingState extends StatelessWidget {
 }
 
 class _HomeErrorState extends StatelessWidget {
-  const _HomeErrorState();
+  const _HomeErrorState({required this.onOpenCoach});
+
+  final VoidCallback onOpenCoach;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Container(
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        132,
+      ),
+      children: [
+        LibreriaEntryCard(onTap: onOpenCoach),
+        const SizedBox(height: AppSpacing.xl),
+        Container(
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(26, 28, 26, 26),
           decoration: BoxDecoration(
@@ -466,7 +478,7 @@ class _HomeErrorState extends StatelessWidget {
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 }

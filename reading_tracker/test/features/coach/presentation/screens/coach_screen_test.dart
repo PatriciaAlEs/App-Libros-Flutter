@@ -19,9 +19,9 @@ void main() {
       final repository = _WidgetRepository();
       await tester.pumpWidget(_app(repository));
 
-      expect(find.text('¿Qué te gustaría explorar?'), findsOneWidget);
+      expect(find.text('¿Sobre qué quieres leer hoy?'), findsOneWidget);
       expect(find.text('Resume mi progreso de lectura'), findsOneWidget);
-      expect(find.text('Analiza mis hábitos lectores'), findsOneWidget);
+      expect(find.text('Recomiéndame un libro'), findsOneWidget);
     });
 
     testWidgets('sugerencia usa el flujo normal y muestra Escribiendo', (

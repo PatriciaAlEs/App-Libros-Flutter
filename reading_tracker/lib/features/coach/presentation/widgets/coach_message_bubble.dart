@@ -24,67 +24,153 @@ class CoachMessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isUser = message.role == CoachMessageRole.user;
-    return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: AnimatedContainer(
-        duration: AppMotion.normal,
-        constraints: const BoxConstraints(maxWidth: 720),
-        margin: EdgeInsets.only(
-          left: isUser ? 42 : 0,
-          right: isUser ? 0 : 24,
-          bottom: AppSpacing.md,
-        ),
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: isUser
-              ? theme.colorScheme.primaryContainer
-              : theme.colorScheme.surface.withValues(alpha: 0.94),
-          borderRadius: BorderRadius.circular(20).copyWith(
-            bottomRight: isUser ? const Radius.circular(6) : null,
-            bottomLeft: isUser ? null : const Radius.circular(6),
-          ),
-          border: isUser
-              ? null
-              : Border.all(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.12),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxBubbleWidth = constraints.maxWidth * (isUser ? 0.80 : 0.82);
+        final bubble = ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxBubbleWidth),
+          child: _MessageEntrance(
+            child: AnimatedContainer(
+              duration: AppMotion.fast,
+              curve: AppMotion.standard,
+              margin: const EdgeInsets.only(bottom: AppSpacing.md),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: 14,
+              ),
+              decoration: BoxDecoration(
+                color: isUser
+                    ? theme.colorScheme.primaryContainer
+                    : theme.colorScheme.surface.withValues(alpha: 0.96),
+                borderRadius: BorderRadius.circular(22).copyWith(
+                  bottomRight: isUser ? const Radius.circular(8) : null,
+                  bottomLeft: isUser ? null : const Radius.circular(8),
                 ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AnimatedSwitcher(
-              duration: AppMotion.normal,
-              child: isWaiting
-                  ? const _TypingIndicator(key: ValueKey('typing'))
-                  : isUser
-                  ? SelectableText(
-                      message.content,
-                      key: const ValueKey('user-content'),
-                    )
-                  : CoachMarkdown(
-                      key: const ValueKey('assistant-content'),
-                      data: message.content,
+                border: isUser
+                    ? null
+                    : Border.all(
+                        color: theme.colorScheme.outlineVariant.withValues(
+                          alpha: 0.72,
+                        ),
+                      ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AnimatedSwitcher(
+                    duration: AppMotion.fast,
+                    switchInCurve: AppMotion.standard,
+                    switchOutCurve: AppMotion.standard,
+                    child: isWaiting
+                        ? const _TypingIndicator(key: ValueKey('typing'))
+                        : isUser
+                        ? SelectableText(
+                            message.content,
+                            key: const ValueKey('user-content'),
+                          )
+                        : CoachMarkdown(
+                            key: const ValueKey('assistant-content'),
+                            data: message.content,
+                          ),
+                  ),
+                  if (isStreaming)
+                    const _StreamingCursor(
+                      key: ValueKey('streaming-cursor'),
                     ),
+                  if (showRegenerate) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Semantics(
+                      button: true,
+                      label: 'Regenerar última respuesta',
+                      child: TextButton.icon(
+                        onPressed: onRegenerate,
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          foregroundColor: theme.colorScheme.onSurfaceVariant,
+                          minimumSize: const Size(44, 44),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                        ),
+                        icon: const Icon(Icons.refresh_rounded, size: 17),
+                        label: const Text('Regenerar'),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
-            if (isStreaming)
-              const _StreamingCursor(key: ValueKey('streaming-cursor')),
-            if (showRegenerate) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Semantics(
-                button: true,
-                label: 'Regenerar última respuesta',
-                child: TextButton.icon(
-                  onPressed: onRegenerate,
-                  icon: const Icon(Icons.refresh, size: 18),
-                  label: const Text('Regenerar'),
+          ),
+        );
+
+        if (isUser) {
+          return Align(alignment: Alignment.centerRight, child: bubble);
+        }
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(top: 10, right: AppSpacing.sm),
+                child: ExcludeSemantics(
+                  child: Text('📚', style: TextStyle(fontSize: 22)),
                 ),
               ),
+              Flexible(child: bubble),
             ],
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
+}
+
+class _MessageEntrance extends StatefulWidget {
+  const _MessageEntrance({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_MessageEntrance> createState() => _MessageEntranceState();
+}
+
+class _MessageEntranceState extends State<_MessageEntrance>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _opacity;
+  late final Animation<Offset> _offset;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: AppMotion.fast,
+    )..forward();
+    _opacity = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _offset = Tween<Offset>(
+      begin: const Offset(0, 0.035),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) _controller.value = 1;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+    opacity: _opacity,
+    child: SlideTransition(position: _offset, child: widget.child),
+  );
 }
 
 class _TypingIndicator extends StatefulWidget {
@@ -105,6 +191,18 @@ class _TypingIndicatorState extends State<_TypingIndicator>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller
+        ..stop()
+        ..value = 1;
+    } else if (!_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    }
   }
 
   @override
@@ -144,6 +242,18 @@ class _StreamingCursorState extends State<_StreamingCursor>
       vsync: this,
       duration: const Duration(milliseconds: 650),
     )..repeat(reverse: true);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller
+        ..stop()
+        ..value = 1;
+    } else if (!_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    }
   }
 
   @override

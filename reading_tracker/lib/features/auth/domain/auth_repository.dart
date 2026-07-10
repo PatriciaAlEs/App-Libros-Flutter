@@ -15,7 +15,7 @@ abstract interface class AuthRepository {
     required String password,
   });
 
-  Future<void> signInWithGoogle();
+  Future<bool> signInWithGoogle();
 
   Future<void> signOut();
 }

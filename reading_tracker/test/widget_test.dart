@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -17,6 +18,9 @@ import 'package:reading_tracker/features/books/domain/enums/book_status.dart';
 import 'package:reading_tracker/features/books/domain/repositories/book_repository.dart';
 import 'package:reading_tracker/features/books/presentation/screens/book_form_screen.dart';
 import 'package:reading_tracker/features/books/presentation/screens/books_list_screen.dart';
+import 'package:reading_tracker/features/auth/domain/app_user.dart';
+import 'package:reading_tracker/features/auth/domain/auth_repository.dart';
+import 'package:reading_tracker/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:reading_tracker/features/coach/presentation/screens/coach_screen.dart';
 import 'package:reading_tracker/features/home/presentation/screens/home_screen.dart';
 import 'package:reading_tracker/features/libreria/presentation/widgets/libreria_entry_card.dart';
@@ -135,9 +139,13 @@ void main() {
   testWidgets('Inicio exposes one LibrerIA access and opens CoachScreen', (
     tester,
   ) async {
+    final authRepository = _HomeAuthRepository();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          authControllerProvider.overrideWith(
+            (ref) => AuthController(authRepository),
+          ),
           bookRepositoryProvider.overrideWithValue(_EmptyBookRepository()),
           statisticsRepositoryProvider.overrideWithValue(
             const _EmptyStatisticsRepository(),
@@ -153,6 +161,14 @@ void main() {
 
     expect(find.byType(LibreriaEntryCard), findsOneWidget);
     expect(find.text('ReadPp Coach'), findsNothing);
+    expect(find.text('LibrerIA'), findsOneWidget);
+
+    authRepository.emit(
+      const AppUser(id: 'authenticated-user', email: 'reader@test.dev'),
+    );
+    await tester.pump();
+
+    expect(find.byType(LibreriaEntryCard), findsOneWidget);
     expect(find.text('LibrerIA'), findsOneWidget);
 
     await tester.tap(find.byType(LibreriaEntryCard));
@@ -713,6 +729,39 @@ void main() {
       expect(find.text('Este libro ya está en tu biblioteca'), findsOneWidget);
     },
   );
+}
+
+class _HomeAuthRepository implements AuthRepository {
+  final _authState = StreamController<AppUser?>.broadcast();
+
+  void emit(AppUser? user) => _authState.add(user);
+
+  @override
+  Future<AppUser?> getCurrentUser() async => null;
+
+  @override
+  Stream<AppUser?> watchAuthState() async* {
+    yield null;
+    yield* _authState.stream;
+  }
+
+  @override
+  Future<AppUser?> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async => null;
+
+  @override
+  Future<AppUser?> signUpWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async => null;
+
+  @override
+  Future<bool> signInWithGoogle() async => true;
+
+  @override
+  Future<void> signOut() async => emit(null);
 }
 
 Finder _searchField() => find.byType(TextField).first;

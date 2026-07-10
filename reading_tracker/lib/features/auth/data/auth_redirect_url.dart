@@ -25,3 +25,20 @@ String? resolveAuthRedirectUrl({
     path: '/',
   ).toString();
 }
+
+bool isOAuthCallbackUri(Uri uri) {
+  final query = uri.queryParameters;
+  return query.containsKey('code') ||
+      query.containsKey('error') ||
+      uri.fragment.contains('access_token=') ||
+      uri.fragment.contains('error=');
+}
+
+bool isOAuthCancellationUri(Uri uri) {
+  final error = uri.queryParameters['error']?.toLowerCase();
+  final description = uri.queryParameters['error_description']?.toLowerCase();
+  final fragment = uri.fragment.toLowerCase();
+  return error == 'access_denied' ||
+      description?.contains('cancel') == true ||
+      fragment.contains('error=access_denied');
+}

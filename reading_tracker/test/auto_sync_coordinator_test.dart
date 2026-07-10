@@ -388,7 +388,7 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> signInWithGoogle() async {}
+  Future<bool> signInWithGoogle() async => true;
 
   @override
   Future<void> signOut() async {}
