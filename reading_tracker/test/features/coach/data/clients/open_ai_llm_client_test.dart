@@ -85,6 +85,35 @@ void main() {
       ]);
     });
 
+    test('Gemini compatible usa messages en chat completions', () async {
+      late Map<String, dynamic> body;
+      final client = _client(
+        MockClient((request) async {
+          body = jsonDecode(request.body) as Map<String, dynamic>;
+          return http.Response(
+            jsonEncode({
+              'choices': [
+                {
+                  'message': {'content': 'Respuesta Gemini'},
+                },
+              ],
+            }),
+            200,
+          );
+        }),
+        baseUri: Uri.parse(
+          'https://generativelanguage.googleapis.com/'
+          'v1beta/openai/chat/completions',
+        ),
+      );
+
+      final response = await client.complete(messages: _messages());
+
+      expect(body['input'], isNull);
+      expect(body['messages'], hasLength(3));
+      expect(response, 'Respuesta Gemini');
+    });
+
     test('devuelve output_text cuando existe', () async {
       final client = _client(
         MockClient((request) async => _outputTextResponse('Texto directo')),
@@ -195,6 +224,32 @@ void main() {
       expect(body['input'], hasLength(3));
       expect(httpClient.request.headers['Authorization'], 'Bearer test-key');
       expect(httpClient.request.headers['Content-Type'], 'application/json');
+    });
+
+    test('Gemini compatible emite deltas y envia messages', () async {
+      final httpClient = _StreamingClient([
+        utf8.encode(
+          'data: {"choices":[{"delta":{"content":"Hola"}}]}\n'
+          'data: [DONE]\n',
+        ),
+      ]);
+      final client = _client(
+        httpClient,
+        baseUri: Uri.parse(
+          'https://generativelanguage.googleapis.com/'
+          'v1beta/openai/chat/completions',
+        ),
+      );
+
+      final chunks = await client
+          .streamCompletion(messages: _messages())
+          .toList();
+      final body = jsonDecode(httpClient.request.body) as Map<String, dynamic>;
+
+      expect(chunks, ['Hola']);
+      expect(body['messages'], hasLength(3));
+      expect(body['input'], isNull);
+      expect(body['stream'], isTrue);
     });
 
     test('streaming procesa eventos y UTF-8 divididos entre chunks', () async {
@@ -348,9 +403,13 @@ void main() {
   });
 }
 
-OpenAiLlmClient _client(http.Client httpClient) {
+OpenAiLlmClient _client(http.Client httpClient, {Uri? baseUri}) {
   return OpenAiLlmClient(
-    config: OpenAiConfig(apiKey: 'test-key', model: 'test-model'),
+    config: OpenAiConfig(
+      apiKey: 'test-key',
+      model: 'test-model',
+      baseUri: baseUri,
+    ),
     httpClient: httpClient,
   );
 }

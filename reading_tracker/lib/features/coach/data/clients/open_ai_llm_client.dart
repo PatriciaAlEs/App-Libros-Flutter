@@ -188,9 +188,15 @@ class OpenAiLlmClient implements LlmClient {
     required bool stream,
   }) => {
     'model': config.model,
-    'input': messages.map(_messageToJson).toList(),
+    if (_usesChatCompletions)
+      'messages': messages.map(_messageToJson).toList()
+    else
+      'input': messages.map(_messageToJson).toList(),
     if (stream) 'stream': true,
   };
+
+  bool get _usesChatCompletions =>
+      config.baseUri.path.endsWith('/chat/completions');
 
   void _validateRuntimeConfiguration() {
     if (config.hasApiKey) return;
@@ -268,6 +274,20 @@ class OpenAiLlmClient implements LlmClient {
 
   String? _extractText(Object? body) {
     if (body is! Map<String, dynamic>) return null;
+
+    final choices = body['choices'];
+    if (choices is List && choices.isNotEmpty) {
+      final firstChoice = choices.first;
+      if (firstChoice is Map<String, dynamic>) {
+        final message = firstChoice['message'];
+        if (message is Map<String, dynamic>) {
+          final content = message['content'];
+          if (content is String && content.trim().isNotEmpty) {
+            return content;
+          }
+        }
+      }
+    }
 
     final outputText = body['output_text'];
     if (outputText is String && outputText.trim().isNotEmpty) {

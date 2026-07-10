@@ -1,3 +1,50 @@
+# Ampliación posterior a Epic 3.11 - proveedor Google Gemini
+
+El Coach incorpora Google Gemini como segundo proveedor sin modificar
+`CoachController`, `CoachRepository`, `PromptBuilder`, memoria ni UI. La
+selección se realiza en Riverpod mediante `LLM_PROVIDER=openai|gemini` y ambas
+implementaciones satisfacen el contrato `LlmClient.complete()` y
+`LlmClient.streamCompletion()`.
+
+`GeminiLlmClient` usa la API REST oficial Generate Content. Las llamadas
+completas se envían a
+`/v1beta/models/{model}:generateContent`; el streaming real usa
+`/v1beta/models/{model}:streamGenerateContent?alt=sse`, autenticado mediante
+`x-goog-api-key`. Los mensajes system se combinan, preservando su orden, en
+`system_instruction`. Los turnos user conservan el rol `user` y los assistant
+se traducen a `model`; los contenidos vacíos no se serializan.
+
+El parser transforma bytes con el decoder UTF-8 incremental y `LineSplitter`,
+por lo que soporta caracteres, líneas JSON y eventos SSE divididos entre
+chunks, además de varios eventos por chunk. Cada
+`GenerateContentResponse.candidates[].content.parts[].text` se emite como texto
+incremental puro. Los errores HTTP y objetos `error` de la API se convierten en
+excepciones de infraestructura sanitizadas; claves, headers y prompts completos
+no se registran. La cancelación de la suscripción se propaga al stream HTTP y el
+controller conserva el contenido parcial recibido antes de un fallo.
+
+Se añadieron tests del cliente Gemini para respuesta completa, mapeo de roles,
+ausencia de duplicación del último user, respuesta vacía, streaming incremental,
+fragmentación UTF-8/JSON, múltiples eventos, errores HTTP/API, cancelación y
+parcial antes de error. Los tests de providers cubren selección OpenAI/Gemini,
+configuración Gemini ausente y provider desconocido. OpenAI permanece
+disponible y continúa siendo el valor por defecto.
+
+Las variables nuevas son `LLM_PROVIDER`, `GEMINI_API_KEY`, `GEMINI_MODEL` y la
+opcional `GEMINI_BASE_URL`. En Flutter Web cualquier secreto entregado mediante
+Dart defines queda embebido en los assets; esta integración es válida para
+desarrollo, pero producción requiere un proxy backend que custodie la clave.
+Ese proxy queda expresamente fuera de esta ampliación, igual que RAG,
+embeddings, tool calling, cambios UX y sincronización cloud.
+
+La compatibilidad web se limita al endpoint nativo que utiliza también
+`generateContentStream` del SDK oficial. `GEMINI_BASE_URL` debe terminar en la
+raíz `/v1beta`; el cliente rechaza preventivamente URLs OpenAI-compatible o que
+ya contengan `/models/`, evitando peticiones mal compuestas que el navegador
+presentaría como fallos CORS. Aunque el endpoint nativo es consumible desde
+navegador para desarrollo, Google desaconseja exponer API keys en clientes y la
+arquitectura de producción sigue requiriendo backend/proxy.
+
 # Epic 3.11 - Memoria conversacional
 
 ## Arquitectura resultante

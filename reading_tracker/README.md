@@ -28,20 +28,47 @@ Supabase is configured with compile-time Dart defines. Create a local
 `dart_defines/dev.json` file from `dart_defines/example.json` and fill it with
 the project values.
 
-The Coach also reads `OPENAI_API_KEY`, `OPENAI_MODEL`, and
-`OPENAI_BASE_URL` at compile time. `flutter run -d chrome` by itself does not
-read shell environment variables or `.env` files. For local Chrome debugging,
-put those values in the ignored `dart_defines/dev.json` and always launch with
-`--dart-define-from-file` as shown below. If `OPENAI_API_KEY` is absent, the
-Coach now fails before issuing HTTP and prints `phase=configuration` in the
-development console.
+The Coach selects its LLM implementation with `LLM_PROVIDER`. Supported values
+are `openai` (the default) and `gemini`. Provider configuration is read at
+compile time:
+
+- OpenAI: `OPENAI_API_KEY`, `OPENAI_MODEL`, and optional `OPENAI_BASE_URL`.
+- Gemini: `GEMINI_API_KEY`, `GEMINI_MODEL`, and optional `GEMINI_BASE_URL`.
+
+Example Gemini configuration:
+
+```json
+{
+  "LLM_PROVIDER": "gemini",
+  "GEMINI_API_KEY": "your-local-development-key",
+  "GEMINI_MODEL": "gemini-3.5-flash",
+  "GEMINI_BASE_URL": "https://generativelanguage.googleapis.com/v1beta"
+}
+```
+
+`flutter run -d chrome` by itself does not read shell environment variables or
+`.env` files. Put the selected provider values in the ignored
+`dart_defines/dev.json` and always launch with `--dart-define-from-file` as
+shown below. Missing keys/models and unknown providers fail before HTTP with a
+clear configuration error in the development console.
+
+For Gemini, `GEMINI_BASE_URL` must be the API root
+`https://generativelanguage.googleapis.com/v1beta`. Do not use the
+OpenAI-compatible `/openai/chat/completions` URL: `GeminiLlmClient` appends the
+native `/models/{model}:generateContent` or
+`/models/{model}:streamGenerateContent?alt=sse` path itself and rejects a base
+URL that already contains either path. The official Google Gen AI JavaScript
+SDK supports `generateContentStream` in browsers, so direct native SSE can be
+used for local Flutter Web development when the endpoint and key are valid.
 
 Do not ship a production Web build with a provider secret in Dart defines:
 compile-time values are visible in browser assets. Production Web must point
-`OPENAI_BASE_URL` to a same-origin or CORS-enabled server-side proxy and keep
-the real provider key on that server. A browser transport failure such as
+the provider base URL to a same-origin or CORS-enabled server-side proxy and
+keep the real OpenAI or Gemini key on that server. A browser transport failure such as
 `ClientException: Failed to fetch` at `phase=http.stream.send` indicates that
 the configured endpoint is unreachable from the browser or rejected by CORS.
+Direct browser streaming is therefore a development-only option, not the
+production deployment architecture.
 
 Do not commit `dart_defines/dev.json` or any `*.local.json` file.
 
