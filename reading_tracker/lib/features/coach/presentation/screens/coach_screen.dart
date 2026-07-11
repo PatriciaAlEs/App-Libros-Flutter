@@ -63,19 +63,28 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         titleSpacing: AppSpacing.lg,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text(
-              '📚 LibrerIA',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            Text(
-              'Tu asistente de lectura',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+            _LibreriaMark(color: theme.colorScheme.primary),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'LibrerIA',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  Text(
+                    'Tu asistente de lectura',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -129,7 +138,9 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
                     child: AnimatedSwitcher(
                       duration: _motionDuration(context),
                       child: _followTail
-                          ? const SizedBox.shrink()
+                          ? const SizedBox.shrink(
+                              key: ValueKey('scroll-bottom-hidden'),
+                            )
                           : Semantics(
                               key: const ValueKey('scroll-bottom'),
                               button: true,
@@ -391,9 +402,11 @@ class _CoachEmptyState extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 56, 24, AppSpacing.xl),
       children: [
-        const Center(
-          child: ExcludeSemantics(
-            child: Text('📚', style: TextStyle(fontSize: 50)),
+        Center(
+          child: _LibreriaMark(
+            color: theme.colorScheme.primary,
+            size: 56,
+            iconSize: 28,
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -512,7 +525,7 @@ class _CoachComposer extends StatelessWidget {
           AppSpacing.md,
           AppSpacing.sm,
           AppSpacing.md,
-          92,
+          AppSpacing.md,
         ),
         child: Material(
           color: theme.colorScheme.surface,
@@ -535,7 +548,8 @@ class _CoachComposer extends StatelessWidget {
                     controller: controller,
                     focusNode: focusNode,
                     minLines: 1,
-                    maxLines: 5,
+                    maxLines: 4,
+                    scrollPadding: const EdgeInsets.only(bottom: 96),
                     textInputAction: TextInputAction.newline,
                     decoration: const InputDecoration(
                       hintText: 'Escribe a LibrerIA…',
@@ -549,33 +563,40 @@ class _CoachComposer extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(7),
-                  child: AnimatedSwitcher(
-                    duration: AppMotion.fast,
-                    switchInCurve: AppMotion.standard,
-                    switchOutCurve: AppMotion.standard,
-                    transitionBuilder: (child, animation) =>
-                        ScaleTransition(scale: animation, child: child),
-                    child: isGenerating
-                        ? Semantics(
-                            button: true,
-                            label: 'Detener respuesta',
-                            child: IconButton.filledTonal(
-                              key: const ValueKey('stop'),
-                              tooltip: 'Detener respuesta',
-                              onPressed: onStop,
-                              icon: const Icon(Icons.stop_rounded),
+                  child: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: controller,
+                    builder: (context, value, _) => AnimatedSwitcher(
+                      duration: AppMotion.fast,
+                      switchInCurve: AppMotion.standard,
+                      switchOutCurve: AppMotion.standard,
+                      transitionBuilder: (child, animation) =>
+                          ScaleTransition(scale: animation, child: child),
+                      child: isGenerating
+                          ? Semantics(
+                              key: const ValueKey('composer-stop-state'),
+                              button: true,
+                              label: 'Detener respuesta',
+                              child: IconButton.filledTonal(
+                                key: const ValueKey('stop'),
+                                tooltip: 'Detener respuesta',
+                                onPressed: onStop,
+                                icon: const Icon(Icons.stop_rounded),
+                              ),
+                            )
+                          : Semantics(
+                              key: const ValueKey('composer-send-state'),
+                              button: true,
+                              label: 'Enviar mensaje',
+                              child: IconButton.filled(
+                                key: const ValueKey('send'),
+                                tooltip: 'Enviar mensaje',
+                                onPressed: value.text.trim().isEmpty
+                                    ? null
+                                    : onSend,
+                                icon: const Icon(Icons.arrow_upward_rounded),
+                              ),
                             ),
-                          )
-                        : Semantics(
-                            button: true,
-                            label: 'Enviar mensaje',
-                            child: IconButton.filled(
-                              key: const ValueKey('send'),
-                              tooltip: 'Enviar mensaje',
-                              onPressed: onSend,
-                              icon: const Icon(Icons.arrow_upward_rounded),
-                            ),
-                          ),
+                    ),
                   ),
                 ),
               ],
@@ -585,6 +606,33 @@ class _CoachComposer extends StatelessWidget {
       ),
     );
   }
+}
+
+class _LibreriaMark extends StatelessWidget {
+  const _LibreriaMark({
+    required this.color,
+    this.size = 40,
+    this.iconSize = 20,
+  });
+
+  final Color color;
+  final double size;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(size * 0.32),
+    ),
+    child: Icon(
+      Icons.auto_awesome_rounded,
+      color: Colors.white,
+      size: iconSize,
+    ),
+  );
 }
 
 extension<T> on List<T> {

@@ -148,7 +148,7 @@ class MarkdownContextFormatter implements ContextFormatter {
         ..add('')
         ..add('## Sesiones recientes');
       for (final session in recentSessions) {
-        lines.add('- ${_formatSession(session)}');
+        lines.add('- ${_formatSession(session, context.library.allBooks)}');
       }
     }
 
@@ -169,6 +169,16 @@ class MarkdownContextFormatter implements ContextFormatter {
       details.add('pagina ${book.currentPage}');
     }
     if (book.rating != null) details.add('valoracion ${book.rating}');
+    final genre = book.genre?.trim();
+    if (genre != null && genre.isNotEmpty) details.add('genero $genre');
+    final notes = book.notes?.trim();
+    if (notes != null && notes.isNotEmpty) details.add('notas: $notes');
+    final publisher = book.publisher?.trim();
+    if (publisher != null && publisher.isNotEmpty) {
+      details.add('editorial $publisher');
+    }
+    final isbn = book.isbn?.trim();
+    if (isbn != null && isbn.isNotEmpty) details.add('ISBN $isbn');
     if (book.completedDate != null) {
       details.add('terminado ${_formatDate(book.completedDate!)}');
     }
@@ -178,13 +188,17 @@ class MarkdownContextFormatter implements ContextFormatter {
     return '$title (${details.join(', ')})';
   }
 
-  String _formatSession(ReadingSession session) {
+  String _formatSession(ReadingSession session, List<Book> books) {
     final details = <String>[
       _formatDate(session.date),
       '${session.minutes} min',
     ];
     if (session.pagesRead > 0) details.add('${session.pagesRead} pags.');
-    return '${details.join(', ')} - libro ${session.bookId}';
+    final matchingBooks = books.where((book) => book.id == session.bookId);
+    final bookLabel = matchingBooks.isEmpty
+        ? session.bookId
+        : matchingBooks.first.title.trim();
+    return '${details.join(', ')} - libro $bookLabel';
   }
 
   int _sortCompletedBooks(Book a, Book b) {

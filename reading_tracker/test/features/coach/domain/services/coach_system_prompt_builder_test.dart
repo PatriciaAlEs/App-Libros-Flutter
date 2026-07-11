@@ -24,6 +24,15 @@ void main() {
       expect(builder.build(), contains('inventar datos'));
     });
 
+    test('limita preguntas y exige recomendaciones verificables', () {
+      final prompt = builder.build();
+
+      expect(prompt, contains('como maximo una pregunta aclaratoria'));
+      expect(prompt, contains('inventar titulos, autores'));
+      expect(prompt, contains('obras indie o poco conocidas'));
+      expect(prompt, contains('no dispone de esa consulta en tiempo real'));
+    });
+
     test('el prompt indica que debe responder en el idioma del usuario', () {
       expect(builder.build(), contains('Responde en el idioma del usuario'));
     });

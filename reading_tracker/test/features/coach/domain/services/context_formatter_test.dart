@@ -75,6 +75,30 @@ void main() {
       expect(markdown, contains('- Abandoned Book'));
     });
 
+    test('includes real preference and verification signals from books', () {
+      final markdown = formatter.format(
+        _context(
+          books: [
+            _book(
+              'verified-book',
+              'Verified Book',
+              author: 'Known Author',
+              status: BookStatus.completed,
+              genre: 'Fantasia',
+              notes: 'Personajes memorables',
+              publisher: 'Editorial Real',
+              isbn: '9780000000001',
+            ),
+          ],
+        ),
+      );
+
+      expect(markdown, contains('genero Fantasia'));
+      expect(markdown, contains('notas: Personajes memorables'));
+      expect(markdown, contains('editorial Editorial Real'));
+      expect(markdown, contains('ISBN 9780000000001'));
+    });
+
     test('limits long book lists to useful entries', () {
       final books = List.generate(
         8,
@@ -124,6 +148,18 @@ void main() {
         markdown,
         contains('- 2026-07-07, 30 min, 10 pags. - libro book-1'),
       );
+    });
+
+    test('resolves activity book ids to real library titles', () {
+      final markdown = formatter.format(
+        _context(
+          books: [_book('book-1', 'Titulo conocido')],
+          sessions: [_session('session-1', 'book-1', DateTime(2026, 7, 8))],
+        ),
+      );
+
+      expect(markdown, contains('libro Titulo conocido'));
+      expect(markdown, isNot(contains('libro book-1')));
     });
 
     test('formats annual goal', () {
@@ -245,6 +281,10 @@ Book _book(
   int? currentPage,
   int? totalPages,
   double? rating,
+  String? genre,
+  String? notes,
+  String? publisher,
+  String? isbn,
   DateTime? createdAt,
   DateTime? updatedAt,
   DateTime? completedDate,
@@ -256,6 +296,10 @@ Book _book(
     currentPage: currentPage,
     totalPages: totalPages,
     rating: rating,
+    genre: genre,
+    notes: notes,
+    publisher: publisher,
+    isbn: isbn,
     status: status,
     createdAt: createdAt ?? DateTime(2026, 7, 1),
     updatedAt: updatedAt,

@@ -105,9 +105,9 @@ void main() {
   );
 
   testWidgets('email CTA signs in and toggles to sign up', (tester) async {
-    final repository = FakeAuthRepository();
+    final signInRepository = FakeAuthRepository();
     await tester.pumpWidget(
-      _authHost(repository: repository, isSupabaseEnabled: true),
+      _authHost(repository: signInRepository, isSupabaseEnabled: true),
     );
     await tester.pump();
 
@@ -116,9 +116,16 @@ void main() {
     await tester.tap(find.text('Entrar con correo'));
     await tester.pump();
 
-    expect(repository.signInCalls, 1);
-    expect(repository.signUpCalls, 0);
-    expect(repository.lastEmail, 'reader@test.dev');
+    expect(signInRepository.signInCalls, 1);
+    expect(signInRepository.signUpCalls, 0);
+    expect(signInRepository.lastEmail, 'reader@test.dev');
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    final signUpRepository = FakeAuthRepository();
+    await tester.pumpWidget(
+      _authHost(repository: signUpRepository, isSupabaseEnabled: true),
+    );
+    await tester.pump();
 
     await tester.tap(find.text('¿Aun no tienes cuenta? Registrate'));
     await tester.pump();
@@ -126,7 +133,7 @@ void main() {
     await tester.tap(find.text('Crear una cuenta'));
     await tester.pump();
 
-    expect(repository.signUpCalls, 1);
+    expect(signUpRepository.signUpCalls, 1);
   });
 
   testWidgets('shows auth errors from controller', (tester) async {
@@ -214,8 +221,7 @@ void main() {
     await tester.pump();
 
     repository.emit(const AppUser(id: 'google-user', email: 'google@test.dev'));
-    await tester.pump();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('authenticated-home')), findsOneWidget);
     expect(repository.googleCalls, 0);

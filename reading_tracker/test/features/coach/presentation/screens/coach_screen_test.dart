@@ -87,6 +87,58 @@ void main() {
       expect(state.messages, hasLength(1));
       expect(state.messages.single.role, CoachMessageRole.user);
       expect(find.byKey(const ValueKey('send')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('transicion send stop no crea keys duplicadas', (tester) async {
+      final repository = _WidgetRepository();
+      await tester.pumpWidget(_app(repository));
+
+      await tester.tap(find.text('Resume mi progreso de lectura'));
+      await _pumpAsyncWork(tester);
+      await tester.pump(const Duration(milliseconds: 250));
+
+      expect(find.byKey(const ValueKey('composer-stop-state')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      await repository.close();
+      await _pumpAsyncWork(tester);
+      await tester.pump(const Duration(milliseconds: 250));
+
+      expect(find.byKey(const ValueKey('composer-send-state')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('desmonta la pantalla con una respuesta activa', (
+      tester,
+    ) async {
+      final repository = _WidgetRepository();
+      await tester.pumpWidget(_app(repository));
+      await tester.tap(find.text('Resume mi progreso de lectura'));
+      await _pumpAsyncWork(tester);
+
+      await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+      await tester.pump();
+
+      expect(repository.hasListener, isFalse);
+      repository.add('fragmento tardio');
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('compositor cabe en una vista web estrecha', (tester) async {
+      tester.view.physicalSize = const Size(320, 700);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(_app(_WidgetRepository()));
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      final composer = tester.getRect(find.byType(TextField));
+      expect(composer.left, greaterThanOrEqualTo(0));
+      expect(composer.right, lessThanOrEqualTo(320));
     });
 
     testWidgets('muestra Reintentar despues de un error', (tester) async {
@@ -162,6 +214,8 @@ Widget _app(CoachRepository repository) => ProviderScope(
 class _WidgetRepository implements CoachRepository {
   final StreamController<String> _controller = StreamController<String>();
   String? lastUserMessage;
+
+  bool get hasListener => _controller.hasListener;
 
   @override
   Stream<String> streamReply({

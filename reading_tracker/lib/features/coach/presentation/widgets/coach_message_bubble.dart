@@ -108,10 +108,20 @@ class CoachMessageBubble extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 10, right: AppSpacing.sm),
-                child: ExcludeSemantics(
-                  child: Text('📚', style: TextStyle(fontSize: 22)),
+              Padding(
+                padding: const EdgeInsets.only(top: 10, right: AppSpacing.sm),
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                 ),
               ),
               Flexible(child: bubble),

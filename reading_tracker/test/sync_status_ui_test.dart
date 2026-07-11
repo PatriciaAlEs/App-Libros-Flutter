@@ -269,7 +269,10 @@ class FakeAuthRepository implements AuthRepository {
   Future<AppUser?> getCurrentUser() async => initialUser;
 
   @override
-  Stream<AppUser?> watchAuthState() => _controller.stream;
+  Stream<AppUser?> watchAuthState() async* {
+    yield initialUser;
+    yield* _controller.stream;
+  }
 
   @override
   Future<AppUser?> signInWithEmailAndPassword({
