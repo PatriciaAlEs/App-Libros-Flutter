@@ -191,7 +191,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ? null
                           : _submitEmailPassword,
                       child: Text(
-                        _isRegisterMode ? 'Crear una cuenta' : 'Entrar con correo',
+                        _isRegisterMode
+                            ? 'Crear una cuenta'
+                            : 'Entrar con correo',
                       ),
                     ),
                     TextButton(

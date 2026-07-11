@@ -177,6 +177,36 @@ void main() {
     expect(find.byType(CoachScreen), findsOneWidget);
   });
 
+  testWidgets('Inicio keeps LibrerIA visible while books are loading', (
+    tester,
+  ) async {
+    final repository = _ControlledBookRepository();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [bookRepositoryProvider.overrideWithValue(repository)],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(LibreriaEntryCard), findsOneWidget);
+  });
+
+  testWidgets('Inicio keeps LibrerIA visible when books fail', (tester) async {
+    final repository = _ControlledBookRepository();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [bookRepositoryProvider.overrideWithValue(repository)],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    repository.completeError(StateError('books failed'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(LibreriaEntryCard), findsOneWidget);
+  });
+
   testWidgets('shows the books screen', (WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -832,6 +862,30 @@ class _EmptyBookRepository implements BookRepository {
 
   @override
   Stream<List<Book>> watchBooks() => Stream.value(const []);
+}
+
+class _ControlledBookRepository implements BookRepository {
+  final _books = Completer<List<Book>>();
+
+  void completeError(Object error) => _books.completeError(error);
+
+  @override
+  Future<void> addBook(Book book) async {}
+
+  @override
+  Future<void> deleteBook(String id) async {}
+
+  @override
+  Future<List<Book>> getAllBooks() => _books.future;
+
+  @override
+  Future<Book?> getBookById(String id) async => null;
+
+  @override
+  Future<void> updateBook(Book book) async {}
+
+  @override
+  Stream<List<Book>> watchBooks() => const Stream.empty();
 }
 
 class _CapturingBookRepository implements BookRepository {

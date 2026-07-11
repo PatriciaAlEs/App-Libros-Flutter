@@ -54,7 +54,7 @@ class AuthController extends StateNotifier<AuthControllerState> {
       (user) {
         _latestAuthEvent = user;
         if (!_firstAuthEvent.isCompleted) _firstAuthEvent.complete();
-        if (!state.isRestoring) _applyAuthenticatedUser(user);
+        if (!state.isRestoring) _applyAuthEvent(user);
       },
       onError: (Object error, StackTrace stackTrace) {
         if (!_firstAuthEvent.isCompleted) {
@@ -95,7 +95,9 @@ class AuthController extends StateNotifier<AuthControllerState> {
         _applyAuthenticatedUser(user);
       }
     } catch (error, stackTrace) {
-      debugPrint('Authentication session restoration failed: $error\n$stackTrace');
+      debugPrint(
+        'Authentication session restoration failed: $error\n$stackTrace',
+      );
       state = const AuthControllerState(
         isRestoring: false,
         errorMessage:
@@ -112,6 +114,14 @@ class AuthController extends StateNotifier<AuthControllerState> {
       isLoading: false,
       clearError: true,
     );
+  }
+
+  void _applyAuthEvent(AppUser? user) {
+    // Supabase can deliver a stale anonymous restoration event after the
+    // OAuth callback has already confirmed a user. Do not let that obsolete
+    // event erase the newer authenticated session.
+    if (user == null && state.user != null) return;
+    _applyAuthenticatedUser(user);
   }
 
   Future<void> signInWithEmailAndPassword({
@@ -170,7 +180,9 @@ class AuthController extends StateNotifier<AuthControllerState> {
         errorMessage: _authErrorMessage(error),
       );
     } catch (error, stackTrace) {
-      debugPrint('Unexpected Google authentication failure: $error\n$stackTrace');
+      debugPrint(
+        'Unexpected Google authentication failure: $error\n$stackTrace',
+      );
       state = state.copyWith(
         isLoading: false,
         errorMessage:

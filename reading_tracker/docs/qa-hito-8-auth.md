@@ -112,3 +112,16 @@ El callback sigue dependiendo de que `AUTH_REDIRECT_URL`, Supabase Redirect
 URLs y Google OAuth estén configurados con el mismo origen. La validación manual
 en preview/producción continúa pendiente. Por restricción de esta corrección no
 se ejecutaron `dart format`, `flutter analyze` ni `flutter test`.
+
+## Validacion conjunta Google + LibrerIA
+
+1. Abrir la aplicacion sin sesion y comprobar `Cuenta · Modo local`.
+2. Confirmar que la tarjeta unica de LibrerIA aparece en Inicio.
+3. Abrir Cuenta, pulsar `Continuar con Google` una sola vez y completar Google.
+4. Al volver, comprobar que Cuenta muestra el usuario autenticado sin repetir el login.
+5. Volver a Inicio durante o despues de la sincronizacion y confirmar que LibrerIA sigue visible.
+6. Pulsar LibrerIA y confirmar que abre `/coach`.
+
+La sesion confirmada tiene precedencia sobre resultados anonimos obsoletos de
+restauracion. LibrerIA no depende del usuario ni del resultado de sincronizacion
+de libros y permanece en las ramas `data`, `loading` y `error` de Inicio.

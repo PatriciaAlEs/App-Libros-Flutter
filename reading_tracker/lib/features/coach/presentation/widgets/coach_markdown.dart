@@ -29,9 +29,7 @@ class CoachMarkdown extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
         h2: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-        h3: theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-        ),
+        h3: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         blockSpacing: 12,
         listIndent: 22,
         listBullet: theme.textTheme.bodyMedium?.copyWith(

@@ -74,9 +74,7 @@ class CoachMessageBubble extends StatelessWidget {
                           ),
                   ),
                   if (isStreaming)
-                    const _StreamingCursor(
-                      key: ValueKey('streaming-cursor'),
-                    ),
+                    const _StreamingCursor(key: ValueKey('streaming-cursor')),
                   if (showRegenerate) ...[
                     const SizedBox(height: AppSpacing.xs),
                     Semantics(
@@ -143,10 +141,8 @@ class _MessageEntranceState extends State<_MessageEntrance>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: AppMotion.fast,
-    )..forward();
+    _controller = AnimationController(vsync: this, duration: AppMotion.fast)
+      ..forward();
     _opacity = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _offset = Tween<Offset>(
       begin: const Offset(0, 0.035),

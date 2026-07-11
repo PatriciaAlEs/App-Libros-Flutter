@@ -39,9 +39,7 @@ void main() {
         isOAuthCallbackUri(Uri.parse('https://readpp.dev/?code=oauth-code')),
         isTrue,
       );
-      final cancellation = Uri.parse(
-        'https://readpp.dev/?error=access_denied',
-      );
+      final cancellation = Uri.parse('https://readpp.dev/?error=access_denied');
       expect(isOAuthCallbackUri(cancellation), isTrue);
       expect(isOAuthCancellationUri(cancellation), isTrue);
     });

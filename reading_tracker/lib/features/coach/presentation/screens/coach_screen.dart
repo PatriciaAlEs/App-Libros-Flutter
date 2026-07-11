@@ -91,9 +91,8 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
           ),
           IconButton(
             tooltip: 'Historial de conversaciones',
-            onPressed: () => _showConversationHistory(
-              ref.read(coachControllerProvider),
-            ),
+            onPressed: () =>
+                _showConversationHistory(ref.read(coachControllerProvider)),
             icon: const Icon(Icons.history),
           ),
         ],
@@ -369,9 +368,8 @@ class _CoachMessageItem extends ConsumerWidget {
       isWaiting: item.isWaiting,
       isStreaming: item.isStreaming,
       showRegenerate: item.showRegenerate,
-      onRegenerate: () => ref
-          .read(coachControllerProvider.notifier)
-          .regenerateLastResponse(),
+      onRegenerate: () =>
+          ref.read(coachControllerProvider.notifier).regenerateLastResponse(),
     );
   }
 }

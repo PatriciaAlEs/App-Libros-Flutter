@@ -16,9 +16,7 @@ void main() {
     addTearDown(controller.dispose);
     await Future<void>.delayed(Duration.zero);
 
-    repository.emit(
-      const AppUser(id: 'signed-user', email: 'reader@test.dev'),
-    );
+    repository.emit(const AppUser(id: 'signed-user', email: 'reader@test.dev'));
     await Future<void>.delayed(Duration.zero);
     expect(controller.state.isAuthenticated, isTrue);
 
@@ -45,6 +43,25 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     expect(cancelled.state.errorMessage, isNull);
     expect(cancelled.state.isRestoring, isFalse);
+  });
+
+  test('evento autenticado gana a restauracion anonima obsoleta', () async {
+    final repository = ControlledAuthRepository();
+    final controller = AuthController(repository);
+    addTearDown(controller.dispose);
+
+    const user = AppUser(id: 'google-user', email: 'google@test.dev');
+    repository.emit(user);
+    repository.completeCurrentUser(null);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(controller.state.user, user);
+
+    repository.emit(null);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(controller.state.user, user);
+    expect(controller.state.isLoading, isFalse);
   });
 
   testWidgets('shows current auth and sync copy without placeholders', (
@@ -105,10 +122,7 @@ void main() {
 
     await tester.tap(find.text('¿Aun no tienes cuenta? Registrate'));
     await tester.pump();
-    expect(
-      find.text('¿Ya tienes una cuenta? Inicia sesion'),
-      findsOneWidget,
-    );
+    expect(find.text('¿Ya tienes una cuenta? Inicia sesion'), findsOneWidget);
     await tester.tap(find.text('Crear una cuenta'));
     await tester.pump();
 
@@ -199,9 +213,7 @@ void main() {
     );
     await tester.pump();
 
-    repository.emit(
-      const AppUser(id: 'google-user', email: 'google@test.dev'),
-    );
+    repository.emit(const AppUser(id: 'google-user', email: 'google@test.dev'));
     await tester.pump();
     await tester.pump();
 
