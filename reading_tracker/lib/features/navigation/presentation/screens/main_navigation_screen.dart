@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/observability/readpp_sentry.dart';
@@ -44,10 +45,22 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void initState() {
     super.initState();
     _selectedIndex = ValueNotifier(widget.initialIndex.clamp(0, 4));
+    if (kDebugMode) {
+      debugPrint(
+        '[navigation] shell init route=${widget.initialRoute} '
+        'index=${_selectedIndex.value}',
+      );
+    }
   }
 
   @override
   void dispose() {
+    if (kDebugMode) {
+      debugPrint(
+        '[navigation] shell dispose route=${widget.initialRoute} '
+        'index=${_selectedIndex.value}',
+      );
+    }
     _selectedIndex.dispose();
     super.dispose();
   }
@@ -67,6 +80,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 name: initialRoute,
                 arguments: widget.initialArguments,
               ),
+              updateSelectedIndex: false,
             ),
           ],
           onGenerateRoute: _onGenerateRoute,
@@ -90,17 +104,28 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _selectedIndex.value = index;
   }
 
-  Route<dynamic> _onGenerateRoute(RouteSettings settings) {
+  Route<dynamic> _onGenerateRoute(
+    RouteSettings settings, {
+    bool updateSelectedIndex = true,
+  }) {
     final mainIndex = switch (settings.name) {
-      '/home' => 0,
+      '/' || '/home' => 0,
       '/books' => 1,
       '/progress' => 2,
       '/insights' => 3,
       '/settings' => 4,
       _ => null,
     };
-    if (mainIndex != null) {
+    if (mainIndex != null && updateSelectedIndex) {
       _selectedIndex.value = mainIndex;
+    }
+
+    if (kDebugMode) {
+      debugPrint(
+        '[navigation] inner route=${settings.name} branch='
+        '${mainIndex == null ? 'detail' : 'main-tab'} '
+        'selectedIndex=${_selectedIndex.value} initial=${!updateSelectedIndex}',
+      );
     }
 
     final builder = switch (settings.name) {

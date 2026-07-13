@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/backend/supabase_client_provider.dart';
@@ -57,8 +58,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     final state = ref.watch(authControllerProvider);
     ref.listen<AuthControllerState>(authControllerProvider, (previous, next) {
       if (previous?.isAuthenticated == true || !next.isAuthenticated) return;
+      if (kDebugMode) {
+        debugPrint(
+          '[auth] authenticated on route=${ModalRoute.of(context)?.settings.name}; '
+          'scheduling redirect to /',
+        );
+      }
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
+        if (kDebugMode) {
+          debugPrint(
+            '[auth] redirecting from route='
+            '${ModalRoute.of(context)?.settings.name} to /',
+          );
+        }
         Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
       });
     });

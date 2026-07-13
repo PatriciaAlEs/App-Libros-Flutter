@@ -9,6 +9,7 @@ import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:reading_tracker/core/design_system/design_system.dart';
+import 'package:reading_tracker/app.dart';
 import 'package:reading_tracker/core/theme/app_theme.dart';
 import 'package:reading_tracker/features/books/data/datasources/book_api_datasource.dart';
 import 'package:reading_tracker/features/books/data/datasources/google_books_datasource.dart';
@@ -18,6 +19,7 @@ import 'package:reading_tracker/features/books/domain/enums/book_status.dart';
 import 'package:reading_tracker/features/books/domain/repositories/book_repository.dart';
 import 'package:reading_tracker/features/books/presentation/screens/book_form_screen.dart';
 import 'package:reading_tracker/features/books/presentation/screens/books_list_screen.dart';
+import 'package:reading_tracker/features/books/presentation/providers/books_provider.dart';
 import 'package:reading_tracker/features/auth/domain/app_user.dart';
 import 'package:reading_tracker/features/auth/domain/auth_repository.dart';
 import 'package:reading_tracker/features/auth/presentation/controllers/auth_controller.dart';
@@ -28,6 +30,7 @@ import 'package:reading_tracker/features/navigation/presentation/screens/main_na
 import 'package:reading_tracker/features/reading_sessions/data/repositories/reading_session_repository_provider.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/entities/reading_session.dart';
 import 'package:reading_tracker/features/reading_sessions/domain/repositories/reading_session_repository.dart';
+import 'package:reading_tracker/features/settings/presentation/screens/settings_screen.dart';
 import 'package:reading_tracker/features/stats/data/repositories/statistics_repository_provider.dart';
 import 'package:reading_tracker/features/stats/domain/entities/statistics_summary.dart';
 import 'package:reading_tracker/features/stats/domain/repositories/statistics_repository.dart';
@@ -229,6 +232,7 @@ void main() {
       );
       await tester.pump();
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
 
       expect(booksRepository.requests, hasLength(2));
       expect(find.byType(LibreriaEntryCard), findsOneWidget);
@@ -242,7 +246,9 @@ void main() {
       );
       container.invalidate(booksProvider);
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
       expect(find.byType(LibreriaEntryCard), findsOneWidget);
+      expect(booksRepository.requests, hasLength(3));
 
       booksRepository.completeNextError(StateError('sync failed'));
       await tester.pump();
@@ -252,6 +258,87 @@ void main() {
       await tester.tap(find.byType(LibreriaEntryCard));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('coach-route-marker')), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'app router keeps one LibrerIA after auth redirect and completed sync',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({
+        'onboarding_completed': true,
+        'sync_onboarding_notice_seen_v1': true,
+      });
+      final authRepository = _HomeAuthRepository();
+      final booksRepository = _TransitionBookRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authControllerProvider.overrideWith(
+              (ref) => AuthController(authRepository),
+            ),
+            bookRepositoryProvider.overrideWithValue(booksRepository),
+            statisticsRepositoryProvider.overrideWithValue(
+              const _EmptyStatisticsRepository(),
+            ),
+            readingSessionRepositoryProvider.overrideWithValue(
+              const _EmptyReadingSessionRepository(),
+            ),
+            syncStatusControllerProvider.overrideWith(
+              (ref) => _InvalidatingSyncStatusController(
+                onSync: () => ref.invalidate(booksProvider),
+              ),
+            ),
+          ],
+          child: const App(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      booksRepository.completeNext(const []);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+
+      final homeContext = tester.element(find.byType(HomeScreen));
+      Navigator.of(homeContext).pushNamedAndRemoveUntil(
+        '/settings',
+        (_) => false,
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsScreen), findsOneWidget);
+
+      final settingsContext = tester.element(find.byType(SettingsScreen));
+      Navigator.of(settingsContext).pushNamed('/account/auth');
+      await tester.pumpAndSettle();
+
+      authRepository.emit(
+        const AppUser(id: 'google-user', email: 'reader@test.dev'),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(booksRepository.requests, hasLength(2));
+
+      booksRepository.completeNext(const []);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(HomeScreen)),
+      );
+      expect(
+        container.read(syncStatusControllerProvider).status,
+        SyncUiStatus.synced,
+      );
+
+      await tester.tap(find.byType(LibreriaEntryCard));
+      await tester.pumpAndSettle();
+      expect(find.byType(CoachScreen), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
     },
   );
 

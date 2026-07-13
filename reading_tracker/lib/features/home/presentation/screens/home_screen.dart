@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/branding/branding.dart';
@@ -9,6 +10,7 @@ import '../../../books/domain/entities/book.dart';
 import '../../../books/domain/enums/book_status.dart';
 import '../../../books/presentation/providers/books_provider.dart';
 import '../../../books/presentation/widgets/current_reading_card.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
 import '../../../libreria/presentation/widgets/libreria_entry_card.dart';
 import '../../../reading_sessions/domain/entities/reading_session.dart';
@@ -19,12 +21,30 @@ import '../../../reading_sessions/presentation/utils/session_completion_flow.dar
 import '../../../stats/domain/entities/statistics_summary.dart';
 import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    if (kDebugMode) debugPrint('[home] init');
+  }
+
+  @override
+  void dispose() {
+    if (kDebugMode) debugPrint('[home] dispose');
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final authState = ref.read(authControllerProvider);
     final readerProfile = ref.watch(readerProfileControllerProvider);
     final booksAsync = ref.watch(booksProvider);
     final summaryAsync = ref.watch(statisticsSummaryProvider);
@@ -40,6 +60,14 @@ class HomeScreen extends ConsumerWidget {
     final recentSessionsAsync = ref.watch(
       readingSessionsForRangeProvider(recentActivityRange),
     );
+
+    if (kDebugMode) {
+      debugPrint(
+        '[home] build route=${ModalRoute.of(context)?.settings.name} '
+        'auth=${authState.isAuthenticated} restoring=${authState.isRestoring} '
+        'branch=canonical-home',
+      );
+    }
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -98,127 +126,132 @@ class HomeScreen extends ConsumerWidget {
                   loading: () => const _HomeLoadingState(),
                   error: (error, _) => const _HomeErrorState(),
                   data: (books) {
-              final summary =
-                  summaryAsync.valueOrNull ?? const StatisticsSummary.empty();
-              final recentSessions =
-                  recentSessionsAsync.valueOrNull ?? const [];
-              final todaySessions = _todaySessions(recentSessions);
-              final booksById = {for (final book in books) book.id: book};
-              final currentBooks = _currentReadingBooks(books);
-              final currentReadingBookId = _resolvedCurrentReadingBookId(
-                currentBooks,
-                readerProfile.currentReadingBookId,
-              );
-              _syncCurrentReadingPreference(
-                ref,
-                readerProfile.currentReadingBookId,
-                currentReadingBookId,
-              );
-              final prioritizedCurrentBooks = _prioritizeCurrentBooks(
-                currentBooks,
-                currentReadingBookId,
-              );
-              final otherCurrentBooks = currentBooks
-                  .where((book) => book.id != currentReadingBookId)
-                  .toList();
-              final pendingBooks = _pendingBooks(books);
+                    final summary =
+                        summaryAsync.valueOrNull ??
+                        const StatisticsSummary.empty();
+                    final recentSessions =
+                        recentSessionsAsync.valueOrNull ?? const [];
+                    final todaySessions = _todaySessions(recentSessions);
+                    final booksById = {for (final book in books) book.id: book};
+                    final currentBooks = _currentReadingBooks(books);
+                    final currentReadingBookId = _resolvedCurrentReadingBookId(
+                      currentBooks,
+                      readerProfile.currentReadingBookId,
+                    );
+                    _syncCurrentReadingPreference(
+                      ref,
+                      readerProfile.currentReadingBookId,
+                      currentReadingBookId,
+                    );
+                    final prioritizedCurrentBooks = _prioritizeCurrentBooks(
+                      currentBooks,
+                      currentReadingBookId,
+                    );
+                    final otherCurrentBooks = currentBooks
+                        .where((book) => book.id != currentReadingBookId)
+                        .toList();
+                    final pendingBooks = _pendingBooks(books);
 
-              return RefreshIndicator(
-                onRefresh: () async {
-                  ref.invalidate(booksProvider);
-                  ref.invalidate(statisticsSummaryProvider);
-                  ref.invalidate(readingInsightsSummaryProvider);
-                  ref.invalidate(
-                    readingSessionsForRangeProvider(recentActivityRange),
-                  );
-                },
-                child: CustomScrollView(
-                  slivers: [
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.lg,
-                        0,
-                        AppSpacing.lg,
-                        132,
-                      ),
-                      sliver: SliverList.list(
-                        children: [
-                          _CurrentReadingCards(
-                            books: prioritizedCurrentBooks,
-                            pendingBooks: pendingBooks,
-                            currentReadingBookId: currentReadingBookId,
-                            onChangeCurrentReading: () =>
-                                _showCurrentReadingPicker(
-                                  context,
-                                  ref,
-                                  prioritizedCurrentBooks,
-                                ),
-                            onOpenProgress: (book) => _openQuickProgress(
-                              context,
-                              ref,
-                              book,
-                              recentActivityRange,
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        ref.invalidate(booksProvider);
+                        ref.invalidate(statisticsSummaryProvider);
+                        ref.invalidate(readingInsightsSummaryProvider);
+                        ref.invalidate(
+                          readingSessionsForRangeProvider(recentActivityRange),
+                        );
+                      },
+                      child: CustomScrollView(
+                        slivers: [
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(
+                              AppSpacing.lg,
+                              0,
+                              AppSpacing.lg,
+                              132,
                             ),
-                            onAddBook: () => _openAddBook(context),
-                            onStartReading: (book) =>
-                                _startReading(context, ref, book),
-                          ),
-                          if (otherCurrentBooks.isNotEmpty) ...[
-                            const SizedBox(height: AppSpacing.lg),
-                            _CurrentReadingStrip(
-                              books: otherCurrentBooks,
-                              onBookTap: (book) =>
-                                  _selectCurrentReading(context, ref, book),
-                            ),
-                          ],
-                          const SizedBox(height: 28),
-                          _TodaySummaryCard(sessions: todaySessions),
-                          const SizedBox(height: 30),
-                          _QuickMetrics(
-                            summary: summary,
-                            onOpenCalendar: () =>
-                                Navigator.pushNamed(context, '/calendar'),
-                            onOpenLibrary: () =>
-                                Navigator.pushNamedAndRemoveUntil(
-                                  context,
-                                  '/books',
-                                  (_) => false,
+                            sliver: SliverList.list(
+                              children: [
+                                _CurrentReadingCards(
+                                  books: prioritizedCurrentBooks,
+                                  pendingBooks: pendingBooks,
+                                  currentReadingBookId: currentReadingBookId,
+                                  onChangeCurrentReading: () =>
+                                      _showCurrentReadingPicker(
+                                        context,
+                                        ref,
+                                        prioritizedCurrentBooks,
+                                      ),
+                                  onOpenProgress: (book) => _openQuickProgress(
+                                    context,
+                                    ref,
+                                    book,
+                                    recentActivityRange,
+                                  ),
+                                  onAddBook: () => _openAddBook(context),
+                                  onStartReading: (book) =>
+                                      _startReading(context, ref, book),
                                 ),
-                            onOpenProgress: () =>
-                                Navigator.pushNamedAndRemoveUntil(
-                                  context,
-                                  '/progress',
-                                  (_) => false,
+                                if (otherCurrentBooks.isNotEmpty) ...[
+                                  const SizedBox(height: AppSpacing.lg),
+                                  _CurrentReadingStrip(
+                                    books: otherCurrentBooks,
+                                    onBookTap: (book) => _selectCurrentReading(
+                                      context,
+                                      ref,
+                                      book,
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: 28),
+                                _TodaySummaryCard(sessions: todaySessions),
+                                const SizedBox(height: 30),
+                                _QuickMetrics(
+                                  summary: summary,
+                                  onOpenCalendar: () =>
+                                      Navigator.pushNamed(context, '/calendar'),
+                                  onOpenLibrary: () =>
+                                      Navigator.pushNamedAndRemoveUntil(
+                                        context,
+                                        '/books',
+                                        (_) => false,
+                                      ),
+                                  onOpenProgress: () =>
+                                      Navigator.pushNamedAndRemoveUntil(
+                                        context,
+                                        '/progress',
+                                        (_) => false,
+                                      ),
                                 ),
-                          ),
-                          const SizedBox(height: 28),
-                          _AnnualGoalCard(
-                            summary: summary,
-                            onTap: () => Navigator.pushNamedAndRemoveUntil(
-                              context,
-                              '/progress',
-                              (_) => false,
+                                const SizedBox(height: 28),
+                                _AnnualGoalCard(
+                                  summary: summary,
+                                  onTap: () =>
+                                      Navigator.pushNamedAndRemoveUntil(
+                                        context,
+                                        '/progress',
+                                        (_) => false,
+                                      ),
+                                ),
+                                const SizedBox(height: 32),
+                                _WeeklyCalendarPreview(
+                                  sessions: recentSessions,
+                                  onTap: () =>
+                                      Navigator.pushNamed(context, '/calendar'),
+                                ),
+                                const SizedBox(height: 30),
+                                const _JournalHeader(),
+                                const SizedBox(height: AppSpacing.lg),
+                                _RecentActivityList(
+                                  sessions: recentSessions,
+                                  booksById: booksById,
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 32),
-                          _WeeklyCalendarPreview(
-                            sessions: recentSessions,
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/calendar'),
-                          ),
-                          const SizedBox(height: 30),
-                          const _JournalHeader(),
-                          const SizedBox(height: AppSpacing.lg),
-                          _RecentActivityList(
-                            sessions: recentSessions,
-                            booksById: booksById,
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              );
+                    );
                   },
                 ),
               ),

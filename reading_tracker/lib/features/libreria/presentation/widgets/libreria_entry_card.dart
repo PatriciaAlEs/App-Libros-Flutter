@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/design_system/design_system.dart';
 
@@ -9,6 +10,12 @@ class LibreriaEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (kDebugMode) {
+      debugPrint(
+        '[libreria] entry card build route='
+        '${ModalRoute.of(context)?.settings.name}',
+      );
+    }
     final theme = Theme.of(context);
 
     return Semantics(
