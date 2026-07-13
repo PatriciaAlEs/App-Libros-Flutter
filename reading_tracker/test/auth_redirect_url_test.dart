@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reading_tracker/features/auth/data/auth_redirect_url.dart';
+import 'package:reading_tracker/core/navigation/app_launch_uri.dart';
 
 void main() {
   group('resolveAuthRedirectUrl', () {
@@ -49,5 +50,20 @@ void main() {
       expect(isOAuthCallbackUri(uri), isFalse);
       expect(isOAuthCancellationUri(uri), isFalse);
     });
+  });
+
+  group('OAuth callback route normalization', () {
+    for (final location in [
+      '/?code=fake-oauth-code',
+      '/?state=fake-state',
+      '/?error=access_denied',
+      '/?code=fake-oauth-code&state=fake-state',
+    ]) {
+      test('$location selects the root path without query data', () {
+        final uri = Uri.parse(location);
+        expect(appRoutePath(uri), '/');
+        expect(routeUri(location).queryParameters.keys, isNotEmpty);
+      });
+    }
   });
 }

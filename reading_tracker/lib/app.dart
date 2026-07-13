@@ -1,46 +1,71 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/design_system/design_system.dart';
+import 'core/navigation/app_launch_uri.dart';
 import 'core/observability/readpp_sentry.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_theme_controller.dart';
 import 'features/navigation/presentation/screens/main_navigation_screen.dart';
+import 'features/auth/presentation/widgets/oauth_callback_bootstrap.dart';
 import 'features/onboarding/presentation/providers/onboarding_controller.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/onboarding/presentation/widgets/sync_onboarding_notice.dart';
 import 'features/sync/presentation/widgets/auto_sync_bootstrap.dart';
 
 class App extends ConsumerWidget {
-  const App({super.key});
+  const App({super.key, this.launchUri, this.onOAuthCallbackCleaned});
+
+  final Uri? launchUri;
+  final ValueChanged<String>? onOAuthCallbackCleaned;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedTheme = ref.watch(appThemeControllerProvider);
 
-    return AutoSyncBootstrap(
-      child: MaterialApp(
-        title: 'ReadPp',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light(selectedTheme),
-        themeAnimationDuration: AppMotion.slow,
-        themeAnimationCurve: AppMotion.emphasized,
-        home: ref
-            .watch(onboardingControllerProvider)
-            .when(
-              loading: () => const _AppBootstrapScreen(),
-              error: (error, stackTrace) => const OnboardingScreen(),
-              data: (isCompleted) => isCompleted
-                  ? const SyncOnboardingNotice(child: MainNavigationScreen())
-                  : const OnboardingScreen(),
-            ),
-        onGenerateRoute: _onGenerateRoute,
-        navigatorObservers: ReadPpSentry.navigatorObservers(),
+    final initialUri = launchUri ?? (kIsWeb ? Uri.base : Uri(path: '/'));
+
+    return OAuthCallbackBootstrap(
+      launchUri: initialUri,
+      onCleanUrl: onOAuthCallbackCleaned,
+      child: AutoSyncBootstrap(
+        child: MaterialApp(
+          title: 'ReadPp',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light(selectedTheme),
+          themeAnimationDuration: AppMotion.slow,
+          themeAnimationCurve: AppMotion.emphasized,
+          initialRoute: appRoutePath(initialUri),
+          home: ref
+              .watch(onboardingControllerProvider)
+              .when(
+                loading: () => const _AppBootstrapScreen(),
+                error: (error, stackTrace) => const OnboardingScreen(),
+                data: (isCompleted) => isCompleted
+                    ? const SyncOnboardingNotice(child: MainNavigationScreen())
+                    : const OnboardingScreen(),
+              ),
+          onGenerateRoute: _onGenerateRoute,
+          navigatorObservers: ReadPpSentry.navigatorObservers(),
+        ),
       ),
     );
   }
 
-  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+  Route<dynamic>? _onGenerateRoute(RouteSettings rawSettings) {
+    final uri = routeUri(rawSettings.name);
+    final settings = RouteSettings(
+      name: appRoutePath(uri),
+      arguments: rawSettings.arguments,
+    );
+    if (kDebugMode) {
+      debugPrint(
+        '[router] rawUri=${safeUriForLog(uri)} path=${appRoutePath(uri)} '
+        'queryKeys=${uri.queryParameters.keys.toList()..sort()}',
+      );
+    }
+
     switch (settings.name) {
       case '/':
         return _route(settings, (_) => const MainNavigationScreen());

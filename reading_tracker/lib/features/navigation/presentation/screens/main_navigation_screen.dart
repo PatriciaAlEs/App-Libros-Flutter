@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/observability/readpp_sentry.dart';
+import '../../../../core/navigation/app_launch_uri.dart';
 import '../../../auth/presentation/screens/account_screen.dart';
 import '../../../auth/presentation/screens/account_transition_screen.dart';
 import '../../../auth/presentation/screens/auth_screen.dart';
@@ -105,9 +106,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   Route<dynamic> _onGenerateRoute(
-    RouteSettings settings, {
+    RouteSettings rawSettings, {
     bool updateSelectedIndex = true,
   }) {
+    final uri = routeUri(rawSettings.name);
+    final settings = RouteSettings(
+      name: appRoutePath(uri),
+      arguments: rawSettings.arguments,
+    );
     final mainIndex = switch (settings.name) {
       '/' || '/home' => 0,
       '/books' => 1,
@@ -124,7 +130,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       debugPrint(
         '[navigation] inner route=${settings.name} branch='
         '${mainIndex == null ? 'detail' : 'main-tab'} '
-        'selectedIndex=${_selectedIndex.value} initial=${!updateSelectedIndex}',
+        'selectedIndex=${_selectedIndex.value} initial=${!updateSelectedIndex} '
+        'rawUri=${safeUriForLog(uri)} path=${appRoutePath(uri)} '
+        'queryKeys=${uri.queryParameters.keys.toList()..sort()}',
       );
     }
 
@@ -177,6 +185,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   Widget _screenForIndex(int index) {
+    if (kDebugMode) {
+      debugPrint(
+        '[navigation] timestamp=${DateTime.now().toIso8601String()} '
+        'source=shell shellIndex=$index renderedScreen='
+        '${switch (index) {
+          0 => 'HomeScreen',
+          1 => 'BooksListScreen',
+          2 => 'ProgressScreen',
+          3 => 'InsightsScreen',
+          _ => 'SettingsScreen',
+        }}',
+      );
+    }
     return switch (index) {
       0 => const HomeScreen(),
       1 => const BooksListScreen(),

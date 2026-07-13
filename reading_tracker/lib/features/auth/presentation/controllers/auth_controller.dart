@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/auth_repository_impl.dart';
 import '../../data/auth_redirect_url.dart';
+import '../../../../core/navigation/app_launch_uri.dart';
 import '../../domain/app_user.dart';
 import '../../domain/auth_repository.dart';
 
@@ -52,6 +53,7 @@ class AuthController extends StateNotifier<AuthControllerState> {
       super(const AuthControllerState()) {
     _subscription = _repository.watchAuthState().listen(
       (user) {
+        _logAuth('onAuthStateChange', user == null ? 'anonymous' : 'user');
         _latestAuthEvent = user;
         if (!_firstAuthEvent.isCompleted) _firstAuthEvent.complete();
         if (!state.isRestoring) _applyAuthEvent(user);
@@ -79,11 +81,13 @@ class AuthController extends StateNotifier<AuthControllerState> {
   AppUser? _latestAuthEvent;
 
   Future<void> _restoreSession() async {
+    _logAuth('restoreSession', 'started');
     try {
       final currentUserFuture = _repository.getCurrentUser();
       await _firstAuthEvent.future;
       final currentUser = await currentUserFuture;
       final user = _latestAuthEvent ?? currentUser;
+      _logAuth('restoreSession', user == null ? 'no-session' : 'session-ready');
       if (user == null && isOAuthCallbackUri(_launchUri)) {
         state = AuthControllerState(
           isRestoring: false,
@@ -113,6 +117,10 @@ class AuthController extends StateNotifier<AuthControllerState> {
       isRestoring: false,
       isLoading: false,
       clearError: true,
+    );
+    _logAuth(
+      'authController',
+      user == null ? 'published-anonymous' : 'published-user',
     );
   }
 
@@ -156,6 +164,7 @@ class AuthController extends StateNotifier<AuthControllerState> {
 
   Future<void> _runGoogleAuth() async {
     if (state.isLoading || state.isRestoring) return;
+    _logAuth('googleOAuth', 'submit');
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final redirectStarted = await _repository.signInWithGoogle();
@@ -234,6 +243,18 @@ class AuthController extends StateNotifier<AuthControllerState> {
   void dispose() {
     _subscription?.cancel();
     super.dispose();
+  }
+
+  void _logAuth(String source, String event) {
+    if (!kDebugMode) return;
+    final queryKeys = _launchUri.queryParameters.keys.toList()..sort();
+    debugPrint(
+      '[auth-flow] timestamp=${DateTime.now().toIso8601String()} '
+      'source=$source authEvent=$event isRestoring=${state.isRestoring} '
+      'isOAuthPending=${state.isLoading} hasSession=${state.user != null} '
+      'hasUser=${state.user != null} rawPath=${appRoutePath(_launchUri)} '
+      'queryKeys=$queryKeys',
+    );
   }
 }
 
