@@ -1,5 +1,6 @@
 import '../../../../core/preferences/reader_profile_controller.dart';
 import '../../../books/domain/entities/book.dart';
+import '../../../books/domain/enums/book_status.dart';
 import '../../../reading_sessions/domain/entities/reading_session.dart';
 import '../models/reader_context.dart';
 
@@ -65,14 +66,13 @@ class MarkdownContextFormatter implements ContextFormatter {
   }
 
   bool _hasLibraryData(ReaderContext context) {
-    return context.library.currentBooks.any(_hasTitle) ||
-        context.library.completedBooks.any(_hasTitle) ||
-        context.library.pendingBooks.any(_hasTitle) ||
-        context.library.abandonedBooks.any(_hasTitle);
+    return context.library.allBooks.any(_hasTitle);
   }
 
   String _librarySection(ReaderContext context) {
     final lines = <String>['# Biblioteca'];
+    final allBooks = context.library.allBooks.where(_hasTitle).toList()
+      ..sort(_sortBooksByTitleThenStatus);
     final currentBooks = context.library.currentBooks.where(_hasTitle).toList()
       ..sort(_sortBooksByUpdatedThenTitle);
     final completedBooks =
@@ -83,6 +83,18 @@ class MarkdownContextFormatter implements ContextFormatter {
     final abandonedBooks =
         context.library.abandonedBooks.where(_hasTitle).toList()
           ..sort(_sortBooksByUpdatedThenTitle);
+
+    if (allBooks.isNotEmpty) {
+      lines
+        ..add('')
+        ..add('## Inventario completo para exclusiones')
+        ..add(
+          'Incluye todos los libros y estados de la biblioteca. Usalo completo cuando se pida una obra que no este en ella:',
+        );
+      for (final book in allBooks) {
+        lines.add('- ${_formatInventoryBook(book)}');
+      }
+    }
 
     if (completedBooks.isNotEmpty) {
       lines
@@ -168,6 +180,21 @@ class MarkdownContextFormatter implements ContextFormatter {
   }
 
   bool _hasTitle(Book book) => book.title.trim().isNotEmpty;
+
+  String _formatInventoryBook(Book book) {
+    final title = book.title.trim();
+    final details = <String>[
+      'Titulo: $title',
+      'Titulo normalizado: ${_normalizeLibraryTitle(title)}',
+      'Titulo base normalizado: ${_normalizeLibraryTitleBase(title)}',
+      'Estado en biblioteca: ${_libraryStatusLabel(book.status)}',
+    ];
+    final author = book.author?.trim();
+    if (author != null && author.isNotEmpty) details.add('Autor: $author');
+    final genre = book.genre?.trim();
+    if (genre != null && genre.isNotEmpty) details.add('Genero: $genre');
+    return details.join(' | ');
+  }
 
   String _formatBook(Book book) {
     final details = <String>[];
@@ -258,6 +285,16 @@ class MarkdownContextFormatter implements ContextFormatter {
     return a.id.compareTo(b.id);
   }
 
+  int _sortBooksByTitleThenStatus(Book a, Book b) {
+    final titleComparison = _normalizeLibraryTitle(
+      a.title,
+    ).compareTo(_normalizeLibraryTitle(b.title));
+    if (titleComparison != 0) return titleComparison;
+    final statusComparison = a.status.index.compareTo(b.status.index);
+    if (statusComparison != 0) return statusComparison;
+    return a.id.compareTo(b.id);
+  }
+
   String _formatDateTime(DateTime date) {
     return '${_formatDate(date)} ${_twoDigits(date.hour)}:${_twoDigits(date.minute)}';
   }
@@ -267,4 +304,50 @@ class MarkdownContextFormatter implements ContextFormatter {
   }
 
   String _twoDigits(int value) => value.toString().padLeft(2, '0');
+}
+
+String _normalizeLibraryTitleBase(String value) {
+  final base = value.split(RegExp(r'\s*[:\-–—]\s*')).first;
+  return _normalizeLibraryTitle(base);
+}
+
+String _libraryStatusLabel(BookStatus status) => switch (status) {
+  BookStatus.pending => 'Pendiente',
+  BookStatus.reading => 'Leyendo',
+  BookStatus.completed => 'Completado',
+  BookStatus.paused => 'Pausado',
+  BookStatus.abandoned => 'Abandonado',
+};
+
+String _normalizeLibraryTitle(String value) {
+  final lower = value.toLowerCase().trim();
+  const accents = {
+    'á': 'a',
+    'à': 'a',
+    'ä': 'a',
+    'â': 'a',
+    'é': 'e',
+    'è': 'e',
+    'ë': 'e',
+    'ê': 'e',
+    'í': 'i',
+    'ì': 'i',
+    'ï': 'i',
+    'î': 'i',
+    'ó': 'o',
+    'ò': 'o',
+    'ö': 'o',
+    'ô': 'o',
+    'ú': 'u',
+    'ù': 'u',
+    'ü': 'u',
+    'û': 'u',
+    'ñ': 'n',
+    'ç': 'c',
+  };
+  final folded = lower.split('').map((char) => accents[char] ?? char).join();
+  return folded
+      .replaceAll(RegExp(r'[^a-z0-9\s]'), ' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
 }

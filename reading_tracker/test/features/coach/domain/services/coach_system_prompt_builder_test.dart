@@ -113,6 +113,75 @@ void main() {
       expect(prompt, contains('superar el límite cultural'));
     });
 
+    test('presenta las restricciones como filtros simultaneos y prioritarios', () {
+      final prompt = builder.build();
+
+      expect(prompt, contains('restricciones obligatorias indicadas'));
+      expect(prompt, contains('deben cumplirse simultaneamente'));
+      expect(prompt, contains('cumplir solo algunas no basta'));
+      expect(prompt, contains('popularidad, humor o variedad'));
+    });
+
+    test('acumula y permite retirar restricciones conversacionales', () {
+      final prompt = builder.build();
+
+      expect(prompt, contains('Acumula las restricciones'));
+      expect(prompt, contains('se combina con las anteriores'));
+      expect(prompt, contains('solo retirala o sustituyela'));
+      expect(prompt, contains('historial visible'));
+    });
+
+    test('distingue autoconclusivo saga y arco terminado', () {
+      final prompt = builder.build();
+
+      expect(prompt, contains('autoconclusivo: la historia principal'));
+      expect(prompt, contains('trilogia completa'));
+      expect(prompt, contains('saga terminada'));
+      expect(prompt, contains('primer arco terminado'));
+      expect(prompt, contains('no demuestra que sea una obra autoconclusiva'));
+    });
+
+    test('descarta candidatos incompatibles sin mencionarlos', () {
+      final prompt = builder.build();
+
+      expect(prompt, contains('descarta silenciosamente'));
+      expect(prompt, contains('unicamente con candidatos'));
+      expect(prompt, contains('no debe aparecer como recomendacion ni alternativa'));
+      expect(prompt, contains('No muestres razonamiento interno'));
+    });
+
+    test('se abstiene ante metadatos no verificables', () {
+      final prompt = builder.build();
+
+      expect(prompt, contains('No aporta pertenencia o posicion en serie'));
+      expect(prompt, contains('no infieras el genero de una persona por su nombre'));
+      expect(
+        prompt,
+        contains('No puedo verificar con seguridad una opcion que cumpla todos esos filtros.'),
+      );
+      expect(prompt, contains('no rellenes la respuesta con un titulo dudoso'));
+    });
+
+    test('contrasta fuera de biblioteca contra todos los estados', () {
+      final prompt = builder.build();
+
+      expect(prompt, contains('Inventario completo para exclusiones'));
+      expect(
+        prompt,
+        contains('pendiente, leyendo, completado, pausado o abandonado'),
+      );
+      expect(prompt, contains('«No completado» no significa'));
+      expect(prompt, contains('mayusculas, tildes, puntuacion, espacios o subtitulos'));
+    });
+
+    test('subordina el humor a los filtros obligatorios', () {
+      final prompt = builder.build();
+
+      expect(prompt, contains('El humor queda por debajo de todos los filtros'));
+      expect(prompt, contains('nunca puede sustituir la verificacion factual'));
+      expect(prompt, contains('sin restricciones adicionales conserva'));
+    });
+
     test('mantiene el humor desactivado en los casos protegidos', () {
       final prompt = builder.build();
 

@@ -284,6 +284,64 @@ void main() {
       );
     });
 
+    test('un pendiente sigue contando como presente en la biblioteca', () {
+      final result = builder.build(
+        userMessage: 'Quiero un libro que no este en mi biblioteca',
+        conversation: const [],
+        readerContext: _readerContext(
+          books: [
+            _book('pending', 'Libro pendiente', status: BookStatus.pending),
+          ],
+        ),
+      );
+
+      expect(result[1].content, contains('## Inventario completo para exclusiones'));
+      expect(result[1].content, contains('Titulo: Libro pendiente'));
+      expect(result[1].content, contains('Estado en biblioteca: Pendiente'));
+      expect(
+        result.first.content,
+        contains('«No completado» no significa «fuera de mi biblioteca»'),
+      );
+    });
+
+    test('conserva las restricciones del caso QA en el seguimiento', () {
+      const initial =
+          'Estoy en bloqueo lector y mi TBR ya amenaza con independizarse. '
+          'Quiero una fantasía cerrada y que no esté en mi biblioteca. '
+          '¿Cuál me recomiendas?';
+      const followUp =
+          '¿Y si te pido que sea autoconclusivo y escrito por una mujer?';
+      final result = builder.build(
+        userMessage: followUp,
+        conversation: [
+          CoachMessage.user(initial),
+          CoachMessage.assistant('Respuesta anterior'),
+        ],
+        readerContext: _readerContext(),
+      );
+
+      expect(result.first.content, contains('Acumula las restricciones'));
+      expect(result.first.content, contains('deben cumplirse simultaneamente'));
+      expect(result.first.content, contains('no infieras el genero'));
+      expect(result[2].content, initial);
+      expect(result.last.content, followUp);
+      expect(result.where((message) => message.content == followUp), hasLength(1));
+    });
+
+    test('permite retirar expresamente una restriccion anterior', () {
+      final result = builder.build(
+        userMessage: 'Da igual que sea una saga',
+        conversation: [
+          CoachMessage.user('Quiero una fantasia autoconclusiva'),
+        ],
+        readerContext: _readerContext(),
+      );
+
+      expect(result.first.content, contains('solo retirala o sustituyela'));
+      expect(result[2].content, 'Quiero una fantasia autoconclusiva');
+      expect(result.last.content, 'Da igual que sea una saga');
+    });
+
     test('permite una peticion explicita para hablar de un libro leido', () {
       final result = builder.build(
         userMessage: 'Resume Vencer al dragon, que ya lei',

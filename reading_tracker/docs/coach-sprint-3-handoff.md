@@ -709,3 +709,15 @@ El corpus local `bookish_culture_es_v1` vive en `lib/features/coach/data/culture
 Las notas se añaden al final del mensaje system de contexto lector, antes del resumen y del historial. Son inspiración opcional, permiten aprovechar como máximo un ángulo y no pueden cambiar recomendaciones ni convertirse en hechos. Sin coincidencias no se crea la sección.
 
 Para ampliar el corpus, añadir una entrada breve con disparadores inequívocos y pruebas positivas y negativas. Las entradas evergreen siguen siendo válidas hasta revisión editorial; las temporales deben tener `expiresAt`. Revisar periódicamente términos de comunidad para evitar jerga obsoleta, coincidencias demasiado amplias y referencias que hayan cambiado de significado.
+
+## Restricciones obligatorias en recomendaciones
+
+Las recomendaciones aplican esta jerarquia: primero las restricciones explicitas de la persona; despues, cuando se solicite, la exclusion de libros completados o presentes en la biblioteca; luego la afinidad con gustos e historial; y por ultimo popularidad, humor o variedad. Todos los filtros obligatorios deben cumplirse a la vez. Los candidatos incompatibles se descartan sin mencionarlos y el humor nunca sustituye una comprobacion.
+
+Las restricciones pertenecen a la busqueda conversacional activa. Los seguimientos añaden condiciones a las anteriores aunque no las repitan. Solo se elimina o sustituye una condicion cuando la persona lo indica expresamente. `PromptBuilder` conserva el historial reciente y su orden contractual; el prompt ordena reconstruir desde ese historial y, cuando exista, desde el resumen de conversacion el conjunto de filtros vigente.
+
+El contexto estructurado permite verificar titulo, autor registrado, genero registrado y estado en la biblioteca. `ReaderContext.library.allBooks` procede de `BookRepository.getAllBooks()` y `MarkdownContextFormatter` expone ahora un inventario completo, sin limites por estado, con titulo completo, titulo normalizado, titulo base sin subtitulo y estado. Por ello una obra pendiente, leyendo, completada, pausada o abandonada cuenta como presente cuando se solicita algo fuera de la biblioteca.
+
+El modelo `Book` no contiene pertenencia o posicion en serie, finalizacion de saga, condicion de autoconclusivo, formato, disponibilidad ni genero de la persona autora. Esos datos no se simulan ni se representan como `false`: permanecen desconocidos. El prompt prohibe inferir genero por el nombre, afirmar disponibilidad sin catalogo o presentar como seguro el cierre de una obra o saga sin base suficiente.
+
+Cuando no se puedan verificar simultaneamente todos los filtros, LibrerIA debe abstenerse antes que completar la respuesta con un titulo dudoso. Puede pedir flexibilizar una condicion u ofrecer trabajar con los datos disponibles. Para garantizar en el futuro autoria, estructura de series y estado de publicacion sera necesaria una fuente bibliografica estructurada y mantenida; este cambio no añade APIs, scraping ni una base nueva.

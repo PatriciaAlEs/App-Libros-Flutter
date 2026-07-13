@@ -111,11 +111,66 @@ void main() {
       );
 
       final markdown = formatter.format(_context(books: books));
+      final currentSection = markdown
+          .split('## Libros en lectura\n')
+          .last
+          .split('\n## ')
+          .first;
 
-      expect(markdown, contains('Current 7'));
-      expect(markdown, contains('Current 3'));
-      expect(markdown, isNot(contains('Current 2')));
-      expect(markdown, isNot(contains('Current 0')));
+      expect(currentSection, contains('Current 7'));
+      expect(currentSection, contains('Current 3'));
+      expect(currentSection, isNot(contains('Current 2')));
+      expect(currentSection, isNot(contains('Current 0')));
+      expect(markdown, contains('Titulo: Current 0'));
+    });
+
+    test('includes the complete library with every reading status', () {
+      final markdown = formatter.format(
+        _context(
+          books: [
+            _book('pending', 'Pendiente', status: BookStatus.pending),
+            _book('reading', 'Leyendo', status: BookStatus.reading),
+            _book('completed', 'Completado', status: BookStatus.completed),
+            _book('paused', 'Pausado', status: BookStatus.paused),
+            _book('abandoned', 'Abandonado', status: BookStatus.abandoned),
+          ],
+        ),
+      );
+
+      expect(markdown, contains('## Inventario completo para exclusiones'));
+      for (final status in [
+        'Pendiente',
+        'Leyendo',
+        'Completado',
+        'Pausado',
+        'Abandonado',
+      ]) {
+        expect(markdown, contains('Estado en biblioteca: $status'));
+      }
+    });
+
+    test('normalizes accents punctuation spaces and subtitles', () {
+      final markdown = formatter.format(
+        _context(
+          books: [
+            _book(
+              'normalized',
+              '  La Canción, Oscura: Edición especial  ',
+              status: BookStatus.pending,
+              author: 'Autora Registrada',
+              genre: 'Fantasía',
+            ),
+          ],
+        ),
+      );
+
+      expect(
+        markdown,
+        contains('Titulo normalizado: la cancion oscura edicion especial'),
+      );
+      expect(markdown, contains('Titulo base normalizado: la cancion oscura'));
+      expect(markdown, contains('Autor: Autora Registrada'));
+      expect(markdown, contains('Genero: Fantasía'));
     });
 
     test('formats activity from reading sessions', () {
