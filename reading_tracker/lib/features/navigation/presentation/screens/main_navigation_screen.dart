@@ -185,19 +185,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   Widget _screenForIndex(int index) {
-    if (kDebugMode) {
-      debugPrint(
-        '[navigation] timestamp=${DateTime.now().toIso8601String()} '
-        'source=shell shellIndex=$index renderedScreen='
-        '${switch (index) {
-          0 => 'HomeScreen',
-          1 => 'BooksListScreen',
-          2 => 'ProgressScreen',
-          3 => 'InsightsScreen',
-          _ => 'SettingsScreen',
-        }}',
-      );
-    }
     return switch (index) {
       0 => const HomeScreen(),
       1 => const BooksListScreen(),

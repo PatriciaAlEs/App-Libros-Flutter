@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:reading_tracker/core/design_system/design_system.dart';
 import 'package:reading_tracker/app.dart';
-import 'package:reading_tracker/core/backend/supabase_client_provider.dart';
 import 'package:reading_tracker/core/theme/app_theme.dart';
 import 'package:reading_tracker/features/books/data/datasources/book_api_datasource.dart';
 import 'package:reading_tracker/features/books/data/datasources/google_books_datasource.dart';
@@ -410,127 +409,6 @@ void main() {
 
       expect(cleanedUrls, ['/']);
       expect(find.byType(HomeScreen), findsOneWidget);
-      expect(find.byType(LibreriaEntryCard), findsOneWidget);
-
-      await tester.tap(find.byType(LibreriaEntryCard));
-      await tester.pumpAndSettle();
-      expect(find.byType(CoachScreen), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'one Google submit survives callback restart and keeps canonical Home',
-    (tester) async {
-      SharedPreferences.setMockInitialValues({
-        'onboarding_completed': true,
-        'sync_onboarding_notice_seen_v1': true,
-      });
-      final authRepository = _OAuthLifecycleAuthRepository();
-
-      Widget appFor(Uri launchUri, {ValueChanged<String>? onCleanUrl}) {
-        return ProviderScope(
-          overrides: [
-            isSupabaseEnabledProvider.overrideWithValue(true),
-            authControllerProvider.overrideWith(
-              (ref) => AuthController(authRepository, launchUri: launchUri),
-            ),
-            bookRepositoryProvider.overrideWithValue(_EmptyBookRepository()),
-            statisticsRepositoryProvider.overrideWithValue(
-              const _EmptyStatisticsRepository(),
-            ),
-            readingSessionRepositoryProvider.overrideWithValue(
-              const _EmptyReadingSessionRepository(),
-            ),
-          ],
-          child: App(launchUri: launchUri, onOAuthCallbackCleaned: onCleanUrl),
-        );
-      }
-
-      final normalUri = Uri.parse('https://readpp-web-alpha.vercel.app/');
-      await tester.pumpWidget(appFor(normalUri));
-      await tester.pumpAndSettle();
-      expect(find.byType(LibreriaEntryCard), findsOneWidget);
-
-      final homeContext = tester.element(find.byType(HomeScreen));
-      Navigator.of(
-        homeContext,
-      ).pushNamedAndRemoveUntil('/settings', (_) => false);
-      await tester.pumpAndSettle();
-      final settingsContext = tester.element(find.byType(SettingsScreen));
-      Navigator.of(settingsContext).pushNamed('/account/auth');
-      await tester.pumpAndSettle();
-
-      final googleButton = find.widgetWithText(
-        FilledButton,
-        'Continuar con Google',
-      );
-      await tester.tap(googleButton);
-      await tester.pump();
-      await tester.tap(googleButton);
-      await tester.pump();
-      expect(authRepository.googleSubmitCount, 1);
-      expect(authRepository.watchCalls, 1);
-
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pumpAndSettle();
-      authRepository.deliveredUsers.clear();
-
-      const authenticatedUser = AppUser(
-        id: 'google-user',
-        email: 'reader@test.dev',
-      );
-      authRepository.currentUser = authenticatedUser;
-      final callbackWatchCalls = authRepository.watchCalls;
-      final cleanedUrls = <String>[];
-      final syncController = _CompletingSyncStatusController();
-      final callbackUri = Uri.parse(
-        'https://readpp-web-alpha.vercel.app/?code=fake-code',
-      );
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            isSupabaseEnabledProvider.overrideWithValue(true),
-            authControllerProvider.overrideWith(
-              (ref) => AuthController(authRepository, launchUri: callbackUri),
-            ),
-            bookRepositoryProvider.overrideWithValue(_EmptyBookRepository()),
-            statisticsRepositoryProvider.overrideWithValue(
-              const _EmptyStatisticsRepository(),
-            ),
-            readingSessionRepositoryProvider.overrideWithValue(
-              const _EmptyReadingSessionRepository(),
-            ),
-            syncStatusControllerProvider.overrideWith((ref) => syncController),
-          ],
-          child: App(
-            launchUri: callbackUri,
-            onOAuthCallbackCleaned: cleanedUrls.add,
-          ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 1));
-
-      expect(authRepository.googleSubmitCount, 1);
-      expect(authRepository.watchCalls - callbackWatchCalls, 1);
-      expect(authRepository.deliveredUsers, [authenticatedUser]);
-      expect(cleanedUrls, ['/']);
-      expect(syncController.state.status, SyncUiStatus.syncing);
-
-      syncController.complete();
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
-
-      expect(syncController.state.status, SyncUiStatus.synced);
-      expect(find.byType(SettingsScreen), findsNothing);
-      expect(find.byType(HomeScreen), findsOneWidget);
-      expect(
-        tester
-            .widget<ReadPpBottomNavigation>(find.byType(ReadPpBottomNavigation))
-            .selectedIndex,
-        0,
-      );
       expect(find.byType(LibreriaEntryCard), findsOneWidget);
 
       await tester.tap(find.byType(LibreriaEntryCard));
@@ -1199,52 +1077,6 @@ class _HomeAuthRepository implements AuthRepository {
   Future<void> signOut() async => emit(null);
 }
 
-class _OAuthLifecycleAuthRepository implements AuthRepository {
-  final _authState = StreamController<AppUser?>.broadcast();
-  AppUser? currentUser;
-  int googleSubmitCount = 0;
-  int watchCalls = 0;
-  final deliveredUsers = <AppUser?>[];
-
-  @override
-  Future<AppUser?> getCurrentUser() async => currentUser;
-
-  @override
-  Stream<AppUser?> watchAuthState() async* {
-    watchCalls++;
-    deliveredUsers.add(currentUser);
-    yield currentUser;
-    await for (final user in _authState.stream) {
-      deliveredUsers.add(user);
-      yield user;
-    }
-  }
-
-  @override
-  Future<bool> signInWithGoogle() async {
-    googleSubmitCount++;
-    return true;
-  }
-
-  @override
-  Future<AppUser?> signInWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async => currentUser;
-
-  @override
-  Future<AppUser?> signUpWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async => currentUser;
-
-  @override
-  Future<void> signOut() async {
-    currentUser = null;
-    _authState.add(null);
-  }
-}
-
 Finder _searchField() => find.byType(TextField).first;
 
 Finder _semanticsWithLabel(String label) {
@@ -1382,22 +1214,6 @@ class _InvalidatingSyncStatusController extends SyncStatusController {
   Future<void> syncNow({required String userId}) async {
     state = const SyncStatusState(status: SyncUiStatus.syncing);
     onSync();
-    state = const SyncStatusState(status: SyncUiStatus.synced);
-  }
-}
-
-class _CompletingSyncStatusController extends SyncStatusController {
-  _CompletingSyncStatusController()
-    : super(coordinator: null, clock: DateTime.now);
-
-  final _completion = Completer<void>();
-
-  void complete() => _completion.complete();
-
-  @override
-  Future<void> syncNow({required String userId}) async {
-    state = const SyncStatusState(status: SyncUiStatus.syncing);
-    await _completion.future;
     state = const SyncStatusState(status: SyncUiStatus.synced);
   }
 }

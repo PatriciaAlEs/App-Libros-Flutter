@@ -25,41 +25,17 @@ class OAuthCallbackBootstrap extends ConsumerStatefulWidget {
 class _OAuthCallbackBootstrapState
     extends ConsumerState<OAuthCallbackBootstrap> {
   bool _urlCleaned = false;
-  late final ProviderSubscription<AuthControllerState> _authSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    _authSubscription = ref.listenManual<AuthControllerState>(
-      authControllerProvider,
-      _onAuthChanged,
-      fireImmediately: true,
-    );
-  }
-
-  @override
-  void dispose() {
-    _authSubscription.close();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    return widget.child;
-  }
-
-  void _onAuthChanged(
-    AuthControllerState? previous,
-    AuthControllerState authState,
-  ) {
+    final authState = ref.watch(authControllerProvider);
     final queryKeys = widget.launchUri.queryParameters.keys.toList()..sort();
     final hasCode = queryKeys.contains('code');
     final exchangeCompleted = hasCode && authState.isAuthenticated;
 
     if (kDebugMode) {
       debugPrint(
-        '[oauth-callback] timestamp=${DateTime.now().toIso8601String()} '
-        'source=urlCleanup rawUri=${safeUriForLog(widget.launchUri)} '
+        '[oauth-callback] rawUri=${safeUriForLog(widget.launchUri)} '
         'path=${appRoutePath(widget.launchUri)} queryKeys=$queryKeys '
         'authState=${authState.isAuthenticated ? 'authenticated' : 'anonymous'} '
         'sessionAvailable=${authState.user != null} '
@@ -72,10 +48,7 @@ class _OAuthCallbackBootstrapState
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         if (kDebugMode) {
-          debugPrint(
-            '[oauth-callback] timestamp=${DateTime.now().toIso8601String()} '
-            'source=urlCleanup urlCleanup=replace-with-root',
-          );
+          debugPrint('[oauth-callback] replacing browser URL with /');
         }
         final onCleanUrl = widget.onCleanUrl;
         if (onCleanUrl != null) {
@@ -85,5 +58,7 @@ class _OAuthCallbackBootstrapState
         }
       });
     }
+
+    return widget.child;
   }
 }
