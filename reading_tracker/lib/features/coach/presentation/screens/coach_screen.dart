@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design_system/design_system.dart';
@@ -7,7 +8,10 @@ import '../controllers/coach_controller.dart';
 import '../widgets/coach_message_bubble.dart';
 
 class CoachScreen extends ConsumerStatefulWidget {
-  const CoachScreen({super.key});
+  const CoachScreen({super.key, this.isFloatingPanel = false, this.onCollapse});
+
+  final bool isFloatingPanel;
+  final VoidCallback? onCollapse;
 
   @override
   ConsumerState<CoachScreen> createState() => _CoachScreenState();
@@ -56,6 +60,40 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
     );
     final theme = Theme.of(context);
 
+    final chatBody = _buildChatBody(uiState);
+    if (widget.isFloatingPanel) {
+      return Column(
+        children: [
+          _CoachPanelHeader(
+            onNewConversation: () => ref
+                .read(coachControllerProvider.notifier)
+                .startNewConversation(),
+            onShowHistory: () =>
+                _showConversationHistory(ref.read(coachControllerProvider)),
+            onCollapse: widget.onCollapse,
+          ),
+          Expanded(child: chatBody),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              0,
+              AppSpacing.md,
+              AppSpacing.sm,
+            ),
+            child: Text(
+              'LibrerIA puede equivocarse. Contrasta los datos importantes.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.primary.withValues(alpha: 0.62),
+                fontSize: 11,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -103,7 +141,22 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
           ),
         ],
       ),
-      body: SafeArea(
+      body: chatBody,
+    );
+  }
+
+  Widget _buildChatBody(
+    ({
+      int messageCount,
+      bool isLoading,
+      String? errorMessage,
+      bool canRetry,
+    })
+    uiState,
+  ) {
+    return ColoredBox(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: SafeArea(
         top: false,
         child: Column(
           children: [
@@ -354,6 +407,138 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
       : AppMotion.normal;
 }
 
+enum _CoachPanelAction { newConversation, history }
+
+class _CoachPanelHeader extends StatelessWidget {
+  const _CoachPanelHeader({
+    required this.onNewConversation,
+    required this.onShowHistory,
+    required this.onCollapse,
+  });
+
+  final VoidCallback onNewConversation;
+  final VoidCallback onShowHistory;
+  final VoidCallback? onCollapse;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.48),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.md,
+          AppSpacing.sm,
+          AppSpacing.md,
+        ),
+        child: Row(
+          children: [
+          _LibreriaMark(
+            color: theme.colorScheme.primary,
+            size: 40,
+            iconSize: 18,
+            showShadow: true,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'LibrerIA',
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF2EAD68),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Flexible(
+                      child: Text(
+                        'Tu asistente de lectura',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.76,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          PopupMenuButton<_CoachPanelAction>(
+            tooltip: 'Acciones de LibrerIA',
+            onSelected: (action) {
+              switch (action) {
+                case _CoachPanelAction.newConversation:
+                  onNewConversation();
+                  return;
+                case _CoachPanelAction.history:
+                  onShowHistory();
+                  return;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: _CoachPanelAction.newConversation,
+                child: Semantics(
+                  button: true,
+                  label: 'Nueva conversacion',
+                  child: const Text('Nueva conversacion'),
+                ),
+              ),
+              PopupMenuItem(
+                value: _CoachPanelAction.history,
+                child: Semantics(
+                  button: true,
+                  label: 'Historial de conversaciones',
+                  child: const Text('Historial'),
+                ),
+              ),
+            ],
+            icon: const Icon(Icons.more_horiz),
+          ),
+          Semantics(
+            button: true,
+            label: 'Colapsar LibrerIA',
+            child: IconButton(
+              key: const ValueKey('collapse-libreria'),
+              tooltip: 'Colapsar LibrerIA',
+              onPressed: onCollapse,
+              style: IconButton.styleFrom(
+                backgroundColor: theme.colorScheme.surface.withValues(
+                  alpha: 0.58,
+                ),
+                foregroundColor: theme.colorScheme.primary,
+              ),
+              icon: const Icon(Icons.keyboard_arrow_down_rounded),
+            ),
+          ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _CoachMessageItem extends ConsumerWidget {
   const _CoachMessageItem({super.key, required this.index});
 
@@ -403,20 +588,26 @@ class _CoachEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return ListView(
-      padding: const EdgeInsets.fromLTRB(24, 56, 24, AppSpacing.xl),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.xl,
+        AppSpacing.lg,
+        AppSpacing.md,
+      ),
       children: [
         Center(
           child: _LibreriaMark(
             color: theme.colorScheme.primary,
-            size: 56,
-            iconSize: 28,
+            size: 44,
+            iconSize: 21,
+            showShadow: true,
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
           '¿Sobre qué quieres leer hoy?',
           textAlign: TextAlign.center,
-          style: theme.textTheme.headlineSmall?.copyWith(
+          style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -429,7 +620,7 @@ class _CoachEmptyState extends StatelessWidget {
             height: 1.45,
           ),
         ),
-        const SizedBox(height: AppSpacing.xl),
+        const SizedBox(height: AppSpacing.lg),
         for (final suggestion in suggestions)
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -440,10 +631,10 @@ class _CoachEmptyState extends StatelessWidget {
                 onPressed: () => onSuggestion(suggestion),
                 style: OutlinedButton.styleFrom(
                   alignment: Alignment.centerLeft,
-                  minimumSize: const Size.fromHeight(52),
+                  minimumSize: const Size.fromHeight(48),
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
-                    vertical: 14,
+                    vertical: 12,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
@@ -528,38 +719,60 @@ class _CoachComposer extends StatelessWidget {
           AppSpacing.md,
           AppSpacing.sm,
           AppSpacing.md,
-          AppSpacing.md,
+          AppSpacing.sm,
         ),
         child: Material(
-          color: theme.colorScheme.surface,
-          elevation: 1,
+          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.22),
+          elevation: 0,
           shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.16),
           borderRadius: BorderRadius.circular(28),
           child: Container(
-            constraints: const BoxConstraints(minHeight: 58),
+            constraints: const BoxConstraints(minHeight: 54),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(28),
               border: Border.all(
-                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.8),
+                color: theme.colorScheme.primary.withValues(alpha: 0.20),
               ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: controller,
-                    focusNode: focusNode,
-                    minLines: 1,
-                    maxLines: 4,
-                    scrollPadding: const EdgeInsets.only(bottom: 96),
-                    textInputAction: TextInputAction.newline,
-                    decoration: const InputDecoration(
-                      hintText: 'Escribe a LibrerIA…',
+                  child: Focus(
+                    onKeyEvent: (_, event) {
+                      if (event is! KeyDownEvent ||
+                          event.logicalKey != LogicalKeyboardKey.enter) {
+                        return KeyEventResult.ignored;
+                      }
+                      if (HardwareKeyboard.instance.isShiftPressed) {
+                        _insertNewLine(controller);
+                      } else if (!isGenerating &&
+                          controller.text.trim().isNotEmpty) {
+                        onSend();
+                      }
+                      return KeyEventResult.handled;
+                    },
+                    child: TextField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      minLines: 1,
+                      maxLines: 4,
+                      scrollPadding: const EdgeInsets.only(bottom: 96),
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (_) {
+                        if (!isGenerating &&
+                            controller.text.trim().isNotEmpty) {
+                          onSend();
+                        }
+                      },
+                      decoration: const InputDecoration(
+                      hintText: 'Escribe sobre tus lecturas…',
+                      filled: false,
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(
                         horizontal: AppSpacing.md,
-                        vertical: 17,
+                        vertical: 15,
+                      ),
                       ),
                     ),
                   ),
@@ -596,7 +809,7 @@ class _CoachComposer extends StatelessWidget {
                                 onPressed: value.text.trim().isEmpty
                                     ? null
                                     : onSend,
-                                icon: const Icon(Icons.arrow_upward_rounded),
+                                icon: const Icon(Icons.send_rounded, size: 20),
                               ),
                             ),
                     ),
@@ -609,6 +822,23 @@ class _CoachComposer extends StatelessWidget {
       ),
     );
   }
+
+  static void _insertNewLine(TextEditingController controller) {
+    final value = controller.value;
+    final selection = value.selection.isValid
+        ? value.selection
+        : TextSelection.collapsed(offset: value.text.length);
+    final updatedText = value.text.replaceRange(
+      selection.start,
+      selection.end,
+      '\n',
+    );
+    controller.value = value.copyWith(
+      text: updatedText,
+      selection: TextSelection.collapsed(offset: selection.start + 1),
+      composing: TextRange.empty,
+    );
+  }
 }
 
 class _LibreriaMark extends StatelessWidget {
@@ -616,11 +846,13 @@ class _LibreriaMark extends StatelessWidget {
     required this.color,
     this.size = 40,
     this.iconSize = 20,
+    this.showShadow = false,
   });
 
   final Color color;
   final double size;
   final double iconSize;
+  final bool showShadow;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -629,6 +861,7 @@ class _LibreriaMark extends StatelessWidget {
     decoration: BoxDecoration(
       color: color,
       borderRadius: BorderRadius.circular(size * 0.32),
+      boxShadow: showShadow ? AppShadows.soft(color) : null,
     ),
     child: Icon(
       Icons.auto_awesome_rounded,

@@ -33,26 +33,24 @@ class CoachMessageBubble extends StatelessWidget {
             child: AnimatedContainer(
               duration: AppMotion.fast,
               curve: AppMotion.standard,
-              margin: const EdgeInsets.only(bottom: AppSpacing.md),
+              margin: const EdgeInsets.only(bottom: 10),
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: 14,
+                horizontal: 14,
+                vertical: 11,
               ),
               decoration: BoxDecoration(
                 color: isUser
-                    ? theme.colorScheme.primaryContainer
-                    : theme.colorScheme.surface.withValues(alpha: 0.96),
-                borderRadius: BorderRadius.circular(22).copyWith(
-                  bottomRight: isUser ? const Radius.circular(8) : null,
-                  bottomLeft: isUser ? null : const Radius.circular(8),
-                ),
-                border: isUser
-                    ? null
-                    : Border.all(
-                        color: theme.colorScheme.outlineVariant.withValues(
-                          alpha: 0.72,
-                        ),
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.primaryContainer.withValues(
+                        alpha: 0.52,
                       ),
+                borderRadius: BorderRadius.circular(18).copyWith(
+                  bottomRight: isUser ? const Radius.circular(5) : null,
+                  bottomLeft: isUser ? null : const Radius.circular(5),
+                ),
+                boxShadow: isUser
+                    ? null
+                    : AppShadows.soft(theme.colorScheme.primary),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,6 +65,9 @@ class CoachMessageBubble extends StatelessWidget {
                         ? SelectableText(
                             message.content,
                             key: const ValueKey('user-content'),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onPrimary,
+                            ),
                           )
                         : CoachMarkdown(
                             key: const ValueKey('assistant-content'),
@@ -109,18 +110,18 @@ class CoachMessageBubble extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 10, right: AppSpacing.sm),
+                padding: const EdgeInsets.only(top: 3, right: AppSpacing.sm),
                 child: Container(
-                  width: 30,
-                  height: 30,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(10),
+                    shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.auto_awesome_rounded,
                     color: Colors.white,
-                    size: 16,
+                    size: 14,
                   ),
                 ),
               ),

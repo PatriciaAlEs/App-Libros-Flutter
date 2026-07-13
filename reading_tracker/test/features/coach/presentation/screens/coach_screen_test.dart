@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reading_tracker/features/coach/data/providers/coach_repository_provider.dart';
@@ -12,6 +13,7 @@ import 'package:reading_tracker/features/coach/domain/repositories/coach_reposit
 import 'package:reading_tracker/features/coach/domain/repositories/coach_conversation_repository.dart';
 import 'package:reading_tracker/features/coach/presentation/controllers/coach_controller.dart';
 import 'package:reading_tracker/features/coach/presentation/screens/coach_screen.dart';
+import 'package:reading_tracker/features/coach/presentation/widgets/floating_libreria.dart';
 
 void main() {
   group('CoachScreen', () {
@@ -141,6 +143,27 @@ void main() {
       expect(composer.right, lessThanOrEqualTo(320));
     });
 
+    testWidgets('Enter envia y Shift Enter inserta una linea', (tester) async {
+      final repository = _WidgetRepository();
+      await tester.pumpWidget(_app(repository));
+
+      final field = find.byType(TextField);
+      await tester.enterText(field, 'Primera linea');
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pump();
+
+      final textField = tester.widget<TextField>(field);
+      expect(textField.controller?.text, 'Primera linea\n');
+      expect(repository.lastUserMessage, isNull);
+
+      await tester.enterText(field, 'Mensaje con Enter');
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await _pumpAsyncWork(tester);
+      expect(repository.lastUserMessage, 'Mensaje con Enter');
+    });
+
     testWidgets('muestra Reintentar despues de un error', (tester) async {
       await tester.pumpWidget(_app(_FailingWidgetRepository()));
 
@@ -235,6 +258,154 @@ void main() {
       },
     );
   });
+
+  group('FloatingLibreria', () {
+    testWidgets('la burbuja abre el panel y la cabecera lo colapsa', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_floatingApp(_WidgetRepository()));
+
+      expect(find.byKey(const ValueKey('open-libreria')), findsOneWidget);
+      expect(find.bySemanticsLabel('Abrir LibrerIA'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('open-libreria')));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('libreria-panel')), findsOneWidget);
+      expect(find.text('Tu asistente de lectura'), findsOneWidget);
+      expect(
+        find.text(
+          'LibrerIA puede equivocarse. Contrasta los datos importantes.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byKey(const ValueKey('collapse-libreria')));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('open-libreria')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+      'conserva controller, mensajes y streaming mientras esta colapsado',
+      (tester) async {
+        final repository = _WidgetRepository();
+        await tester.pumpWidget(_floatingApp(repository));
+        final providerContext = tester.element(find.byType(_FloatingHarness));
+        final container = ProviderScope.containerOf(providerContext);
+
+        await tester.tap(find.byKey(const ValueKey('open-libreria')));
+        await tester.pump();
+        final controllerBefore = container.read(
+          coachControllerProvider.notifier,
+        );
+        await tester.tap(find.textContaining('crear un'));
+        await _pumpAsyncWork(tester);
+        repository.add('Primer fragmento. ');
+        await _pumpAsyncWork(tester);
+
+        await tester.tap(find.byKey(const ValueKey('collapse-libreria')));
+        await tester.pump();
+        repository.add('Segundo fragmento mientras esta colapsado.');
+        await _pumpAsyncWork(tester);
+
+        expect(container.read(coachControllerProvider).messages, hasLength(2));
+        expect(
+          container.read(coachControllerProvider).messages.last.content,
+          'Primer fragmento. Segundo fragmento mientras esta colapsado.',
+        );
+
+        await tester.tap(find.byKey(const ValueKey('open-libreria')));
+        await tester.pump();
+        expect(container.read(coachControllerProvider.notifier), controllerBefore);
+        expect(
+          find.textContaining('Segundo fragmento mientras esta colapsado.'),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('cabe en movil, teclado y escritorio sin incluir la navegacion', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(320, 700);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _floatingApp(_WidgetRepository(), initiallyExpanded: true),
+      );
+      await tester.pump();
+
+      var panelRect = tester.getRect(
+        find.byKey(const ValueKey('libreria-panel')),
+      );
+      expect(panelRect.left, 10);
+      expect(panelRect.right, 310);
+      expect(find.byKey(const ValueKey('test-bottom-navigation')), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('libreria-panel')),
+          matching: find.byKey(const ValueKey('test-bottom-navigation')),
+        ),
+        findsNothing,
+      );
+      expect(find.byType(TextField), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      tester.view.viewInsets = const FakeViewPadding(bottom: 240);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pump();
+      panelRect = tester.getRect(find.byKey(const ValueKey('libreria-panel')));
+      final composerRect = tester.getRect(find.byType(TextField));
+      expect(composerRect.bottom, lessThanOrEqualTo(panelRect.bottom));
+      expect(tester.takeException(), isNull);
+
+      tester.view.physicalSize = const Size(1200, 900);
+      tester.view.viewInsets = const FakeViewPadding();
+      await tester.pump();
+      panelRect = tester.getRect(find.byKey(const ValueKey('libreria-panel')));
+      expect(panelRect.width, FloatingLibreria.maxPanelWidth);
+      expect(panelRect.height, lessThanOrEqualTo(FloatingLibreria.maxPanelHeight));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('alternar rapidamente no produce excepciones de layout', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_floatingApp(_WidgetRepository()));
+
+      for (var index = 0; index < 5; index++) {
+        await tester.tap(find.byKey(const ValueKey('open-libreria')));
+        await tester.pump();
+        await tester.tap(find.byKey(const ValueKey('collapse-libreria')));
+        await tester.pump();
+      }
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('cabecera soporta texto escalado en 320 px', (tester) async {
+      tester.view.physicalSize = const Size(320, 700);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _floatingApp(
+          _WidgetRepository(),
+          initiallyExpanded: true,
+          textScaler: const TextScaler.linear(1.3),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('LibrerIA'), findsOneWidget);
+      expect(find.byKey(const ValueKey('collapse-libreria')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  });
 }
 
 Future<void> _pumpAsyncWork(WidgetTester tester) async {
@@ -253,6 +424,65 @@ Widget _app(CoachRepository repository) => ProviderScope(
   ],
   child: const MaterialApp(home: CoachScreen()),
 );
+
+Widget _floatingApp(
+  CoachRepository repository, {
+  bool initiallyExpanded = false,
+  TextScaler? textScaler,
+}) => ProviderScope(
+  overrides: [
+    coachRepositoryProvider.overrideWithValue(repository),
+    coachConversationRepositoryProvider.overrideWithValue(
+      _MemoryConversationRepository(),
+    ),
+    readerContextProvider.overrideWith((ref) async => _readerContext()),
+  ],
+  child: MaterialApp(
+    builder: textScaler == null
+        ? null
+        : (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+            child: child!,
+          ),
+    home: _FloatingHarness(initiallyExpanded: initiallyExpanded),
+  ),
+);
+
+class _FloatingHarness extends StatefulWidget {
+  const _FloatingHarness({this.initiallyExpanded = false});
+
+  final bool initiallyExpanded;
+
+  @override
+  State<_FloatingHarness> createState() => _FloatingHarnessState();
+}
+
+class _FloatingHarnessState extends State<_FloatingHarness> {
+  late bool _isExpanded = widget.initiallyExpanded;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBody: true,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: ColoredBox(color: Colors.white)),
+          Positioned.fill(
+            child: FloatingLibreria(
+              isExpanded: _isExpanded,
+              onExpand: () => setState(() => _isExpanded = true),
+              onCollapse: () => setState(() => _isExpanded = false),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: const SizedBox(
+        key: ValueKey('test-bottom-navigation'),
+        height: 96,
+      ),
+    );
+  }
+}
 
 class _WidgetRepository implements CoachRepository {
   final StreamController<String> _controller = StreamController<String>();

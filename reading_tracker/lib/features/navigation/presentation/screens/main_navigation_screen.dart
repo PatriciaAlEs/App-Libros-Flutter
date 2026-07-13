@@ -10,7 +10,7 @@ import '../../../auth/presentation/screens/auth_screen.dart';
 import '../../../books/presentation/screens/book_detail_screen.dart';
 import '../../../books/presentation/screens/book_form_screen.dart';
 import '../../../books/presentation/screens/books_list_screen.dart';
-import '../../../coach/presentation/screens/coach_screen.dart';
+import '../../../coach/presentation/widgets/floating_libreria.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../insights/presentation/screens/insights_screen.dart';
 import '../../../progress/presentation/screens/progress_screen.dart';
@@ -40,12 +40,19 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late final ValueNotifier<int> _selectedIndex;
+  late final ValueNotifier<String> _currentRoute;
+  late final NavigatorObserver _routeObserver;
   final List<int> _tabVersions = List.filled(5, 0);
+  late bool _isLibreriaExpanded;
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = ValueNotifier(_expectedIndex(widget));
+    final initialPath = appRoutePath(routeUri(widget.initialRoute));
+    _currentRoute = ValueNotifier(initialPath == '/coach' ? '/' : initialPath);
+    _routeObserver = _ShellRouteObserver(_currentRoute);
+    _isLibreriaExpanded = initialPath == '/coach';
     if (kDebugMode) {
       debugPrint(
         '[navigation] shell init route=${widget.initialRoute} '
@@ -92,6 +99,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       );
     }
     _selectedIndex.dispose();
+    _currentRoute.dispose();
     super.dispose();
   }
 
@@ -99,23 +107,48 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: NavigatorPopHandler(
-        onPopWithResult: (result) => _navigatorKey.currentState?.pop(result),
-        child: Navigator(
-          key: _navigatorKey,
-          initialRoute: widget.initialRoute,
-          onGenerateInitialRoutes: (_, initialRoute) => [
-            _onGenerateRoute(
-              RouteSettings(
-                name: initialRoute,
-                arguments: widget.initialArguments,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: NavigatorPopHandler(
+              onPopWithResult: (result) =>
+                  _navigatorKey.currentState?.pop(result),
+              child: Navigator(
+                key: _navigatorKey,
+                initialRoute: _initialNavigatorRoute,
+                onGenerateInitialRoutes: (_, initialRoute) => [
+                  _onGenerateRoute(
+                    RouteSettings(
+                      name: initialRoute,
+                      arguments: widget.initialArguments,
+                    ),
+                    updateSelectedIndex: false,
+                  ),
+                ],
+                onGenerateRoute: _onGenerateRoute,
+                observers: [
+                  ...ReadPpSentry.navigatorObservers(),
+                  _routeObserver,
+                ],
               ),
-              updateSelectedIndex: false,
             ),
-          ],
-          onGenerateRoute: _onGenerateRoute,
-          observers: ReadPpSentry.navigatorObservers(),
-        ),
+          ),
+          Positioned.fill(
+            child: ValueListenableBuilder<String>(
+              valueListenable: _currentRoute,
+              builder: (context, route, _) {
+                if (_isAuthenticationRoute(route)) {
+                  return const SizedBox.shrink();
+                }
+                return FloatingLibreria(
+                  isExpanded: _isLibreriaExpanded,
+                  onExpand: _expandLibreria,
+                  onCollapse: _collapseLibreria,
+                );
+              },
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: ValueListenableBuilder<int>(
         valueListenable: _selectedIndex,
@@ -125,6 +158,25 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ),
       ),
     );
+  }
+
+  String get _initialNavigatorRoute {
+    final path = appRoutePath(routeUri(widget.initialRoute));
+    return path == '/coach' ? '/' : widget.initialRoute;
+  }
+
+  bool _isAuthenticationRoute(String route) =>
+      route == '/account/auth' || route == '/account/transition';
+
+  void _expandLibreria() {
+    if (_isLibreriaExpanded || !mounted) return;
+    setState(() => _isLibreriaExpanded = true);
+  }
+
+  void _collapseLibreria() {
+    if (!_isLibreriaExpanded || !mounted) return;
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() => _isLibreriaExpanded = false);
   }
 
   void _selectTab(int index) {
@@ -176,6 +228,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       );
     }
 
+    if (settings.name == '/coach') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _expandLibreria();
+      });
+    }
+
     final builder = switch (settings.name) {
       '/' ||
       '/home' ||
@@ -198,7 +256,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         session: settings.arguments! as ReadingSession,
       ),
       '/stats' => (_) => const StatsScreen(),
-      '/coach' => (_) => const CoachScreen(),
+      '/coach' => (_) => _mainTabBody(),
       '/account' => (_) => const AccountScreen(),
       '/account/transition' => (_) => const AccountTransitionScreen(),
       '/account/auth' => (_) => AuthScreen(
@@ -242,12 +300,38 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   Widget _screenForIndex(int index) {
     return switch (index) {
-      0 => const HomeScreen(),
+      0 => HomeScreen(onOpenLibreria: _expandLibreria),
       1 => const BooksListScreen(),
       2 => const ProgressScreen(),
       3 => const InsightsScreen(),
       _ => const SettingsScreen(),
     };
+  }
+}
+
+class _ShellRouteObserver extends NavigatorObserver {
+  _ShellRouteObserver(this.currentRoute);
+
+  final ValueNotifier<String> currentRoute;
+
+  void _update(Route<dynamic>? route) {
+    final name = route?.settings.name;
+    if (name != null) currentRoute.value = name;
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _update(route);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _update(previousRoute);
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    _update(newRoute);
   }
 }
 

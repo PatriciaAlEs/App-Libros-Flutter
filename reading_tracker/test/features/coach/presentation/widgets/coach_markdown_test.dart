@@ -58,4 +58,33 @@ void main() {
     expect(find.text('Copiado'), findsOneWidget);
     await tester.pump(const Duration(seconds: 2));
   });
+
+  testWidgets('Markdown largo no desborda un ancho de 320 px', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            padding: EdgeInsets.all(16),
+            child: CoachMarkdown(
+              data:
+                  '## Plan de lectura\n\n'
+                  '1. Empieza con diez minutos y una explicacion larga que deba ajustarse.\n'
+                  '2. Continua con **constancia**, una palabra_muy_larga_sin_espacios_para_probar_el_viewport y una nota.\n'
+                  '3. Revisa el habito cada semana.\n\n'
+                  '```dart\nfinal tituloMuyLargo = "lectura";\n```',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Plan de lectura'), findsOneWidget);
+    expect(find.bySemanticsLabel('Copiar bloque de cÃ³digo'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

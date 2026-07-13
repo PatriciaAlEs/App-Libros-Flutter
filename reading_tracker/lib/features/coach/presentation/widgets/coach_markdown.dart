@@ -23,20 +23,20 @@ class CoachMarkdown extends StatelessWidget {
           decoration: TextDecoration.underline,
           decorationColor: theme.colorScheme.primary.withValues(alpha: 0.55),
         ),
-        p: theme.textTheme.bodyMedium?.copyWith(height: 1.55),
-        pPadding: const EdgeInsets.only(bottom: 4),
-        h1: theme.textTheme.headlineSmall?.copyWith(
+        p: theme.textTheme.bodyMedium?.copyWith(height: 1.42),
+        pPadding: const EdgeInsets.only(bottom: 2),
+        h1: theme.textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w700,
         ),
-        h2: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-        h3: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-        blockSpacing: 12,
-        listIndent: 22,
+        h2: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        h3: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+        blockSpacing: 8,
+        listIndent: 18,
         listBullet: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.primary,
           fontWeight: FontWeight.w700,
         ),
-        listBulletPadding: const EdgeInsets.only(right: 8),
+        listBulletPadding: const EdgeInsets.only(right: 6),
         blockquoteDecoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest.withValues(
             alpha: 0.66,

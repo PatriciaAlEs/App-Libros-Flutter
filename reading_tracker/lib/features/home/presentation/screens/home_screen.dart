@@ -23,7 +23,9 @@ import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 import '../../../sync/presentation/controllers/sync_status_controller.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.onOpenLibreria});
+
+  final VoidCallback? onOpenLibreria;
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -123,7 +125,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     const SizedBox(height: AppSpacing.xl),
                     LibreriaEntryCard(
-                      onTap: () => Navigator.pushNamed(context, '/coach'),
+                      onTap: widget.onOpenLibreria ??
+                          () => Navigator.pushNamed(context, '/coach'),
                     ),
                   ],
                 ),
