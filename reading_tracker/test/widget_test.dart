@@ -270,6 +270,7 @@ void main() {
       });
       final authRepository = _HomeAuthRepository();
       final booksRepository = _TransitionBookRepository();
+      late _CompletingSyncStatusController syncController;
 
       await tester.pumpWidget(
         ProviderScope(
@@ -285,7 +286,7 @@ void main() {
               const _EmptyReadingSessionRepository(),
             ),
             syncStatusControllerProvider.overrideWith(
-              (ref) => _InvalidatingSyncStatusController(
+              (ref) => syncController = _CompletingSyncStatusController(
                 onSync: () => ref.invalidate(booksProvider),
               ),
             ),
@@ -299,10 +300,9 @@ void main() {
 
       expect(find.byType(LibreriaEntryCard), findsOneWidget);
 
-      final homeContext = tester.element(find.byType(HomeScreen));
-      Navigator.of(
-        homeContext,
-      ).pushNamedAndRemoveUntil('/settings', (_) => false);
+      tester
+          .widget<ReadPpBottomNavigation>(find.byType(ReadPpBottomNavigation))
+          .onSelect(4);
       await tester.pumpAndSettle();
       expect(find.byType(SettingsScreen), findsOneWidget);
 
@@ -317,6 +317,22 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pump(const Duration(milliseconds: 500));
+
+      expect(
+        tester
+            .widget<ReadPpBottomNavigation>(find.byType(ReadPpBottomNavigation))
+            .selectedIndex,
+        0,
+      );
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(find.byType(SettingsScreen), findsNothing);
+      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+      expect(syncController.state.status, SyncUiStatus.syncing);
+      expect(booksRepository.requests, hasLength(1));
+
+      syncController.complete();
+      await tester.pump();
+      await tester.pump();
       expect(booksRepository.requests, hasLength(2));
 
       booksRepository.completeNext(const []);
@@ -1213,6 +1229,26 @@ class _InvalidatingSyncStatusController extends SyncStatusController {
   @override
   Future<void> syncNow({required String userId}) async {
     state = const SyncStatusState(status: SyncUiStatus.syncing);
+    onSync();
+    state = const SyncStatusState(status: SyncUiStatus.synced);
+  }
+}
+
+class _CompletingSyncStatusController extends SyncStatusController {
+  _CompletingSyncStatusController({required this.onSync})
+    : super(coordinator: null, clock: DateTime.now);
+
+  final VoidCallback onSync;
+  final Completer<void> _completion = Completer<void>();
+
+  void complete() {
+    if (!_completion.isCompleted) _completion.complete();
+  }
+
+  @override
+  Future<void> syncNow({required String userId}) async {
+    state = const SyncStatusState(status: SyncUiStatus.syncing);
+    await _completion.future;
     onSync();
     state = const SyncStatusState(status: SyncUiStatus.synced);
   }

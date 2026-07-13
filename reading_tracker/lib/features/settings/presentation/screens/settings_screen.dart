@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/branding/branding.dart';
@@ -18,6 +19,12 @@ class SettingsScreen extends ConsumerWidget {
     final controller = ref.read(appThemeControllerProvider.notifier);
     final profile = ref.watch(readerProfileControllerProvider);
     final authState = ref.watch(authControllerProvider);
+    if (kDebugMode) {
+      debugPrint(
+        '[settings] build route=${ModalRoute.of(context)?.settings.name} '
+        'auth=${authState.isAuthenticated} restoring=${authState.isRestoring}',
+      );
+    }
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(

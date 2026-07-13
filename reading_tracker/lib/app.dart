@@ -71,12 +71,18 @@ class App extends ConsumerWidget {
         return _route(settings, (_) => const MainNavigationScreen());
 
       case '/home':
-        return _route(settings, (_) => const MainNavigationScreen());
+        return _route(
+          settings,
+          (_) => const MainNavigationScreen(initialRoute: '/home'),
+        );
 
       case '/books':
         return _route(
           settings,
-          (_) => const MainNavigationScreen(initialIndex: 1),
+          (_) => const MainNavigationScreen(
+            initialIndex: 1,
+            initialRoute: '/books',
+          ),
         );
 
       case '/book/add':
@@ -112,19 +118,28 @@ class App extends ConsumerWidget {
       case '/progress':
         return _route(
           settings,
-          (_) => const MainNavigationScreen(initialIndex: 2),
+          (_) => const MainNavigationScreen(
+            initialIndex: 2,
+            initialRoute: '/progress',
+          ),
         );
 
       case '/insights':
         return _route(
           settings,
-          (_) => const MainNavigationScreen(initialIndex: 3),
+          (_) => const MainNavigationScreen(
+            initialIndex: 3,
+            initialRoute: '/insights',
+          ),
         );
 
       case '/settings':
         return _route(
           settings,
-          (_) => const MainNavigationScreen(initialIndex: 4),
+          (_) => const MainNavigationScreen(
+            initialIndex: 4,
+            initialRoute: '/settings',
+          ),
         );
 
       case '/coach':

@@ -45,7 +45,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedIndex = ValueNotifier(widget.initialIndex.clamp(0, 4));
+    _selectedIndex = ValueNotifier(_expectedIndex(widget));
     if (kDebugMode) {
       debugPrint(
         '[navigation] shell init route=${widget.initialRoute} '
@@ -53,6 +53,35 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       );
     }
   }
+
+  @override
+  void didUpdateWidget(covariant MainNavigationScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final expectedIndex = _expectedIndex(widget);
+    if (_selectedIndex.value == expectedIndex) return;
+    if (kDebugMode) {
+      debugPrint(
+        '[navigation] shell config changed raw=${widget.initialRoute} '
+        'path=${appRoutePath(routeUri(widget.initialRoute))} '
+        'selectedIndex=${_selectedIndex.value} expectedIndex=$expectedIndex',
+      );
+    }
+    _selectedIndex.value = expectedIndex;
+  }
+
+  int _expectedIndex(MainNavigationScreen configuration) {
+    final path = appRoutePath(routeUri(configuration.initialRoute));
+    return _indexFromPath(path) ?? configuration.initialIndex.clamp(0, 4);
+  }
+
+  int? _indexFromPath(String path) => switch (path) {
+    '/' || '/home' => 0,
+    '/books' => 1,
+    '/progress' => 2,
+    '/insights' => 3,
+    '/settings' => 4,
+    _ => null,
+  };
 
   @override
   void dispose() {
@@ -99,11 +128,29 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _selectTab(int index) {
-    _navigatorKey.currentState?.popUntil((route) => route.isFirst);
-    if (index == _selectedIndex.value) return;
-    _tabVersions[index]++;
-    _selectedIndex.value = index;
+    final normalizedIndex = index.clamp(0, 4);
+    final route = _pathForIndex(normalizedIndex);
+    if (kDebugMode) {
+      debugPrint(
+        '[navigation] bottom navigation route=$route '
+        'selectedIndex=${_selectedIndex.value} expectedIndex=$normalizedIndex',
+      );
+    }
+    if (normalizedIndex == _selectedIndex.value &&
+        _navigatorKey.currentState?.canPop() == false) {
+      return;
+    }
+    _tabVersions[normalizedIndex]++;
+    _navigatorKey.currentState?.pushNamedAndRemoveUntil(route, (_) => false);
   }
+
+  String _pathForIndex(int index) => switch (index) {
+    0 => '/',
+    1 => '/books',
+    2 => '/progress',
+    3 => '/insights',
+    _ => '/settings',
+  };
 
   Route<dynamic> _onGenerateRoute(
     RouteSettings rawSettings, {
@@ -114,14 +161,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       name: appRoutePath(uri),
       arguments: rawSettings.arguments,
     );
-    final mainIndex = switch (settings.name) {
-      '/' || '/home' => 0,
-      '/books' => 1,
-      '/progress' => 2,
-      '/insights' => 3,
-      '/settings' => 4,
-      _ => null,
-    };
+    final mainIndex = _indexFromPath(settings.name!);
     if (mainIndex != null && updateSelectedIndex) {
       _selectedIndex.value = mainIndex;
     }
@@ -175,14 +215,30 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget _mainTabBody() {
     return ValueListenableBuilder<int>(
       valueListenable: _selectedIndex,
-      builder: (context, selectedIndex, _) => AppAnimatedPageSwitch(
-        child: KeyedSubtree(
-          key: ValueKey('tab-$selectedIndex-${_tabVersions[selectedIndex]}'),
-          child: _screenForIndex(selectedIndex),
-        ),
-      ),
+      builder: (context, selectedIndex, _) {
+        if (kDebugMode) {
+          debugPrint(
+            '[navigation] _mainTabBody branch=${_branchName(selectedIndex)} '
+            'selectedIndex=$selectedIndex',
+          );
+        }
+        return AppAnimatedPageSwitch(
+          child: KeyedSubtree(
+            key: ValueKey('tab-$selectedIndex-${_tabVersions[selectedIndex]}'),
+            child: _screenForIndex(selectedIndex),
+          ),
+        );
+      },
     );
   }
+
+  String _branchName(int index) => switch (index) {
+    0 => 'HomeScreen',
+    1 => 'BooksListScreen',
+    2 => 'ProgressScreen',
+    3 => 'InsightsScreen',
+    _ => 'SettingsScreen',
+  };
 
   Widget _screenForIndex(int index) {
     return switch (index) {

@@ -20,6 +20,7 @@ import '../../../reading_sessions/presentation/providers/register_reading_sessio
 import '../../../reading_sessions/presentation/utils/session_completion_flow.dart';
 import '../../../stats/domain/entities/statistics_summary.dart';
 import '../../../stats/presentation/providers/statistics_summary_provider.dart';
+import '../../../sync/presentation/controllers/sync_status_controller.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -47,6 +48,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final authState = ref.read(authControllerProvider);
     final readerProfile = ref.watch(readerProfileControllerProvider);
     final booksAsync = ref.watch(booksProvider);
+    final syncState = ref.watch(syncStatusControllerProvider);
     final summaryAsync = ref.watch(statisticsSummaryProvider);
     final now = DateTime.now();
     final recentActivityRange = DateRange(
@@ -65,6 +67,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       debugPrint(
         '[home] build route=${ModalRoute.of(context)?.settings.name} '
         'auth=${authState.isAuthenticated} restoring=${authState.isRestoring} '
+        'sync=${syncState.status.name} '
+        'books=${booksAsync.isLoading
+            ? 'loading'
+            : booksAsync.hasError
+            ? 'error'
+            : 'data'} '
         'branch=canonical-home',
       );
     }
