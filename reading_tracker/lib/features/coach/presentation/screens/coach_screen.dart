@@ -24,14 +24,11 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_handleScroll);
   }
 
   @override
   void dispose() {
-    _scrollController
-      ..removeListener(_handleScroll)
-      ..dispose();
+    _scrollController.dispose();
     _textController.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -116,21 +113,24 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
                   if (uiState.messageCount == 0)
                     _CoachEmptyState(onSuggestion: _sendSuggestion)
                   else
-                    ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.fromLTRB(
-                        18,
-                        AppSpacing.md,
-                        18,
-                        32,
+                    NotificationListener<ScrollNotification>(
+                      onNotification: _handleScrollNotification,
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.fromLTRB(
+                          18,
+                          AppSpacing.md,
+                          18,
+                          32,
+                        ),
+                        itemCount: uiState.messageCount,
+                        itemBuilder: (context, index) {
+                          return _CoachMessageItem(
+                            key: ValueKey('coach-message-position-$index'),
+                            index: index,
+                          );
+                        },
                       ),
-                      itemCount: uiState.messageCount,
-                      itemBuilder: (context, index) {
-                        return _CoachMessageItem(
-                          key: ValueKey('coach-message-position-$index'),
-                          index: index,
-                        );
-                      },
                     ),
                   Positioned(
                     right: AppSpacing.lg,
@@ -302,17 +302,20 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
         '${local.month.toString().padLeft(2, '0')}/${local.year}';
   }
 
-  void _handleScroll() {
-    if (!_scrollController.hasClients) {
-      return;
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (!mounted ||
+        notification.depth != 0 ||
+        notification is! ScrollUpdateNotification ||
+        notification.dragDetails == null) {
+      return false;
     }
     final distance =
-        _scrollController.position.maxScrollExtent -
-        _scrollController.position.pixels;
+        notification.metrics.maxScrollExtent - notification.metrics.pixels;
     final shouldFollow = distance <= _bottomThreshold;
-    if (shouldFollow != _followTail && mounted) {
+    if (shouldFollow != _followTail) {
       setState(() => _followTail = shouldFollow);
     }
+    return false;
   }
 
   void _scheduleScrollToEnd() {

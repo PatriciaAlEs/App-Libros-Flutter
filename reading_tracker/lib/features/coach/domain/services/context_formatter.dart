@@ -84,6 +84,18 @@ class MarkdownContextFormatter implements ContextFormatter {
         context.library.abandonedBooks.where(_hasTitle).toList()
           ..sort(_sortBooksByUpdatedThenTitle);
 
+    if (completedBooks.isNotEmpty) {
+      lines
+        ..add('')
+        ..add('## No recomendar como lectura nueva (ya terminados)')
+        ..add(
+          'Estos libros pueden usarse para inferir preferencias, pero no como proxima lectura nueva:',
+        );
+      for (final book in completedBooks) {
+        lines.add('- ${book.title.trim()}');
+      }
+    }
+
     _appendBookGroup(
       lines,
       title: 'Libros en lectura',

@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reading_tracker/features/books/domain/entities/book.dart';
+import 'package:reading_tracker/features/books/domain/enums/book_status.dart';
 import 'package:reading_tracker/features/coach/domain/entities/coach_message.dart';
 import 'package:reading_tracker/features/coach/domain/models/reader_context.dart';
 import 'package:reading_tracker/features/coach/domain/services/coach_system_prompt_builder.dart';
@@ -214,17 +216,146 @@ void main() {
         throwsArgumentError,
       );
     });
+
+    test(
+      'usa terminados como preferencias y los marca como no recomendables',
+      () {
+        final result = builder.build(
+          userMessage: 'Recomiendame un libro nuevo',
+          conversation: const [],
+          readerContext: _readerContext(
+            books: [
+              _book(
+                'completed',
+                'Vencer al dragon',
+                status: BookStatus.completed,
+                rating: 5,
+                genre: 'Fantasia',
+              ),
+            ],
+          ),
+        );
+
+        final contextPrompt = result[1].content;
+        expect(contextPrompt, contains('valoracion 5.0'));
+        expect(contextPrompt, contains('genero Fantasia'));
+        expect(
+          contextPrompt,
+          contains('## No recomendar como lectura nueva (ya terminados)'),
+        );
+        expect(contextPrompt, contains('- Vencer al dragon'));
+      },
+    );
+
+    test('distingue libros en curso de libros terminados', () {
+      final result = builder.build(
+        userMessage: 'Que puedo leer despues?',
+        conversation: const [],
+        readerContext: _readerContext(
+          books: [
+            _book('reading', 'Lectura actual', status: BookStatus.reading),
+            _book(
+              'completed',
+              'Lectura terminada',
+              status: BookStatus.completed,
+            ),
+          ],
+        ),
+      );
+
+      final contextPrompt = result[1].content;
+      expect(contextPrompt, contains('## Libros en lectura\n- Lectura actual'));
+      expect(
+        contextPrompt,
+        contains('## Ultimos libros terminados\n- Lectura terminada'),
+      );
+      expect(
+        contextPrompt,
+        contains(
+          '## No recomendar como lectura nueva (ya terminados)\n'
+          'Estos libros pueden usarse para inferir preferencias, pero no como proxima lectura nueva:\n'
+          '- Lectura terminada',
+        ),
+      );
+    });
+
+    test('permite una peticion explicita para hablar de un libro leido', () {
+      final result = builder.build(
+        userMessage: 'Resume Vencer al dragon, que ya lei',
+        conversation: const [],
+        readerContext: _readerContext(
+          books: [
+            _book(
+              'completed',
+              'Vencer al dragon',
+              status: BookStatus.completed,
+            ),
+          ],
+        ),
+      );
+
+      expect(
+        result.first.content,
+        contains(
+          'Esta restriccion no impide comentar, resumir o proponer releer un libro terminado',
+        ),
+      );
+      expect(result.last.content, 'Resume Vencer al dragon, que ya lei');
+    });
+
+    test(
+      'no duplica el mensaje actual al aplicar las reglas de recomendacion',
+      () {
+        const currentMessage = 'Recomiendame un libro nuevo';
+        final result = builder.build(
+          userMessage: currentMessage,
+          conversation: [CoachMessage.user(currentMessage)],
+          conversationIncludesCurrentMessage: true,
+          readerContext: _readerContext(),
+        );
+
+        expect(
+          result.where((message) => message.content == currentMessage),
+          hasLength(1),
+        );
+      },
+    );
   });
 }
 
-ReaderContext _readerContext() => ReaderContext(
+ReaderContext _readerContext({List<Book> books = const []}) => ReaderContext(
   metadata: ReaderContextMetadata(generatedAt: DateTime(2026, 7, 10, 10)),
   library: ReaderLibraryContext(
-    allBooks: const [],
-    currentBooks: const [],
-    completedBooks: const [],
-    pendingBooks: const [],
-    abandonedBooks: const [],
+    allBooks: books,
+    currentBooks: books
+        .where((book) => book.status == BookStatus.reading)
+        .toList(),
+    completedBooks: books
+        .where((book) => book.status == BookStatus.completed)
+        .toList(),
+    pendingBooks: books
+        .where((book) => book.status == BookStatus.pending)
+        .toList(),
+    abandonedBooks: books
+        .where((book) => book.status == BookStatus.abandoned)
+        .toList(),
   ),
   activity: ReaderActivityContext(readingSessions: const []),
 );
+
+Book _book(
+  String id,
+  String title, {
+  required BookStatus status,
+  double? rating,
+  String? genre,
+}) {
+  return Book(
+    id: id,
+    title: title,
+    status: status,
+    rating: rating,
+    genre: genre,
+    createdAt: DateTime(2026, 7, 1),
+  );
+}

@@ -178,17 +178,60 @@ void main() {
         );
         scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
         await tester.pump();
-        scrollable.position.jumpTo(
-          (scrollable.position.maxScrollExtent - 200)
-              .clamp(
-                scrollable.position.minScrollExtent,
-                scrollable.position.maxScrollExtent,
-              )
-              .toDouble(),
-        );
+        await tester.drag(list, const Offset(0, 250));
         await tester.pump();
 
         expect(find.byKey(const ValueKey('scroll-bottom')), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'streaming largo con Markdown numerado es estable en viewport estrecho',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 560);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        final repository = _WidgetRepository();
+        await tester.pumpWidget(_app(repository));
+        await tester.tap(find.textContaining('crear un'));
+        await _pumpAsyncWork(tester);
+
+        for (var index = 1; index <= 16; index++) {
+          repository.add(
+            '$index. Paso de habito con una explicacion suficientemente larga '
+            'para ocupar varias lineas en una ventana estrecha.\n',
+          );
+          await _pumpAsyncWork(tester);
+        }
+
+        expect(find.byKey(const ValueKey('streaming-cursor')), findsOneWidget);
+        expect(tester.takeException(), isNull);
+
+        final list = find.byType(ListView).first;
+        final scrollable = tester.state<ScrollableState>(
+          find.descendant(of: list, matching: find.byType(Scrollable)).first,
+        );
+        scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
+        await tester.pump();
+        await tester.drag(list, const Offset(0, 220));
+        await tester.pump();
+        expect(find.byKey(const ValueKey('scroll-bottom')), findsOneWidget);
+        expect(tester.takeException(), isNull);
+
+        repository.add(
+          '17. El contenido sigue creciendo sin recuperar el seguimiento '
+          'automatico mientras el usuario revisa mensajes anteriores.\n',
+        );
+        await _pumpAsyncWork(tester);
+        expect(find.byKey(const ValueKey('scroll-bottom')), findsOneWidget);
+        expect(tester.takeException(), isNull);
+
+        await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+        repository.add('18. Fragmento posterior al desmontaje.');
+        await tester.pump();
+        expect(tester.takeException(), isNull);
       },
     );
   });
