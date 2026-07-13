@@ -111,6 +111,9 @@ class GoogleBooksDatasource {
       externalId: _normalizedExternalId(json['id'] as String?),
       firstPublishYear: _yearFromDate(volumeInfo['publishedDate']),
       numberOfPages: _positiveInt(volumeInfo['pageCount']),
+      categories: _stringList(volumeInfo['categories']),
+      description: volumeInfo['description'] as String?,
+      language: volumeInfo['language'] as String?,
     );
   }
 
@@ -143,6 +146,11 @@ class GoogleBooksDatasource {
           .firstOrNull;
     }
     return null;
+  }
+
+  List<String> _stringList(Object? value) {
+    if (value is! List) return const [];
+    return value.whereType<String>().where((item) => item.isNotEmpty).toList();
   }
 
   int? _yearFromDate(Object? value) {

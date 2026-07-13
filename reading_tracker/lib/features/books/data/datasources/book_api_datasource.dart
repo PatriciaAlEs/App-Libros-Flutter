@@ -49,6 +49,9 @@ class BookApiDatasource {
         'first_publish_year',
         'number_of_pages',
         'number_of_pages_median',
+        'subject',
+        'language',
+        'first_sentence',
       ].join(','),
     });
     final stopwatch = Stopwatch()..start();
@@ -253,6 +256,9 @@ class BookApiDatasource {
       numberOfPages:
           _intValue(json['number_of_pages']) ??
           _intValue(json['number_of_pages_median']),
+      categories: _stringList(json['subject']).take(8).toList(),
+      description: _firstValue(json['first_sentence']),
+      language: _firstValue(json['language']),
     );
   }
 

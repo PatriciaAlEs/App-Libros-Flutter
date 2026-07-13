@@ -20,6 +20,9 @@ void main() {
                   'publisher': 'Bloomsbury',
                   'publishedDate': '2015-05-05',
                   'pageCount': 419,
+                  'categories': ['Fantasy', 'Romance'],
+                  'description': 'A fantasy novel.',
+                  'language': 'en',
                   'industryIdentifiers': [
                     {'type': 'ISBN_10', 'identifier': '1619634449'},
                     {'type': 'ISBN_13', 'identifier': '9781619634442'},
@@ -47,5 +50,8 @@ void main() {
     expect(results.single.externalId, 'ABC123');
     expect(results.single.firstPublishYear, 2015);
     expect(results.single.numberOfPages, 419);
+    expect(results.single.categories, ['Fantasy', 'Romance']);
+    expect(results.single.description, 'A fantasy novel.');
+    expect(results.single.language, 'en');
   });
 }

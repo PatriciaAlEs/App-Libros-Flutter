@@ -9,6 +9,9 @@ class BookSearchResult {
     this.externalId,
     this.firstPublishYear,
     this.numberOfPages,
+    this.categories = const [],
+    this.description,
+    this.language,
   });
 
   final String title;
@@ -20,4 +23,7 @@ class BookSearchResult {
   final String? externalId;
   final int? firstPublishYear;
   final int? numberOfPages;
+  final List<String> categories;
+  final String? description;
+  final String? language;
 }

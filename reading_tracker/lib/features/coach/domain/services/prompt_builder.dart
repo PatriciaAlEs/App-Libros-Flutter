@@ -11,6 +11,7 @@ abstract interface class PromptBuilder {
     required ReaderContext readerContext,
     bool conversationIncludesCurrentMessage = false,
     String? conversationSummary,
+    String? verifiedBibliographicContext,
   });
 }
 
@@ -36,6 +37,7 @@ final class CoachPromptBuilder implements PromptBuilder {
     required ReaderContext readerContext,
     bool conversationIncludesCurrentMessage = false,
     String? conversationSummary,
+    String? verifiedBibliographicContext,
   }) {
     final currentMessage = CoachMessage.user(userMessage);
     final domainConversation = conversation
@@ -79,14 +81,16 @@ final class CoachPromptBuilder implements PromptBuilder {
     );
     final cultureNotes = bookishCultureRetriever.formatNotes(cultureEntries);
     final readerContextPrompt = contextFormatter.format(readerContext);
+    final enrichedContext = [
+      readerContextPrompt,
+      if (cultureNotes.isNotEmpty) cultureNotes,
+      if (verifiedBibliographicContext?.trim().isNotEmpty == true)
+        verifiedBibliographicContext!.trim(),
+    ].join('\n\n');
 
     return List.unmodifiable([
       CoachMessage.system(systemPromptBuilder.build()),
-      CoachMessage.system(
-        cultureNotes.isEmpty
-            ? readerContextPrompt
-            : '$readerContextPrompt\n\n$cultureNotes',
-      ),
+      CoachMessage.system(enrichedContext),
       if (conversationSummary?.trim().isNotEmpty == true)
         CoachMessage.system(
           'Resumen de la conversación:\n$conversationSummary',

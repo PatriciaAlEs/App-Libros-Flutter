@@ -107,7 +107,13 @@ void main() {
         (request) async => http.Response(
           jsonEncode({
             'docs': [
-              {'title': 'Dune', 'key': '/works/OL893415W'},
+              {
+                'title': 'Dune',
+                'key': '/works/OL893415W',
+                'subject': ['Science Fiction'],
+                'language': ['eng'],
+                'first_sentence': ['A desert world.'],
+              },
             ],
           }),
           200,
@@ -119,6 +125,9 @@ void main() {
 
     expect(results.single.externalSource, 'open_library');
     expect(results.single.externalId, 'WORKSOL893415W');
+    expect(results.single.categories, ['Science Fiction']);
+    expect(results.single.language, 'eng');
+    expect(results.single.description, 'A desert world.');
   });
 }
 

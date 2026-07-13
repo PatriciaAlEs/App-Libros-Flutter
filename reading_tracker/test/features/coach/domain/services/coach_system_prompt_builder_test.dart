@@ -30,7 +30,9 @@ void main() {
       expect(prompt, contains('como maximo una pregunta aclaratoria'));
       expect(prompt, contains('inventar titulos, autores'));
       expect(prompt, contains('obras indie o poco conocidas'));
-      expect(prompt, contains('no dispone de esa consulta en tiempo real'));
+      expect(prompt, contains('exclusivamente desde esa lista'));
+      expect(prompt, contains('no añadas otros por conocimiento propio'));
+      expect(prompt, contains('no repitas la misma formula de abstencion'));
     });
 
     test('limita una consulta sencilla a 1-3 frases y 40-80 palabras', () {

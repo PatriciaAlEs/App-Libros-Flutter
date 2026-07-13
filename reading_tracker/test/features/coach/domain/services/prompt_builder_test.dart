@@ -454,6 +454,27 @@ void main() {
       expect(result.where((message) => message.content == current), hasLength(1));
     });
 
+    test('inyecta candidatos verificados sin alterar orden ni mensaje actual', () {
+      const current = 'Recomiendame un libro externo';
+      final result = builder.build(
+        userMessage: current,
+        conversation: [CoachMessage.user('Condición anterior')],
+        readerContext: _readerContext(),
+        verifiedBibliographicContext:
+            '# Candidatos bibliográficos verificados\n- Título: Verificado',
+      );
+
+      expect(result[0].role, CoachMessageRole.system);
+      expect(result[1].content, startsWith('# Contexto'));
+      expect(
+        result[1].content,
+        contains('# Candidatos bibliográficos verificados'),
+      );
+      expect(result[2].content, 'Condición anterior');
+      expect(result.last.content, current);
+      expect(result.where((message) => message.content == current), hasLength(1));
+    });
+
     test('define respuestas breves y permite detalle solicitado', () {
       final prompt = builder.build(
         userMessage: 'Explicamelo con detalle',
