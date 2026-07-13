@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reading_tracker/features/books/domain/entities/book.dart';
 import 'package:reading_tracker/features/books/domain/enums/book_status.dart';
+import 'package:reading_tracker/features/coach/data/culture/bookish_culture_es_v1.dart';
 import 'package:reading_tracker/features/coach/domain/entities/coach_message.dart';
 import 'package:reading_tracker/features/coach/domain/models/reader_context.dart';
 import 'package:reading_tracker/features/coach/domain/services/coach_system_prompt_builder.dart';
+import 'package:reading_tracker/features/coach/domain/services/bookish_culture_retriever.dart';
 import 'package:reading_tracker/features/coach/domain/services/context_formatter.dart';
 import 'package:reading_tracker/features/coach/domain/services/prompt_builder.dart';
 
@@ -12,6 +14,9 @@ void main() {
     const builder = CoachPromptBuilder(
       systemPromptBuilder: DefaultCoachSystemPromptBuilder(),
       contextFormatter: MarkdownContextFormatter(),
+      bookishCultureRetriever: BookishCultureRetriever(
+        entries: bookishCultureEsV1,
+      ),
     );
 
     test(
@@ -33,7 +38,7 @@ void main() {
           CoachMessageRole.assistant,
           CoachMessageRole.user,
         ]);
-        expect(result[0].content, contains('ReadPp Coach'));
+        expect(result[0].content, contains('LibrerIA'));
         expect(result[1].content, startsWith('# Contexto'));
         expect(result.map((message) => message.content).skip(2), [
           'Uno',
@@ -320,6 +325,71 @@ void main() {
         );
       },
     );
+
+    test('inyecta notas tras el contexto y antes del historial', () {
+      final result = builder.build(
+        userMessage: 'Tengo demasiados pendientes en mi TBR',
+        conversation: [CoachMessage.user('Mensaje anterior')],
+        readerContext: _readerContext(),
+      );
+
+      expect(result[0].content, contains('Eres LibrerIA'));
+      expect(result[1].content, startsWith('# Contexto'));
+      expect(result[1].content, contains('# Notas opcionales de cultura lectora'));
+      expect(
+        result[1].content.indexOf('# Notas opcionales de cultura lectora'),
+        greaterThan(result[1].content.indexOf('# Contexto')),
+      );
+      expect(result[2].content, 'Mensaje anterior');
+      expect(result.last.content, 'Tengo demasiados pendientes en mi TBR');
+    });
+
+    test('no inyecta notas sin una coincidencia clara', () {
+      final result = builder.build(
+        userMessage: 'Cuantas paginas lei esta semana',
+        conversation: const [],
+        readerContext: _readerContext(),
+      );
+      expect(result[1].content, isNot(contains('Notas opcionales')));
+    });
+
+    test('mantiene una sola copia del mensaje al inyectar cultura lectora', () {
+      const current = 'Quiero enemies to lovers';
+      final result = builder.build(
+        userMessage: current,
+        conversation: [CoachMessage.user(current)],
+        conversationIncludesCurrentMessage: true,
+        readerContext: _readerContext(),
+      );
+      expect(result.where((message) => message.content == current), hasLength(1));
+    });
+
+    test('define respuestas breves y permite detalle solicitado', () {
+      final prompt = builder.build(
+        userMessage: 'Explicamelo con detalle',
+        conversation: const [],
+        readerContext: _readerContext(),
+      ).first.content;
+      expect(prompt, contains('consulta sencilla: normalmente entre 1 y 3 frases'));
+      expect(prompt, contains('40 a 80 palabras'));
+      expect(prompt, contains('máximo aproximado de 120 palabras'));
+      expect(prompt, contains('máximo 3 acciones concretas'));
+      expect(prompt, contains('máximo 3 propuestas'));
+      expect(prompt, contains('pida expresamente detalle'));
+    });
+
+    test('limita el humor y lo evita en situaciones sensibles', () {
+      final prompt = builder.build(
+        userMessage: 'Estoy frustrada',
+        conversation: const [],
+        readerContext: _readerContext(),
+      ).first.content;
+      expect(prompt, contains('como máximo una observación humorística breve'));
+      expect(prompt, contains('esté frustrada'));
+      expect(prompt, contains('comunique un error'));
+      expect(prompt, contains('tema sensible'));
+      expect(prompt, contains('estrictamente factuales'));
+    });
   });
 }
 

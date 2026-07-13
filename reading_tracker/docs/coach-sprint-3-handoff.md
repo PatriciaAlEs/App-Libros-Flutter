@@ -695,3 +695,17 @@ Si algo falla, corrige solo lo necesario y no introduzcas cambios de alcance.
 
 Despues de validar Epic 3.5, continuar con el siguiente epic del Coach segun el roadmap: probablemente wiring/configuracion segura del Coach o provider de CoachEngine, pero no lo implementes sin confirmacion explicita.
 ```
+
+## Epic 3.13 - Personalidad y cultura lectora local
+
+LibrerIA responde en español natural de España, tutea y da primero la respuesta útil. Por defecto limita las consultas sencillas a 2-5 frases, los resúmenes de progreso a unas 120 palabras, los hábitos a tres acciones y las recomendaciones a tres propuestas breves. Estos límites pueden ampliarse cuando la persona pide detalle expresamente.
+
+El humor es opcional y queda limitado a una observación breve. La utilidad y los datos reales de la biblioteca tienen prioridad. Se evita humor ante frustración, errores, temas sensibles o consultas estrictamente factuales, y LibrerIA no finge experiencias humanas.
+
+El corpus local `bookish_culture_es_v1` vive en `lib/features/coach/data/culture/bookish_culture_es_v1.dart`. Cada entrada declara identificador, temas, disparadores, contexto cultural, ángulos de humor, situaciones a evitar, fecha de revisión y, cuando corresponde, caducidad. No contiene recomendaciones de títulos ni hechos sobre la biblioteca.
+
+`BookishCultureRetriever` normaliza mayúsculas, tildes y puntuación, puntúa coincidencias del mensaje actual por encima del historial reciente, exige coincidencias fuertes y devuelve como máximo dos entradas. Las entradas caducadas se excluyen usando la fecha de generación de `ReaderContext`, lo que mantiene el resultado determinista.
+
+Las notas se añaden al final del mensaje system de contexto lector, antes del resumen y del historial. Son inspiración opcional, permiten aprovechar como máximo un ángulo y no pueden cambiar recomendaciones ni convertirse en hechos. Sin coincidencias no se crea la sección.
+
+Para ampliar el corpus, añadir una entrada breve con disparadores inequívocos y pruebas positivas y negativas. Las entradas evergreen siguen siendo válidas hasta revisión editorial; las temporales deben tener `expiresAt`. Revisar periódicamente términos de comunidad para evitar jerga obsoleta, coincidencias demasiado amplias y referencias que hayan cambiado de significado.

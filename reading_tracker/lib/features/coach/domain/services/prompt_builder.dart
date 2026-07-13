@@ -1,6 +1,7 @@
 import '../entities/coach_message.dart';
 import '../models/reader_context.dart';
 import 'coach_system_prompt_builder.dart';
+import 'bookish_culture_retriever.dart';
 import 'context_formatter.dart';
 
 abstract interface class PromptBuilder {
@@ -17,12 +18,14 @@ final class CoachPromptBuilder implements PromptBuilder {
   const CoachPromptBuilder({
     required this.systemPromptBuilder,
     required this.contextFormatter,
+    this.bookishCultureRetriever = const BookishCultureRetriever(),
     this.maxConversationMessages = 20,
     this.maxConversationCharacters = 12000,
   }) : assert(maxConversationMessages >= 0);
 
   final CoachSystemPromptBuilder systemPromptBuilder;
   final ContextFormatter contextFormatter;
+  final BookishCultureRetriever bookishCultureRetriever;
   final int maxConversationMessages;
   final int maxConversationCharacters;
 
@@ -69,10 +72,21 @@ final class CoachPromptBuilder implements PromptBuilder {
       retainedCharacters += message.content.length;
     }
     final recentConversation = recentConversationReversed.reversed;
+    final cultureEntries = bookishCultureRetriever.retrieve(
+      userMessage: userMessage,
+      recentConversation: recentConversation.toList(growable: false),
+      now: readerContext.metadata.generatedAt,
+    );
+    final cultureNotes = bookishCultureRetriever.formatNotes(cultureEntries);
+    final readerContextPrompt = contextFormatter.format(readerContext);
 
     return List.unmodifiable([
       CoachMessage.system(systemPromptBuilder.build()),
-      CoachMessage.system(contextFormatter.format(readerContext)),
+      CoachMessage.system(
+        cultureNotes.isEmpty
+            ? readerContextPrompt
+            : '$readerContextPrompt\n\n$cultureNotes',
+      ),
       if (conversationSummary?.trim().isNotEmpty == true)
         CoachMessage.system(
           'Resumen de la conversación:\n$conversationSummary',

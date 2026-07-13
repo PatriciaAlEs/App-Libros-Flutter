@@ -5,6 +5,8 @@ import '../../domain/repositories/coach_conversation_repository.dart';
 import '../../domain/repositories/coach_repository.dart';
 import '../../domain/services/conversation_context_policy.dart';
 import '../../domain/services/conversation_summary_service.dart';
+import '../../domain/services/bookish_culture_retriever.dart';
+import '../culture/bookish_culture_es_v1.dart';
 import '../../domain/services/coach_system_prompt_builder.dart';
 import '../../domain/services/context_formatter.dart';
 import '../../domain/services/prompt_builder.dart';
@@ -17,6 +19,9 @@ final promptBuilderProvider = Provider<PromptBuilder>((ref) {
   return const CoachPromptBuilder(
     systemPromptBuilder: DefaultCoachSystemPromptBuilder(),
     contextFormatter: MarkdownContextFormatter(),
+    bookishCultureRetriever: BookishCultureRetriever(
+      entries: bookishCultureEsV1,
+    ),
   );
 });
 
