@@ -11,7 +11,9 @@ import '../../../../core/theme/app_theme_controller.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.onRestartLibreriaTour});
+
+  final VoidCallback? onRestartLibreriaTour;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -80,8 +82,60 @@ class SettingsScreen extends ConsumerWidget {
                 onChanged: controller.setTheme,
               ),
               const SizedBox(height: AppSpacing.lg),
+              _LibreriaTourAction(onPressed: onRestartLibreriaTour),
+              const SizedBox(height: AppSpacing.lg),
               const _PreferencesAction(),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LibreriaTourAction extends StatelessWidget {
+  const _LibreriaTourAction({required this.onPressed});
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Semantics(
+      button: true,
+      label: 'Volver a ver el tour de LibrerIA',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: const ValueKey('restart-libreria-tour'),
+          borderRadius: BorderRadius.circular(24),
+          onTap: onPressed,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.16),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.auto_awesome_rounded, color: theme.colorScheme.primary),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    'Volver a ver el tour de LibrerIA',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Icon(Icons.replay_rounded, color: theme.colorScheme.primary),
+              ],
+            ),
           ),
         ),
       ),

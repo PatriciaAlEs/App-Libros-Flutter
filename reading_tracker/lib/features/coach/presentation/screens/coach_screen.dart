@@ -8,10 +8,18 @@ import '../controllers/coach_controller.dart';
 import '../widgets/coach_message_bubble.dart';
 
 class CoachScreen extends ConsumerStatefulWidget {
-  const CoachScreen({super.key, this.isFloatingPanel = false, this.onCollapse});
+  const CoachScreen({
+    super.key,
+    this.isFloatingPanel = false,
+    this.onCollapse,
+    this.conversationTargetKey,
+    this.collapseTargetKey,
+  });
 
   final bool isFloatingPanel;
   final VoidCallback? onCollapse;
+  final GlobalKey? conversationTargetKey;
+  final GlobalKey? collapseTargetKey;
 
   @override
   ConsumerState<CoachScreen> createState() => _CoachScreenState();
@@ -71,6 +79,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
             onShowHistory: () =>
                 _showConversationHistory(ref.read(coachControllerProvider)),
             onCollapse: widget.onCollapse,
+            collapseTargetKey: widget.collapseTargetKey,
           ),
           Expanded(child: chatBody),
           Padding(
@@ -165,9 +174,11 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
         child: Column(
           children: [
             Expanded(
-              child: Stack(
-                key: const ValueKey('coach-conversation-area'),
-                children: [
+              child: KeyedSubtree(
+                key: widget.conversationTargetKey,
+                child: Stack(
+                  key: const ValueKey('coach-conversation-area'),
+                  children: [
                   if (uiState.messageCount == 0)
                     _CoachEmptyState(onSuggestion: _sendSuggestion)
                   else
@@ -211,7 +222,8 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
                             ),
                     ),
                   ),
-                ],
+                  ],
+                ),
               ),
             ),
             if (uiState.errorMessage != null)
@@ -420,11 +432,13 @@ class _CoachPanelHeader extends StatelessWidget {
     required this.onNewConversation,
     required this.onShowHistory,
     required this.onCollapse,
+    this.collapseTargetKey,
   });
 
   final VoidCallback onNewConversation;
   final VoidCallback onShowHistory;
   final VoidCallback? onCollapse;
+  final GlobalKey? collapseTargetKey;
 
   @override
   Widget build(BuildContext context) {
@@ -525,10 +539,12 @@ class _CoachPanelHeader extends StatelessWidget {
             ],
             icon: const Icon(Icons.more_horiz),
           ),
-          Semantics(
-            button: true,
-            label: 'Colapsar LibrerIA',
-            child: IconButton(
+          KeyedSubtree(
+            key: collapseTargetKey,
+            child: Semantics(
+              button: true,
+              label: 'Colapsar LibrerIA',
+              child: IconButton(
               key: const ValueKey('collapse-libreria'),
               tooltip: 'Colapsar LibrerIA',
               onPressed: onCollapse,
@@ -539,6 +555,7 @@ class _CoachPanelHeader extends StatelessWidget {
                 foregroundColor: theme.colorScheme.primary,
               ),
               icon: const Icon(Icons.keyboard_arrow_down_rounded),
+              ),
             ),
           ),
           ],

@@ -40,7 +40,10 @@ import 'package:reading_tracker/features/sync/presentation/widgets/auto_sync_boo
 
 void main() {
   setUp(() {
-    SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+    SharedPreferences.setMockInitialValues({
+      'onboarding_completed': true,
+      'libreria_tour_v1': 'completed',
+    });
   });
 
   test('book status keeps persisted value and exposes Spanish label', () {
@@ -290,6 +293,7 @@ void main() {
       SharedPreferences.setMockInitialValues({
         'onboarding_completed': true,
         'sync_onboarding_notice_seen_v1': true,
+        'libreria_tour_v1': 'completed',
       });
       final authRepository = _HomeAuthRepository();
       final booksRepository = _TransitionBookRepository();
@@ -386,6 +390,7 @@ void main() {
       SharedPreferences.setMockInitialValues({
         'onboarding_completed': true,
         'sync_onboarding_notice_seen_v1': true,
+        'libreria_tour_v1': 'completed',
       });
       final launchUri = Uri.parse(
         'https://readpp-web-alpha.vercel.app/?code=fake-oauth-code',
@@ -467,6 +472,7 @@ void main() {
       SharedPreferences.setMockInitialValues({
         'onboarding_completed': true,
         'sync_onboarding_notice_seen_v1': true,
+        'libreria_tour_v1': 'completed',
       });
       final launchUri = Uri.parse(
         'https://readpp-web-alpha.vercel.app$callbackLocation',
@@ -1080,6 +1086,193 @@ void main() {
       expect(repository.addedBook, isNull);
       expect(find.text('Este libro ya está en tu biblioteca'), findsOneWidget);
     },
+  );
+
+  group('tour de novedades de LibrerIA', () {
+    testWidgets('pendiente recorre los tres objetivos y completa al final', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        'onboarding_completed': true,
+        'libreria_tour_v1': 'pending',
+      });
+      await tester.pumpWidget(_libreriaTourApp());
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey('libreria-tour-overlay')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('libreria-tour-spotlight-0')),
+        findsOneWidget,
+      );
+      await tester.binding.reassembleApplication();
+      await tester.pump();
+      expect(
+        find.byKey(const ValueKey('libreria-tour-overlay')),
+        findsOneWidget,
+      );
+
+      await tester.tapAt(const Offset(2, 2));
+      await tester.pump();
+      expect(
+        find.byKey(const ValueKey('libreria-tour-overlay')),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Conocer a LibrerIA'));
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(const ValueKey('libreria-panel')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('libreria-tour-spotlight-1')),
+        findsOneWidget,
+      );
+      expect(find.text('¿Sobre qué quieres leer hoy?'), findsOneWidget);
+
+      await tester.tap(find.text('Siguiente'));
+      await tester.pump();
+      expect(
+        find.byKey(const ValueKey('libreria-tour-spotlight-2')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('collapse-libreria')), findsOneWidget);
+
+      await tester.tap(find.text('Entendido'));
+      await tester.pumpAndSettle();
+      final preferences = await SharedPreferences.getInstance();
+      expect(preferences.getString('libreria_tour_v1'), 'completed');
+      expect(
+        find.byKey(const ValueKey('libreria-tour-overlay')),
+        findsNothing,
+      );
+    });
+
+    testWidgets('completado u omitido no se muestra automaticamente', (
+      tester,
+    ) async {
+      for (final status in ['completed', 'skipped']) {
+        SharedPreferences.setMockInitialValues({
+          'onboarding_completed': true,
+          'libreria_tour_v1': status,
+        });
+        await tester.pumpWidget(_libreriaTourApp());
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey('libreria-tour-overlay')),
+          findsNothing,
+        );
+        await tester.pumpWidget(const SizedBox.shrink());
+      }
+    });
+
+    testWidgets('omitir persiste el estado y desmontar no completa', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        'onboarding_completed': true,
+      });
+      await tester.pumpWidget(_libreriaTourApp());
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(const SizedBox.shrink());
+      final pendingPreferences = await SharedPreferences.getInstance();
+      expect(pendingPreferences.getString('libreria_tour_v1'), isNull);
+
+      await tester.pumpWidget(_libreriaTourApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Omitir recorrido'));
+      await tester.pumpAndSettle();
+      expect(pendingPreferences.getString('libreria_tour_v1'), 'skipped');
+    });
+
+    testWidgets('Ajustes reinicia el tour y vuelve al contexto de Inicio', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        'onboarding_completed': true,
+        'libreria_tour_v1': 'completed',
+      });
+      await tester.pumpWidget(
+        _libreriaTourApp(initialIndex: 4, initialRoute: '/settings'),
+      );
+      await tester.pumpAndSettle();
+      final action = find.byKey(const ValueKey('restart-libreria-tour'));
+      await tester.scrollUntilVisible(
+        action,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(action);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('libreria-tour-overlay')),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel('Volver a ver el tour de LibrerIA'),
+        findsNothing,
+      );
+      final preferences = await SharedPreferences.getInstance();
+      expect(preferences.getString('libreria_tour_v1'), 'pending');
+    });
+
+    testWidgets('el coach mark cabe a 320 px con texto escalado', (tester) async {
+      SharedPreferences.setMockInitialValues({
+        'onboarding_completed': true,
+        'libreria_tour_v1': 'pending',
+      });
+      tester.view.physicalSize = const Size(320, 760);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        _libreriaTourApp(textScaler: const TextScaler.linear(1.3)),
+      );
+      await tester.pumpAndSettle();
+
+      final rect = tester.getRect(
+        find.byKey(const ValueKey('libreria-tour-card-0')),
+      );
+      expect(rect.left, greaterThanOrEqualTo(0));
+      expect(rect.right, lessThanOrEqualTo(320));
+      expect(rect.top, greaterThanOrEqualTo(0));
+      expect(rect.bottom, lessThanOrEqualTo(760));
+      expect(tester.takeException(), isNull);
+    });
+  });
+}
+
+Widget _libreriaTourApp({
+  int initialIndex = 0,
+  String initialRoute = '/',
+  TextScaler? textScaler,
+}) {
+  return ProviderScope(
+    overrides: [
+      bookRepositoryProvider.overrideWithValue(_EmptyBookRepository()),
+      statisticsRepositoryProvider.overrideWithValue(
+        const _EmptyStatisticsRepository(),
+      ),
+      readingSessionRepositoryProvider.overrideWithValue(
+        const _EmptyReadingSessionRepository(),
+      ),
+    ],
+    child: MaterialApp(
+      theme: AppTheme.light(),
+      builder: textScaler == null
+          ? null
+          : (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+              child: child!,
+            ),
+      home: MainNavigationScreen(
+        initialIndex: initialIndex,
+        initialRoute: initialRoute,
+      ),
+    ),
   );
 }
 

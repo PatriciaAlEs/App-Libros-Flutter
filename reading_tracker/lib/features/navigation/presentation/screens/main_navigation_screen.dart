@@ -13,6 +13,8 @@ import '../../../books/presentation/screens/books_list_screen.dart';
 import '../../../coach/presentation/widgets/floating_libreria.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../insights/presentation/screens/insights_screen.dart';
+import '../../../onboarding/data/libreria_tour_preferences.dart';
+import '../../../onboarding/presentation/widgets/libreria_tour_overlay.dart';
 import '../../../progress/presentation/screens/progress_screen.dart';
 import '../../../reading_sessions/domain/entities/reading_session.dart';
 import '../../../reading_sessions/presentation/screens/calendar_screen.dart';
@@ -44,6 +46,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   late final NavigatorObserver _routeObserver;
   final List<int> _tabVersions = List.filled(5, 0);
   late bool _isLibreriaExpanded;
+  final GlobalKey _libreriaBubbleKey = GlobalKey();
+  final GlobalKey _libreriaConversationKey = GlobalKey();
+  final GlobalKey _libreriaCollapseKey = GlobalKey();
+  final GlobalKey _shellBodyKey = GlobalKey();
+  bool _tourVisible = false;
+  bool _tourLoadStarted = false;
+  int _tourStep = 0;
 
   @override
   void initState() {
@@ -51,8 +60,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _selectedIndex = ValueNotifier(_expectedIndex(widget));
     final initialPath = appRoutePath(routeUri(widget.initialRoute));
     _currentRoute = ValueNotifier(initialPath == '/coach' ? '/' : initialPath);
-    _routeObserver = _ShellRouteObserver(_currentRoute);
+    _routeObserver = _ShellRouteObserver(
+      _currentRoute,
+      onRouteChanged: _handleRouteChanged,
+    );
     _isLibreriaExpanded = initialPath == '/coach';
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartTour());
     if (kDebugMode) {
       debugPrint(
         '[navigation] shell init route=${widget.initialRoute} '
@@ -105,9 +118,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: !_tourVisible,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _tourVisible) _dismissTourTemporarily();
+      },
+      child: Scaffold(
       extendBody: true,
       body: Stack(
+        key: _shellBodyKey,
         children: [
           Positioned.fill(
             child: NavigatorPopHandler(
@@ -144,10 +163,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   isExpanded: _isLibreriaExpanded,
                   onExpand: _expandLibreria,
                   onCollapse: _collapseLibreria,
+                  bubbleTargetKey: _libreriaBubbleKey,
+                  conversationTargetKey: _libreriaConversationKey,
+                  collapseTargetKey: _libreriaCollapseKey,
                 );
               },
             ),
           ),
+          if (_tourVisible) _buildTourOverlay(),
         ],
       ),
       bottomNavigationBar: ValueListenableBuilder<int>(
@@ -157,6 +180,122 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           onSelect: _selectTab,
         ),
       ),
+      ),
+    );
+  }
+
+  Widget _buildTourOverlay() {
+    final target = _targetRectForStep(_tourStep);
+    if (target == null) return const SizedBox.shrink();
+    return Positioned.fill(
+      child: LibreriaTourOverlay(
+        step: _tourStep,
+        targetRect: target,
+        onPrimary: _advanceTour,
+        onSkip: _skipTour,
+        onDismissTemporarily: _dismissTourTemporarily,
+      ),
+    );
+  }
+
+  Rect? _targetRectForStep(int step) {
+    final key = switch (step) {
+      0 => _libreriaBubbleKey,
+      1 => _libreriaConversationKey,
+      _ => _libreriaCollapseKey,
+    };
+    final renderObject = key.currentContext?.findRenderObject();
+    final shellRenderObject = _shellBodyKey.currentContext?.findRenderObject();
+    if (renderObject is! RenderBox ||
+        shellRenderObject is! RenderBox ||
+        !renderObject.attached ||
+        !renderObject.hasSize) {
+      return null;
+    }
+    return renderObject.localToGlobal(
+          Offset.zero,
+          ancestor: shellRenderObject,
+        ) &
+        renderObject.size;
+  }
+
+  Future<void> _maybeStartTour({bool force = false}) async {
+    if (!mounted || _tourVisible || (_tourLoadStarted && !force)) return;
+    if (_isAuthenticationRoute(_currentRoute.value)) return;
+    _tourLoadStarted = true;
+    if (!force) {
+      final status = await LibreriaTourPreferences.load();
+      if (!mounted || status != LibreriaTourStatus.pending) return;
+    }
+    if (_isLibreriaExpanded) {
+      setState(() => _isLibreriaExpanded = false);
+      await WidgetsBinding.instance.endOfFrame;
+    }
+    for (var attempt = 0; attempt < 4; attempt++) {
+      if (!mounted || _isAuthenticationRoute(_currentRoute.value)) return;
+      if (_targetRectForStep(0) != null) {
+        setState(() {
+          _tourStep = 0;
+          _tourVisible = true;
+        });
+        return;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+  }
+
+  void _handleRouteChanged(String route) {
+    if (!mounted) return;
+    if (_isAuthenticationRoute(route)) {
+      if (_tourVisible) setState(() => _tourVisible = false);
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartTour());
+  }
+
+  void _advanceTour() {
+    if (_tourStep == 0) {
+      setState(() {
+        _isLibreriaExpanded = true;
+        _tourStep = 1;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _tourVisible) setState(() {});
+      });
+      return;
+    }
+    if (_tourStep == 1) {
+      setState(() => _tourStep = 2);
+      return;
+    }
+    _completeTour();
+  }
+
+  Future<void> _completeTour() async {
+    await LibreriaTourPreferences.save(LibreriaTourStatus.completed);
+    if (!mounted) return;
+    setState(() {
+      _tourVisible = false;
+      _isLibreriaExpanded = false;
+    });
+  }
+
+  Future<void> _skipTour() async {
+    await LibreriaTourPreferences.save(LibreriaTourStatus.skipped);
+    if (mounted) setState(() => _tourVisible = false);
+  }
+
+  void _dismissTourTemporarily() {
+    if (mounted) setState(() => _tourVisible = false);
+  }
+
+  Future<void> _restartLibreriaTour() async {
+    await LibreriaTourPreferences.reset();
+    if (!mounted) return;
+    _tourLoadStarted = false;
+    _selectTab(0);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _maybeStartTour(force: true),
     );
   }
 
@@ -304,19 +443,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       1 => const BooksListScreen(),
       2 => const ProgressScreen(),
       3 => const InsightsScreen(),
-      _ => const SettingsScreen(),
+      _ => SettingsScreen(onRestartLibreriaTour: _restartLibreriaTour),
     };
   }
 }
 
 class _ShellRouteObserver extends NavigatorObserver {
-  _ShellRouteObserver(this.currentRoute);
+  _ShellRouteObserver(this.currentRoute, {required this.onRouteChanged});
 
   final ValueNotifier<String> currentRoute;
+  final ValueChanged<String> onRouteChanged;
 
   void _update(Route<dynamic>? route) {
     final name = route?.settings.name;
-    if (name != null) currentRoute.value = name;
+    if (name != null) {
+      currentRoute.value = name;
+      onRouteChanged(name);
+    }
   }
 
   @override

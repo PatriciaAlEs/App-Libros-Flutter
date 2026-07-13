@@ -10,11 +10,17 @@ class FloatingLibreria extends StatelessWidget {
     required this.isExpanded,
     required this.onExpand,
     required this.onCollapse,
+    this.bubbleTargetKey,
+    this.conversationTargetKey,
+    this.collapseTargetKey,
   });
 
   final bool isExpanded;
   final VoidCallback onExpand;
   final VoidCallback onCollapse;
+  final GlobalKey? bubbleTargetKey;
+  final GlobalKey? conversationTargetKey;
+  final GlobalKey? collapseTargetKey;
 
   static const double maxPanelWidth = 420;
   static const double maxPanelHeight = 680;
@@ -40,7 +46,9 @@ class FloatingLibreria extends StatelessWidget {
               Positioned(
                 right: sideMargin,
                 bottom: _navigationClearance,
-                child: Semantics(
+                child: KeyedSubtree(
+                  key: bubbleTargetKey,
+                  child: Semantics(
                   button: true,
                   label: 'Abrir LibrerIA',
                   child: Tooltip(
@@ -67,6 +75,7 @@ class FloatingLibreria extends StatelessWidget {
                         ),
                       ),
                     ),
+                  ),
                   ),
                 ),
               ),
@@ -99,6 +108,8 @@ class FloatingLibreria extends StatelessWidget {
                   child: CoachScreen(
                     isFloatingPanel: true,
                     onCollapse: onCollapse,
+                    conversationTargetKey: conversationTargetKey,
+                    collapseTargetKey: collapseTargetKey,
                   ),
                 ),
               ),
