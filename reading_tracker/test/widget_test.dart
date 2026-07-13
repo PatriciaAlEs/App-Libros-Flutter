@@ -31,6 +31,9 @@ import 'package:reading_tracker/features/reading_sessions/domain/repositories/re
 import 'package:reading_tracker/features/stats/data/repositories/statistics_repository_provider.dart';
 import 'package:reading_tracker/features/stats/domain/entities/statistics_summary.dart';
 import 'package:reading_tracker/features/stats/domain/repositories/statistics_repository.dart';
+import 'package:reading_tracker/features/sync/domain/entities/sync_status_state.dart';
+import 'package:reading_tracker/features/sync/presentation/controllers/sync_status_controller.dart';
+import 'package:reading_tracker/features/sync/presentation/widgets/auto_sync_bootstrap.dart';
 
 void main() {
   setUp(() {
@@ -176,6 +179,81 @@ void main() {
 
     expect(find.byType(CoachScreen), findsOneWidget);
   });
+
+  testWidgets(
+    'LibrerIA survives real auth transition and post-login book invalidation',
+    (tester) async {
+      final authRepository = _HomeAuthRepository();
+      final booksRepository = _TransitionBookRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authControllerProvider.overrideWith(
+              (ref) => AuthController(authRepository),
+            ),
+            bookRepositoryProvider.overrideWithValue(booksRepository),
+            statisticsRepositoryProvider.overrideWithValue(
+              const _EmptyStatisticsRepository(),
+            ),
+            readingSessionRepositoryProvider.overrideWithValue(
+              const _EmptyReadingSessionRepository(),
+            ),
+            syncStatusControllerProvider.overrideWith(
+              (ref) => _InvalidatingSyncStatusController(
+                onSync: () => ref.invalidate(booksProvider),
+              ),
+            ),
+          ],
+          child: MaterialApp(
+            home: const AutoSyncBootstrap(child: HomeScreen()),
+            routes: {
+              '/coach': (_) => const Scaffold(
+                body: KeyedSubtree(
+                  key: Key('coach-route-marker'),
+                  child: Text('Coach'),
+                ),
+              ),
+            },
+          ),
+        ),
+      );
+
+      expect(booksRepository.requests, hasLength(1));
+      booksRepository.completeNext(const []);
+      await tester.pumpAndSettle();
+      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+
+      authRepository.emit(
+        const AppUser(id: 'google-user', email: 'reader@test.dev'),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(booksRepository.requests, hasLength(2));
+      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+
+      booksRepository.completeNext(const []);
+      await tester.pumpAndSettle();
+      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(HomeScreen)),
+      );
+      container.invalidate(booksProvider);
+      await tester.pump();
+      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+
+      booksRepository.completeNextError(StateError('sync failed'));
+      await tester.pump();
+      await tester.pump();
+      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+
+      await tester.tap(find.byType(LibreriaEntryCard));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('coach-route-marker')), findsOneWidget);
+    },
+  );
 
   testWidgets('Inicio keeps LibrerIA visible while books are loading', (
     tester,
@@ -886,6 +964,53 @@ class _ControlledBookRepository implements BookRepository {
 
   @override
   Stream<List<Book>> watchBooks() => const Stream.empty();
+}
+
+class _TransitionBookRepository implements BookRepository {
+  final requests = <Completer<List<Book>>>[];
+
+  void completeNext(List<Book> books) =>
+      requests.firstWhere((request) => !request.isCompleted).complete(books);
+
+  void completeNextError(Object error) => requests
+      .firstWhere((request) => !request.isCompleted)
+      .completeError(error);
+
+  @override
+  Future<List<Book>> getAllBooks() {
+    final request = Completer<List<Book>>();
+    requests.add(request);
+    return request.future;
+  }
+
+  @override
+  Future<void> addBook(Book book) async {}
+
+  @override
+  Future<void> deleteBook(String id) async {}
+
+  @override
+  Future<Book?> getBookById(String id) async => null;
+
+  @override
+  Future<void> updateBook(Book book) async {}
+
+  @override
+  Stream<List<Book>> watchBooks() => const Stream.empty();
+}
+
+class _InvalidatingSyncStatusController extends SyncStatusController {
+  _InvalidatingSyncStatusController({required this.onSync})
+    : super(coordinator: null, clock: DateTime.now);
+
+  final VoidCallback onSync;
+
+  @override
+  Future<void> syncNow({required String userId}) async {
+    state = const SyncStatusState(status: SyncUiStatus.syncing);
+    onSync();
+    state = const SyncStatusState(status: SyncUiStatus.synced);
+  }
 }
 
 class _CapturingBookRepository implements BookRepository {

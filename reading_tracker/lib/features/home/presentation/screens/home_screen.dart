@@ -57,14 +57,47 @@ class HomeScreen extends ConsumerWidget {
               stops: const [0, 0.44, 1],
             ),
           ),
-          child: booksAsync.when(
-            loading: () => _HomeLoadingState(
-              onOpenCoach: () => Navigator.pushNamed(context, '/coach'),
-            ),
-            error: (error, _) => _HomeErrorState(
-              onOpenCoach: () => Navigator.pushNamed(context, '/coach'),
-            ),
-            data: (books) {
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.md,
+                  AppSpacing.lg,
+                  0,
+                ),
+                child: Column(
+                  children: [
+                    ReadPpPageHeader(
+                      readerProfile: readerProfile,
+                      onTap: () => Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/',
+                        (route) => false,
+                      ),
+                      onProfileTap: () => Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/settings',
+                        (_) => false,
+                      ),
+                      onAddBookTap: () =>
+                          Navigator.pushNamed(context, '/book/add'),
+                      onCalendarTap: () =>
+                          Navigator.pushNamed(context, '/calendar'),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    LibreriaEntryCard(
+                      onTap: () => Navigator.pushNamed(context, '/coach'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Expanded(
+                child: booksAsync.when(
+                  loading: () => const _HomeLoadingState(),
+                  error: (error, _) => const _HomeErrorState(),
+                  data: (books) {
               final summary =
                   summaryAsync.valueOrNull ?? const StatisticsSummary.empty();
               final recentSessions =
@@ -104,37 +137,12 @@ class HomeScreen extends ConsumerWidget {
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(
                         AppSpacing.lg,
-                        AppSpacing.md,
+                        0,
                         AppSpacing.lg,
                         132,
                       ),
                       sliver: SliverList.list(
                         children: [
-                          ReadPpPageHeader(
-                            readerProfile: readerProfile,
-                            onTap: () {
-                              Navigator.pushNamedAndRemoveUntil(
-                                context,
-                                '/',
-                                (route) => false,
-                              );
-                            },
-                            onProfileTap: () =>
-                                Navigator.pushNamedAndRemoveUntil(
-                                  context,
-                                  '/settings',
-                                  (_) => false,
-                                ),
-                            onAddBookTap: () =>
-                                Navigator.pushNamed(context, '/book/add'),
-                            onCalendarTap: () =>
-                                Navigator.pushNamed(context, '/calendar'),
-                          ),
-                          const SizedBox(height: AppSpacing.xl),
-                          LibreriaEntryCard(
-                            onTap: () => Navigator.pushNamed(context, '/coach'),
-                          ),
-                          const SizedBox(height: AppSpacing.xl),
                           _CurrentReadingCards(
                             books: prioritizedCurrentBooks,
                             pendingBooks: pendingBooks,
@@ -211,7 +219,10 @@ class HomeScreen extends ConsumerWidget {
                   ],
                 ),
               );
-            },
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -377,9 +388,7 @@ class HomeScreen extends ConsumerWidget {
 }
 
 class _HomeLoadingState extends StatelessWidget {
-  const _HomeLoadingState({required this.onOpenCoach});
-
-  final VoidCallback onOpenCoach;
+  const _HomeLoadingState();
 
   @override
   Widget build(BuildContext context) {
@@ -393,16 +402,6 @@ class _HomeLoadingState extends StatelessWidget {
         112,
       ),
       children: [
-        Container(
-          height: 64,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withValues(alpha: 0.58),
-            borderRadius: BorderRadius.circular(24),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        LibreriaEntryCard(onTap: onOpenCoach),
-        const SizedBox(height: AppSpacing.xl),
         Container(
           height: 302,
           decoration: BoxDecoration(
@@ -427,9 +426,7 @@ class _HomeLoadingState extends StatelessWidget {
 }
 
 class _HomeErrorState extends StatelessWidget {
-  const _HomeErrorState({required this.onOpenCoach});
-
-  final VoidCallback onOpenCoach;
+  const _HomeErrorState();
 
   @override
   Widget build(BuildContext context) {
@@ -443,8 +440,6 @@ class _HomeErrorState extends StatelessWidget {
         132,
       ),
       children: [
-        LibreriaEntryCard(onTap: onOpenCoach),
-        const SizedBox(height: AppSpacing.xl),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(26, 28, 26, 26),
