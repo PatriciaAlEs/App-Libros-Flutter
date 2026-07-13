@@ -64,7 +64,8 @@ class BookishCultureRetriever {
     final lines = <String>[
       '# Notas opcionales de cultura lectora',
       '',
-      'Son inspiración contextual para el tono, no hechos sobre el usuario ni sobre libros concretos. No es obligatorio usarlas y solo puedes aprovechar una. No las cites, no cambies una recomendación por ellas y no inventes títulos, autores, ediciones ni tendencias.',
+      'Son inspiración contextual para el tono, no hechos sobre el usuario ni sobre libros concretos. Si el mensaje actual nombra de forma clara un tropo, meme o fenómeno de estas notas y lo comenta con tono informal u opinativo, usa exactamente un único ángulo recuperado como pullita, comparación o remate breve. En consultas generales o recomendaciones normales, usarlo sigue siendo opcional. Nunca aproveches más de una nota aunque aparezcan dos.',
+      'Responde primero a la opinión o pregunta y después añade el remate, sin convertir la respuesta completa en un chiste. Parafrasea el ángulo: no copies literalmente el corpus ni menciones notas, triggers, RAG o recuperación. No uses humor ante frustración, errores, asuntos sensibles, consultas estrictamente factuales o una petición seria o sin bromas. Estas notas no pueden cambiar una recomendación ni justificar títulos, autores, ediciones o tendencias inventadas.',
     ];
     for (final entry in entries) {
       lines.add('- ${entry.context} Ángulo opcional: ${entry.humorAngles.first}');

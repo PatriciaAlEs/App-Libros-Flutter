@@ -70,6 +70,8 @@ class StatsScreen extends ConsumerWidget {
                     const _StatsEmptyState(),
                     const SizedBox(height: AppSpacing.xl),
                   ],
+                  _StatsHero(summary: summary),
+                  const SizedBox(height: AppSpacing.xl),
                   SectionHeader(
                     title: 'Objetivo anual',
                     actionLabel: 'Editar',
@@ -94,8 +96,6 @@ class StatsScreen extends ConsumerWidget {
                     ),
                     onSearchCover: () => _searchAnnualGoalCover(context, ref),
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                  _StatsHero(summary: summary),
                   const SizedBox(height: AppSpacing.xl),
                   _PremiumStatsVisuals(
                     summary: summary,
@@ -352,30 +352,18 @@ class _StatsHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
-    final dark = Color.lerp(primary, Colors.black, 0.30)!;
-    final accent = theme.colorScheme.secondary;
     final year = DateTime.now().year;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [primary, dark],
-        ),
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        color: primary,
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: dark.withValues(alpha: 0.28),
-            blurRadius: 44,
-            offset: const Offset(0, 24),
-          ),
-          BoxShadow(
-            color: accent.withValues(alpha: 0.16),
-            blurRadius: 26,
-            offset: const Offset(0, 10),
+            color: primary.withValues(alpha: 0.22),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -385,8 +373,8 @@ class _StatsHero extends StatelessWidget {
           Text(
             'RESUMEN LECTOR',
             style: theme.textTheme.labelSmall?.copyWith(
-              color: accent.withValues(alpha: 0.96),
-              letterSpacing: 2.6,
+              color: theme.colorScheme.onPrimary.withValues(alpha: 0.82),
+              letterSpacing: 1.1,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -398,12 +386,14 @@ class _StatsHero extends StatelessWidget {
                   label: 'libros $year',
                 ),
               ),
+              _StatsHeroDivider(color: theme.colorScheme.onPrimary),
               Expanded(
                 child: _HeroMetric(
                   value: '${summary.currentStreakDays}',
                   label: 'racha',
                 ),
               ),
+              _StatsHeroDivider(color: theme.colorScheme.onPrimary),
               Expanded(
                 child: _HeroMetric(
                   value: _compactNumber(summary.totalPagesRead),
@@ -413,34 +403,25 @@ class _StatsHero extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-            ),
-            child: Row(
-              children: [
-                Icon(AppIcons.chart, color: accent, size: 22),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    '${summary.completedBooks} completados · ${summary.readingBooks} en curso · ${summary.toReadBooks} pendientes',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onPrimary,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          Divider(color: theme.colorScheme.onPrimary.withValues(alpha: 0.20)),
+          const SizedBox(height: AppSpacing.xs),
+          Wrap(
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.xs,
+            children: [
+              _StatsHeroStatus(
+                value: summary.completedBooks,
+                label: 'completados',
+              ),
+              _StatsHeroStatus(
+                value: summary.readingBooks,
+                label: 'en curso',
+              ),
+              _StatsHeroStatus(
+                value: summary.toReadBooks,
+                label: 'pendientes',
+              ),
+            ],
           ),
         ],
       ),
@@ -469,7 +450,7 @@ class _HeroMetric extends StatelessWidget {
             maxLines: 1,
             style: theme.textTheme.headlineSmall?.copyWith(
               color: theme.colorScheme.onPrimary,
-              fontSize: 36,
+              fontSize: 28,
               fontWeight: FontWeight.w900,
               height: 0.92,
             ),
@@ -482,6 +463,51 @@ class _HeroMetric extends StatelessWidget {
           textAlign: TextAlign.center,
           style: theme.textTheme.labelSmall?.copyWith(
             color: theme.colorScheme.onPrimary.withValues(alpha: 0.74),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatsHeroDivider extends StatelessWidget {
+  const _StatsHeroDivider({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 1,
+    height: 54,
+    color: color.withValues(alpha: 0.22),
+  );
+}
+
+class _StatsHeroStatus extends StatelessWidget {
+  const _StatsHeroStatus({required this.value, required this.label});
+
+  final int value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 7,
+          height: 7,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.onPrimary.withValues(alpha: 0.76),
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          '$value $label',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onPrimary.withValues(alpha: 0.82),
           ),
         ),
       ],
@@ -534,11 +560,11 @@ class _AnnualGoalSection extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.90),
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
           color: theme.colorScheme.primary.withValues(alpha: 0.16),
         ),
-        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+        boxShadow: AppShadows.soft(theme.colorScheme.primary),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1466,22 +1492,20 @@ class _PremiumChartCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
           color: theme.colorScheme.primary.withValues(alpha: 0.12),
         ),
-        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+        boxShadow: AppShadows.soft(theme.colorScheme.primary),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: theme.textTheme.headlineSmall?.copyWith(
+            style: theme.textTheme.titleMedium?.copyWith(
               color: theme.colorScheme.primary,
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              height: 1.05,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 4),

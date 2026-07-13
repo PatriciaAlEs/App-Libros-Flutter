@@ -68,6 +68,25 @@ void main() {
       expect(prompt, contains('nunca debe convertirse en un segundo párrafo'));
     });
 
+    test('hace preferente un angulo ante cultura explicita y opinativa', () {
+      final prompt = builder.build();
+
+      expect(prompt, contains('tenga tono informal u opinativo'));
+      expect(prompt, contains('exactamente un ángulo recuperado'));
+      expect(prompt, contains('No uses más de una referencia cultural'));
+      expect(prompt, contains('En consultas generales y recomendaciones normales'));
+    });
+
+    test('mantiene el humor desactivado en los casos protegidos', () {
+      final prompt = builder.build();
+
+      expect(prompt, contains('esté frustrada'));
+      expect(prompt, contains('comunique un error'));
+      expect(prompt, contains('asunto sensible'));
+      expect(prompt, contains('datos estrictamente factuales'));
+      expect(prompt, contains('respuesta sin bromas'));
+    });
+
     test('permite una pregunta ante ambiguedad real', () {
       final prompt = builder.build();
 

@@ -344,6 +344,22 @@ void main() {
       expect(result.last.content, 'Tengo demasiados pendientes en mi TBR');
     });
 
+    test('marca como preferente el humor para enemies to lovers opinativo', () {
+      const current = '¿No está ya muy quemado el enemies to lovers?';
+      final result = builder.build(
+        userMessage: current,
+        conversation: const [],
+        readerContext: _readerContext(),
+      );
+
+      expect(result[1].content, contains('fase de enemistad'));
+      expect(
+        result[1].content,
+        contains('usa exactamente un único ángulo recuperado'),
+      );
+      expect(result.where((message) => message.content == current), hasLength(1));
+    });
+
     test('no inyecta notas sin una coincidencia clara', () {
       final result = builder.build(
         userMessage: 'Cuantas paginas lei esta semana',

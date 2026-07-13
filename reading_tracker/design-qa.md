@@ -1,65 +1,39 @@
-# Design QA - LibrerIA floating chat visual redesign
+# Design QA — Progreso, Insights y Estadísticas
 
 - Source visual truth:
-  - `C:\Users\piruj\OneDrive\Pictures\Screenshots\Captura de pantalla 2026-07-11 113802.png`
-  - `C:\Users\piruj\OneDrive\Pictures\Screenshots\Captura de pantalla 2026-07-11 114100.png`
-  - `C:\Users\piruj\OneDrive\Pictures\Screenshots\Captura de pantalla 2026-07-11 120235.png`
-- Intended comparison viewport: 420 px wide expanded panel, plus 320 px responsive validation.
-- Intended state: expanded conversation panel and collapsed launcher.
+  - `C:\Users\piruj\AppData\Local\Temp\codex-clipboard-5ce60ac7-95cc-4392-9ab5-9d4ff9714c02.png`
+  - `C:\Users\piruj\AppData\Local\Temp\codex-clipboard-2b0797a5-5793-449f-ba5c-b10992249dbd.png`
+  - `C:\Users\piruj\AppData\Local\Temp\codex-clipboard-c254d621-e998-465c-90e3-8078eba15b75.png`
 - Implementation screenshot: unavailable.
+- Intended viewport: 390 px mobile, with a responsive lower bound of 320 px.
+- State: populated progress, insights and statistics dashboards.
 
 ## Full-view comparison evidence
 
-The three source images were opened at original resolution. A browser-rendered
-implementation capture could not be produced because the local Flutter web
-process did not publish its configured port or return diagnostic output before
-the execution timeout. A reliable side-by-side comparison is therefore blocked.
+The three source references were opened at original resolution. Their visual language was extended from Progress to Insights and Statistics. A rendered implementation could not be captured because the Flutter analyzer did not finish and the local web process could not be started: PowerShell `Start-Process` failed on an environment collision between `Path` and `PATH`.
 
 ## Focused-region comparison evidence
 
-Blocked for the same reason. The intended focused regions were the compact
-header, assistant/user bubble pair, composer/footer, and collapsed launcher.
-
-## Static implementation review
-
-- Fonts and typography: existing ReadPp Roboto text-theme styles are reused;
-  headings were reduced to panel-scale title styles.
-- Spacing and layout rhythm: compact `AppSpacing` values are used for the
-  header, message list, empty state, composer, and footer.
-- Colors and visual tokens: the existing burgundy `primary`, pale
-  `primaryContainer`, warm `scaffoldBackgroundColor`, `onPrimary`, outline
-  variants, elevations, and `AppShadows.soft` are reused.
-- Image and icon fidelity: the design contains no required raster content.
-  Existing Material sparkle, chevron, send, stop, refresh, and menu icons are
-  retained. The unrelated black question-mark overlay is intentionally absent.
-- Copy: title, subtitle, composer placeholder, disclaimer, and the three
-  existing suggestions match the requested product copy.
+Blocked for the same reason. The source regions reviewed were the reader summary, annual goal, weekly activity, reader map, reading time and reading-status cards. No implementation pixels are available for a valid comparison.
 
 ## Findings
 
-- [P1] Rendered fidelity cannot be confirmed.
-  - Location: complete floating chat.
-  - Evidence: source references are available, but no implementation screenshot
-    could be captured.
-  - Impact: exact visual matching, text wrapping, and runtime layout at the
-    target widths remain unverified.
-  - Fix: start the Flutter web target in the normal development environment,
-    capture the expanded and collapsed states at matching widths, and compare
-    them side by side with the source references.
-
-## Comparison history
-
-- Initial pass: blocked before the first rendered comparison because the local
-  web target did not become available within the execution window.
-- No visual iteration was claimed without rendered evidence.
+- [P1] Rendered fidelity is not verified.
+  - Location: `ProgressScreen`, `InsightsScreen` and `StatsScreen` at 320 px and 390 px.
+  - Evidence: source references are available, but no implementation capture exists.
+  - Impact: overflow, wrapping, exact density and vertical rhythm cannot be judged from code alone.
+  - Fix: start the Flutter web app in a working process environment, capture the three routes at 390 px and 320 px, and compare them against the supplied references.
 
 ## Implementation checklist
 
-- Capture the expanded panel at 420 px and 320 px.
-- Capture the collapsed launcher.
-- Verify Enter, Shift+Enter, stop, regenerate, menu, and collapse interactions.
-- Check browser console for layout or input exceptions.
-- Compare header, bubbles, composer, footer, shadows, radii, and typography
-  against the supplied references.
+1. Resolve the `Path`/`PATH` process-launch collision.
+2. Capture the populated Progreso, Insights and Estadísticas views at 390 px.
+3. Capture the three responsive views at 320 px.
+4. Check all existing actions: Editar, Buscar/Cambiar libro, Ver estadísticas, calendario and registrar sesión.
+5. Compare spacing, card radii, color tokens, typography inheritance, icons and copy.
+
+## Comparison history
+
+- Initial pass: blocked before implementation capture; no pixel-level fixes can be justified without rendered evidence.
 
 final result: blocked

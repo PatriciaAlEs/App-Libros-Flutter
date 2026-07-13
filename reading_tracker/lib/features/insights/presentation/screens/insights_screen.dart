@@ -188,32 +188,15 @@ class _InsightsHero extends StatelessWidget {
         : 'Cada sesión empieza a dibujar tu mapa lector';
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            theme.colorScheme.primary,
-            Color.lerp(theme.colorScheme.primary, Colors.black, 0.30)!,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        color: theme.colorScheme.primary,
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Color.lerp(
-              theme.colorScheme.primary,
-              Colors.black,
-              0.30,
-            )!.withValues(alpha: 0.24),
-            blurRadius: 38,
-            offset: const Offset(0, 20),
-          ),
-          BoxShadow(
-            color: theme.colorScheme.secondary.withValues(alpha: 0.12),
+            color: theme.colorScheme.primary.withValues(alpha: 0.22),
             blurRadius: 24,
-            offset: const Offset(0, 10),
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -221,33 +204,30 @@ class _InsightsHero extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Insights',
-            style: theme.textTheme.displaySmall?.copyWith(
-              color: Colors.white,
-              fontSize: 39,
-              fontWeight: FontWeight.w800,
-              height: 1.02,
+            'MAPA LECTOR',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onPrimary.withValues(alpha: 0.82),
+              letterSpacing: 1.1,
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             'Gustos, hallazgos y señales de tu vida lectora.',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withValues(alpha: 0.78),
+              color: theme.colorScheme.onPrimary.withValues(alpha: 0.78),
               height: 1.35,
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
               children: [
-                const Icon(AppIcons.star, color: Colors.white, size: 28),
+                const Icon(AppIcons.star, color: Colors.white, size: 24),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
@@ -259,7 +239,7 @@ class _InsightsHero extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           color: Colors.white,
-                          fontSize: 25,
+                          fontSize: 22,
                           fontWeight: FontWeight.w800,
                           height: 1.05,
                         ),
@@ -568,11 +548,9 @@ class _SectionTitle extends StatelessWidget {
       children: [
         Text(
           title,
-          style: theme.textTheme.headlineSmall?.copyWith(
+          style: theme.textTheme.titleMedium?.copyWith(
             color: theme.colorScheme.primary,
-            fontSize: 28,
-            fontWeight: FontWeight.w900,
-            height: 1,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ],
@@ -594,11 +572,11 @@ class _FavoriteAuthorCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: theme.colorScheme.primary.withValues(alpha: 0.16),
         ),
-        boxShadow: AppShadows.editorial(theme.colorScheme.primary),
+        boxShadow: AppShadows.soft(theme.colorScheme.primary),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

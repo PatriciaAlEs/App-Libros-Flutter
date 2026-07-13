@@ -27,6 +27,13 @@ void main() {
     expect(result, containsAll(['enemies_to_lovers', 'tropos']));
   });
 
+  test('la consulta exacta recupera enemies_to_lovers', () {
+    expect(
+      ids('¿No está ya muy quemado el enemies to lovers?'),
+      ['enemies_to_lovers'],
+    );
+  });
+
   test('recupera ediciones especiales y cantos pintados', () {
     final result = ids('Esta edición especial tiene cantos pintados');
     expect(result, containsAll(['ediciones_especiales', 'cantos_pintados']));
@@ -98,10 +105,31 @@ void main() {
     );
   });
 
-  test('frustracion, errores y peticiones factuales desaconsejan humor', () {
+  test('una consulta factual no recupera cultura para humor', () {
+    expect(ids('Cuántas páginas leí esta semana'), isEmpty);
+  });
+
+  test('un mensaje sensible o frustrado no recupera cultura para humor', () {
     expect(ids('Estoy frustrada: no consigo terminar este libro'), isEmpty);
     expect(ids('Ha fallado con un error al guardar mi TBR'), isEmpty);
+  });
+
+  test('una peticion expresa sin bromas desactiva la recuperacion', () {
     expect(ids('Solo los datos de mi saga, sin bromas'), isEmpty);
+  });
+
+  test('las notas hacen preferente un solo angulo en charla cultural', () {
+    final entries = retriever.retrieve(
+      userMessage: '¿No está ya muy quemado el enemies to lovers?',
+      now: now,
+    );
+    final notes = retriever.formatNotes(entries);
+
+    expect(notes, contains('usa exactamente un único ángulo recuperado'));
+    expect(notes, contains('Nunca aproveches más de una nota'));
+    expect(notes, contains('En consultas generales o recomendaciones normales'));
+    expect(notes, contains('No uses humor ante frustración'));
+    expect(notes, contains('sin bromas'));
   });
 
   test('el corpus no contiene titulos ni datos ficticios de biblioteca', () {
