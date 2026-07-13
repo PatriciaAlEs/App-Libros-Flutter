@@ -29,7 +29,8 @@ El despliegue oficial se hace desde los artefactos generados por Flutter, nunca 
 
 ```sh
 cd reading_tracker
-flutter build web --release --dart-define-from-file=dart_defines/dev.json
+flutter build web --release --dart-define-from-file=dart_defines/dev.json \
+  --dart-define=AUTH_REDIRECT_URL=https://readpp-web-alpha.vercel.app/
 cd build/web
 vercel --prod
 ```

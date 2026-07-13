@@ -2,11 +2,22 @@ import 'package:flutter/foundation.dart';
 
 const _configuredAuthRedirectUrl = String.fromEnvironment('AUTH_REDIRECT_URL');
 
-String? get authRedirectUrl => resolveAuthRedirectUrl(
-  isWeb: kIsWeb,
-  baseUri: Uri.base,
-  configuredUrl: _configuredAuthRedirectUrl,
-);
+String? get authRedirectUrl {
+  final isExplicitRedirect = _configuredAuthRedirectUrl.trim().isNotEmpty;
+  final redirectUrl = resolveAuthRedirectUrl(
+    isWeb: kIsWeb,
+    baseUri: Uri.base,
+    configuredUrl: _configuredAuthRedirectUrl,
+  );
+  if (kDebugMode) {
+    debugPrint(
+      '[auth-redirect] authRedirectUrl=$redirectUrl '
+      'currentOrigin=${kIsWeb ? Uri.base.origin : 'native'} '
+      'isExplicitRedirect=$isExplicitRedirect',
+    );
+  }
+  return redirectUrl;
+}
 
 String? resolveAuthRedirectUrl({
   required bool isWeb,
@@ -18,12 +29,7 @@ String? resolveAuthRedirectUrl({
   final configured = configuredUrl.trim();
   if (configured.isNotEmpty) return configured;
 
-  return Uri(
-    scheme: baseUri.scheme,
-    host: baseUri.host,
-    port: baseUri.hasPort ? baseUri.port : null,
-    path: '/',
-  ).toString();
+  return '${baseUri.origin}/';
 }
 
 bool isOAuthCallbackUri(Uri uri) {

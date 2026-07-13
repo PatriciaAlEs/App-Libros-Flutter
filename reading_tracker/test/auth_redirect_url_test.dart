@@ -4,23 +4,49 @@ import 'package:reading_tracker/core/navigation/app_launch_uri.dart';
 
 void main() {
   group('resolveAuthRedirectUrl', () {
-    test('uses the current web origin instead of a localhost fallback', () {
+    test('localhost dynamic port without define uses its current origin', () {
       final redirectUrl = resolveAuthRedirectUrl(
         isWeb: true,
-        baseUri: Uri.parse('https://readpp-web-alpha.vercel.app/profile?x=1'),
+        baseUri: Uri.parse('http://localhost:58001/profile?x=1'),
+      );
+
+      expect(redirectUrl, 'http://localhost:58001/');
+    });
+
+    test('explicit Vercel redirect has priority over localhost origin', () {
+      final redirectUrl = resolveAuthRedirectUrl(
+        isWeb: true,
+        baseUri: Uri.parse('http://localhost:58001/'),
+        configuredUrl: ' https://readpp-web-alpha.vercel.app/ ',
       );
 
       expect(redirectUrl, 'https://readpp-web-alpha.vercel.app/');
+      expect(redirectUrl, isNot(contains('localhost')));
     });
 
-    test('supports an explicit canonical production URL', () {
+    test('explicit localhost redirect has priority over Vercel origin', () {
       final redirectUrl = resolveAuthRedirectUrl(
         isWeb: true,
-        baseUri: Uri.parse('https://preview.vercel.app/'),
-        configuredUrl: ' https://readpp.example.com/auth ',
+        baseUri: Uri.parse('https://readpp-web-alpha.vercel.app/'),
+        configuredUrl: 'http://localhost:61234/',
       );
 
-      expect(redirectUrl, 'https://readpp.example.com/auth');
+      expect(redirectUrl, 'http://localhost:61234/');
+      expect(redirectUrl, isNot(contains('vercel.app')));
+    });
+
+    test('fallback never mixes localhost host with production origin', () {
+      final localRedirect = resolveAuthRedirectUrl(
+        isWeb: true,
+        baseUri: Uri.parse('http://localhost:49327/?debug=true'),
+      );
+      final productionRedirect = resolveAuthRedirectUrl(
+        isWeb: true,
+        baseUri: Uri.parse('https://readpp-web-alpha.vercel.app/?x=1'),
+      );
+
+      expect(localRedirect, 'http://localhost:49327/');
+      expect(productionRedirect, 'https://readpp-web-alpha.vercel.app/');
     });
 
     test('does not override the validated native deep-link flow', () {

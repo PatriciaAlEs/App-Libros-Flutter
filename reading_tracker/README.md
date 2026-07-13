@@ -87,11 +87,14 @@ flutter run -d chrome --dart-define-from-file=dart_defines/dev.json
 Build Web:
 
 ```sh
-flutter build web --release --dart-define-from-file=dart_defines/dev.json
+flutter build web --release --dart-define-from-file=dart_defines/dev.json \
+  --dart-define=AUTH_REDIRECT_URL=https://readpp-web-alpha.vercel.app/
 ```
 
-For production Auth, set `AUTH_REDIRECT_URL` to the public HTTPS origin (with
-its trailing slash) in the Dart defines file. Add that exact URL to Supabase
+For production Auth, pass `AUTH_REDIRECT_URL` explicitly to the release build,
+as shown above. Do not add it to `dart_defines/dev.json`, because local Chrome
+runs must derive their callback from the current dynamic `Uri.base.origin`.
+Add the production URL to Supabase
 Authentication > URL Configuration > Redirect URLs. Keep the Supabase project
 Site URL on the production origin as a safe fallback. Google Cloud must only
 use Supabase's callback URL as its authorized redirect URI:
