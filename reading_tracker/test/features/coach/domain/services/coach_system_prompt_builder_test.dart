@@ -60,10 +60,10 @@ void main() {
       expect(prompt, contains('cambie de forma material la recomendación'));
     });
 
-    test('limita el humor a una frase corta posterior a la recomendacion', () {
+    test('limita el humor a una frase corta posterior a la respuesta', () {
       final prompt = builder.build();
 
-      expect(prompt, contains('Da primero la recomendación'));
+      expect(prompt, contains('Da primero la respuesta útil'));
       expect(prompt, contains('una frase corta o una cláusula'));
       expect(prompt, contains('nunca debe convertirse en un segundo párrafo'));
     });
@@ -75,6 +75,42 @@ void main() {
       expect(prompt, contains('exactamente un ángulo recuperado'));
       expect(prompt, contains('No uses más de una referencia cultural'));
       expect(prompt, contains('En consultas generales y recomendaciones normales'));
+    });
+
+    test('da una longitud y una postura propias a la charla cultural', () {
+      final prompt = builder.build();
+
+      expect(prompt, contains('responde en 1 o 2 frases'));
+      expect(prompt, contains('30 a 60 palabras'));
+      expect(prompt, contains('Empieza con una postura clara'));
+      expect(prompt, contains('cuándo funciona o falla'));
+      expect(prompt, contains('No introduzcas recomendaciones ni preguntas finales'));
+    });
+
+    test('desaconseja el registro academico en la charla cultural', () {
+      final prompt = builder.build();
+
+      expect(prompt, contains('evita un registro académico'));
+      expect(prompt, contains('«bien ejecutado»'));
+      expect(prompt, contains('«la dinámica entre los personajes»'));
+      expect(prompt, contains('«el desarrollo tiene suficiente peso»'));
+      expect(prompt, contains('vocabulario cotidiano'));
+    });
+
+    test('no introduce emojis automaticamente', () {
+      final prompt = builder.build();
+
+      expect(prompt, contains('No añadas emojis automáticamente'));
+      expect(prompt, contains('la persona ya los está utilizando'));
+      expect(prompt, contains('no sustituye la broma'));
+    });
+
+    test('permite profundidad cuando se solicita analisis literario', () {
+      final prompt = builder.build();
+
+      expect(prompt, contains('análisis literario detallado'));
+      expect(prompt, contains('puedes usar un registro más profundo'));
+      expect(prompt, contains('superar el límite cultural'));
     });
 
     test('mantiene el humor desactivado en los casos protegidos', () {

@@ -360,6 +360,22 @@ void main() {
       expect(result.where((message) => message.content == current), hasLength(1));
     });
 
+    test('aplica el tono cotidiano y breve a cultura explicita', () {
+      const current = '¿Los enemies to lovers están muy quemados?';
+      final result = builder.build(
+        userMessage: current,
+        conversation: const [],
+        readerContext: _readerContext(),
+      );
+
+      expect(result.first.content, contains('responde en 1 o 2 frases'));
+      expect(result.first.content, contains('30 a 60 palabras'));
+      expect(result.first.content, contains('evita un registro académico'));
+      expect(result.first.content, contains('No añadas emojis automáticamente'));
+      expect(result[1].content, contains('fase de enemistad'));
+      expect(result.where((message) => message.content == current), hasLength(1));
+    });
+
     test('no inyecta notas sin una coincidencia clara', () {
       final result = builder.build(
         userMessage: 'Cuantas paginas lei esta semana',
