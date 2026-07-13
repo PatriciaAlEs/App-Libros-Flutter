@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reading_tracker/core/theme/app_theme.dart';
 import 'package:reading_tracker/features/coach/data/providers/coach_repository_provider.dart';
 import 'package:reading_tracker/features/coach/domain/entities/coach_message.dart';
 import 'package:reading_tracker/features/coach/domain/entities/coach_conversation.dart';
@@ -278,6 +279,17 @@ void main() {
         ),
         findsOneWidget,
       );
+      final conversationRect = tester.getRect(
+        find.byKey(const ValueKey('coach-conversation-area')),
+      );
+      final composerRect = tester.getRect(
+        find.byKey(const ValueKey('coach-composer')),
+      );
+      final disclaimerRect = tester.getRect(
+        find.byKey(const ValueKey('libreria-disclaimer')),
+      );
+      expect(composerRect.top, closeTo(conversationRect.bottom, 0.1));
+      expect(disclaimerRect.top, closeTo(composerRect.bottom, 0.1));
 
       await tester.tap(find.byKey(const ValueKey('collapse-libreria')));
       await tester.pump();
@@ -352,6 +364,7 @@ void main() {
         findsNothing,
       );
       expect(find.byType(TextField), findsOneWidget);
+      expect(find.byKey(const ValueKey('libreria-disclaimer')), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       tester.view.viewInsets = const FakeViewPadding(bottom: 240);
@@ -360,6 +373,7 @@ void main() {
       panelRect = tester.getRect(find.byKey(const ValueKey('libreria-panel')));
       final composerRect = tester.getRect(find.byType(TextField));
       expect(composerRect.bottom, lessThanOrEqualTo(panelRect.bottom));
+      expect(find.byKey(const ValueKey('libreria-disclaimer')), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       tester.view.physicalSize = const Size(1200, 900);
@@ -386,6 +400,46 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('respuesta larga mantiene composer y aviso visibles', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(390, 760);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final repository = _WidgetRepository();
+      await tester.pumpWidget(
+        _floatingApp(repository, initiallyExpanded: true),
+      );
+      await tester.tap(find.textContaining('crear un'));
+      await _pumpAsyncWork(tester);
+      repository.add(
+        List.generate(
+          30,
+          (index) =>
+              '${index + 1}. Paso extenso para construir un habito lector.\n',
+        ).join(),
+      );
+      await _pumpAsyncWork(tester);
+
+      expect(find.byKey(const ValueKey('coach-composer')), findsOneWidget);
+      expect(find.byKey(const ValueKey('libreria-disclaimer')), findsOneWidget);
+      final panelRect = tester.getRect(
+        find.byKey(const ValueKey('libreria-panel')),
+      );
+      final composerRect = tester.getRect(
+        find.byKey(const ValueKey('coach-composer')),
+      );
+      final disclaimerRect = tester.getRect(
+        find.byKey(const ValueKey('libreria-disclaimer')),
+      );
+      expect(composerRect.bottom, lessThanOrEqualTo(panelRect.bottom));
+      expect(disclaimerRect.bottom, lessThanOrEqualTo(panelRect.bottom));
+      expect(disclaimerRect.top, closeTo(composerRect.bottom, 0.1));
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('cabecera soporta texto escalado en 320 px', (tester) async {
       tester.view.physicalSize = const Size(320, 700);
       tester.view.devicePixelRatio = 1;
@@ -403,6 +457,11 @@ void main() {
 
       expect(find.text('LibrerIA'), findsOneWidget);
       expect(find.byKey(const ValueKey('collapse-libreria')), findsOneWidget);
+      final title = tester.widget<Text>(find.text('LibrerIA'));
+      expect(
+        title.style?.fontFamily,
+        AppTheme.light().textTheme.headlineSmall?.fontFamily,
+      );
       expect(tester.takeException(), isNull);
     });
   });
@@ -438,6 +497,7 @@ Widget _floatingApp(
     readerContextProvider.overrideWith((ref) async => _readerContext()),
   ],
   child: MaterialApp(
+    theme: AppTheme.light(),
     builder: textScaler == null
         ? null
         : (context, child) => MediaQuery(

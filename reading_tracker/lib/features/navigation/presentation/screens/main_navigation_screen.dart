@@ -300,7 +300,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   Widget _screenForIndex(int index) {
     return switch (index) {
-      0 => HomeScreen(onOpenLibreria: _expandLibreria),
+      0 => const HomeScreen(),
       1 => const BooksListScreen(),
       2 => const ProgressScreen(),
       3 => const InsightsScreen(),

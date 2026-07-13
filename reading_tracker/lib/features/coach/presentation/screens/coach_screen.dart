@@ -74,6 +74,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
           ),
           Expanded(child: chatBody),
           Padding(
+            key: const ValueKey('libreria-disclaimer'),
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.md,
               0,
@@ -108,9 +109,11 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
                 children: [
                   Text(
                     'LibrerIA',
-                    style: theme.textTheme.titleLarge?.copyWith(
+                    style: theme.textTheme.headlineSmall?.copyWith(
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.w800,
+                      fontSize: 23,
+                      height: 1,
                     ),
                   ),
                   Text(
@@ -158,10 +161,12 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
       color: Theme.of(context).scaffoldBackgroundColor,
       child: SafeArea(
         top: false,
+        bottom: !widget.isFloatingPanel,
         child: Column(
           children: [
             Expanded(
               child: Stack(
+                key: const ValueKey('coach-conversation-area'),
                 children: [
                   if (uiState.messageCount == 0)
                     _CoachEmptyState(onSuggestion: _sendSuggestion)
@@ -222,6 +227,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
               controller: _textController,
               focusNode: _focusNode,
               isGenerating: uiState.isLoading,
+              useBottomSafeArea: !widget.isFloatingPanel,
               onSend: _sendComposerMessage,
               onStop: () =>
                   ref.read(coachControllerProvider.notifier).cancelGeneration(),
@@ -451,9 +457,12 @@ class _CoachPanelHeader extends StatelessWidget {
                 Text(
                   'LibrerIA',
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  maxLines: 1,
+                  style: theme.textTheme.headlineSmall?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.w800,
+                    fontSize: 22,
+                    height: 1,
                   ),
                 ),
                 Row(
@@ -607,8 +616,10 @@ class _CoachEmptyState extends StatelessWidget {
         Text(
           '¿Sobre qué quieres leer hoy?',
           textAlign: TextAlign.center,
-          style: theme.textTheme.titleLarge?.copyWith(
+          style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w700,
+            fontSize: 24,
+            height: 1.1,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -699,6 +710,7 @@ class _CoachComposer extends StatelessWidget {
     required this.controller,
     required this.focusNode,
     required this.isGenerating,
+    required this.useBottomSafeArea,
     required this.onSend,
     required this.onStop,
   });
@@ -706,6 +718,7 @@ class _CoachComposer extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final bool isGenerating;
+  final bool useBottomSafeArea;
   final VoidCallback onSend;
   final VoidCallback onStop;
 
@@ -713,7 +726,9 @@ class _CoachComposer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SafeArea(
+      key: const ValueKey('coach-composer'),
       top: false,
+      bottom: useBottomSafeArea,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.md,

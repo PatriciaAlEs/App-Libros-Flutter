@@ -77,12 +77,12 @@ void main() {
     expect(find.textContaining('modo local'), findsNothing);
     expect(find.text('Continuar con Google'), findsOneWidget);
     expect(find.text('Entrar con correo'), findsOneWidget);
+    expect(find.text('Bienvenida a ReadPp'), findsOneWidget);
     expect(
-      find.textContaining(
-        'biblioteca, sesiones, perfil lector y objetivo anual',
-      ),
+      find.textContaining('Tu compañero de lecturas inteligente.'),
       findsOneWidget,
     );
+    expect(find.textContaining('Terminos de uso'), findsOneWidget);
   });
 
   testWidgets(
@@ -195,6 +195,27 @@ void main() {
       tester.widget<FilledButton>(find.byType(FilledButton).first).enabled,
       false,
     );
+  });
+
+  testWidgets('login y registro comparten la identidad visual ReadPp', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _authHost(repository: FakeAuthRepository(), isSupabaseEnabled: true),
+    );
+    await tester.pump();
+
+    expect(find.byIcon(Icons.auto_awesome_rounded), findsOneWidget);
+    expect(find.text('INICIAR SESION'), findsOneWidget);
+    expect(find.text('Entrar con correo'), findsOneWidget);
+
+    await tester.tap(find.textContaining('Registrate'));
+    await tester.pump();
+
+    expect(find.text('CREAR CUENTA'), findsOneWidget);
+    expect(find.text('Registrarse con Google'), findsOneWidget);
+    expect(find.text('Crear una cuenta'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('primer evento autenticado navega sin segunda accion', (

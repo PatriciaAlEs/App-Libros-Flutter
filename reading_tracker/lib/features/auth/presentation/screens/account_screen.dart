@@ -75,9 +75,9 @@ class AccountScreen extends ConsumerWidget {
                     Text(
                       'Cuenta',
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineSmall?.copyWith(
+                      style: theme.textTheme.titleLarge?.copyWith(
                         color: theme.colorScheme.primary,
-                        fontSize: 31,
+                        fontSize: 28,
                         fontWeight: FontWeight.w800,
                         height: 1.05,
                       ),
@@ -230,7 +230,7 @@ class _SignedInContent extends StatelessWidget {
         const SizedBox(height: AppSpacing.lg),
         const SyncStatusCard(),
         const SizedBox(height: AppSpacing.xl),
-        OutlinedButton.icon(
+        FilledButton.icon(
           onPressed: isLoading ? null : onSignOut,
           icon: const Icon(Icons.logout_rounded),
           label: const Text('Cerrar sesion'),

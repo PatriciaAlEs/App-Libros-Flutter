@@ -142,7 +142,7 @@ void main() {
     expect(find.byType(ReadPpBottomNavigation), findsOneWidget);
   });
 
-  testWidgets('Inicio exposes one LibrerIA access and opens CoachScreen', (
+  testWidgets('Inicio usa la burbuja como acceso unico a LibrerIA', (
     tester,
   ) async {
     final authRepository = _HomeAuthRepository();
@@ -165,7 +165,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(LibreriaEntryCard), findsOneWidget);
+    expect(find.byType(LibreriaEntryCard), findsNothing);
+    expect(find.byKey(const ValueKey('open-libreria')), findsOneWidget);
     expect(find.text('ReadPp Coach'), findsNothing);
     expect(find.text('LibrerIA'), findsOneWidget);
 
@@ -174,12 +175,38 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byType(LibreriaEntryCard), findsOneWidget);
+    expect(find.byType(LibreriaEntryCard), findsNothing);
+    expect(find.byKey(const ValueKey('open-libreria')), findsOneWidget);
     expect(find.text('LibrerIA'), findsOneWidget);
 
-    await tester.tap(find.byType(LibreriaEntryCard));
+    await tester.tap(find.byKey(const ValueKey('open-libreria')));
     await tester.pump();
 
+    expect(find.byType(CoachScreen), findsOneWidget);
+  });
+
+  testWidgets('/coach abre el panel flotante sobre Inicio', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookRepositoryProvider.overrideWithValue(_EmptyBookRepository()),
+          statisticsRepositoryProvider.overrideWithValue(
+            const _EmptyStatisticsRepository(),
+          ),
+          readingSessionRepositoryProvider.overrideWithValue(
+            const _EmptyReadingSessionRepository(),
+          ),
+        ],
+        child: const MaterialApp(
+          home: MainNavigationScreen(initialRoute: '/coach'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(LibreriaEntryCard), findsNothing);
+    expect(find.byKey(const ValueKey('libreria-panel')), findsOneWidget);
     expect(find.byType(CoachScreen), findsOneWidget);
   });
 
@@ -225,7 +252,7 @@ void main() {
       expect(booksRepository.requests, hasLength(1));
       booksRepository.completeNext(const []);
       await tester.pumpAndSettle();
-      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+      expect(find.byType(LibreriaEntryCard), findsNothing);
 
       authRepository.emit(
         const AppUser(id: 'google-user', email: 'reader@test.dev'),
@@ -235,11 +262,11 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1));
 
       expect(booksRepository.requests, hasLength(2));
-      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+      expect(find.byType(LibreriaEntryCard), findsNothing);
 
       booksRepository.completeNext(const []);
       await tester.pumpAndSettle();
-      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+      expect(find.byType(LibreriaEntryCard), findsNothing);
 
       final container = ProviderScope.containerOf(
         tester.element(find.byType(HomeScreen)),
@@ -247,17 +274,13 @@ void main() {
       container.invalidate(booksProvider);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1));
-      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+      expect(find.byType(LibreriaEntryCard), findsNothing);
       expect(booksRepository.requests, hasLength(3));
 
       booksRepository.completeNextError(StateError('sync failed'));
       await tester.pump();
       await tester.pump();
-      expect(find.byType(LibreriaEntryCard), findsOneWidget);
-
-      await tester.tap(find.byType(LibreriaEntryCard));
-      await tester.pumpAndSettle();
-      expect(find.byKey(const Key('coach-route-marker')), findsOneWidget);
+      expect(find.byType(LibreriaEntryCard), findsNothing);
     },
   );
 
@@ -298,7 +321,7 @@ void main() {
       booksRepository.completeNext(const []);
       await tester.pumpAndSettle();
 
-      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+      expect(find.byType(LibreriaEntryCard), findsNothing);
 
       tester
           .widget<ReadPpBottomNavigation>(find.byType(ReadPpBottomNavigation))
@@ -326,7 +349,7 @@ void main() {
       );
       expect(find.byType(HomeScreen), findsOneWidget);
       expect(find.byType(SettingsScreen), findsNothing);
-      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+      expect(find.byType(LibreriaEntryCard), findsNothing);
       expect(syncController.state.status, SyncUiStatus.syncing);
       expect(booksRepository.requests, hasLength(1));
 
@@ -339,7 +362,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(HomeScreen), findsOneWidget);
-      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+      expect(find.byType(LibreriaEntryCard), findsNothing);
       final container = ProviderScope.containerOf(
         tester.element(find.byType(HomeScreen)),
       );
@@ -348,7 +371,7 @@ void main() {
         SyncUiStatus.synced,
       );
 
-      await tester.tap(find.byType(LibreriaEntryCard));
+      await tester.tap(find.byKey(const ValueKey('open-libreria')));
       await tester.pumpAndSettle();
       expect(find.byType(CoachScreen), findsOneWidget);
 
@@ -409,7 +432,7 @@ void main() {
             .selectedIndex,
         0,
       );
-      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+      expect(find.byType(LibreriaEntryCard), findsNothing);
       expect(cleanedUrls, isEmpty);
 
       authRepository.emit(
@@ -425,9 +448,9 @@ void main() {
 
       expect(cleanedUrls, ['/']);
       expect(find.byType(HomeScreen), findsOneWidget);
-      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+      expect(find.byType(LibreriaEntryCard), findsNothing);
 
-      await tester.tap(find.byType(LibreriaEntryCard));
+      await tester.tap(find.byKey(const ValueKey('open-libreria')));
       await tester.pumpAndSettle();
       expect(find.byType(CoachScreen), findsOneWidget);
     },
@@ -472,11 +495,11 @@ void main() {
             .selectedIndex,
         0,
       );
-      expect(find.byType(LibreriaEntryCard), findsOneWidget);
+      expect(find.byType(LibreriaEntryCard), findsNothing);
     });
   }
 
-  testWidgets('Inicio keeps LibrerIA visible while books are loading', (
+  testWidgets('Inicio no recupera la tarjeta mientras cargan los libros', (
     tester,
   ) async {
     final repository = _ControlledBookRepository();
@@ -488,10 +511,10 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byType(LibreriaEntryCard), findsOneWidget);
+    expect(find.byType(LibreriaEntryCard), findsNothing);
   });
 
-  testWidgets('Inicio keeps LibrerIA visible when books fail', (tester) async {
+  testWidgets('Inicio no recupera la tarjeta si fallan los libros', (tester) async {
     final repository = _ControlledBookRepository();
     await tester.pumpWidget(
       ProviderScope(
@@ -503,7 +526,7 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.byType(LibreriaEntryCard), findsOneWidget);
+    expect(find.byType(LibreriaEntryCard), findsNothing);
   });
 
   testWidgets('shows the books screen', (WidgetTester tester) async {

@@ -12,7 +12,6 @@ import '../../../books/presentation/providers/books_provider.dart';
 import '../../../books/presentation/widgets/current_reading_card.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../insights/presentation/providers/reading_insights_summary_provider.dart';
-import '../../../libreria/presentation/widgets/libreria_entry_card.dart';
 import '../../../reading_sessions/domain/entities/reading_session.dart';
 import '../../../reading_sessions/domain/usecases/register_reading_session.dart';
 import '../../../reading_sessions/presentation/providers/reading_sessions_provider.dart';
@@ -23,9 +22,7 @@ import '../../../stats/presentation/providers/statistics_summary_provider.dart';
 import '../../../sync/presentation/controllers/sync_status_controller.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key, this.onOpenLibreria});
-
-  final VoidCallback? onOpenLibreria;
+  const HomeScreen({super.key});
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -122,11 +119,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           Navigator.pushNamed(context, '/book/add'),
                       onCalendarTap: () =>
                           Navigator.pushNamed(context, '/calendar'),
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                    LibreriaEntryCard(
-                      onTap: widget.onOpenLibreria ??
-                          () => Navigator.pushNamed(context, '/coach'),
                     ),
                   ],
                 ),
